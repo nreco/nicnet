@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NI.Data.RelationalExpressions</name>
+    </assembly>
+    <members>
+        <member name="T:NI.Data.RelationalExpressions.RelExQueryNodeProvider">
+            <summary>
+            Relex-based query node provider.
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryNodeProvider.ContextArgumentKey">
+            <summary>
+            Get or set key in context where provider argument should be stored
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryNodeProvider.RelExQueryParser">
+            <summary>
+            Get or set relational expression parser
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryNodeProvider.RelExCondition">
+            <summary>
+            Get or set relational expression condition
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryNodeProvider.ExprResolver">
+            <summary>
+            Get or set expression resolver used for preparsing relex
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.IRelExQueryParser">
+            <summary>
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.IRelExQueryNodeParser">
+            <summary>
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.RelExQueryNodeParser">
+            <summary>
+            Relex-based query node provider.
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryNodeParser.RelExQueryParser">
+            <summary>
+            Get or set relational expression parser used to build query node
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.RelExQueryProvider">
+            <summary>
+            Relex-based query provider.
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryProvider.ContextArgumentKey">
+            <summary>
+            Get or set key in context where provider argument should be stored
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryProvider.RelExQueryParser">
+            <summary>
+            Get or set relational expression parser
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryProvider.RelEx">
+            <summary>
+            Get or set relational expression
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryProvider.ExprResolver">
+            <summary>
+            Get or set expression resolver used for preparsing relex
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryProvider.SortProvider">
+            <summary>
+            Get or set query sort settings 
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.RelationalExprResolver">
+            <summary>
+            Relational expression resolver (executed for DALC).
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelationalExprResolver.ReturnCount">
+            <summary>
+            Get or set flag that idicates whether this resolver should return records count as result
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelationalExprResolver.ReturnList">
+            <summary>
+            Get or set flag that indicates whether this resolver should return result as objects list
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelationalExprResolver.RelExQueryParser">
+            <summary>
+            Get or set context relational expressions to query parser
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelationalExprResolver.Dalc">
+            <summary>
+            Get or set DALC component
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.CachedRelationalExprResolver">
+            <summary>
+            Relational Expr Resolver that uses simple caching
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.CachedRelationalExprResolver.Cache">
+            <summary>
+            Get or set cache instance used for caching relex results
+            </summary>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.ObjectRelexConditionExprResolver">
+            <summary>
+            Object RelEx condition expression resolver. Evaluates condition in RelEx syntax in some 'object' context.
+            </summary>
+            <remarks>This resolver does not support all features of RelEx syntax (nested queries for instance).</remarks>
+        </member>
+        <member name="T:NI.Data.RelationalExpressions.RelExQueryParser">
+            <summary>
+            </summary>
+        </member>
+        <member name="P:NI.Data.RelationalExpressions.RelExQueryParser.AllowDumpConstants">
+            <summary>
+            Get or set flag that indicates whether 'dump' constants are allowed
+            </summary>
+        </member>
+    </members>
+</doc>
