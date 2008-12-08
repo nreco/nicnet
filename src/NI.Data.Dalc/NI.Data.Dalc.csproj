@@ -1,0 +1,290 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>NI.Data.Dalc</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NI.Data.Dalc</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>NI.Data.Dalc.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>NI.Data.Dalc.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NI.Common, Version=1.0.3258.22841, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\NI.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CacheDalc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CacheDbDalc.cs" />
+    <Compile Include="ChainQueryFieldValueFormatter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ChainQueryModifier.cs" />
+    <Compile Include="DataSetProvider.cs" />
+    <Compile Include="DataSetXmlProvider.cs" />
+    <Compile Include="DalcDataSetProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DalcDictionaryListProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DalcObjectListProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DalcObjectProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DalcRecordDictionaryProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DatasetDalc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbCommandEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbCommandGenerator.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DbDalcTraceLogger.cs" />
+    <Compile Include="DbDALC.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DbDalcEventsMediator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbDalcTransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbDataView.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbDataViewCommandGenerator.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DbSqlBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbTypeResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FailsafeDalc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDalc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDataSetProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbCommandGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbCommandWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbCommandWrapperFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbDalc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbDalcEventsMediator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbDataAdapterWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbDataAdapterWrapperFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbDataView.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IDbSqlBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQuery.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryConditionNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryFieldValueFormatter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryGroupNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryModifier.cs" />
+    <Compile Include="Interfaces\IQueryNegationNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryNodeProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IQueryValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\ISqlBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbDalcProxy.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ObjectQueryConditionEvaluator.cs" />
+    <Compile Include="QueryFieldValueFormatter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="QueryProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QConst.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QField.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QRawConst.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QSortField.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\Query.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QueryConditionNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QueryGroupNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QueryNegationNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QueryNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Query\QueryNodeCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RecordsCountQueryModifier.cs" />
+    <Compile Include="SharedConnectionDbDalc.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SqlBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SqlClient\SqlAdapterWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SqlClient\SqlClientDbSqlBuilder.cs" />
+    <Compile Include="SqlClient\SqlCommandWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SqlClient\SqlFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SubstQueryModifier.cs" />
+    <Compile Include="ThreadsafeDalc.cs" />
+    <Compile Include="XmlDataSetProvider.cs" />
+    <EmbeddedResource Include="DbDALC.resx">
+      <DependentUpon>DbDALC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SqlClient\SqlFactory.resx">
+      <DependentUpon>SqlFactory.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

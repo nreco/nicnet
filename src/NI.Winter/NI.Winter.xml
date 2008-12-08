@@ -1,0 +1,574 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NI.Winter</name>
+    </assembly>
+    <members>
+        <member name="T:NI.Winter.TypeValueInitInfo">
+            <summary>
+            Type Value init info
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IValueInitInfo">
+            <summary>
+            Value init definition interface
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ListValueInitInfo">
+            <summary>
+            Value Info for list
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ApplicationContainer">
+            <summary>
+            Simple application container based on IServiceProvider implementation.
+            </summary>
+            <example><code>
+            IComponentsConfig cfg;
+            IComponent someDotNetComponent;
+            
+            ApplicationContainer appContainer = new ApplicationContainer();
+            /*inject service provider*/
+            appContainer.ServiceProvider = new NI.Winter.ServiceProvider( cfg  );
+            appContainer.Add(someDotNetComponent);
+            /* now someDotNetComponent 'sited' and can use interface ISite to obtain services */</code>
+            </example>
+        </member>
+        <member name="M:NI.Winter.ApplicationContainer.GetService(System.Type)">
+            <summary>
+            Get service of specified type. Search sequence:
+            1) base.GetService (default Container behaviour)
+            2) ServiceProvider
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ApplicationContainer.CreateSite(System.ComponentModel.IComponent,System.String)">
+            <summary>
+            Do not use Container.CreateSite because of buggy MONO 1.1 implementation of this method.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ApplicationContainer.ServiceProvider">
+            <summary>
+            Service provider
+            If not set, Container will try to find it in components collection
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ApplicationContainer.NamedServiceProvider">
+            <summary>
+            Named service provider associated with this container.
+            </summary>
+            <remarks>
+            This property is not used actually by container and can be used as 'entry point' to service provider from objects outside container.
+            </remarks>
+        </member>
+        <member name="T:NI.Winter.EventBinder">
+            <summary>
+            EventBinder is a helper component that gives ability to bind events and events handlers inside Winter configuration.
+            </summary>
+        </member>
+        <member name="M:NI.Winter.EventBinder.Init">
+            <summary>
+            Perform all necessary calls
+            </summary>
+        </member>
+        <member name="P:NI.Winter.EventBinder.SenderObject">
+            <summary>
+            Get or set event sender object
+            </summary>
+        </member>
+        <member name="P:NI.Winter.EventBinder.ReceiverObject">
+            <summary>
+            Get or set receiver method object
+            </summary>
+        </member>
+        <member name="P:NI.Winter.EventBinder.SenderEvent">
+            <summary>
+            Get or set event name
+            </summary>
+        </member>
+        <member name="P:NI.Winter.EventBinder.ReceiverMethod">
+            <summary>
+            Get or set event name
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ServiceProvider">
+            <summary>
+            Service provider based on Spring-like configuration.
+            </summary>
+            <remarks>
+            This component takes care about objects initialization, creation, referencing etc. Fully integrated with System.ComponentModel: 
+            <list type="bullet">
+            <description>if Config property is not initialized and ServiceProvider added to Container, it will try to found it using ISite interface</description>
+            <description>if Container is available, all 'singleton' IComponent objects created with ServiceProvider are added to the Container</description>
+            </list>
+            </remarks>
+            <example><code>
+            IComponentsConfig cfg;
+            ServiceProvider srvProv = new ServiceProvider(cfg);
+            object someService = srvProv.GetObject("someServiceName");
+            </code></example>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.Init">
+            <summary>
+            Create services
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.System#IServiceProvider#GetService(System.Type)">
+            <summary>
+            Service provider: get requested service by type.
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.NI#Common#INamedServiceProvider#GetService(System.String)">
+            <summary>
+            Service provider: get requested service by name.
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.GetServiceInternal(System.Type)">
+            <summary>
+            Service provider: get service by type internal implementation
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.GetServiceInternal(System.String)">
+            <summary>
+            Service provider: get service by name internal implementation
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ServiceProvider.CreateInstance(NI.Winter.IComponentInitInfo)">
+            <summary>
+            Create instance by component initialization info
+            </summary>
+            <param name="componentInfo">component initialization info</param>
+            <returns>initialized component instance</returns>
+        </member>
+        <member name="P:NI.Winter.ServiceProvider.Config">
+            <summary>
+            Config for factory
+            If not set, component will try to find it using GetService
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IValueFactory">
+            <summary>
+            Factory used to initialize a new instance by IValueInitInfo
+            </summary>
+        </member>
+        <member name="T:NI.Winter.NestedServiceProvider">
+            <summary>
+            NestedServiceProvider implementation used for defining composite ServiceProviders.
+            </summary>
+        </member>
+        <member name="M:NI.Winter.NestedServiceProvider.GetServiceInternal(System.Type)">
+            <summary>
+            Nested service provider logic: if component not fount in this provider,
+            try to find it in parent provider.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.NestedServiceProvider.ParentServiceProvider">
+            <summary>
+            Get or set parent service provider
+            </summary>
+        </member>
+        <member name="P:NI.Winter.NestedServiceProvider.ParentNamedServiceProvider">
+            <summary>
+            Get or set 
+            </summary>
+        </member>
+        <member name="T:NI.Winter.INamedServiceProviderAware">
+            <summary>
+            Named service provider aware component interface
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ComponentsConfig">
+            <summary>
+            IComponentsConfig implementation based on XML.
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IComponentsConfig">
+            <summary>
+            IComponents config
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentsConfig.DefaultLazyInit">
+            <summary>
+            Default value of lazy init flag for components in this collection
+            False by default
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentsConfig.Description">
+            <summary>
+            Components collection description
+            Null by default
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentsConfig.Item(System.String)">
+            <summary>
+            Get component definition by name (alias)
+            </summary>
+            <value>ICompanyInitInfo object or null</value>
+        </member>
+        <member name="P:NI.Winter.IComponentsConfig.Item(System.Type)">
+            <summary>
+            Get component definition by System.Type
+            </summary>
+            <value>ICompanyInitInfo object or null</value>
+        </member>
+        <member name="P:NI.Winter.ComponentsConfig.DefaultLazyInit">
+            <summary>
+            Default value of lazy init flag for components in this collection
+            False by default
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentsConfig.Description">
+            <summary>
+            Components collection description
+            Null by default
+            </summary>
+        </member>
+        <member name="T:NI.Winter.PropertyInfo">
+            <summary>
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IPropertyInitInfo">
+            <summary>
+            Property init definition interface
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IPropertyInitInfo.Name">
+            <summary>
+            Property name
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IPropertyInitInfo.Value">
+            <summary>
+            Property value
+            </summary>
+        </member>
+        <member name="T:NI.Winter.BaseMethodInvokingFactory">
+            <summary>
+            Base class for method invoking factories
+            </summary>
+        </member>
+        <member name="P:NI.Winter.BaseMethodInvokingFactory.TargetMethodArgs">
+            <summary>
+            Get or set target method args values
+            </summary>
+        </member>
+        <member name="P:NI.Winter.BaseMethodInvokingFactory.TargetMethodArgTypes">
+            <summary>
+            Get or set target method args types
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ComponentInitInfo">
+            <summary>
+            Component Info
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IComponentInitInfo">
+            <summary>
+            Component init definition interface.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.Singleton">
+            <summary>
+            Singleton flag.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.LazyInit">
+            <summary>
+            Lazy init flag.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.Name">
+            <summary>
+            Component name (alias).
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.ComponentType">
+            <summary>
+            Component System.Type
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.Description">
+            <summary>
+            Component description. Null by default.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.ConstructorArgs">
+            <summary>
+            Constructor arguments.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.Properties">
+            <summary>
+            Properies to set
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IComponentInitInfo.InitMethod">
+            <summary>
+            Initialization method name. Null by default.
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ComponentInitInfo.InitValues(System.Xml.XmlNode,NI.Winter.IComponentsConfig)">
+            <summary>
+            Initialize component values (constructor arguments / properties )
+            </summary>
+        </member>
+        <member name="M:NI.Winter.ComponentInitInfo.ResolveValueInfo(System.Xml.XmlNode,NI.Winter.IComponentsConfig)">
+            <summary>
+            Resolve object instance by its definition in config
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.Singleton">
+            <summary>
+            Singleton flag. True by default.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.LazyInit">
+            <summary>
+            Lazy init flag. False by default.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.Name">
+            <summary>
+            Component name (alias).
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.Parent">
+            <summary>
+            Component parent name (alias).
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.InitMethod">
+            <summary>
+            Initialization method name. Null by default.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.ComponentType">
+            <summary>
+            Component System.Type
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.Description">
+            <summary>
+            Component description. Null by default.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.ConstructorArgs">
+            <summary>
+            Constructor arguments.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ComponentInitInfo.Properties">
+            <summary>
+            Properies to set
+            </summary>
+        </member>
+        <member name="T:NI.Winter.MethodInvokingFactory">
+            <summary>
+            MethodInvokingFactory can be used for defining instance as result of another object's method invoking.
+            </summary>
+            <example><code>
+            &lt;component name="datetimenow-3days" type="NI.Winter.MethodInvokingFactory,NI.Winter" singleton="false" lazy-init="true"&gt;
+            	&lt;property name="TargetObject"&gt;&lt;ref name="dateTimeNow"/&gt;&lt;/property&gt;
+            	&lt;property name="TargetMethod"&gt;&lt;value&gt;AddDays&lt;/value&gt;&lt;/property&gt;
+            	&lt;property name="TargetMethodArgTypes"&gt;&lt;list&gt;&lt;entry&gt;&lt;type&gt;System.Double,Mscorlib&lt;/type&gt;&lt;/entry&gt;&lt;/list&gt;&lt;/property&gt;
+            	&lt;property name="TargetMethodArgs"&gt;&lt;list&gt;&lt;entry&gt;&lt;value&gt;-3&lt;/value&gt;&lt;/entry&gt;&lt;/list&gt;&lt;/property&gt;
+            &lt;/component&gt; 
+            </code></example>
+        </member>
+        <member name="T:NI.Winter.IFactoryComponent">
+            <summary>
+            Factory component interface
+            </summary>
+        </member>
+        <member name="P:NI.Winter.MethodInvokingFactory.TargetObject">
+            <summary>
+            Get or set target object instance
+            </summary>
+        </member>
+        <member name="P:NI.Winter.MethodInvokingFactory.TargetMethod">
+            <summary>
+            Get or set target method name to invoke
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ServiceProviderInvokingFactory">
+            <summary>
+            ServiceProviderInvokingFactory used for defining instance as result of calling specified INamedServiceProvider implementation.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ServiceProviderInvokingFactory.NamedServiceProvider">
+            <summary>
+            Get or set context service provider
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ServiceProviderInvokingFactory.ServiceName">
+            <summary>
+            Get or set service name to retrieve from service provider
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IndexerInvokingFactory">
+            <summary>
+            Indexer invoking factory used for defining instance by indexer of another object.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IndexerInvokingFactory.TargetObject">
+            <summary>
+            Get or set target object
+            </summary>
+        </member>
+        <member name="P:NI.Winter.IndexerInvokingFactory.IndexerArgs">
+            <summary>
+            Get or set indexer arguments
+            </summary>
+        </member>
+        <member name="T:NI.Winter.StaticMethodInvokingFactory">
+            <summary>
+            StaticMethodInvokingFactory used for defining instance as result of invoking static method
+            </summary>
+            <example><code>
+            &lt;component name="falseInstance" type="NI.Winter.StaticMethodInvokingFactory,NI.Winter" singleton="false" lazy-init="true"&gt;
+            	&lt;property name="TargetType"&gt;&lt;type&gt;System.Boolean,Mscorlib&lt;/type&gt;&lt;/property&gt;
+            	&lt;property name="TargetMethod"&gt;&lt;value&gt;Parse&lt;/value&gt;&lt;/property&gt;
+            	&lt;property name="TargetMethodArgTypes"&gt;
+            		&lt;list&gt;
+            			&lt;entry&gt;&lt;type&gt;System.String,Mscorlib&lt;/type&gt;&lt;/entry&gt;		
+            		&lt;/list&gt;
+            	&lt;/property&gt;
+            	&lt;property name="TargetMethodArgs"&gt;
+            		&lt;list&gt;
+            			&lt;entry&gt;&lt;value&gt;False&lt;/value&gt;&lt;/entry&gt;		  
+            		&lt;/list&gt;
+            	&lt;/property&gt;
+            &lt;/component&gt;
+            </code></example>
+        </member>
+        <member name="P:NI.Winter.StaticMethodInvokingFactory.TargetType">
+            <summary>
+            Get or set target type
+            </summary>
+        </member>
+        <member name="P:NI.Winter.StaticMethodInvokingFactory.TargetMethod">
+            <summary>
+            Get or set static target method name
+            </summary>
+        </member>
+        <member name="T:NI.Winter.PropertyInvokingFactory">
+            <summary>
+            Property invoking factory component
+            </summary>
+        </member>
+        <member name="P:NI.Winter.PropertyInvokingFactory.TargetObject">
+            <summary>
+            Get or set target object
+            </summary>
+        </member>
+        <member name="P:NI.Winter.PropertyInvokingFactory.TargetProperty">
+            <summary>
+            Get or set static target property name
+            </summary>
+        </member>
+        <member name="T:NI.Winter.XmlComponentsConfig">
+            <summary>
+            Extension of ComponentsConfig that supports configuration section handler
+            (so you may place configuration in the app.config or web.config)
+            </summary>
+            <example><code>
+            &lt;configSections&gt;
+            	&lt;section name="components" type="NI.Winter.XmlComponentsConfig, NI.Winter" /&gt;
+            &lt;/configSections&gt;
+            &lt;components&gt;
+            	&lt;!-- components definitions --&gt;
+            &lt;/components&gt;
+            </code></example>
+        </member>
+        <member name="M:NI.Winter.XmlComponentsConfig.#ctor">
+            <summary>
+            Without parameters can be used only as IConfigurationSectionHandler
+            </summary>
+        </member>
+        <member name="P:NI.Winter.XmlComponentsConfig.Preprocessor">
+            <summary>
+            Get or set preprocessor component
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ReplacingFactory">
+            <summary>
+            ReplacingFactory factory component
+            </summary>
+            <example><code>
+            &lt;component name="testEnabled" type="NI.Winter.ReplacingFactory,NI.Winter" singleton="true"&gt;
+            	&lt;property name="TargetObject"&gt;&lt;value&gt;&lt;ref name="testEnabledVariable"/&gt;&lt;/property&gt;	
+            &lt;/component&gt;
+            </code></example>
+        </member>
+        <member name="T:NI.Winter.ValueInitInfo">
+            <summary>
+            Value Info
+            </summary>
+        </member>
+        <member name="T:NI.Winter.RefValueInfo">
+            <summary>
+            Component reference info
+            </summary>
+        </member>
+        <member name="T:NI.Winter.IServiceProviderAware">
+            <summary>
+            Service provider aware component interface
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:NI.Winter.ArrayFactory" -->
+        <member name="M:NI.Winter.ArrayFactory.#ctor">
+            <summary>
+            Default Constructor
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ArrayFactory.ElementType">
+            <summary>
+            Get or set array element type
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ArrayFactory.Elements">
+            <summary>
+            Get or set enumerations of array
+            </summary>
+        </member>
+        <member name="T:NI.Winter.StaticPropertyInvokingFactory">
+            <summary>
+            StaticPropertyInvokingFactory used for defining instance as static property of some class.
+            </summary>
+            <example><code>
+            &lt;component name="datetimenow" type="NI.Winter.StaticPropertyInvokingFactory,NI.Winter" singleton="false" lazy-init="true"&gt;
+            	&lt;property name="TargetType"&gt;&lt;type&gt;System.DateTime,Mscorlib&lt;/type&gt;&lt;/property&gt;
+            	&lt;property name="TargetProperty"&gt;&lt;value&gt;Now&lt;/value&gt;&lt;/property&gt;
+            &lt;/component&gt;
+            </code></example>
+        </member>
+        <member name="P:NI.Winter.StaticPropertyInvokingFactory.TargetType">
+            <summary>
+            Get or set target type
+            </summary>
+        </member>
+        <member name="P:NI.Winter.StaticPropertyInvokingFactory.TargetProperty">
+            <summary>
+            Get or set static target property name
+            </summary>
+        </member>
+        <member name="T:NI.Winter.ServiceProviderContext">
+            <summary>
+            ServiceProviderContext used for referencing to IoC container inside its configuration.
+            </summary>
+        </member>
+        <member name="P:NI.Winter.ServiceProviderContext.ServiceProvider">
+            <summary>
+            Get or set context service provider
+            </summary>
+        </member>
+        <member name="T:NI.Winter.MapValueInitInfo">
+            <summary>
+            Value Info for map
+            </summary>
+        </member>
+        <member name="T:NI.Winter.MapEntryInfo">
+            <summary>
+            </summary>
+        </member>
+    </members>
+</doc>

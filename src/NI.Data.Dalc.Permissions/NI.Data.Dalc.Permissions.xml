@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NI.Data.Dalc.Permissions</name>
+    </assembly>
+    <members>
+        <member name="T:NI.Data.Dalc.Permissions.DalcPermissionChecker">
+            <summary>
+            DALC-specific permission checker
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionChecker.RecordExistsMethod">
+            <summary>
+            Get or set record exists check type
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionChecker.OriginalDalc">
+            <summary>
+            Get or set original (not permission proxy!) DALC component
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionChecker.DalcConditionComposer">
+            <summary>
+            Get or set condition composer component
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.FieldDalcPermissionAclEntry">
+            <summary>
+            Field-oriented DalcPermission ACL entry.
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcPermissionAclEntry">
+            <summary>
+            Field-oriented DalcPermission ACL entry.
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionAclEntry.MatchOperation">
+            <summary>
+            Get or set DALC operation should be matched by this entry
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionAclEntry.BooleanProvider">
+            <summary>
+            Get or set external boolean provider used in permission 'Check' operation
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionAclEntry.SourceNameContextKey">
+            <summary>
+            Get or set context key for source name
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionAclEntry.SubjectContextKey">
+            <summary>
+            Get or set context key for subject
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcPermissionAclEntry.MatchSourceName">
+            <summary>
+            Get or set source name regex to match
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.FieldDalcPermissionAclEntry.FieldNameContextKey">
+            <summary>
+            Get or set context key for field name
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.FieldDalcPermissionAclEntry.MatchFieldName">
+            <summary>
+            Get or set field name to match
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcConditionComposer">
+            <summary>
+            DALC condition composer
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.IDalcConditionComposer">
+            <summary>
+            </summary>
+        </member>
+        <member name="M:NI.Data.Dalc.Permissions.IDalcConditionComposer.Compose(System.Object,NI.Data.Dalc.Permissions.DalcOperation,System.String)">
+            <summary>
+            Compose condition
+            </summary>
+            <returns>condition or null (means no additional conditions)</returns>
+        </member>
+        <member name="M:NI.Data.Dalc.Permissions.DalcConditionComposer.Compose(System.Object,NI.Data.Dalc.Permissions.DalcOperation,System.String)">
+            <summary>
+            <see cref="M:NI.Data.Dalc.Permissions.IDalcConditionComposer.Compose(System.Object,NI.Data.Dalc.Permissions.DalcOperation,System.String)"/>
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcRecordFieldInfo">
+            <summary>
+            Holds DALC record field identification.
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcRecordInfo">
+            <summary>
+            Holds DALC record identification
+            </summary>
+        </member>
+        <member name="M:NI.Data.Dalc.Permissions.DalcRecordInfo.#ctor(System.String,System.Collections.IDictionary)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NI.Data.Dalc.Permissions.DalcRecordInfo"/> class
+            with basic record identification info.
+            </summary>
+            <param name="sourceName">record source name</param>
+            <param name="uidFields">fieldname-to-value map that forms record UID</param>
+        </member>
+        <member name="M:NI.Data.Dalc.Permissions.DalcRecordInfo.#ctor(System.String,System.Collections.IDictionary,System.Collections.IDictionary)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NI.Data.Dalc.Permissions.DalcRecordInfo"/> class
+            with full record identification info.
+            </summary>
+            <param name="sourceName">record source name</param>
+            <param name="uidFields">fieldname-to-value map that forms record UID</param>
+            <param name="fields">record fieldname-to-value map</param>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcRecordInfo.SourceName">
+            <summary>
+            Record source name 
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcRecordInfo.UidFields">
+            <summary>
+            Fieldname-to-value map that forms record UID
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcRecordInfo.Fields">
+            <summary>
+            Get or set record fieldname-to-value map (optional, can be null)
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcRecordFieldInfo.FieldName">
+            <summary>
+            Field name
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcProxy">
+            <summary>
+            Permission-checking DALC proxy.
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.BaseDalcProxy">
+            <summary>
+            Permission-checking DALC proxy.
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.BaseDalcProxy.Dalc">
+            <summary>
+            Get or set underlying DALC component
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.BaseDalcProxy.DalcConditionComposer">
+            <summary>
+            Get or set DALC condition composer component
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.BaseDalcProxy.PermissionChecker">
+            <summary>
+            Get or set DALC permission checker component
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DalcProxy.UnderlyingDalc">
+            <summary>
+            Get or set underlying DALC component
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DbDataViewCommandGenerator">
+            <summary>
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcConditionDescriptor">
+            <summary>
+            Generic implementation of IDalcConditionDescriptor interface
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcOperation">
+            <summary>
+            Dalc operation.
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DbDalcProxy">
+            <summary>
+            DbDALC proxy
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.Permissions.DbDalcProxy.UnderlyingDbDalc">
+            <summary>
+            Get or set underlying DB DALC component
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.DalcPermission">
+            <summary>
+            DALC permission.
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.Permissions.CompositeDalcConditionComposer">
+            <summary>
+            Composite IDalcConditionComposer implementation.
+            </summary>
+        </member>
+    </members>
+</doc>

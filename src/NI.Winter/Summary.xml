@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<namespaces>
+	<namespace name="NI.Winter">
+		Winter IoC Container components namespace.
+	</namespace>
+</namespaces>

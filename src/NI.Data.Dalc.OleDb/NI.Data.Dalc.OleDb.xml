@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NI.Data.Dalc.OleDb</name>
+    </assembly>
+    <members>
+        <member name="T:NI.Data.Dalc.OleDb.OleDbAdapterWrapper">
+            <summary>
+            OleDbAdapterWrapper.
+            </summary>
+        </member>
+        <member name="E:NI.Data.Dalc.OleDb.OleDbAdapterWrapper.RowUpdating">
+            <summary>
+            Row updating event
+            </summary>
+        </member>
+        <member name="E:NI.Data.Dalc.OleDb.OleDbAdapterWrapper.RowUpdated">
+            <summary>
+            Row updated event
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.OleDb.OleDbFactory.QueryFieldValueFormatter">
+            <summary>
+            Get or set default query field value formatter
+            </summary>
+        </member>
+        <member name="T:NI.Data.Dalc.OleDb.OleDbCommandWrapper">
+            <summary>
+            </summary>
+        </member>
+        <member name="M:NI.Data.Dalc.OleDb.OleDbCommandWrapper.GetInsertId">
+            <summary>
+            Returns inserted row id
+            </summary>
+        </member>
+        <member name="P:NI.Data.Dalc.OleDb.OleDbCommandWrapper.QueryFieldValueFormatter">
+            <summary>
+            Get or set default query field value formatter
+            </summary>
+        </member>
+    </members>
+</doc>

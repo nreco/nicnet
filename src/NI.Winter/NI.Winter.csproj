@@ -1,0 +1,207 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{25702474-5D4D-4EEA-A68A-3662A0966ED6}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>NI.Winter</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NI.Winter</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>NI.Winter.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>NI.Winter.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NI.Common, Version=1.0.3258.22841, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\NI.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ArrayFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BaseMethodInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="EventBinder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="IndexerInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IComponentInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IComponentsConfig.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IFactoryComponent.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\INamedServiceProviderAware.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IPropertyInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IServiceProviderAware.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IValueFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MethodInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NestedServiceProvider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PropertyInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ReplacingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Schema\ComponentInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\ComponentsConfig.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Schema\ListValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\MapValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\PropertyInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\RefValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\TypeValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\ValueInitInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ServiceProvider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ServiceProviderContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ServiceProviderInvokingFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StaticMethodInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StaticPropertyInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="XmlComponentsConfig.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="ComponentsConfigSchema.xsd" />
+    <EmbeddedResource Include="ReplacingFactory.resx">
+      <DependentUpon>ReplacingFactory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ServiceProvider.resx">
+      <DependentUpon>ServiceProvider.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XmlComponentsConfig.resx">
+      <DependentUpon>XmlComponentsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="ComponentsConfigSchema.xsx">
+      <DependentUpon>ComponentsConfigSchema.xsd</DependentUpon>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
