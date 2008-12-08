@@ -96,6 +96,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CachedRelationalExprResolver.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="RelExQueryNodeParser.cs" />
     <Compile Include="Interfaces\IRelExQueryNodeParser.cs" />
@@ -104,6 +105,7 @@
     </Compile>
     <Compile Include="ObjectRelexConditionExprResolver.cs" />
     <Compile Include="RelationalExprResolver.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="RelexBuilder.cs" />
     <Compile Include="RelExQueryNodeProvider.cs">

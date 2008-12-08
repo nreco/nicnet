@@ -36,10 +36,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NI.Common.dll</HintPath>
     </Reference>
-    <Reference Include="NI.Data.Dalc, Version=1.0.2372.25634, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\src\NI.Data.Dalc\bin\Debug\NI.Data.Dalc.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -51,6 +47,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NI.Data.Dalc\NI.Data.Dalc.csproj">
+      <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
+      <Name>NI.Data.Dalc</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
