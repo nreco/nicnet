@@ -40,7 +40,7 @@ namespace NI.Data.Dalc {
 
         private bool enabled = true;
 		private bool collectStatistics = false;
-		private CacheDalcStatistics statistics = new CacheDalcStatistics();
+		protected CacheDalcStatistics statistics = new CacheDalcStatistics();
 		
 		/// <summary>
 		/// Get or set cache instace used for caching 'Load' results
@@ -123,15 +123,15 @@ namespace NI.Data.Dalc {
 			set { collectStatistics = value; }
 		}        
 
-        private bool CachingAllowed(IQuery query){
+        protected bool CachingAllowed(IQuery query){
             return QueryCachingAllowedProvider == null || QueryCachingAllowedProvider.GetBoolean(query);
         }
 		
-        private bool CachingAllowed(LoadDataSetValueContext context) {
+        protected bool CachingAllowed(LoadDataSetValueContext context) {
 			return ValueCachingAllowedProvider == null || ValueCachingAllowedProvider.GetBoolean(context);
         }
 
-		private bool CachingAllowed(LoadRecordValueContext context) {
+		protected bool CachingAllowed(LoadRecordValueContext context) {
 			return ValueCachingAllowedProvider == null || ValueCachingAllowedProvider.GetBoolean(context);
         }
 
@@ -149,7 +149,7 @@ namespace NI.Data.Dalc {
             return names;
         }
 
-        private ICacheEntryValidator GetValidator(IQuery query){
+        protected ICacheEntryValidator GetValidator(IQuery query){
             if (CacheValidatorProvider != null){
                 List<string> list = GetAccessibleSourceNames(query.Root, new List<string>());
                 if (list.Count > 0){
@@ -161,7 +161,7 @@ namespace NI.Data.Dalc {
             return null;
         }
 
-        private bool CanAdd(string key, object validator){
+        protected bool CanAdd(string key, object validator){
             return validator != null || CacheValidatorProvider == null;
         }
 
