@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="DalcData.cs" />
     <Compile Include="DalcLinqExtensions.cs" />
+    <Compile Include="DalcRecord.cs" />
     <Compile Include="QueryProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -21,8 +21,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.RelationalExpressio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Dalc.Linq", "NI.Data.Dalc.Linq\NI.Data.Dalc.Linq.csproj", "{D31A3A8F-29A6-4F97-B96B-286453EF80DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{B2B75943-CCEE-4491-A808-795C5B176ACC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,10 +67,6 @@ Global
 		{D31A3A8F-29A6-4F97-B96B-286453EF80DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D31A3A8F-29A6-4F97-B96B-286453EF80DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D31A3A8F-29A6-4F97-B96B-286453EF80DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2B75943-CCEE-4491-A808-795C5B176ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2B75943-CCEE-4491-A808-795C5B176ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2B75943-CCEE-4491-A808-795C5B176ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2B75943-CCEE-4491-A808-795C5B176ACC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

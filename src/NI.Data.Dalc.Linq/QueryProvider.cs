@@ -57,7 +57,9 @@ namespace NI.Data.Dalc.Linq
 				Type[] genArgs = resT.GetGenericArguments();
 				Array resArr = Array.CreateInstance(genArgs[0], dataRows.Count);
 				for (int i = 0; i < dataRows.Count; i++) {
-					if (genArgs[0] == typeof(IDictionary))
+					if (genArgs[0] == typeof(DalcRecord)) {
+						resArr.SetValue(new DalcRecord( new NI.Common.Collections.DataRowDictionary(dataRows[i]) ), i);
+					} else if (genArgs[0] == typeof(IDictionary))
 						resArr.SetValue(new NI.Common.Collections.DataRowDictionary(dataRows[i]), i);
 					else if (genArgs[0] == typeof(DataRow))
 						resArr.SetValue(dataRows[i], i);
