@@ -29,7 +29,7 @@ namespace NI.Data.Dalc.Linq {
 	}
 
 	/// <summary>
-	/// Linq-friendly DALC value.
+	/// Linq-friendly DALC value boxing structure.
 	/// </summary>
 	[Serializable]
 	public struct DalcValue : IComparable {
@@ -89,7 +89,33 @@ namespace NI.Data.Dalc.Linq {
 		public static bool operator <=(DalcValue o1, object o2) {
 			return Compare(o1.Value, o2) <= 0;
 		}
-
+		public static implicit operator DalcValue(string o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(int o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(DBNull o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(decimal o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(float o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(bool o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(byte o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(long o) {
+			return new DalcValue(o);
+		}
+		public static implicit operator DalcValue(DateTime o) {
+			return new DalcValue(o);
+		}
 	}
 
 }
