@@ -99,11 +99,22 @@ namespace NI.Data.Dalc.Linq
 					throw new NotSupportedException();
 				Expression sourceExpr = call.Arguments[0];
 				BuildDalcQuery(q, sourceExpr);
-				Console.WriteLine(call.Method.Name);
 				switch (call.Method.Name)
 				{
+					case "Linq":
+						ConstantExpression sourceNameConst = (ConstantExpression)call.Arguments[1];
+						q.SourceName = sourceNameConst.Value.ToString();
+						break;
 					case "Where":
 						q.Root = ComposeCondition(call.Arguments[1]);
+						if (call.Arguments[1] is UnaryExpression) {
+							UnaryExpression unExpr = (UnaryExpression)call.Arguments[1];
+							if (unExpr.Operand is LambdaExpression) {
+								LambdaExpression lambdaExpr = (LambdaExpression)unExpr.Operand;
+								if (lambdaExpr.Parameters.Count == 1)
+									q.SourceName += "." + lambdaExpr.Parameters[0].Name;
+							}
+						}
 						break;
 					case "Select":
 						q.Fields = new string[] { ComposeFieldValue(call.Arguments[1]).Name };
@@ -163,8 +174,19 @@ namespace NI.Data.Dalc.Linq
 			else if (expression is MethodCallExpression) {
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;
 				if (methodExpr.Method.Name == "In") { // check for special method call like 'In' or 'Like'
-					// our argument is IEnumerable. Check for possible nested DALC query.
-					IEnumerable inArg = null;
+					IQueryFieldValue fldValue = ComposeFieldValue(methodExpr.Object);
+					IQueryValue inValue = ComposeValue(methodExpr.Arguments[0]);
+					// possible conversion to IList
+					if (inValue is IQueryConstantValue) {
+						IQueryConstantValue inConstValue = (IQueryConstantValue)inValue;
+						if (!(inConstValue.Value is IList)) {
+							IList constList = new ArrayList();
+							foreach (object o in ((IEnumerable)inConstValue.Value))
+								constList.Add(o);
+							inValue = new QConst(constList);
+						}
+					}
+					return new QueryConditionNode(fldValue, Conditions.In, inValue);
 				}
 			}
 
@@ -203,22 +225,32 @@ namespace NI.Data.Dalc.Linq
 			if (expression is MethodCallExpression) {
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;
 				if (methodExpr.Method.Name == "get_Item") {
-					if (methodExpr.Arguments.Count == 1 && methodExpr.Arguments[0] is ConstantExpression) {
+					if (methodExpr.Arguments.Count == 1 && 
+						methodExpr.Arguments[0] is ConstantExpression &&
+						methodExpr.Object is ParameterExpression) {
 						ConstantExpression fldNameExpr = (ConstantExpression)methodExpr.Arguments[0];
-						return new QField(fldNameExpr.Value.ToString());
+						// lets extract prefix
+						ParameterExpression paramExpr = (ParameterExpression)methodExpr.Object;
+						return new QField(paramExpr.Name+"."+fldNameExpr.Value.ToString());
 					}
-				} else if (methodExpr.Method.Name=="In") { // check for special method call like 'In' or 'Like'
-					// our argument is IEnumerable. Check for possible nested DALC query.
-					IEnumerable inArg = null;
+				} else if (methodExpr.Method.Name == "Select") {
+					Query nestedQ = new Query(String.Empty);
+					BuildDalcQuery(nestedQ, methodExpr);
+					if (!String.IsNullOrEmpty(nestedQ.SourceName))
+						return nestedQ;
 				}
 
+				throw new NotSupportedException();
 			}
 
 			if (expression is ConstantExpression) {
 				ConstantExpression constExpr = (ConstantExpression)expression;
 				return new QConst(constExpr.Value);
 			}
-			throw new NotSupportedException();
+
+			// just try to eval
+			LambdaExpression lExpr = Expression.Lambda(expression);
+			return new QConst(lExpr.Compile().DynamicInvoke(null));
 		}
 
     }
