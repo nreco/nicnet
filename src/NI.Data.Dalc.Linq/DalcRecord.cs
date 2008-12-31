@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region License
+/*
+ * Open NIC.NET library (http://nicnet.googlecode.com/)
+ * Copyright 2004-2008 NewtonIdeas
+ * Distributed under the LGPL licence
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +33,7 @@ namespace NI.Data.Dalc.Linq {
 
 		public DalcValue this[string fldName] {
 			get {
-				return new DalcValue(this[fldName]);
+				return new DalcValue(RecordData[fldName]);
 			}
 			set {
 				RecordData[fldName] = value.Value;
@@ -50,6 +64,12 @@ namespace NI.Data.Dalc.Linq {
 		public override bool Equals(object obj) {
 			return Value!=null ? Value.Equals(obj) : obj==null;
 		}
+		public override string ToString() {
+			if (Value != null)
+				return Value.ToString();
+			return base.ToString();
+		}
+
 		public int CompareTo(object obj) {
 			if (Value is IComparable)
 				return ((IComparable)Value).CompareTo(obj);
@@ -60,6 +80,10 @@ namespace NI.Data.Dalc.Linq {
 
 		public bool Like(object o) {
 			// this is marker method for linq
+			throw new NotImplementedException();
+		}
+
+		public bool In(IEnumerable o) {
 			throw new NotImplementedException();
 		}
 

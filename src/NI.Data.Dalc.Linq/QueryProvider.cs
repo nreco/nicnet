@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region License
+/*
+ * Open NIC.NET library (http://nicnet.googlecode.com/)
+ * Copyright 2004-2008 NewtonIdeas
+ * Distributed under the LGPL licence
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Data;
 using System.Collections.Generic;
@@ -146,6 +160,14 @@ namespace NI.Data.Dalc.Linq
 					return qCondNode;
 				}
 			}
+			else if (expression is MethodCallExpression) {
+				MethodCallExpression methodExpr = (MethodCallExpression)expression;
+				if (methodExpr.Method.Name == "In") { // check for special method call like 'In' or 'Like'
+					// our argument is IEnumerable. Check for possible nested DALC query.
+					IEnumerable inArg = null;
+				}
+			}
+
 			throw new NotSupportedException();
 		}
 
@@ -179,13 +201,17 @@ namespace NI.Data.Dalc.Linq
 				return ComposeValue(lambdaExpr.Body);
 			}
 			if (expression is MethodCallExpression) {
-				MethodCallExpression getItemMethodExpr = (MethodCallExpression)expression;
-				if (getItemMethodExpr.Method.Name == "get_Item") {
-					if (getItemMethodExpr.Arguments.Count == 1 && getItemMethodExpr.Arguments[0] is ConstantExpression) {
-						ConstantExpression fldNameExpr = (ConstantExpression)getItemMethodExpr.Arguments[0];
+				MethodCallExpression methodExpr = (MethodCallExpression)expression;
+				if (methodExpr.Method.Name == "get_Item") {
+					if (methodExpr.Arguments.Count == 1 && methodExpr.Arguments[0] is ConstantExpression) {
+						ConstantExpression fldNameExpr = (ConstantExpression)methodExpr.Arguments[0];
 						return new QField(fldNameExpr.Value.ToString());
 					}
+				} else if (methodExpr.Method.Name=="In") { // check for special method call like 'In' or 'Like'
+					// our argument is IEnumerable. Check for possible nested DALC query.
+					IEnumerable inArg = null;
 				}
+
 			}
 
 			if (expression is ConstantExpression) {
