@@ -173,7 +173,8 @@ namespace NI.Data.Dalc.Linq
 			}
 			else if (expression is MethodCallExpression) {
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;
-				if (methodExpr.Method.Name == "In") { // check for special method call like 'In' or 'Like'
+				// check for special method call like 'In' or 'Like'
+				if (methodExpr.Method.Name == "In") { 
 					IQueryFieldValue fldValue = ComposeFieldValue(methodExpr.Object);
 					IQueryValue inValue = ComposeValue(methodExpr.Arguments[0]);
 					// possible conversion to IList
@@ -187,6 +188,10 @@ namespace NI.Data.Dalc.Linq
 						}
 					}
 					return new QueryConditionNode(fldValue, Conditions.In, inValue);
+				} else if (methodExpr.Method.Name == "Like") {
+					IQueryFieldValue fldValue = ComposeFieldValue(methodExpr.Object);
+					IQueryValue likeValue = ComposeValue(methodExpr.Arguments[0]);
+					return new QueryConditionNode(fldValue, Conditions.Like, likeValue);
 				}
 			}
 

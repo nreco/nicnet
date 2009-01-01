@@ -78,7 +78,7 @@ namespace NI.Data.Dalc.Linq {
 			throw new NotImplementedException();
 		}
 
-		public bool Like(object o) {
+		public bool Like(string o) {
 			// this is marker method for linq
 			throw new NotImplementedException();
 		}
