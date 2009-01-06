@@ -38,8 +38,9 @@ namespace NI.Data.Dalc
 		}
 		
 		public override IDbCommandWrapper ComposeSelect(IQuery query) {
+			string sourceName = query.SourceName.IndexOf('.')>=0 ? query.SourceName.Split('.')[0] : query.SourceName;
 			for (int i=0; i<DataViews.Length; i++)
-				if (DataViews[i].MatchSourceName(query.SourceName) )
+				if (DataViews[i].MatchSourceName(sourceName))
 					return ComposeDataViewSelect(DataViews[i], query);
 			
 			return base.ComposeSelect(query);
