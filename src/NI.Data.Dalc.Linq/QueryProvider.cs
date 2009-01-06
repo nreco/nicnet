@@ -184,6 +184,8 @@ namespace NI.Data.Dalc.Linq
 							IList constList = new ArrayList();
 							foreach (object o in ((IEnumerable)inConstValue.Value))
 								constList.Add(o);
+							if (constList.Count==0) // means 'nothing'?
+								return new QueryConditionNode( (QConst)"1", Conditions.Equal, (QConst)"2" );
 							inValue = new QConst(constList);
 						}
 					}
@@ -218,6 +220,17 @@ namespace NI.Data.Dalc.Linq
 				throw new NotSupportedException();
 		}
 
+		protected bool IsDalcQueryExpression(Expression expression) {
+			if (expression is MethodCallExpression) {
+				MethodCallExpression mCall = (MethodCallExpression)expression;
+				if (mCall.Method.Name == "Linq")
+					return true;
+				if (mCall.Arguments.Count > 0)
+					return IsDalcQueryExpression(mCall.Arguments[0]);
+			}
+			return false;
+		}
+
 		protected IQueryValue ComposeValue(Expression expression) {
 			if (expression is UnaryExpression) {
 				UnaryExpression unExpr = (UnaryExpression)expression;
@@ -238,14 +251,14 @@ namespace NI.Data.Dalc.Linq
 						ParameterExpression paramExpr = (ParameterExpression)methodExpr.Object;
 						return new QField(paramExpr.Name+"."+fldNameExpr.Value.ToString());
 					}
-				} else if (methodExpr.Method.Name == "Select") {
+				} else if (methodExpr.Method.Name == "Select" && IsDalcQueryExpression(methodExpr) ) {
 					Query nestedQ = new Query(String.Empty);
 					BuildDalcQuery(nestedQ, methodExpr);
 					if (!String.IsNullOrEmpty(nestedQ.SourceName))
 						return nestedQ;
+					throw new NotSupportedException();
 				}
-
-				throw new NotSupportedException();
+				
 			}
 
 			if (expression is ConstantExpression) {

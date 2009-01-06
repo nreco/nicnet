@@ -25,18 +25,18 @@ namespace NI.Data.Dalc.Linq {
 	/// </summary>
 	[Serializable]
 	public class DalcRecord {
-		IDictionary RecordData;
+		public IDictionary Data;
 
 		public DalcRecord(IDictionary data) {
-			RecordData = data;
+			Data = data;
 		}
 
 		public DalcValue this[string fldName] {
 			get {
-				return new DalcValue(RecordData[fldName]);
+				return new DalcValue(Data[fldName]);
 			}
 			set {
-				RecordData[fldName] = value.Value;
+				Data[fldName] = value.Value;
 			}
 		}
 
