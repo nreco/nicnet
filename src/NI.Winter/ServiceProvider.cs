@@ -90,6 +90,25 @@ namespace NI.Winter
 			Config = config;
 		}
 
+		protected override void Dispose(bool disposing) {
+			base.Dispose(disposing);
+			if (disposing) {
+				// lets remove references
+				if (serviceInstanceByName!=null)
+					serviceInstanceByName.Clear();
+				if (serviceNameByInstance!=null)
+					serviceNameByInstance.Clear();
+				if (serviceInstanceByType != null)
+					serviceInstanceByType.Clear();
+				if (services != null)
+					services.Clear();								
+				serviceInstanceByName = null;
+				serviceNameByInstance = null;
+				services = null;
+				_Config = null;
+			}
+		}
+		
 		public CountersData Counters {
 			get {
 				if (!CountersEnabled)
