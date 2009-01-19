@@ -46,6 +46,10 @@ namespace NI.Data.Dalc
 		
 		public QueryProvider() { }
 
+		public QueryProvider(IObjectProvider prv) {
+			UnderlyingObjectProvider = prv;
+		}
+
 		public IQuery GetQuery(object context) {
 			IQuery q = (IQuery)UnderlyingObjectProvider.GetObject(context);
 			if (QueryModifier!=null)

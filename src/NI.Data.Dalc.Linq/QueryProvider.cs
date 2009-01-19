@@ -16,9 +16,11 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using NI.Common.Providers;
 
 namespace NI.Data.Dalc.Linq
 {
@@ -59,29 +61,50 @@ namespace NI.Data.Dalc.Linq
 		{
 			Query q = new Query(SourceName);
 			BuildDalcQuery(q, expression);
-			
-			Console.WriteLine(q.ToString());
-			DataSet ds = new DataSet();
-			Dalc.Load(ds, q);
+
+			object result = null;
+			IQueryProvider dalcQueryPrv = new NI.Data.Dalc.QueryProvider(new ConstObjectProvider(q));
+			if (q.RecordCount == 1 && q.Fields != null && q.Fields.Length == 1) {
+				DalcObjectProvider prv = new DalcObjectProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
+				result = prv.GetObject(null);
+			} else if (q.RecordCount == 1) {
+				DalcRecordDictionaryProvider prv = new DalcRecordDictionaryProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
+				result = prv.GetDictionary(null);
+			} else {
+				DalcDictionaryListProvider prv = new DalcDictionaryListProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
+				result = prv.GetDictionaryList(null);
+			}
+			// now lets try to convert 
+
 			Type resT = typeof(TResult);
-			DataRowCollection dataRows = ds.Tables[q.SourceName].Rows;
-			if (resT == typeof(IEnumerable))
-				return (TResult)((object)dataRows);
+			if (resT == typeof(IEnumerable) && (result is IEnumerable || result == null)) {
+				return result!=null ? (TResult)result : (TResult)((object)new IDictionary[0]);
+			}
+
 			if (resT.IsGenericType && resT.GetGenericTypeDefinition() == typeof(IEnumerable<>)) {
 				Type[] genArgs = resT.GetGenericArguments();
-				Array resArr = Array.CreateInstance(genArgs[0], dataRows.Count);
-				for (int i = 0; i < dataRows.Count; i++) {
-					if (genArgs[0] == typeof(DalcRecord)) {
-						resArr.SetValue(new DalcRecord( new NI.Common.Collections.DataRowDictionary(dataRows[i]) ), i);
-					} else if (genArgs[0] == typeof(IDictionary))
-						resArr.SetValue(new NI.Common.Collections.DataRowDictionary(dataRows[i]), i);
-					else if (genArgs[0] == typeof(DataRow))
-						resArr.SetValue(dataRows[i], i);
-					else
-						throw new InvalidCastException();
+				int arrLen = result is IList ? ((ICollection)result).Count : 1;
+				Array resArr = Array.CreateInstance(genArgs[0], arrLen);
+				if (result is IList) {
+					IList resultList = (IList)result;
+					for (int i = 0; i < resultList.Count; i++)
+						resArr.SetValue( PrepareResult(resultList[i],genArgs[0]), i );
+				} else {
+					resArr.SetValue(PrepareResult(result, genArgs[0]), 0);
 				}
 				return (TResult)((object)resArr);
 			}
+
+			return (TResult)PrepareResult(result, typeof(TResult));
+		}
+
+		protected object PrepareResult(object o, Type t) {
+			if (t.IsInstanceOfType(o))
+				return o;
+			if (t == typeof(DalcRecord) && (o is IDictionary))
+				return new DalcRecord((IDictionary)o);
+			if (t == typeof(DalcValue))
+				return new DalcValue(o);
 			throw new InvalidCastException();
 		}
 
@@ -90,48 +113,64 @@ namespace NI.Data.Dalc.Linq
 			return Execute<IEnumerable>(expression);
 		}
 
+		protected void ApplySingleOrDefault(Query q, MethodCallExpression call) {
+			BuildDalcQuery(q, call.Arguments[0]);
+			q.RecordCount = 1;
+			if (q.Fields == null || q.Fields.Length != 1)
+				throw new InvalidOperationException();
+		}
 
-		protected void BuildDalcQuery(Query q, Expression expression)
-		{
+		protected void ApplyLinq(Query q, MethodCallExpression call) {
+			ConstantExpression sourceNameConst = (ConstantExpression)call.Arguments[1];
+			q.SourceName = sourceNameConst.Value.ToString();
+		}
+
+		protected void ApplyWhere(Query q, MethodCallExpression call) {
+			BuildDalcQuery(q, call.Arguments[0]);
+			q.Root = ComposeCondition(call.Arguments[1]);
+			if (call.Arguments[1] is UnaryExpression) {
+				UnaryExpression unExpr = (UnaryExpression)call.Arguments[1];
+				if (unExpr.Operand is LambdaExpression) {
+					LambdaExpression lambdaExpr = (LambdaExpression)unExpr.Operand;
+					if (lambdaExpr.Parameters.Count == 1)
+						q.SourceName += "." + lambdaExpr.Parameters[0].Name;
+				}
+			}
+		}
+
+		protected void ApplySelect(Query q, MethodCallExpression call) {
+			BuildDalcQuery(q, call.Arguments[0]);
+			q.Fields = new string[] { ComposeFieldValue(call.Arguments[1]).Name };
+		}
+
+		protected void ApplyOrderBy(Query q, MethodCallExpression call) {
+			BuildDalcQuery(q, call.Arguments[0]);
+			AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name);
+		}
+
+		protected void ApplyOrderByDescending(Query q, MethodCallExpression call) {
+			BuildDalcQuery(q, call.Arguments[0]);
+			AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name + " " + QSortField.Desc);
+		}
+
+		protected void ApplyThenBy(Query q, MethodCallExpression call) {
+			ApplyOrderBy(q, call);
+		}
+
+		protected void ApplyThenByDescending(Query q, MethodCallExpression call) {
+			ApplyOrderByDescending(q, call);
+		}
+
+
+		protected void BuildDalcQuery(Query q, Expression expression) {
 			if (expression is MethodCallExpression) {
 				MethodCallExpression call = (MethodCallExpression)expression;
-				if (call.Arguments.Count != 2)
+				MethodInfo applyMethod = this.GetType().GetMethod("Apply" + call.Method.Name,
+											BindingFlags.Instance | BindingFlags.NonPublic, null,
+											new Type[] { typeof(Query), typeof(MethodCallExpression) }, null);
+				if (applyMethod==null)
 					throw new NotSupportedException();
-				Expression sourceExpr = call.Arguments[0];
-				BuildDalcQuery(q, sourceExpr);
-				switch (call.Method.Name)
-				{
-					case "Linq":
-						ConstantExpression sourceNameConst = (ConstantExpression)call.Arguments[1];
-						q.SourceName = sourceNameConst.Value.ToString();
-						break;
-					case "Where":
-						q.Root = ComposeCondition(call.Arguments[1]);
-						if (call.Arguments[1] is UnaryExpression) {
-							UnaryExpression unExpr = (UnaryExpression)call.Arguments[1];
-							if (unExpr.Operand is LambdaExpression) {
-								LambdaExpression lambdaExpr = (LambdaExpression)unExpr.Operand;
-								if (lambdaExpr.Parameters.Count == 1)
-									q.SourceName += "." + lambdaExpr.Parameters[0].Name;
-							}
-						}
-						break;
-					case "Select":
-						q.Fields = new string[] { ComposeFieldValue(call.Arguments[1]).Name };
-						break;
-					case "OrderBy":
-						AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name );
-						break;
-					case "OrderByDescending":
-						AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name + " " + QSortField.Desc);
-						break;	
-					case "ThenBy":
-						AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name );
-						break;
-					case "ThenByDescending":
-						AddQuerySort(q, ComposeFieldValue(call.Arguments[1]).Name + " " + QSortField.Desc);
-						break;
-				}
+				applyMethod.Invoke(this, new object[] { q, call });
 			}
 		}
 
@@ -249,7 +288,10 @@ namespace NI.Data.Dalc.Linq
 						ConstantExpression fldNameExpr = (ConstantExpression)methodExpr.Arguments[0];
 						// lets extract prefix
 						ParameterExpression paramExpr = (ParameterExpression)methodExpr.Object;
-						return new QField(paramExpr.Name+"."+fldNameExpr.Value.ToString());
+						string fldName = fldNameExpr.Value.ToString();
+						if (fldName.IndexOf('(') < 0) // not function - tmp hack! TODO fix aliases
+							fldName = paramExpr.Name + "." + fldName;
+						return new QField(fldName);
 					}
 				} else if (methodExpr.Method.Name == "Select" && IsDalcQueryExpression(methodExpr) ) {
 					Query nestedQ = new Query(String.Empty);
