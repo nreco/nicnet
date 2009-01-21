@@ -15,6 +15,7 @@
 using System;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 
 
@@ -290,11 +291,14 @@ namespace NI.Winter
 
             if (isGenericType)
             {
-                genericTypePart = type_description.Substring(aposPos, type_description.Length - aposPos);
-                int genericPartEnd = genericTypePart.LastIndexOf(']');
-                genericTypePart = genericTypePart.Substring(0, genericPartEnd + 1);
-
-                type_description = type_description.Replace(genericTypePart, String.Empty);
+                int genericStartArgPos = type_description.IndexOf('[', aposPos);
+                if (genericStartArgPos>=0) { /* real generic type, not definition */
+					genericTypePart = type_description.Substring(genericStartArgPos, type_description.Length - genericStartArgPos);
+					int genericPartEnd = genericTypePart.LastIndexOf(']');
+					genericTypePart = genericTypePart.Substring(0, genericPartEnd + 1);
+					// get generic type definition str
+					type_description = type_description.Replace(genericTypePart, String.Empty);
+				}
             }
 
             string[] parts = type_description.Split(new char[] { Separator }, 2);
@@ -312,7 +316,23 @@ namespace NI.Winter
 					throw new Exception("Cannot load assembly "+parts[1]);
 				
 				try {
-					return assembly.GetType( String.Format("{0}{1}", parts[0], genericTypePart), true, false );
+					Type t = assembly.GetType( parts[0], true, false );
+					if (!String.IsNullOrEmpty(genericTypePart)) {
+						// lets get generic type by generic type definition
+						List<Type> genArgType = new List<Type>();
+						// get rid of [ ]
+						string genericTypeArgs = genericTypePart.Substring(1, genericTypePart.Length-2); 
+						int genParamStartIdx = -1;
+						while ((genParamStartIdx = genericTypeArgs.IndexOf('[', genParamStartIdx+1)) >= 0) {
+							int genParamEndIdx = genericTypeArgs.IndexOf(']',genParamStartIdx);
+							if (genParamEndIdx<0)
+								throw new Exception("Invalid generic type definition "+parts[0]+genericTypePart);
+							string genArgTypeStr = genericTypeArgs.Substring(genParamStartIdx+1, genParamEndIdx-genParamStartIdx-1);
+							genArgType.Add(ResolveType(genArgTypeStr));
+						}
+						t = t.MakeGenericType( genArgType.ToArray() );
+					}
+					return t;
 				} catch (Exception ex) {
 					throw new Exception("Cannot resolve type "+type_description, ex);
 				}
