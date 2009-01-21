@@ -49,6 +49,7 @@ namespace NI.Winter
 		bool _CountersEnabled = false;
 		CountersData counters = new CountersData();
 		IValueFactory _ValueFactory;
+		static IComparer constructorInfoComparer = new ConstructorInfoComparer();
 
 		public bool CountersEnabled {
 			get { return _CountersEnabled; }
@@ -266,7 +267,8 @@ namespace NI.Winter
 				
 				// find appropriate constructor and create instance
 				ConstructorInfo[] constructors = componentInfo.ComponentType.GetConstructors();
-				
+				Array.Sort(constructors, constructorInfoComparer);
+
 				foreach (ConstructorInfo constructor in constructors) {
 					ParameterInfo[] args = constructor.GetParameters();
 					// it should be always 'not null'. But lets ensure.
@@ -350,7 +352,27 @@ namespace NI.Winter
 				serviceNameByInstance[instance] = componentInfo.Name;
 			}
 		}
-		
+
+		internal class ConstructorInfoComparer : IComparer {
+			public int Compare(object x, object y) {
+				ConstructorInfo c1 = (ConstructorInfo)x;
+				ConstructorInfo c2 = (ConstructorInfo)y;
+				ParameterInfo[] c1Params = c1.GetParameters();
+				ParameterInfo[] c2Params = c2.GetParameters();
+				if (c1Params.Length != c2Params.Length)
+					return c1Params.Length.CompareTo(c2Params.Length);
+				// lets analyse types
+				for (int i = 0; i < c1Params.Length; i++) {
+					bool isXObj = c1Params[i].ParameterType==typeof(object);
+					bool isYObj = c2Params[i].ParameterType==typeof(object);
+					if (isXObj && isYObj) return 0;
+					if (isXObj) return 1;
+					if (isYObj) return -1;
+				}
+				return 0;
+			}
+		}
+
 		public class LocalValueFactory : IValueFactory {
 			ServiceProvider SP;
 
