@@ -135,28 +135,34 @@ namespace NI.Data.Dalc {
 			return ValueCachingAllowedProvider == null || ValueCachingAllowedProvider.GetBoolean(context);
         }
 
-        private List<string> GetAccessibleSourceNames(IQueryNode node, List<string> names){
+        private void GetAccessibleSourceNames(IQueryNode node, List<string> names){
             if (node is IQueryConditionNode){
                 IQueryConditionNode cn = (IQueryConditionNode) node;
-                if (cn.RValue is IQuery){
-                    names.Add( ((IQuery) cn.RValue).SourceName );
-                }
+                if (cn.LValue is IQuery) {
+					IQuery q = (IQuery)cn.LValue;
+					if (!names.Contains(q.SourceName))
+						names.Add(q.SourceName);					
+					GetAccessibleSourceNames( q.Root, names);
+				}
+				if (cn.RValue is IQuery) {
+					IQuery q = (IQuery)cn.RValue;
+					if (!names.Contains(q.SourceName))
+						names.Add(q.SourceName);
+					GetAccessibleSourceNames(q.Root, names);
+				}
             } else if (node is IQueryGroupNode){
                 foreach (IQueryNode child in node.Nodes){
                     GetAccessibleSourceNames(child, names);
                 }
             }
-            return names;
         }
 
         protected ICacheEntryValidator GetValidator(IQuery query){
             if (CacheValidatorProvider != null){
-                List<string> list = GetAccessibleSourceNames(query.Root, new List<string>());
-                if (list.Count > 0){
-                    list.Add( query.SourceName );
-                    return CacheValidatorProvider.GetValidator(list.ToArray());
-                }
-                return CacheValidatorProvider.GetValidator(query.SourceName);
+                List<string> list = new List<string>();
+				list.Add(query.SourceName);
+				GetAccessibleSourceNames(query.Root, list);
+				return CacheValidatorProvider.GetValidator(list.ToArray());
             }
             return null;
         }
