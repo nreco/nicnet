@@ -267,7 +267,9 @@ namespace NI.Winter
 				
 				// find appropriate constructor and create instance
 				ConstructorInfo[] constructors = componentInfo.ComponentType.GetConstructors();
-				Array.Sort(constructors, constructorInfoComparer);
+				// order is important only if at least one argument is present
+				if (constructors.Length>0 && componentInfo.ConstructorArgs!=null && componentInfo.ConstructorArgs.Length>0)
+					Array.Sort(constructors, constructorInfoComparer);
 
 				foreach (ConstructorInfo constructor in constructors) {
 					ParameterInfo[] args = constructor.GetParameters();
