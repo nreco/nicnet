@@ -402,7 +402,10 @@ namespace NI.Winter
 			protected virtual object ConvertTo(object o, Type toType) {
 				if (o==null) 
 					return null; // nothing to convert
-				return TypeDescriptor.GetConverter(toType).ConvertFrom(o);
+				TypeConverter converter = TypeDescriptor.GetConverter(toType);
+				if (converter!=null && converter.CanConvertFrom(o.GetType()))
+					return converter.ConvertFrom(o);
+				throw new InvalidCastException(String.Format("Cannot convert from {0} to {1}", o.GetType(), toType));
 			}
 		}
 		
