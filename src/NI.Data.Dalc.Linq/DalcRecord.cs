@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -24,7 +25,7 @@ namespace NI.Data.Dalc.Linq {
 	/// Linq-friendly dalc record structure.
 	/// </summary>
 	[Serializable]
-	public class DalcRecord {
+	public class DalcRecord : ICustomTypeDescriptor {
 		public IDictionary Data;
 
 		public DalcRecord(IDictionary data) {
@@ -40,6 +41,60 @@ namespace NI.Data.Dalc.Linq {
 			}
 		}
 
+		#region ICustomTypeDescriptor
+
+		AttributeCollection ICustomTypeDescriptor.GetAttributes() {
+			return new AttributeCollection(null);
+		}
+
+		string ICustomTypeDescriptor.GetClassName() {
+			return null;
+		}
+
+		string ICustomTypeDescriptor.GetComponentName() {
+			return null;
+		}
+
+		TypeConverter ICustomTypeDescriptor.GetConverter() {
+			return null;
+		}
+
+		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent() {
+			return null;
+		}
+
+		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty() {
+			return null;
+		}
+
+		object ICustomTypeDescriptor.GetEditor(Type editorBaseType) {
+			return null;
+		}
+
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes) {
+			return new EventDescriptorCollection(null);
+		}
+
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents() {
+			return new EventDescriptorCollection(null);
+		}
+
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes) {
+			var props = new List<PropertyDescriptor>();
+			foreach (DictionaryEntry varEntry in Data)
+				props.Add(new DalcRecordPropertyDescriptor(varEntry.Key.ToString()));
+			return new PropertyDescriptorCollection(props.ToArray());
+		}
+
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties() {
+			return ((ICustomTypeDescriptor)this).GetProperties(null);
+		}
+
+		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd) {
+			return this;
+		}
+
+		#endregion
 	}
 
 	/// <summary>
@@ -139,6 +194,47 @@ namespace NI.Data.Dalc.Linq {
 		}
 		public static implicit operator DalcValue(DateTime o) {
 			return new DalcValue(o);
+		}
+	}
+
+	internal class DalcRecordPropertyDescriptor : PropertyDescriptor {
+		string Name;
+
+		public DalcRecordPropertyDescriptor(string name)
+			: base(name, null) {
+			Name = name;
+		}
+
+		public override bool CanResetValue(object component) {
+			return true;
+		}
+
+		public override Type ComponentType {
+			get { return typeof(DalcRecord); }
+		}
+
+		public override object GetValue(object component) {
+			return ((DalcRecord)component)[Name].Value;
+		}
+
+		public override bool IsReadOnly {
+			get { return false; }
+		}
+
+		public override Type PropertyType {
+			get { return typeof(object); }
+		}
+
+		public override void ResetValue(object component) {
+			((DalcRecord)component)[Name] = new DalcValue(null);
+		}
+
+		public override void SetValue(object component, object value) {
+			((DalcRecord)component)[Name] = new DalcValue(value);
+		}
+
+		public override bool ShouldSerializeValue(object component) {
+			return false;
 		}
 	}
 
