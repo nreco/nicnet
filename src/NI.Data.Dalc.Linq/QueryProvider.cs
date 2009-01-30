@@ -101,6 +101,8 @@ namespace NI.Data.Dalc.Linq
 		protected object PrepareResult(object o, Type t) {
 			if (t.IsInstanceOfType(o))
 				return o;
+			if (o == null && !t.IsValueType)
+				return o;
 			if (t == typeof(DalcRecord) && (o is IDictionary))
 				return new DalcRecord((IDictionary)o);
 			if (t == typeof(DalcValue))
@@ -116,8 +118,6 @@ namespace NI.Data.Dalc.Linq
 		protected void ApplySingleOrDefault(Query q, MethodCallExpression call) {
 			BuildDalcQuery(q, call.Arguments[0]);
 			q.RecordCount = 1;
-			if (q.Fields == null || q.Fields.Length != 1)
-				throw new InvalidOperationException();
 		}
 
 		protected void ApplyLinq(Query q, MethodCallExpression call) {
