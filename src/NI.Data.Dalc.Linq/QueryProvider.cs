@@ -105,8 +105,12 @@ namespace NI.Data.Dalc.Linq
 				return o;
 			if (t == typeof(DalcRecord) && (o is IDictionary))
 				return new DalcRecord((IDictionary)o);
-			if (t == typeof(DalcValue))
+			if (t == typeof(DalcValue)) {
+				if (o is IDictionary)
+					foreach (DictionaryEntry entry in ((IDictionary)o))
+						return new DalcValue(entry.Value);
 				return new DalcValue(o);
+			}
 			throw new InvalidCastException();
 		}
 
