@@ -77,7 +77,8 @@ namespace NI.Data.Dalc.Permissions {
 		}
 		
 		protected IQuery AddPermissionCondition(DalcOperation operation, IQuery query) {
-			IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextSubject, operation, query.SourceName);
+			QSourceName qSourceName = (QSourceName)query.SourceName;
+			IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextSubject, operation, qSourceName.Name);
 			if (permissionCondition!=null) {
 				Query modifiedQuery = CloneQuery(query);
 				QueryGroupNode newRoot = new QueryGroupNode(GroupType.And);

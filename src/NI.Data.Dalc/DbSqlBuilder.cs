@@ -39,11 +39,10 @@ namespace NI.Data.Dalc
 		}
 		
 		protected virtual string GetTableName(string sourceName) {
-			int dotIdx = sourceName.LastIndexOf('.');
-			// dot is exists and not last char of the sourcename
-			if (dotIdx>=0 && (dotIdx+1)<sourceName.Length )
-				return sourceName.Substring(0, dotIdx)+" "+sourceName.Substring(dotIdx+1);
-			return sourceName.Replace('.', ' ');
+			QSourceName qSourceName = (QSourceName)sourceName;
+			if (!String.IsNullOrEmpty(qSourceName.Alias))
+				return qSourceName.Name + " " + qSourceName.Alias;
+			return qSourceName.Name;
 		}
 
 		protected virtual string BuildSelectInternal(IQuery query, bool isNested) {

@@ -241,6 +241,7 @@
     <Compile Include="QueryProvider.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Query\QSourceName.cs" />
     <Compile Include="Query\QConst.cs">
       <SubType>Code</SubType>
     </Compile>
