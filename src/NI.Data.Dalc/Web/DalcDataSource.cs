@@ -24,6 +24,7 @@ namespace NI.Data.Dalc.Web {
 	public class DalcDataSource : DataSourceControl {
 		string _SourceName;
 		IDalc _Dalc;
+		IQueryNode _Condition = null;
 
 		public string SourceName {
 			get { return _SourceName; }
@@ -33,6 +34,11 @@ namespace NI.Data.Dalc.Web {
 		public IDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }
+		}
+
+		public IQueryNode Condition {
+			get { return _Condition; }
+			set { _Condition = value; }
 		}
 
 		public DalcDataSource() { }

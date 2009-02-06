@@ -37,6 +37,7 @@ namespace NI.Data.Dalc.Web {
 
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
 			Query q = new Query(Name);
+			q.Root = DataSource.Condition;
 			if (arguments.RetrieveTotalRowCount) {
 				arguments.TotalRowCount = DataSource.Dalc.RecordsCount(q.SourceName, q.Root);
 			}
