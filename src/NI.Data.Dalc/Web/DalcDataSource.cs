@@ -13,6 +13,8 @@
 #endregion
 
 using System;
+using System.Data;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Web;
@@ -25,6 +27,15 @@ namespace NI.Data.Dalc.Web {
 		string _SourceName;
 		IDalc _Dalc;
 		IQueryNode _Condition = null;
+
+		public event DalcDataSourceSelectEventHandler Selecting;
+		public event DalcDataSourceSelectEventHandler Selected;
+		public event DalcDataSourceSaveEventHandler Updating;
+		public event DalcDataSourceSaveEventHandler Updated;
+		public event DalcDataSourceSaveEventHandler Inserting;
+		public event DalcDataSourceSaveEventHandler Inserted;
+		public event DalcDataSourceSaveEventHandler Deleting;
+		public event DalcDataSourceSaveEventHandler Deleted;
 
 		public string SourceName {
 			get { return _SourceName; }
@@ -46,5 +57,64 @@ namespace NI.Data.Dalc.Web {
 		protected override DataSourceView GetView(string viewName) {
 			return new DalcDataSourceView(this, String.IsNullOrEmpty(viewName) ? SourceName : viewName );
 		}
+
+		internal void OnSelecting(object sender, DalcDataSourceSelectEventArgs e) {
+			if (Selecting != null)
+				Selecting(sender, e);
+		}
+		internal void OnSelected(object sender, DalcDataSourceSelectEventArgs e) {
+			if (Selected != null)
+				Selected(sender, e);
+		}
+
+		internal void OnUpdating(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Updating != null)
+				Updating(sender, e);
+		}
+		internal void OnUpdated(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Updated != null)
+				Updated(sender, e);
+		}
+
+		internal void OnInserting(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Inserting != null)
+				Inserting(sender, e);
+		}
+		internal void OnInserted(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Inserted != null)
+				Inserted(sender, e);
+		}
+
+		internal void OnDeleting(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Deleting != null)
+				Deleting(sender, e);
+		}
+		internal void OnDeleted(object sender, DalcDataSourceSaveEventArgs e) {
+			if (Deleted != null)
+				Deleted(sender, e);
+		}
+
+
 	}
+
+	public delegate void DalcDataSourceSelectEventHandler(object sender, DalcDataSourceSelectEventArgs e);
+	public delegate void DalcDataSourceSaveEventHandler(object sender, DalcDataSourceSaveEventArgs e);
+
+	public class DalcDataSourceSaveEventArgs {
+		public string SourceName { get; set; }
+		public IDictionary OldValues { get; set; }
+		public IDictionary Values { get; set; }
+		public IDictionary Keys { get; set; }
+		public int AffectedCount { get; internal set; }
+	}
+
+	public class DalcDataSourceSelectEventArgs {
+		public Query SelectQuery { get; set; }
+		public DataSet Data { get; set; }
+		public DataSourceSelectArguments SelectArgs { get; set; }
+	}
+
+
+
+
 }

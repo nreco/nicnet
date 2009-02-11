@@ -38,17 +38,24 @@ namespace NI.Data.Dalc.Web {
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
 			Query q = new Query(Name);
 			q.Root = DataSource.Condition;
+			if (!String.IsNullOrEmpty(arguments.SortExpression))
+				q.Sort = arguments.SortExpression.Split(',');
+			DataSet ds = new DataSet();
+
+			var eArgs = new DalcDataSourceSelectEventArgs { SelectQuery = q, SelectArgs = arguments, Data = ds };
+			// raise event
+			DataSource.OnSelecting(this, eArgs);
+
 			if (arguments.RetrieveTotalRowCount) {
 				arguments.TotalRowCount = DataSource.Dalc.RecordsCount(q.SourceName, q.Root);
 			}
 
-			if (!String.IsNullOrEmpty(arguments.SortExpression))
-				q.Sort = arguments.SortExpression.Split(',');
 			q.StartRecord = arguments.StartRowIndex;
 			if (arguments.MaximumRows>0)
 				q.RecordCount = arguments.MaximumRows;
-			DataSet ds = new DataSet();
 			DataSource.Dalc.Load(ds, q);
+			// raise event
+			DataSource.OnSelected(this, eArgs);
 			return ds.Tables[q.SourceName].DefaultView;
 		}
 
@@ -61,18 +68,33 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected override int ExecuteInsert(IDictionary values) {
+			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name };
+			DataSource.OnInserting(this, eArgs);
 			DataSource.Dalc.Insert(values, Name);
+			DataSource.OnInserted(this, eArgs);
 			return 1;
 		}
 
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
+			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name, OldValues = oldValues, Keys = keys };
+			DataSource.OnUpdating(this, eArgs);
 			var uidCondition = ComposeUidCondition(keys);
-			return DataSource.Dalc.Update(values, new Query(Name, uidCondition));
+			int result = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
+			// raise event
+			eArgs.AffectedCount = result;
+			DataSource.OnUpdated(this, eArgs);
+			return result;
 		}
 
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
+			var eArgs = new DalcDataSourceSaveEventArgs { SourceName = Name, OldValues = oldValues, Keys = keys };
+			DataSource.OnDeleting(this, eArgs);
 			var uidCondition = ComposeUidCondition(keys);
-			return DataSource.Dalc.Delete(new Query(Name, uidCondition));
+			int result = DataSource.Dalc.Delete(new Query(Name, uidCondition));
+			// raise event
+			eArgs.AffectedCount = result;
+			DataSource.OnDeleted(this, eArgs);
+			return result;
 		}
 
 		public override bool CanDelete {
