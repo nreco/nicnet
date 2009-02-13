@@ -280,7 +280,27 @@ namespace NI.Winter
 			// unknown object definition (???)
 			return null;
 		}
-		
+
+		protected int FindBracketClose(string s, int start) {
+			int nestedLev = 0;
+			int idx = start;
+			while (idx < s.Length) {
+				switch (s[idx]) {
+					case '[':
+						nestedLev++;
+						break;
+					case ']':
+						if (nestedLev > 0)
+							nestedLev--;
+						else
+							return idx;
+						break;
+				}
+				idx++;
+			}
+			return -1;
+		}
+
 		protected Type ResolveType(string type_description) 
         {
 			const char Separator = ',' ;
@@ -294,7 +314,7 @@ namespace NI.Winter
                 int genericStartArgPos = type_description.IndexOf('[', aposPos);
                 if (genericStartArgPos>=0) { /* real generic type, not definition */
 					genericTypePart = type_description.Substring(genericStartArgPos, type_description.Length - genericStartArgPos);
-					int genericPartEnd = genericTypePart.LastIndexOf(']');
+					int genericPartEnd = FindBracketClose( genericTypePart, 1 );
 					genericTypePart = genericTypePart.Substring(0, genericPartEnd + 1);
 					// get generic type definition str
 					type_description = type_description.Replace(genericTypePart, String.Empty);
@@ -324,11 +344,13 @@ namespace NI.Winter
 						string genericTypeArgs = genericTypePart.Substring(1, genericTypePart.Length-2); 
 						int genParamStartIdx = -1;
 						while ((genParamStartIdx = genericTypeArgs.IndexOf('[', genParamStartIdx+1)) >= 0) {
-							int genParamEndIdx = genericTypeArgs.IndexOf(']',genParamStartIdx);
+							int genParamEndIdx = FindBracketClose( genericTypeArgs, genParamStartIdx+1 );
 							if (genParamEndIdx<0)
 								throw new Exception("Invalid generic type definition "+parts[0]+genericTypePart);
 							string genArgTypeStr = genericTypeArgs.Substring(genParamStartIdx+1, genParamEndIdx-genParamStartIdx-1);
 							genArgType.Add(ResolveType(genArgTypeStr));
+							// skip processed
+							genParamStartIdx = genParamEndIdx;
 						}
 						t = t.MakeGenericType( genArgType.ToArray() );
 					}
