@@ -70,31 +70,85 @@ namespace NI.Data.Dalc.Web {
 		protected override int ExecuteInsert(IDictionary values) {
 			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name };
 			DataSource.OnInserting(this, eArgs);
-			DataSource.Dalc.Insert(values, Name);
+			if (DataSource.DataSetMode) {
+				DataSet ds = new DataSet();
+				DataSource.Dalc.Load(ds, new Query(Name, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
+				DataTable tbl = ds.Tables[Name];
+				EnsureDataSchema(tbl);
+				
+				DataRow r = tbl.NewRow();
+				foreach (DataColumn col in tbl.Columns)
+					if (values.Contains(col.ColumnName))
+						r[col] = values[col.ColumnName];
+				tbl.Rows.Add(r);
+				DataSource.Dalc.Update(ds, Name);
+				// push back autoincrement field
+				if (DataSource.AutoIncrementNames != null)
+					foreach (string autoIncName in DataSource.AutoIncrementNames)
+						values[autoIncName] = r[autoIncName];
+				
+			} else {
+				DataSource.Dalc.Insert(values, Name);
+			}
 			DataSource.OnInserted(this, eArgs);
 			return 1;
+		}
+
+		protected void EnsureDataSchema(DataTable tbl) {
+			List<DataColumn> pkCols = new List<DataColumn>();
+			if (DataSource.DataKeyNames!=null)
+				foreach (string keyName in DataSource.DataKeyNames)
+					pkCols.Add(tbl.Columns[keyName]);
+			tbl.PrimaryKey = pkCols.ToArray();
+			if (DataSource.AutoIncrementNames != null)
+				foreach (string autoIncName in DataSource.AutoIncrementNames)
+					tbl.Columns[autoIncName].AutoIncrement = true;
 		}
 
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
 			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name, OldValues = oldValues, Keys = keys };
 			DataSource.OnUpdating(this, eArgs);
 			var uidCondition = ComposeUidCondition(keys);
-			int result = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
+			if (DataSource.DataSetMode) {
+				DataSet ds = new DataSet();
+				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
+				EnsureDataSchema(ds.Tables[Name]);
+
+				eArgs.AffectedCount = ds.Tables[Name].Rows.Count;
+				foreach (DataRow r in ds.Tables[Name].Rows)
+					foreach (DataColumn col in ds.Tables[Name].Columns)
+						if (values.Contains(col.ColumnName))
+							r[col] = values[col.ColumnName];
+				DataSource.Dalc.Update(ds, Name);
+			} else {
+				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
+			}
 			// raise event
-			eArgs.AffectedCount = result;
 			DataSource.OnUpdated(this, eArgs);
-			return result;
+			return eArgs.AffectedCount;
 		}
 
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
 			var eArgs = new DalcDataSourceSaveEventArgs { SourceName = Name, OldValues = oldValues, Keys = keys };
 			DataSource.OnDeleting(this, eArgs);
 			var uidCondition = ComposeUidCondition(keys);
-			int result = DataSource.Dalc.Delete(new Query(Name, uidCondition));
+
+			if (DataSource.DataSetMode) {
+				DataSet ds = new DataSet();
+				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
+				EnsureDataSchema(ds.Tables[Name]);
+				eArgs.AffectedCount = ds.Tables[Name].Rows.Count;
+				foreach (DataRow r in ds.Tables[Name].Rows)
+					r.Delete();
+				DataSource.Dalc.Update(ds, Name);
+
+			} else {
+				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(Name, uidCondition));
+			}
+
 			// raise event
-			eArgs.AffectedCount = result;
 			DataSource.OnDeleted(this, eArgs);
-			return result;
+			return eArgs.AffectedCount;
 		}
 
 		public override bool CanDelete {

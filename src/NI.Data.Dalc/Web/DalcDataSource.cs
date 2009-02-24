@@ -14,11 +14,13 @@
 
 using System;
 using System.Data;
+using System.ComponentModel;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using NI.Data.Dalc;
 
 namespace NI.Data.Dalc.Web {
@@ -27,6 +29,9 @@ namespace NI.Data.Dalc.Web {
 		string _SourceName;
 		IDalc _Dalc;
 		IQueryNode _Condition = null;
+		bool _DataSetMode = false;
+		string[] _AutoIncrementNames = null;
+		string[] _DataKeyNames = null;
 
 		public event DalcDataSourceSelectEventHandler Selecting;
 		public event DalcDataSourceSelectEventHandler Selected;
@@ -36,6 +41,23 @@ namespace NI.Data.Dalc.Web {
 		public event DalcDataSourceSaveEventHandler Inserted;
 		public event DalcDataSourceSaveEventHandler Deleting;
 		public event DalcDataSourceSaveEventHandler Deleted;
+
+		public bool DataSetMode {
+			get { return _DataSetMode; }
+			set { _DataSetMode = value; }
+		}
+
+		[TypeConverterAttribute(typeof(StringArrayConverter))]
+		public string[] AutoIncrementNames {
+			get { return _AutoIncrementNames; }
+			set { _AutoIncrementNames = value; }
+		}
+
+		[TypeConverterAttribute(typeof(StringArrayConverter))]
+		public string[] DataKeyNames {
+			get { return _DataKeyNames; }
+			set { _DataKeyNames = value; }
+		}
 
 		public string SourceName {
 			get { return _SourceName; }
