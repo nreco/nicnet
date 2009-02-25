@@ -26,7 +26,9 @@ namespace NI.Examples.Dalc {
 			dbDalcSample.CreateUser("Joe", "joe@somedomain.com", null);
 			dbDalcSample.ShowActiveUsers();
 
-			Console.WriteLine("Compact query syntax also can be used (try for example, )");
+			Console.WriteLine("Compact query syntax also can be used (try for example: users(name like \"%o%\" )[id]");
+			var relex = Console.ReadLine();
+			dbDalcSample.ShowByRelex(relex);
 
 			Console.WriteLine("Press any key...");
 			Console.ReadKey();
