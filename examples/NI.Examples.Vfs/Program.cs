@@ -18,6 +18,8 @@ namespace NI.Examples.Vfs
             MemoryFileSystem memFs = new MemoryFileSystem();
             Utility.IllustrateSystem(memFs);
             memFs.Root.Delete();
+            Console.WriteLine("=== Press any key to proceed to local filesystem sample ===");
+            Console.ReadLine();
 
             // Local filesystem example
             Console.WriteLine(
@@ -36,6 +38,7 @@ namespace NI.Examples.Vfs
             LocalFileSystem localFs = new LocalFileSystem(tempFileName);
             Utility.IllustrateSystem(localFs);
             localFs.Root.Delete();
+            Console.ReadLine();
         }
     }
 }
