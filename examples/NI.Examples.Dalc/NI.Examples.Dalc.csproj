@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F558B3E3-BB9C-4709-ACF6-69F205D827F9}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -85,9 +85,9 @@
     <Content Include="sampleDb.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sampleDb_log.LDF">
-      <DependentUpon>sampleDb.mdf</DependentUpon>
+    <Content Include="sampleDb_log.ldf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>sampleDb.mdf</DependentUpon>
     </Content>
   </ItemGroup>
   <ItemGroup>
