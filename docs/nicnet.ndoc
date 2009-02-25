@@ -1,0 +1,45 @@
+<project SchemaVersion="1.3">
+    <assemblies>
+        <assembly location=".\dll\NI.Data.Dalc.dll" documentation=".\dll\NI.Data.Dalc.xml" />
+        <assembly location=".\dll\NI.Data.Dalc.Permissions.dll" documentation=".\dll\NI.Data.Dalc.Permissions.xml" />
+        <assembly location=".\dll\NI.Data.RelationalExpressions.dll" documentation=".\dll\NI.Data.RelationalExpressions.xml" />
+        <assembly location=".\dll\NI.Vfs.dll" documentation=".\dll\NI.Vfs.xml" />
+        <assembly location=".\dll\NI.Winter.dll" documentation=".\dll\NI.Winter.xml" />
+    </assemblies>
+    <documenters>
+        <documenter name="JavaDoc">
+            <property name="OutputDirectory" value=".\doc\" />
+        </documenter>
+        <documenter name="LaTeX">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="TextFileFullName" value="Documentation.tex" />
+            <property name="TexFileBaseName" value="Documentation" />
+            <property name="LatexCompiler" value="latex" />
+            <property name="TexFileFullPath" value=".\doc\Documentation.tex" />
+        </documenter>
+        <documenter name="LinearHtml">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="Title" value="An NDoc Documented Class Library" />
+        </documenter>
+        <documenter name="MSDN">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="HtmlHelpName" value="Documentation" />
+            <property name="Title" value="An NDoc Documented Class Library" />
+            <property name="CopyrightText" value="NewtonIdeas" />
+            <property name="CopyrightHref" value="http://www.newtonideas.com" />
+            <property name="UseNamespaceDocSummaries" value="True" />
+        </documenter>
+        <documenter name="MSDN 2003">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="Title" value="An NDoc Documented Class Library" />
+        </documenter>
+        <documenter name="VS.NET 2003">
+            <property name="OutputDirectory" value=".\doc\" />
+            <property name="HtmlHelpName" value="Documentation" />
+            <property name="Title" value="An NDoc documented library" />
+        </documenter>
+        <documenter name="XML">
+            <property name="OutputFile" value=".\doc\doc.xml" />
+        </documenter>
+    </documenters>
+</project>
