@@ -71,6 +71,12 @@ namespace NI.Examples.Winter
                     )
                 );
 
+            Console.WriteLine(
+                String.Format(
+                        "[Service] name: {0}, {1}", "appName", srv.GetService("appName")
+                    )
+                );
+
             Console.ReadLine();
         }
     }
