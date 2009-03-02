@@ -22,17 +22,27 @@ using NI.Common.Providers;
 
 namespace NI.Data.RelationalExpressions {
 	
+	/// <summary>
+	/// Relex string builder from object model.
+	/// </summary>
 	public class RelexBuilder : IStringProvider, IObjectProvider {
 		
 		public string BuildRelex(IQueryNode node) {
 			InternalBuilder builder = new InternalBuilder();
 			return builder.BuildExpression(node);
 		}
+
+        public string BuildRelex(IQuery node) {
+            InternalBuilder builder = new InternalBuilder();
+            return builder.BuildQueryString(node, false);
+        }
 		
 		public string GetString(object context) {
-			if (!(context is IQueryNode))
-				throw new Exception("Expected IQueryNode object");
-			return BuildRelex( (IQueryNode)context );
+			if (context is IQueryNode)
+				return BuildRelex( (IQueryNode)context );
+			if (context is IQuery)
+				return BuildRelex((IQuery)context);
+			throw new ArgumentException("Unsupported context type");
 		}
 
 		public object GetObject(object context) {
