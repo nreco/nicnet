@@ -116,6 +116,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChainQueryModifier.cs" />
+    <Compile Include="DbDalcRowTrigger.cs" />
     <Compile Include="DataSetProvider.cs" />
     <Compile Include="DataSetXmlProvider.cs" />
     <Compile Include="DalcDataSetProvider.cs">
@@ -152,6 +153,7 @@
     <Compile Include="DbDalcTransaction.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BaseDbDalcRowTrigger.cs" />
     <Compile Include="DbDataView.cs">
       <SubType>Code</SubType>
     </Compile>
