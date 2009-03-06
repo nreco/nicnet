@@ -88,7 +88,7 @@ namespace NI.Winter
 			serviceInstanceByName = new Hashtable();
 			serviceNameByInstance = new Hashtable();
 			serviceInstanceByType = new Hashtable();
-			services = new ArrayList();
+			services = new ArrayList(1000);
 			ValueFactory = new LocalValueFactory(this); // default value factory
 		}
 		
@@ -313,8 +313,9 @@ namespace NI.Winter
 					throw new MissingMethodException( componentInfo.ComponentType.ToString(), "constructor" );
 
 				// fill properties
-				foreach (IPropertyInitInfo propertyInitInfo in componentInfo.Properties) {
+				for (int i=0; i<componentInfo.Properties.Length; i++) {
 					// find property
+					IPropertyInitInfo propertyInitInfo = componentInfo.Properties[i];
 					try {
 						SetObjectProperty(componentInfo.ComponentType, instance, propertyInitInfo.Name, factory, propertyInitInfo.Value);
 					} catch(Exception e) {
