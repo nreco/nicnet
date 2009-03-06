@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Xml;
 using System.Collections;
+using System.Reflection.Emit;
 
 using NI.Common;
 using NI.Common.Providers;
@@ -47,14 +48,22 @@ namespace NI.Winter
 		Hashtable serviceNameByInstance;
 		Hashtable serviceInstanceByType;
 		bool _CountersEnabled = false;
+		bool _ReflectionCacheEnabled = false;
 		CountersData counters = new CountersData();
 		IValueFactory _ValueFactory;
 		static IComparer constructorInfoComparer = new ConstructorInfoComparer();
-
+		static Hashtable propertyInfoCache = new Hashtable();
+		static Hashtable constructorInfoCache = new Hashtable();
+		
 		public bool CountersEnabled {
 			get { return _CountersEnabled; }
 			set { _CountersEnabled = value; }
 		}
+
+		public bool ReflectionCacheEnabled {
+			get { return _ReflectionCacheEnabled; }
+			set { _ReflectionCacheEnabled = value; }
+		}		
 		
 		public IValueFactory ValueFactory {
 			get { return _ValueFactory; }
@@ -265,34 +274,38 @@ namespace NI.Winter
 				
 				IValueFactory factory = ValueFactory;
 				
-				// find appropriate constructor and create instance
-				ConstructorInfo[] constructors = componentInfo.ComponentType.GetConstructors();
-				// order is important only if at least one argument is present
-				if (constructors.Length>0 && componentInfo.ConstructorArgs!=null && componentInfo.ConstructorArgs.Length>0)
-					Array.Sort(constructors, constructorInfoComparer);
+				if (componentInfo.ConstructorArgs==null || componentInfo.ConstructorArgs.Length==0) {
+					instance = CreateObjectInstance(componentInfo.ComponentType);
+				} else {
+					// find appropriate constructor and create instance
+					ConstructorInfo[] constructors = componentInfo.ComponentType.GetConstructors();
+					// order is important only if at least one argument is present
+					if (constructors.Length>0 && componentInfo.ConstructorArgs!=null && componentInfo.ConstructorArgs.Length>0)
+						Array.Sort(constructors, constructorInfoComparer);
 
-				foreach (ConstructorInfo constructor in constructors) {
-					ParameterInfo[] args = constructor.GetParameters();
-					// it should be always 'not null'. But lets ensure.
-					if (args == null)
-						throw new NullReferenceException("ConstructorInfo.GetParameters returns null for type = " + componentInfo.ComponentType.ToString() );
-					if (componentInfo.ConstructorArgs == null)
-						throw new NullReferenceException("IComponentInitInfo.ConstructorArgs is null for type = " + componentInfo.ComponentType.ToString());
-					
-					if (args.Length!=componentInfo.ConstructorArgs.Length) continue;
-					
-					// compose constructor arguments
-					object[] constructorArgs = new object[componentInfo.ConstructorArgs.Length];
-					try {
-						for (int i=0; i<constructorArgs.Length; i++)
-							constructorArgs[i] = componentInfo.ConstructorArgs[i].GetInstance(factory, args[i].ParameterType );
-					} catch {
-						// try next constructor ...
-						continue;
+					foreach (ConstructorInfo constructor in constructors) {
+						ParameterInfo[] args = constructor.GetParameters();
+						// it should be always 'not null'. But lets ensure.
+						if (args == null)
+							throw new NullReferenceException("ConstructorInfo.GetParameters returns null for type = " + componentInfo.ComponentType.ToString() );
+						if (componentInfo.ConstructorArgs == null)
+							throw new NullReferenceException("IComponentInitInfo.ConstructorArgs is null for type = " + componentInfo.ComponentType.ToString());
+						
+						if (args.Length!=componentInfo.ConstructorArgs.Length) continue;
+						
+						// compose constructor arguments
+						object[] constructorArgs = new object[componentInfo.ConstructorArgs.Length];
+						try {
+							for (int i=0; i<constructorArgs.Length; i++)
+								constructorArgs[i] = componentInfo.ConstructorArgs[i].GetInstance(factory, args[i].ParameterType );
+						} catch {
+							// try next constructor ...
+							continue;
+						}
+						
+						instance = Activator.CreateInstance( componentInfo.ComponentType, constructorArgs );
+						break;
 					}
-					
-					instance = Activator.CreateInstance( componentInfo.ComponentType, constructorArgs );
-					break;
 				}
 				
 				// instance created ?
@@ -303,11 +316,7 @@ namespace NI.Winter
 				foreach (IPropertyInitInfo propertyInitInfo in componentInfo.Properties) {
 					// find property
 					try {
-						System.Reflection.PropertyInfo propInfo = componentInfo.ComponentType.GetProperty( propertyInitInfo.Name );
-						if (propInfo==null) 
-							throw new MissingMethodException( componentInfo.ComponentType.ToString(), propertyInitInfo.Name );
-						object value = propertyInitInfo.Value.GetInstance(factory, propInfo.PropertyType );
-						propInfo.SetValue( instance, value, null ); 
+						SetObjectProperty(componentInfo.ComponentType, instance, propertyInitInfo.Name, factory, propertyInitInfo.Value);
 					} catch(Exception e) {
 						throw new Exception(string.Format("Cannot initialize component property: {1}.{0}", propertyInitInfo.Name,componentInfo.Name),e);
 					}
@@ -423,7 +432,100 @@ namespace NI.Winter
 				return String.Format("GetInstance={0} CreateInstance={1}",GetInstance,CreateInstance);
 			}
 		}
+		
+		internal void SetObjectProperty(Type t, object o, string propName, IValueFactory factory, IValueInitInfo valueInfo) {
+			if (ReflectionCacheEnabled) {
+				ReflectionPropertyCacheKey cacheKey = new ReflectionPropertyCacheKey(t, propName);
+				ReflectionPropertyCacheValue cacheValue = propertyInfoCache[cacheKey] as ReflectionPropertyCacheValue;
+				if (cacheValue == null) {
+					System.Reflection.PropertyInfo propInfo = t.GetProperty(propName);
+					if (propInfo == null)
+						throw new MissingMethodException(t.ToString(), propName);
+					MethodInfo setMethodInfo = propInfo.GetSetMethod(false);
 
+					DynamicMethod setDynMethod = new DynamicMethod(String.Empty, typeof(void),	new Type[] { typeof(object), typeof(object) }, t, true);
+					ILGenerator setGenerator = setDynMethod.GetILGenerator();
+					setGenerator.Emit(OpCodes.Ldarg_0);
+					setGenerator.Emit(OpCodes.Ldarg_1);
+					if (setMethodInfo.GetParameters()[0].ParameterType.IsValueType)
+						setGenerator.Emit(OpCodes.Unbox_Any, setMethodInfo.GetParameters()[0].ParameterType);
+					setGenerator.Emit(OpCodes.Call, setMethodInfo );
+					setGenerator.Emit(OpCodes.Ret);
+
+					cacheValue = new ReflectionPropertyCacheValue(
+										(PropertySetHandler)setDynMethod.CreateDelegate(typeof(PropertySetHandler)),
+										propInfo.PropertyType);
+					propertyInfoCache[cacheKey] = cacheValue;
+				}
+				object value = valueInfo.GetInstance( factory, cacheValue.PropertyType);
+				cacheValue.SetHandler(o, value);
+			} else {
+				System.Reflection.PropertyInfo propInfo = t.GetProperty(propName);
+				if (propInfo == null)
+					throw new MissingMethodException(t.ToString(), propName);
+				propInfo.SetValue(o, valueInfo.GetInstance( factory, propInfo.PropertyType), null);
+			}
+			
+		}
+		
+		internal object CreateObjectInstance(Type t) {
+			if (ReflectionCacheEnabled) {
+				CreateObjectHandler createHandler = constructorInfoCache[t] as CreateObjectHandler;
+				if (createHandler==null) {
+					ConstructorInfo constructorInfo = t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
+					if (constructorInfo==null)
+						throw new MissingMemberException(t.FullName, "constructor");
+					DynamicMethod dynamicMethod = new DynamicMethod(String.Empty,
+								MethodAttributes.Static | MethodAttributes.Public, 
+								CallingConventions.Standard, typeof(object), null, t, true);
+					ILGenerator generator = dynamicMethod.GetILGenerator();
+					generator.Emit(OpCodes.Newobj, constructorInfo);
+					generator.Emit(OpCodes.Ret);
+					createHandler = (CreateObjectHandler)dynamicMethod.CreateDelegate(typeof(CreateObjectHandler));					
+					constructorInfoCache[t] = createHandler;
+				}
+				return createHandler();
+			} else {
+				return Activator.CreateInstance(t, false);
+			}
+		}
+		
+		internal delegate void PropertySetHandler(object source, object value);
+		internal delegate object CreateObjectHandler();
+		
+		internal struct ReflectionPropertyCacheKey {
+			Type t;
+			string propName;
+			int hashCode;
+
+			public ReflectionPropertyCacheKey(Type t, string propName) {
+				this.t = t;
+				this.propName = propName;
+				hashCode = (t.AssemblyQualifiedName+propName).GetHashCode();
+			}
+
+			public override int GetHashCode() {
+				return hashCode;
+			}
+			
+			public override bool Equals(object obj) {
+ 				if (obj is ReflectionPropertyCacheKey) {
+ 					ReflectionPropertyCacheKey k = (ReflectionPropertyCacheKey)obj;
+ 					return k.t==t && k.propName==propName;
+ 				}
+ 				return base.Equals(obj);
+			}
+		}
+		internal class ReflectionPropertyCacheValue {
+			internal PropertySetHandler SetHandler;
+			internal Type PropertyType;
+			
+			public ReflectionPropertyCacheValue(PropertySetHandler hdlr, Type propType) {
+				SetHandler = hdlr;
+				PropertyType = propType;
+			}
+		}
+		
 
 	}
 }
