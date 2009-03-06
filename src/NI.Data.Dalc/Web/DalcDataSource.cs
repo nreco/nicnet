@@ -123,17 +123,69 @@ namespace NI.Data.Dalc.Web {
 	public delegate void DalcDataSourceSaveEventHandler(object sender, DalcDataSourceSaveEventArgs e);
 
 	public class DalcDataSourceSaveEventArgs {
-		public string SourceName { get; set; }
-		public IDictionary OldValues { get; set; }
-		public IDictionary Values { get; set; }
-		public IDictionary Keys { get; set; }
-		public int AffectedCount { get; internal set; }
+		string _SourceName;
+		IDictionary _OldValues;
+		IDictionary _Values;
+		IDictionary _Keys;
+		int _AffectedCount;
+
+		public string SourceName {
+			get { return _SourceName; }
+			set { _SourceName = value; }
+		}
+
+		public IDictionary OldValues {
+			get { return _OldValues; }
+			set { _OldValues = value; }
+		}
+
+		public IDictionary Values {
+			get { return _Values; }
+			set { _Values = value; } 
+		}
+
+		public IDictionary Keys {
+			get { return _Keys; }
+			set { _Keys = value; }
+		}
+		public int AffectedCount {
+			get { return _AffectedCount; }
+			internal set { _AffectedCount = value; }
+		}
+
+		public DalcDataSourceSaveEventArgs(string sourcename, IDictionary keys, IDictionary oldValues, IDictionary newValues) {
+			SourceName = sourcename;
+			Keys = keys;
+			OldValues = oldValues;
+			Values = newValues;
+		}
 	}
 
 	public class DalcDataSourceSelectEventArgs {
-		public Query SelectQuery { get; set; }
-		public DataSet Data { get; set; }
-		public DataSourceSelectArguments SelectArgs { get; set; }
+		Query _SelectQuery;
+		DataSet _Data;
+		DataSourceSelectArguments _SelectArgs;
+
+		public Query SelectQuery {
+			get { return _SelectQuery; }
+			set { _SelectQuery = value; }
+		}
+		
+		public DataSet Data {
+			get { return _Data; }
+			set { _Data = value; }
+		}
+
+		public DataSourceSelectArguments SelectArgs {
+			get { return _SelectArgs; }
+			set { _SelectArgs = value; } 
+		}
+
+		public DalcDataSourceSelectEventArgs(Query q, DataSourceSelectArguments args, DataSet ds) {
+			SelectQuery = q;
+			SelectArgs = args;
+			Data = ds;
+		}
 	}
 
 

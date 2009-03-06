@@ -42,7 +42,7 @@ namespace NI.Data.Dalc.Web {
 				q.Sort = arguments.SortExpression.Split(',');
 			DataSet ds = new DataSet();
 
-			var eArgs = new DalcDataSourceSelectEventArgs { SelectQuery = q, SelectArgs = arguments, Data = ds };
+			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, arguments, ds);
 			// raise event
 			DataSource.OnSelecting(this, eArgs);
 
@@ -61,14 +61,14 @@ namespace NI.Data.Dalc.Web {
 
 		protected IQueryNode ComposeUidCondition(IDictionary keys) {
 			// compose UID condition
-			var uidGroup = new QueryGroupNode(GroupType.And);
+			QueryGroupNode uidGroup = new QueryGroupNode(GroupType.And);
 			foreach (DictionaryEntry key in keys)
 				uidGroup.Nodes.Add(new QField(key.Key.ToString()) == new QConst(key.Value));
 			return uidGroup;
 		}
 
 		protected override int ExecuteInsert(IDictionary values) {
-			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name };
+			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, null, null, values);
 			DataSource.OnInserting(this, eArgs);
 			if (DataSource.DataSetMode) {
 				DataSet ds = new DataSet();
@@ -106,9 +106,9 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
-			var eArgs = new DalcDataSourceSaveEventArgs { Values = values, SourceName = Name, OldValues = oldValues, Keys = keys };
+			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, values);
 			DataSource.OnUpdating(this, eArgs);
-			var uidCondition = ComposeUidCondition(keys);
+			IQueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = new DataSet();
 				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
@@ -129,9 +129,9 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
-			var eArgs = new DalcDataSourceSaveEventArgs { SourceName = Name, OldValues = oldValues, Keys = keys };
+			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, oldValues);
 			DataSource.OnDeleting(this, eArgs);
-			var uidCondition = ComposeUidCondition(keys);
+			IQueryNode uidCondition = ComposeUidCondition(keys);
 
 			if (DataSource.DataSetMode) {
 				DataSet ds = new DataSet();
