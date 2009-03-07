@@ -55,11 +55,22 @@ namespace NI.Winter
 		static Hashtable propertyInfoCache = new Hashtable();
 		static Hashtable constructorInfoCache = new Hashtable();
 		
+		/// <summary>
+		/// Get of set flag that determines whether 
+		/// service provider should collect stats counters.
+		/// </summary>
+		/// <remarks>Counters are disabled by default.</remarks>
 		public bool CountersEnabled {
 			get { return _CountersEnabled; }
 			set { _CountersEnabled = value; }
 		}
 
+		/// <summary>
+		/// Get or set flag that determines whether service provider
+		/// should use internal cache during reflections calls.
+		/// </summary>
+		/// <remarks>When enabled reflection calls are cached using 
+		/// dynamic delegates.</remarks>
 		public bool ReflectionCacheEnabled {
 			get { return _ReflectionCacheEnabled; }
 			set { _ReflectionCacheEnabled = value; }
@@ -88,7 +99,7 @@ namespace NI.Winter
 			serviceInstanceByName = new Hashtable();
 			serviceNameByInstance = new Hashtable();
 			serviceInstanceByType = new Hashtable();
-			services = new ArrayList(1000);
+			services = new ArrayList();
 			ValueFactory = new LocalValueFactory(this); // default value factory
 		}
 		
@@ -154,7 +165,7 @@ namespace NI.Winter
 			serviceInstanceByName.Clear();
 			services.Clear();
 			serviceNameByInstance.Clear();
-	
+			
 			// initialize non-lazy components
 			foreach (IComponentInitInfo cInfo in Config) 
 				if (!cInfo.LazyInit)
