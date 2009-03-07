@@ -45,11 +45,10 @@ namespace NI.Data.Dalc {
 		public DbDalcRowTrigger(string sourceName) : base(sourceName) {
 		}
 
-		protected override void Execute(EventType eventType, DataRow r, int recordsAffected) {
+		protected override void Execute(EventType eventType, DataRow r) {
 			ListDictionary context = new ListDictionary();
 			context["event"] = eventType;
 			context["row"] = r;
-			context["records_affected"] = recordsAffected;
 			Operation.Execute(context);
 		}
 
