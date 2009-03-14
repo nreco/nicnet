@@ -22,7 +22,7 @@ namespace NI.Winter {
 	/// Value Info for map
 	/// </summary>
 	public class MapValueInitInfo : IValueInitInfo {
-		MapEntryInfo[] Values;
+		public MapEntryInfo[] Values;
 		bool isOnlyConstValues = false;
 		ConstDictionary cachedConstDictionary = null;
 		

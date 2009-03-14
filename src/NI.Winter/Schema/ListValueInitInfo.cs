@@ -22,7 +22,7 @@ namespace NI.Winter
 	/// </summary>
 	public class ListValueInitInfo : IValueInitInfo
 	{
-		IValueInitInfo[] Values;
+		public IValueInitInfo[] Values;
 		bool isOnlyConstValues = false;
 		IDictionary cachedTypedArrays = null;
 		
