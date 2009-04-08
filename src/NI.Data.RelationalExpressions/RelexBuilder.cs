@@ -22,9 +22,6 @@ using NI.Common.Providers;
 
 namespace NI.Data.RelationalExpressions {
 	
-	/// <summary>
-	/// Relex string builder from object model.
-	/// </summary>
 	public class RelexBuilder : IStringProvider, IObjectProvider {
 		
 		public string BuildRelex(IQueryNode node) {
@@ -38,11 +35,9 @@ namespace NI.Data.RelationalExpressions {
         }
 		
 		public string GetString(object context) {
-			if (context is IQueryNode)
-				return BuildRelex( (IQueryNode)context );
-			if (context is IQuery)
-				return BuildRelex((IQuery)context);
-			throw new ArgumentException("Unsupported context type");
+			if (!(context is IQueryNode))
+				throw new Exception("Expected IQueryNode object");
+			return BuildRelex( (IQueryNode)context );
 		}
 
 		public object GetObject(object context) {
@@ -101,6 +96,8 @@ namespace NI.Data.RelationalExpressions {
 			protected override string BuildValue(IQueryValue value) {
 				if (value is IQuery)
 					return BuildQueryString((IQuery)value, true);
+				if (value is IQueryRawValue) 
+					return BuildValue( ((IQueryRawValue)value).Value )+":sql";
 				return base.BuildValue(value);
 			}
 
@@ -121,7 +118,7 @@ namespace NI.Data.RelationalExpressions {
 				return BuildValue( Convert.ToString(constValue, CultureInfo.InvariantCulture ) ) + typeSuffix;
 			}
 
-			protected virtual string BuildValue(IList list) {
+			protected override string BuildValue(IList list) {
 				string[] paramNames = new string[list.Count];
 				// in relexes only supported arrays that can be represented as comma-delimeted string 
 				for (int i = 0; i < list.Count; i++)

@@ -24,7 +24,7 @@ namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// </summary>
-	public class RelExQueryParser : IRelExQueryParser
+	public class RelExQueryParser : IRelExQueryParser, IRelExQueryNodeParser
 	{
 		static readonly string[] nameGroups = new string[] { "and", "or"};
 		static readonly string[] delimiterGroups = new string[] { "&&", "||"};
@@ -188,7 +188,7 @@ namespace NI.Data.RelationalExpressions
 		
 		protected void GetAllDelimiters(string s, int startIdx, out int endIdx) {
 			endIdx = startIdx;
-			while (Array.IndexOf(delimiters, s[endIdx])>=0 && (endIdx+1)<s.Length )
+			while ((endIdx+1)<s.Length && Array.IndexOf(delimiters, s[endIdx])>=0 )
 				endIdx++;
 		}
 		
@@ -260,6 +260,19 @@ namespace NI.Data.RelationalExpressions
 				q = QueryModifier.Modify(q);
 			return q;
 		}
+		
+		public virtual IQueryNode ParseCondition(string relExCondition) {
+			int endIdx;
+			if (String.IsNullOrEmpty(relExCondition))
+				return null;
+			IQueryNode node = ParseConditionGroup(relExCondition, 0, out endIdx);
+			return node;
+		}
+
+		IQueryNode IRelExQueryNodeParser.Parse(string relExCondition) {
+			return ParseCondition(relExCondition);
+		}
+		
 		
 		protected virtual IQueryValue ParseTypedConstant(string typeCodeString, string constant) {
 			typeCodeString = typeCodeString.ToLower();
@@ -565,32 +578,6 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 
-		/// <summary>
-		/// Parse [conditions] from string representation
-		/// </summary>
-		/// <remarks>
-		/// TODO: implement normal recursive parsing instead very simplified procedure
-		/// </remarks>
-		/*protected virtual IQueryNode ParseGroup(string input, int startIdx, out int endIdx) {
-			int condEndIdx;
-			IQueryNode cond = ParseCondition(input, startIdx, out condEndIdx);
-			
-			Match match = GroupRegEx.Match( input, condEndIdx );
-			if (!match.Success || match.Index!=condEndIdx) {
-				endIdx = condEndIdx;
-				return cond;
-			}
-			
-			QueryGroupNode groupNode = new QueryGroupNode( enumGroups[ Array.IndexOf(strGroups, match.Groups["group"].Value) ] );
-			groupNode.Nodes.Add( cond );
-			groupNode.Nodes.Add( ParseGroup(input, match.Groups["tail"].Index, out endIdx) );
-			return groupNode;
-		}*/
-		
-		
-		
-		
-		
 	}
 }
 
