@@ -27,6 +27,7 @@ namespace NI.Data.Dalc.Web {
 
 	public class DalcDataSource : DataSourceControl {
 		string _SourceName;
+		string _SelectSourceName = null;
 		IDalc _Dalc;
 		IQueryNode _Condition = null;
 		bool _DataSetMode = false;
@@ -59,9 +60,20 @@ namespace NI.Data.Dalc.Web {
 			set { _DataKeyNames = value; }
 		}
 
+		/// <summary>
+		/// Get or set sourcename for this datasource.
+		/// </summary>
 		public string SourceName {
 			get { return _SourceName; }
 			set { _SourceName = value; }
+		}
+
+		/// <summary>
+		/// Get or set sourcename for select action.
+		/// </summary>
+		public string SelectSourceName {
+			get { return _SelectSourceName == null ? SourceName : _SelectSourceName; }
+			set { _SelectSourceName = value; }
 		}
 
 		public IDalc Dalc {

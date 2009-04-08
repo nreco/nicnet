@@ -36,7 +36,7 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
-			Query q = new Query(Name);
+			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
 			q.Root = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
 				q.Sort = arguments.SortExpression.Split(',');
