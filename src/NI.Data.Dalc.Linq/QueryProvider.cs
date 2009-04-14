@@ -287,12 +287,19 @@ namespace NI.Data.Dalc.Linq
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;
 				if (methodExpr.Method.Name == "get_Item") {
 					if (methodExpr.Arguments.Count == 1 && 
-						methodExpr.Arguments[0] is ConstantExpression &&
 						methodExpr.Object is ParameterExpression) {
-						ConstantExpression fldNameExpr = (ConstantExpression)methodExpr.Arguments[0];
+
+						string fldName;
+						if (methodExpr.Arguments[0] is ConstantExpression) {
+							var fldNameExpr = (ConstantExpression)methodExpr.Arguments[0];
+							fldName = fldNameExpr.Value.ToString();
+						} else {
+							var fldNameLambda = Expression.Lambda(methodExpr.Arguments[0]);
+							fldName = (string)fldNameLambda.Compile().DynamicInvoke(null);
+						}
+
 						// lets extract prefix
 						ParameterExpression paramExpr = (ParameterExpression)methodExpr.Object;
-						string fldName = fldNameExpr.Value.ToString();
 						if (fldName.IndexOf('(') < 0) // not function - tmp hack! TODO fix aliases
 							fldName = paramExpr.Name + "." + fldName;
 						return new QField(fldName);
