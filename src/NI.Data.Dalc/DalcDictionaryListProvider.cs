@@ -14,8 +14,8 @@
 
 using System;
 using System.Collections;
-using NI.Common.Data;
 using NI.Common.Providers;
+using NI.Common.Collections;
 
 namespace NI.Data.Dalc
 {
@@ -38,7 +38,7 @@ namespace NI.Data.Dalc
 		}
 
 		protected override object PrepareObject(System.Data.DataRow row, string[] fields) {
-			return DataRowConverter.ConvertToDictionary(row);
+			return new DataRowDictionary(row);
 		}
 		
 		protected override object PrepareObject(IDictionary row, string[] fields) {

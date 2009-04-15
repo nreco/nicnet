@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<namespaces>
+	<namespace name="NI.Common">
+		NI Commons library.
+	</namespace>
+	<namespace name="NI.Common.Caching">
+		The <see cref="NI.Common.Caching"/> namespace provides classes and interfaces that are used to organize generic data caching.
+	</namespace>
+	<namespace name="NI.Common.Expressions">
+		The NI.Common.Caching namespace provides classes and interfaces that are used to perform evaluation of abstract expressions. 
+		Expression is a something that should be evaluated at run time in some context.
+		Core interface in this namespace is <see cref="IExpressionResolver"/> - it specifies a way how context and expression passed to resolver.
+	</namespace>
+	<namespace name="NI.Common.Collections">
+		The <see cref="NI.Common.Caching"/> namespace contains interfaces and classes that define various collections of objects that for some reason are not included in System.Collections namespace.
+	</namespace>
+
+</namespaces>

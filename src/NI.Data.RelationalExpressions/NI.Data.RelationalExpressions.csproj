@@ -89,10 +89,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NI.Common, Version=1.0.3258.22841, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NI.Common.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -102,6 +98,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <ProjectReference Include="..\NI.Common\NI.Common.csproj">
+      <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
+      <Name>NI.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NI.Data.Dalc\NI.Data.Dalc.csproj">
       <Name>NI.Data.Dalc</Name>
       <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
@@ -113,7 +113,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CachedRelationalExprResolver.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="RelExQueryNodeParser.cs" />
     <Compile Include="Interfaces\IRelExQueryNodeParser.cs" />
@@ -122,7 +121,6 @@
     </Compile>
     <Compile Include="ObjectRelexConditionExprResolver.cs" />
     <Compile Include="RelationalExprResolver.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="RelexBuilder.cs" />
     <Compile Include="RelExQueryNodeProvider.cs">

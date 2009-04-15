@@ -1,0 +1,307 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{18403EE8-1014-45C2-9594-E4C5417F013B}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>NI.Common</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NI.Common</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <SignAssembly>false</SignAssembly>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <PublishUrl>http://localhost/NI.Common/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DocumentationFile>NI.Common.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>NI.Common.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BinarySerializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Caching\Cache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Caching\CompositeCacheEntryValidator.cs" />
+    <Compile Include="Caching\CompositeCacheEntryValidatorProvider.cs" />
+    <Compile Include="Caching\ICache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Caching\ICacheEntryValidator.cs" />
+    <Compile Include="Caching\ICacheEntryValidatorProvider.cs" />
+    <Compile Include="Caching\PrefixCacheWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Caching\RegulatedCacheWrapper.cs" />
+    <Compile Include="Caching\UniqueCacheKeyProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\CompositeDictionary.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\ConstDictionary.cs" />
+    <Compile Include="Collections\DataRowDictionary.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Component.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DependencyAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DependencyResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DiffProcessor.cs">
+    </Compile>
+    <Compile Include="Expressions\CacheExprResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Expressions\ComponentExprResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Expressions\ResourceExprResolver.cs" />
+    <Compile Include="Expressions\DataBindExprResolver.cs" />
+    <Compile Include="Expressions\ExpressionDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Expressions\IExpressionDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Expressions\IExpressionResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Expressions\IsInRoleExprResolver.cs">
+    </Compile>
+    <Compile Include="Expressions\TemplateExprParserResolver.cs">
+    </Compile>
+    <Compile Include="Expressions\VariableExprResolver.cs">
+    </Compile>
+    <Compile Include="Expressions\XmlEncodeExprResolver.cs" />
+    <Compile Include="Globalization\AdjustTimeZoneProvider.cs" />
+    <Compile Include="Globalization\CacheResourceProvider.cs" />
+    <Compile Include="Globalization\CompositeResourceProvider.cs" />
+    <Compile Include="Globalization\FormatTimeZoneProvider.cs" />
+    <Compile Include="Globalization\IResourceProvider.cs" />
+    <Compile Include="Globalization\LocalTimezoneOffsetProvider.cs" />
+    <Compile Include="Globalization\NumberFormPrefixProvider.cs" />
+    <Compile Include="Globalization\ResourceProvider.cs" />
+    <Compile Include="Globalization\ResourceStringFormatter.cs" />
+    <Compile Include="Globalization\SetThreadCultureFromProviderOperation.cs" />
+    <Compile Include="Globalization\SetThreadCultureOperation.cs" />
+    <Compile Include="IBinarySerializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IDependencyResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IDiffHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="INamedServiceProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IndexerProxy.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IO\FilterStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IO\PushbackStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IO\ReadByteStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IStringSerializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Operations\IOperation.cs" />
+    <Compile Include="OperatorHelper.cs" />
+    <Compile Include="Providers\CacheObjectProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\CompositeBooleanProvider.cs" />
+    <Compile Include="Providers\CompareBooleanProvider.cs" />
+    <Compile Include="Providers\ConstObjectProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\ContextDictionaryProvider.cs" />
+    <Compile Include="Providers\IBooleanProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IDateTimeProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IDecimalProvider.cs" />
+    <Compile Include="Providers\IDictionaryListProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IDictionaryProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IObjectListProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IObjectProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IPrincipalProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IStringListProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\IStringProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Providers\LazyObjectProvider.cs" />
+    <Compile Include="StackTraceHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StringSerializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transaction\FlatTransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transaction\ITransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transaction\ITransactionEventsMediator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transaction\TransactionEventsMediator.cs">
+    </Compile>
+    <Compile Include="Transaction\TransactionManager.cs">
+    </Compile>
+    <Compile Include="Xml\CacheModifyXmlDocumentHandler.cs" />
+    <Compile Include="Xml\IModifyXmlDocumentHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Xml\XmlDocumentLoader.cs">
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Summary.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

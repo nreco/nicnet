@@ -53,10 +53,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Microsoft.AnalysisServices.AdomdClient.dll</HintPath>
     </Reference>
-    <Reference Include="NI.Common, Version=1.0.3258.22841, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NI.Common.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -70,6 +66,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NI.Common\NI.Common.csproj">
+      <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
+      <Name>NI.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NI.Data.Dalc\NI.Data.Dalc.csproj">
       <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
       <Name>NI.Data.Dalc</Name>

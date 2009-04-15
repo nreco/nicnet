@@ -23,7 +23,6 @@ using System.Text;
 
 using NI.Common;
 using NI.Common.Xml;
-using NI.Common.Text;
 
 namespace NI.Winter
 {
