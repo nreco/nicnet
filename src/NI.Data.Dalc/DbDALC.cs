@@ -286,7 +286,7 @@ namespace NI.Data.Dalc {
                     }
                 }
 			}
-			throw new Exception(); //TODO: add structured exception here
+			throw new Exception( "Count is not supported for sourcename="+sourceName); //TODO: add structured exception here
 		}
 		
 		
