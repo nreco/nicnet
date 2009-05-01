@@ -31,6 +31,7 @@ namespace NI.Data.Dalc.Web {
 		IDalc _Dalc;
 		IQueryNode _Condition = null;
 		bool _DataSetMode = false;
+		bool _InsertMode = false;
 		string[] _AutoIncrementNames = null;
 		string[] _DataKeyNames = null;
 		IDataSetProvider _DataSetProvider = null;
@@ -51,6 +52,15 @@ namespace NI.Data.Dalc.Web {
 			get { return _DataSetMode; }
 			set { _DataSetMode = value; }
 		}
+
+		/// <summary>
+		/// Determines whether datasource should return one new row if no records found (false by default).
+		/// </summary>
+		public bool InsertMode {
+			get { return _InsertMode; }
+			set { _InsertMode = value; }
+		}
+
 
 		/// <summary>
 		/// Get or set list of autoincrement field names (optional).

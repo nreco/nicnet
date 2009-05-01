@@ -68,6 +68,10 @@ namespace NI.Data.Dalc.Web {
 			DataSource.Dalc.Load(ds, q);
 			// raise event
 			DataSource.OnSelected(this, eArgs);
+
+			if (ds.Tables[q.SourceName].Rows.Count == 0 && DataSource.InsertMode)
+				ds.Tables[q.SourceName].Rows.Add(ds.Tables[q.SourceName].NewRow());
+			
 			return ds.Tables[q.SourceName].DefaultView;
 		}
 
