@@ -23,6 +23,9 @@ using NI.Data.Dalc;
 
 namespace NI.Data.Dalc.Web {
 	
+	/// <summary>
+	/// DALC DataSource view.
+	/// </summary>
 	public class DalcDataSourceView : DataSourceView {
 		
 		DalcDataSource _DataSource;
@@ -35,12 +38,21 @@ namespace NI.Data.Dalc.Web {
 			DataSource = owner;
 		}
 
+		protected virtual DataSet GetDataSet() {
+			if (DataSource.DataSetProvider != null) {
+				DataSet ds = DataSource.DataSetProvider.GetDataSet(Name);
+				if (ds != null)
+					return ds;
+			}
+			return new DataSet();
+		}
+
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
 			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
 			q.Root = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
 				q.Sort = arguments.SortExpression.Split(',');
-			DataSet ds = new DataSet();
+			DataSet ds = GetDataSet();
 
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, arguments, ds);
 			// raise event
@@ -71,8 +83,10 @@ namespace NI.Data.Dalc.Web {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, null, null, values);
 			DataSource.OnInserting(this, eArgs);
 			if (DataSource.DataSetMode) {
-				DataSet ds = new DataSet();
-				DataSource.Dalc.Load(ds, new Query(Name, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
+				DataSet ds = GetDataSet();
+				// if schema is unknown, lets try to load from datasource
+				if (!ds.Tables.Contains(Name))
+					DataSource.Dalc.Load(ds, new Query(Name, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
 				DataTable tbl = ds.Tables[Name];
 				EnsureDataSchema(tbl);
 				
@@ -83,9 +97,9 @@ namespace NI.Data.Dalc.Web {
 				tbl.Rows.Add(r);
 				DataSource.Dalc.Update(ds, Name);
 				// push back autoincrement field
-				if (DataSource.AutoIncrementNames != null)
-					foreach (string autoIncName in DataSource.AutoIncrementNames)
-						values[autoIncName] = r[autoIncName];
+				foreach (DataColumn c in tbl.Columns)
+					if (c.AutoIncrement)
+						values[c.ColumnName] = r[c.ColumnName];
 				
 			} else {
 				DataSource.Dalc.Insert(values, Name);
@@ -95,11 +109,12 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected void EnsureDataSchema(DataTable tbl) {
-			List<DataColumn> pkCols = new List<DataColumn>();
-			if (DataSource.DataKeyNames!=null)
+			if (DataSource.DataKeyNames != null) {
+				List<DataColumn> pkCols = new List<DataColumn>();
 				foreach (string keyName in DataSource.DataKeyNames)
 					pkCols.Add(tbl.Columns[keyName]);
-			tbl.PrimaryKey = pkCols.ToArray();
+				tbl.PrimaryKey = pkCols.ToArray();
+			}
 			if (DataSource.AutoIncrementNames != null)
 				foreach (string autoIncName in DataSource.AutoIncrementNames)
 					tbl.Columns[autoIncName].AutoIncrement = true;
@@ -110,7 +125,7 @@ namespace NI.Data.Dalc.Web {
 			DataSource.OnUpdating(this, eArgs);
 			IQueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
-				DataSet ds = new DataSet();
+				DataSet ds = GetDataSet();
 				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
 				EnsureDataSchema(ds.Tables[Name]);
 
@@ -134,7 +149,7 @@ namespace NI.Data.Dalc.Web {
 			IQueryNode uidCondition = ComposeUidCondition(keys);
 
 			if (DataSource.DataSetMode) {
-				DataSet ds = new DataSet();
+				DataSet ds = GetDataSet();
 				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
 				EnsureDataSchema(ds.Tables[Name]);
 				eArgs.AffectedCount = ds.Tables[Name].Rows.Count;

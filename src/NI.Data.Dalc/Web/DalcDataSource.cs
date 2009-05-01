@@ -33,6 +33,7 @@ namespace NI.Data.Dalc.Web {
 		bool _DataSetMode = false;
 		string[] _AutoIncrementNames = null;
 		string[] _DataKeyNames = null;
+		IDataSetProvider _DataSetProvider = null;
 
 		public event DalcDataSourceSelectEventHandler Selecting;
 		public event DalcDataSourceSelectEventHandler Selected;
@@ -43,17 +44,34 @@ namespace NI.Data.Dalc.Web {
 		public event DalcDataSourceSaveEventHandler Deleting;
 		public event DalcDataSourceSaveEventHandler Deleted;
 
+		/// <summary>
+		/// Determines whether datasource should use DataSet for all operations (false by default).
+		/// </summary>
 		public bool DataSetMode {
 			get { return _DataSetMode; }
 			set { _DataSetMode = value; }
 		}
 
+		/// <summary>
+		/// Get or set list of autoincrement field names (optional).
+		/// </summary>
+		/// <remarks>
+		/// Instead of setting this property DataSetProvider may be used for providing all
+		/// required information about data schema.
+		/// </remarks>
 		[TypeConverterAttribute(typeof(StringArrayConverter))]
 		public string[] AutoIncrementNames {
 			get { return _AutoIncrementNames; }
 			set { _AutoIncrementNames = value; }
 		}
 
+		/// <summary>
+		/// Get or set list of primary key field names (optional).
+		/// </summary>
+		/// <remarks>
+		/// Instead of setting this property DataSetProvider may be used for providing all
+		/// required information about data schema.
+		/// </remarks>
 		[TypeConverterAttribute(typeof(StringArrayConverter))]
 		public string[] DataKeyNames {
 			get { return _DataKeyNames; }
@@ -61,7 +79,7 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		/// <summary>
-		/// Get or set sourcename for this datasource.
+		/// Get or set sourcename for this datasource (required).
 		/// </summary>
 		public string SourceName {
 			get { return _SourceName; }
@@ -69,18 +87,32 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		/// <summary>
-		/// Get or set sourcename for select action.
+		/// Get or set sourcename for select action (optional).
 		/// </summary>
 		public string SelectSourceName {
 			get { return _SelectSourceName == null ? SourceName : _SelectSourceName; }
 			set { _SelectSourceName = value; }
 		}
 
+		/// <summary>
+		/// Get or set DALC instance for this datasource (required).
+		/// </summary>
 		public IDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }
 		}
 
+		/// <summary>
+		/// Get or set DataSet instance provider for specificed sourcename (optional).
+		/// </summary>
+		public IDataSetProvider DataSetProvider {
+			get { return _DataSetProvider; }
+			set { _DataSetProvider = value; }
+		}
+
+		/// <summary>
+		/// Get or set data condition (optional).
+		/// </summary>
 		public IQueryNode Condition {
 			get { return _Condition; }
 			set { _Condition = value; }
