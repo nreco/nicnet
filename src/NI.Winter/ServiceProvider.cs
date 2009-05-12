@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 
 using NI.Common;
@@ -52,25 +53,14 @@ namespace NI.Winter
 		CountersData counters = new CountersData();
 		IValueFactory _ValueFactory;
 		static IComparer constructorInfoComparer = new ConstructorInfoComparer();
-		static Hashtable propertyInfoCache = new Hashtable();
-		static Hashtable constructorInfoCache = new Hashtable();
+		static IDictionary<ReflectionPropertyCacheKey,ReflectionPropertyCacheValue> propertyInfoCache = new Dictionary<ReflectionPropertyCacheKey,ReflectionPropertyCacheValue>();
+		static IDictionary<Type,CreateObjectHandler> constructorInfoCache = new Dictionary<Type,CreateObjectHandler>();
 		
-		/// <summary>
-		/// Get of set flag that determines whether 
-		/// service provider should collect stats counters.
-		/// </summary>
-		/// <remarks>Counters are disabled by default.</remarks>
 		public bool CountersEnabled {
 			get { return _CountersEnabled; }
 			set { _CountersEnabled = value; }
 		}
 
-		/// <summary>
-		/// Get or set flag that determines whether service provider
-		/// should use internal cache during reflections calls.
-		/// </summary>
-		/// <remarks>When enabled reflection calls are cached using 
-		/// dynamic delegates.</remarks>
 		public bool ReflectionCacheEnabled {
 			get { return _ReflectionCacheEnabled; }
 			set { _ReflectionCacheEnabled = value; }
@@ -99,7 +89,7 @@ namespace NI.Winter
 			serviceInstanceByName = new Hashtable();
 			serviceNameByInstance = new Hashtable();
 			serviceInstanceByType = new Hashtable();
-			services = new ArrayList();
+			services = new ArrayList(1000);
 			ValueFactory = new LocalValueFactory(this); // default value factory
 		}
 		
@@ -165,7 +155,7 @@ namespace NI.Winter
 			serviceInstanceByName.Clear();
 			services.Clear();
 			serviceNameByInstance.Clear();
-			
+	
 			// initialize non-lazy components
 			foreach (IComponentInitInfo cInfo in Config) 
 				if (!cInfo.LazyInit)
@@ -448,8 +438,8 @@ namespace NI.Winter
 		internal void SetObjectProperty(Type t, object o, string propName, IValueFactory factory, IValueInitInfo valueInfo) {
 			if (ReflectionCacheEnabled) {
 				ReflectionPropertyCacheKey cacheKey = new ReflectionPropertyCacheKey(t, propName);
-				ReflectionPropertyCacheValue cacheValue = propertyInfoCache[cacheKey] as ReflectionPropertyCacheValue;
-				if (cacheValue == null) {
+				ReflectionPropertyCacheValue cacheValue;
+				if (!propertyInfoCache.TryGetValue(cacheKey, out cacheValue)) {
 					System.Reflection.PropertyInfo propInfo = t.GetProperty(propName);
 					if (propInfo == null)
 						throw new MissingMethodException(t.ToString(), propName);
@@ -482,8 +472,8 @@ namespace NI.Winter
 		
 		internal object CreateObjectInstance(Type t) {
 			if (ReflectionCacheEnabled) {
-				CreateObjectHandler createHandler = constructorInfoCache[t] as CreateObjectHandler;
-				if (createHandler==null) {
+				CreateObjectHandler createHandler;
+				if (!constructorInfoCache.TryGetValue(t, out createHandler)) {
 					ConstructorInfo constructorInfo = t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
 					if (constructorInfo==null)
 						throw new MissingMemberException(t.FullName, "constructor");
@@ -505,7 +495,7 @@ namespace NI.Winter
 		internal delegate void PropertySetHandler(object source, object value);
 		internal delegate object CreateObjectHandler();
 		
-		internal struct ReflectionPropertyCacheKey {
+		internal class ReflectionPropertyCacheKey {
 			Type t;
 			string propName;
 			int hashCode;
