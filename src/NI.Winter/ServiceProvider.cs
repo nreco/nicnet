@@ -457,7 +457,10 @@ namespace NI.Winter
 					cacheValue = new ReflectionPropertyCacheValue(
 										(PropertySetHandler)setDynMethod.CreateDelegate(typeof(PropertySetHandler)),
 										propInfo.PropertyType);
-					propertyInfoCache[cacheKey] = cacheValue;
+					// despite the fact Dictionary is thread safe, for some reason sometimes exceptions are thrown without extra lock
+					lock (propertyInfoCache) {
+						propertyInfoCache[cacheKey] = cacheValue;
+					}
 				}
 				object value = valueInfo.GetInstance( factory, cacheValue.PropertyType);
 				cacheValue.SetHandler(o, value);
@@ -484,7 +487,10 @@ namespace NI.Winter
 					generator.Emit(OpCodes.Newobj, constructorInfo);
 					generator.Emit(OpCodes.Ret);
 					createHandler = (CreateObjectHandler)dynamicMethod.CreateDelegate(typeof(CreateObjectHandler));					
-					constructorInfoCache[t] = createHandler;
+					// despite the fact Dictionary is thread safe, for some reason sometimes exceptions are thrown without extra lock
+					lock (constructorInfoCache) {
+						constructorInfoCache[t] = createHandler;
+					}
 				}
 				return createHandler();
 			} else {
