@@ -218,7 +218,6 @@ namespace NI.Winter
 					serviceInstanceByType[type] = services[i];
 					return services[i];
 				}
-			serviceInstanceByType[type] = null;
 			return null;
 		}
 		
