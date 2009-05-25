@@ -123,7 +123,7 @@ namespace NI.Common.Collections {
 			get {
 				if (UnderlyingDictionary!=null)
 					return UnderlyingDictionary[key];
-				int idx = isOrdered ? Array.IndexOf(ArrKeys, key) : Array.BinarySearch(orderedKeys, key);
+				int idx = isOrdered ? Array.BinarySearch(orderedKeys, key) : Array.IndexOf(ArrKeys, key);
 				if (isOrdered && idx>=0) idx = orderedIndexes[idx];
 				return idx>=0 ? ArrValues[idx] : null;
 			}
