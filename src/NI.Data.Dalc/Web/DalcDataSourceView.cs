@@ -97,7 +97,7 @@ namespace NI.Data.Dalc.Web {
 				DataRow r = tbl.NewRow();
 				foreach (DataColumn col in tbl.Columns)
 					if (values.Contains(col.ColumnName))
-						r[col] = values[col.ColumnName];
+						r[col] = PrepareDataRowValue(values[col.ColumnName]);
 				tbl.Rows.Add(r);
 				DataSource.Dalc.Update(ds, Name);
 				// push back autoincrement field
@@ -124,6 +124,10 @@ namespace NI.Data.Dalc.Web {
 					tbl.Columns[autoIncName].AutoIncrement = true;
 		}
 
+		protected object PrepareDataRowValue(object o) {
+			return o ?? DBNull.Value;
+		}
+
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, values);
 			DataSource.OnUpdating(this, eArgs);
@@ -137,7 +141,7 @@ namespace NI.Data.Dalc.Web {
 				foreach (DataRow r in ds.Tables[Name].Rows)
 					foreach (DataColumn col in ds.Tables[Name].Columns)
 						if (values.Contains(col.ColumnName))
-							r[col] = values[col.ColumnName];
+							r[col] = PrepareDataRowValue( values[col.ColumnName] );
 				DataSource.Dalc.Update(ds, Name);
 			} else {
 				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
