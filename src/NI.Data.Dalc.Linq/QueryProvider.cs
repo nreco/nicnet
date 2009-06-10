@@ -208,9 +208,20 @@ namespace NI.Data.Dalc.Linq
 					return qGroup;
 				}
 				if (conditionMapping.ContainsKey(binExpr.NodeType)) {
-					Conditions qCond = conditionMapping[binExpr.NodeType];
-					QueryConditionNode qCondNode = new QueryConditionNode(
-							ComposeValue(binExpr.Left), qCond, ComposeValue(binExpr.Right) );
+                    IQueryValue rightValue = ComposeValue(binExpr.Right);
+                    IQueryValue leftValue = ComposeValue(binExpr.Left);
+
+                    Conditions qCond = conditionMapping[binExpr.NodeType];
+
+                    // process == and != null/DBNull.Value specifically
+                    if (rightValue is QConst
+                        &&
+                        (Convert.IsDBNull(((QConst)rightValue).Value) || ((QConst)rightValue).Value == null))                    
+                    {
+                        qCond = nullConditionMapping[binExpr.NodeType]; 
+                    }
+
+                    QueryConditionNode qCondNode = new QueryConditionNode(leftValue, qCond, rightValue);
 					return qCondNode;
 				}
 			}
@@ -244,6 +255,7 @@ namespace NI.Data.Dalc.Linq
 		}
 
 		static IDictionary<ExpressionType, Conditions> conditionMapping;
+        static IDictionary<ExpressionType, Conditions> nullConditionMapping;
 		
 		static QueryProvider() {
 			conditionMapping = new Dictionary<ExpressionType,Conditions>();
@@ -253,6 +265,10 @@ namespace NI.Data.Dalc.Linq
 			conditionMapping[ExpressionType.GreaterThanOrEqual] = Conditions.GreaterThan|Conditions.Equal;
 			conditionMapping[ExpressionType.LessThan] = Conditions.LessThan;
 			conditionMapping[ExpressionType.LessThanOrEqual] = Conditions.LessThan | Conditions.Equal;
+
+            nullConditionMapping = new Dictionary<ExpressionType, Conditions>();
+            nullConditionMapping[ExpressionType.Equal] = Conditions.Null;
+            nullConditionMapping[ExpressionType.NotEqual] = Conditions.Null | Conditions.Not;
 		}
 
 		protected IQueryFieldValue ComposeFieldValue(Expression expression) {
