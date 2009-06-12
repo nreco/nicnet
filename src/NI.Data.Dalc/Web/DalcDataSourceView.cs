@@ -76,6 +76,8 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		protected IQueryNode ComposeUidCondition(IDictionary keys) {
+			if (keys.Count == 0)
+				throw new MissingPrimaryKeyException();
 			// compose UID condition
 			QueryGroupNode uidGroup = new QueryGroupNode(GroupType.And);
 			foreach (DictionaryEntry key in keys)
