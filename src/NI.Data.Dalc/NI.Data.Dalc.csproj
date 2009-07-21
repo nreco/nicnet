@@ -112,6 +112,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChainQueryModifier.cs" />
+    <Compile Include="DalcManager.cs" />
     <Compile Include="DataSetFactory.cs" />
     <Compile Include="DbDalcRowTrigger.cs" />
     <Compile Include="DataSetProvider.cs" />
