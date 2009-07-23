@@ -78,6 +78,14 @@ namespace NI.Data.Dalc {
 			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
 		}
 
+		public DataTable LoadAll(IQuery q) {
+			DataSet ds = DataSetProvider.GetDataSet(q.SourceName);
+			if (ds == null)
+				throw new Exception("Unknown source name");
+			Dalc.Load(ds, q);
+			return ds.Tables[q.SourceName];
+		}
+
 		public void Delete(string sourceName, params object[] pk) {
 			DataRow r = Load(sourceName, pk);
 			Delete(r);
@@ -98,6 +106,10 @@ namespace NI.Data.Dalc {
 			if (r.RowState == DataRowState.Detached)
 				r.Table.Rows.Add(r);
 			Dalc.Update(r.Table.DataSet, r.Table.TableName);
+		}
+
+		public void Update(DataTable tbl) {
+			Dalc.Update(tbl.DataSet, tbl.TableName);
 		}
 
 		public void Update(string sourceName, object pk, IDictionary<string, object> changeset) {
