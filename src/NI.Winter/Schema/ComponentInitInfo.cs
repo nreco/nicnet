@@ -141,9 +141,10 @@ namespace NI.Winter
 		public void InitValues(XmlNode componentNode, IComponentsConfig components) {
 			if (ValuesInitialized) return;
 			ValuesInitialized = true;
-			
-			Hashtable constructorArgs = new Hashtable();
-			Hashtable properties = new Hashtable();
+
+			Dictionary<int, IValueInitInfo> constructorArgs = new Dictionary<int, IValueInitInfo>();
+			List<IPropertyInitInfo> propsList = new List<IPropertyInitInfo>();
+			Dictionary<string, int> propsIndex = new Dictionary<string, int>();
 			
 			// parent exists?
 			if (Parent!=null) {
@@ -152,8 +153,10 @@ namespace NI.Winter
 					throw new Exception("Cannot find parent component with name='"+Parent+"'" );
 				
 				// copy all property-definitions
-				foreach (IPropertyInitInfo propInfo in parentComponentInfo.Properties)
-					properties[propInfo.Name] = propInfo;
+				for (int i=0; i<parentComponentInfo.Properties.Length; i++) {
+					propsList.Add(parentComponentInfo.Properties[i]);
+					propsIndex[parentComponentInfo.Properties[i].Name] = i;
+				}
 				// copy all constructor-arg-definitions
 				for (int i=0; i<parentComponentInfo.ConstructorArgs.Length; i++)
 					constructorArgs[i] = parentComponentInfo.ConstructorArgs[i];
@@ -179,14 +182,14 @@ namespace NI.Winter
 			// compose final constructor args list
 			// 1) find greatest index
 			int maxConstructorArgIndex = -1;
-			foreach (object idx in constructorArgs.Keys)
-				if ( (int)idx>maxConstructorArgIndex ) 
+			foreach (int idx in constructorArgs.Keys)
+				if ( idx>maxConstructorArgIndex ) 
 					maxConstructorArgIndex = (int)idx;
 			// 2) create constructor args array
 			_ConstructorArgs = new IValueInitInfo[maxConstructorArgIndex+1];
 			// 3) initialize constructor args array
-			foreach (object idx in constructorArgs.Keys)
-				_ConstructorArgs[ (int)idx ] = (IValueInitInfo)constructorArgs[idx];
+			foreach (int idx in constructorArgs.Keys)
+				_ConstructorArgs[idx ] = constructorArgs[idx];
 			
 
 			// extract properies
@@ -196,22 +199,21 @@ namespace NI.Winter
 					PropertyInfo pInfo = new PropertyInfo( 
 						propertyNode.Attributes["name"].Value,
 						ResolveValueInfo( propertyNode, components) );
-					properties[ pInfo.Name ] = pInfo;
+					if (propsIndex.ContainsKey(pInfo.Name)) {
+						propsList[propsIndex[pInfo.Name]] = pInfo;
+					} else {
+						int idx = propsList.Count;
+						propsList.Add(pInfo);
+						propsIndex[pInfo.Name] = idx;
+					}
 				} catch (Exception ex) {
 					throw new Exception(
 						String.Format("Cannot resolve value for property '{0}'", propertyNode.Attributes["name"].Value), ex );
 				}
 			}
 			// compose final properties list
-			_Properties = new IPropertyInitInfo[properties.Count];
-			int propertyIdx = 0;
-			foreach (IPropertyInitInfo propInfo in properties.Values)
-				_Properties[propertyIdx++] = propInfo;
-				
+			_Properties = propsList.ToArray();
 		}
-
-		
-
 		
 		
 		/// <summary>
