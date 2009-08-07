@@ -283,6 +283,7 @@ namespace NI.Winter
 					if (constructors.Length>0 && componentInfo.ConstructorArgs!=null && componentInfo.ConstructorArgs.Length>0)
 						Array.Sort(constructors, constructorInfoComparer);
 
+					Exception lastTryException = null;
 					foreach (ConstructorInfo constructor in constructors) {
 						ParameterInfo[] args = constructor.GetParameters();
 						// it should be always 'not null'. But lets ensure.
@@ -298,7 +299,8 @@ namespace NI.Winter
 						try {
 							for (int i=0; i<constructorArgs.Length; i++)
 								constructorArgs[i] = componentInfo.ConstructorArgs[i].GetInstance(factory, args[i].ParameterType );
-						} catch {
+						} catch (Exception ex) {
+							lastTryException = ex;
 							// try next constructor ...
 							continue;
 						}
@@ -306,6 +308,8 @@ namespace NI.Winter
 						instance = Activator.CreateInstance( componentInfo.ComponentType, constructorArgs );
 						break;
 					}
+					if (instance == null && lastTryException!=null)
+						throw new Exception(componentInfo.ComponentType.ToString() + " invalid constructor args", lastTryException);
 				}
 				
 				// instance created ?
