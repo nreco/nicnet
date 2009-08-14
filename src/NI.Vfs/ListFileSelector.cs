@@ -23,6 +23,7 @@ namespace NI.Vfs
 	public class ListFileSelector : IFileSelector
 	{
 		protected string[] Names;
+		StringComparison Comparision = StringComparison.CurrentCultureIgnoreCase;
 	
 		public ListFileSelector(params string[] names)
 		{
@@ -34,7 +35,15 @@ namespace NI.Vfs
 		
 		public bool IncludeFile(IFileObject file) {
 			string normFileName = file.Name.Replace( Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar );
-			return Array.IndexOf( Names, normFileName )>=0;
+			string onlyFileName = Path.GetFileName(normFileName);
+			for (int i = 0; i < Names.Length; i++) {
+				bool isFullPath = Names[i].IndexOf(Path.DirectorySeparatorChar) >= 0;
+				if (isFullPath && Names[i].Equals(normFileName, Comparision))
+					return true;
+				if (!isFullPath && Names[i].Equals(onlyFileName, Comparision))
+					return true;
+			}
+			return false;
 		}
 		
 		public bool TraverseDescendents(IFileObject file) {

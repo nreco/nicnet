@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{25702474-5D4D-4EEA-A68A-3662A0966ED6}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -111,6 +111,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BaseMethodInvokingFactory.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StaticFieldInvokingFactory.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="EventBinder.cs">
