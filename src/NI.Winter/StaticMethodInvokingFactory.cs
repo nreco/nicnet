@@ -70,8 +70,8 @@ namespace NI.Winter
 		}
 		
 		public object GetObject() {
-			
-			Type[] argTypes = TargetMethodArgTypes!=null ? TargetMethodArgTypes : new Type[0];
+
+			Type[] argTypes = ResolveMethodArgTypes();
 			object[] argValues = PrepareMethodArgs(TargetMethodArgs, argTypes);
 			
 			MethodInfo mInfo = TargetType.GetMethod(TargetMethod, BindingFlags.Static|BindingFlags.Public, null, argTypes, null);
@@ -81,7 +81,7 @@ namespace NI.Winter
 		}
 		
 		public Type GetObjectType() {
-			MethodInfo mInfo = TargetType.GetMethod( TargetMethod, BindingFlags.Static|BindingFlags.Public, null, TargetMethodArgTypes, null);
+			MethodInfo mInfo = TargetType.GetMethod(TargetMethod, BindingFlags.Static | BindingFlags.Public, null, ResolveMethodArgTypes(), null);
 			return mInfo.ReturnType;
 		}		
 		

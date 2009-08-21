@@ -61,7 +61,7 @@ namespace NI.Winter
 		
 		public object GetObject() {
 
-			Type[] argTypes = TargetMethodArgTypes!=null ? TargetMethodArgTypes : new Type[0];
+			Type[] argTypes = ResolveMethodArgTypes();
 			object[] argValues = PrepareMethodArgs(TargetMethodArgs, argTypes);
 			
 			MethodInfo mInfo = TargetObject.GetType().GetMethod(TargetMethod, argTypes);
@@ -70,7 +70,7 @@ namespace NI.Winter
 		}
 		
 		public Type GetObjectType() {
-			MethodInfo mInfo = TargetObject.GetType().GetMethod(TargetMethod, TargetMethodArgTypes);
+			MethodInfo mInfo = TargetObject.GetType().GetMethod(TargetMethod, ResolveMethodArgTypes());
 			return mInfo.ReturnType;
 		}
 		

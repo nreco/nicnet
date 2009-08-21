@@ -47,7 +47,17 @@ namespace NI.Winter
 		public BaseMethodInvokingFactory()
 		{
 		}
-		
+
+		protected Type[] ResolveMethodArgTypes() {
+			if (TargetMethodArgTypes != null)
+				return TargetMethodArgTypes;
+			int argsCount = TargetMethodArgs != null ? TargetMethodArgs.Length : 0;
+			Type[] argTypes = new Type[argsCount];
+			for (int i = 0; i < argTypes.Length; i++)
+				argTypes[i] = TargetMethodArgs[i] != null ? TargetMethodArgs[i].GetType() : typeof(object);
+			return argTypes;
+		}
+
 		protected object[] PrepareMethodArgs(object[] args, Type[] argTypes) {
 			object[] argValues = args!=null ? new object[args.Length] : new object[0];
 			for (int i=0; i<argValues.Length; i++)
