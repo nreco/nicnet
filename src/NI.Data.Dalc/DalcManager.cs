@@ -61,6 +61,10 @@ namespace NI.Data.Dalc {
 			return r;
 		}
 
+		public DataRow Load(string sourceName, object pk) {
+			return Load(sourceName, new object[]{pk});
+		}
+
 		public DataRow Load(string sourceName, params object[] pk) {
 			DataSet ds = DataSetProvider.GetDataSet(sourceName);
 			if (ds == null)
