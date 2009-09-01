@@ -61,6 +61,24 @@ namespace NI.Data.Dalc
 			else
 				ds.Tables[query.SourceName].Rows.Clear();
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
+			if (query.Fields != null && query.Fields.Length != 0) {
+				for (int i=0; i<query.Fields.Length; i++) {
+					string fld = query.Fields[i];
+					if (ds.Tables[query.SourceName].Columns.Contains(fld))
+						continue;
+					DataColumn column = new DataColumn();
+					int idx = fld.LastIndexOf(')');
+					if (idx == -1) {
+						column.ColumnName = fld;
+					} else {
+						column.ColumnName = fld.Substring(idx + 1).Trim();
+						column.Expression = fld.Substring(0, idx + 1).Trim();
+					}
+					if (ds.Tables[query.SourceName].Columns.Contains(column.ColumnName))
+						ds.Tables[query.SourceName].Columns.Remove(column.ColumnName);
+					ds.Tables[query.SourceName].Columns.Add(column);
+				}
+			}
 			for (int i=0; i<result.Length; i++)
 				ds.Tables[query.SourceName].ImportRow(result[i]);
 		}
@@ -185,7 +203,7 @@ namespace NI.Data.Dalc
 		
 		protected virtual string BuildSort(IQuery q) {
 			if (q.Sort!=null && q.Sort.Length>0)
-				return q.Sort[0];
+				return string.Join(",", q.Sort);
 			return null;
 		}
 
