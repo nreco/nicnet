@@ -90,6 +90,10 @@ namespace NI.Data.Dalc {
 			return ds.Tables[q.SourceName];
 		}
 
+		public void Delete(string sourceName, object pk) {
+			Delete(sourceName, new object[] { pk });
+		}
+
 		public void Delete(string sourceName, params object[] pk) {
 			DataRow r = Load(sourceName, pk);
 			Delete(r);
