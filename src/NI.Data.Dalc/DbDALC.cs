@@ -295,12 +295,12 @@ namespace NI.Data.Dalc {
 
 		protected virtual void OnCommandExecuting(string sourceName, StatementType type, IDbCommand cmd) {
 			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnCommandExecuting( new DbCommandEventArgs(sourceName, type, cmd) );
+				DbDalcEventsMediator.OnCommandExecuting(this, new DbCommandEventArgs(sourceName, type, cmd) );
 		}
 		
 		protected virtual void OnCommandExecuted(string sourceName, StatementType type, IDbCommand cmd) {
 			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnCommandExecuted( new DbCommandEventArgs(sourceName, type, cmd) );
+				DbDalcEventsMediator.OnCommandExecuted(this, new DbCommandEventArgs(sourceName, type, cmd) );
 		}
 
 		/// <summary>
@@ -310,7 +310,7 @@ namespace NI.Data.Dalc {
 			//Trace.WriteLine( e.Command.CommandText, "SQL" );
 			OnCommandExecuting(e.Row.Table.TableName, StatementType.Update, e.Command);
 			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnRowUpdating(e);
+				DbDalcEventsMediator.OnRowUpdating(this, e);
 		}
 		
 		/// <summary>
@@ -336,7 +336,7 @@ namespace NI.Data.Dalc {
 			}
 			
 			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnRowUpdated(e);
+				DbDalcEventsMediator.OnRowUpdated(this, e);
 			OnCommandExecuted(e.Row.Table.TableName, StatementType.Update, e.Command);
 		}
 

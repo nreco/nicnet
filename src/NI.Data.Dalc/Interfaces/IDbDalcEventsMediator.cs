@@ -47,22 +47,22 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Raise BeforeRowUpdate event
 		/// </summary>
-		void OnRowUpdating(RowUpdatingEventArgs e);
+		void OnRowUpdating(object sender, RowUpdatingEventArgs e);
 		
 		/// <summary>
 		/// Raise AfterRowUpdate event
 		/// </summary>
-		void OnRowUpdated(RowUpdatedEventArgs e);
+		void OnRowUpdated(object sender, RowUpdatedEventArgs e);
 		
 		/// <summary>
 		/// Raise BeforeCommandExecute event
 		/// </summary>
-		void OnCommandExecuting(DbCommandEventArgs e);
+		void OnCommandExecuting(object sender, DbCommandEventArgs e);
 
 		/// <summary>
 		/// Raise AfterCommandExecute event
 		/// </summary>
-		void OnCommandExecuted(DbCommandEventArgs e);
+		void OnCommandExecuted(object sender, DbCommandEventArgs e);
 
 
 	}

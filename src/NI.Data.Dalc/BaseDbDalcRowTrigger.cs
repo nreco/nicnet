@@ -120,7 +120,7 @@ namespace NI.Data.Dalc {
 		public void RowUpdatingHandler(object sender, RowUpdatingEventArgs e) {
 			EventType eventType = GetBeforeEventType(e.StatementType);
 			if (!IsMatch(e.Row, eventType)) return;
-			Execute(eventType, e.Row);
+			Execute(eventType, e.Row, sender, e);
 			// lets ensure that command has actual values
 			foreach (IDataParameter param in e.Command.Parameters)
 				if ((param.Direction == ParameterDirection.Input ||
@@ -133,10 +133,10 @@ namespace NI.Data.Dalc {
 		public void RowUpdatedHandler(object sender, RowUpdatedEventArgs e) {
 			EventType eventType = GetAfterEventType( e.StatementType );
 			if (!IsMatch(e.Row, eventType)) return;
-			Execute(eventType, e.Row);
+			Execute(eventType, e.Row, sender, e);
 		}
 
-		protected abstract void Execute(EventType eventType, DataRow r);
+		protected abstract void Execute(EventType eventType, DataRow r, object sender, EventArgs args);
 
 	}
 
