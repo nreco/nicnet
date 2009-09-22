@@ -122,12 +122,13 @@ namespace NI.Data.Dalc {
 			if (!IsMatch(e.Row, eventType)) return;
 			Execute(eventType, e.Row, sender, e);
 			// lets ensure that command has actual values
-			foreach (IDataParameter param in e.Command.Parameters)
-				if ((param.Direction == ParameterDirection.Input ||
-					param.Direction == ParameterDirection.InputOutput) &&
-					!String.IsNullOrEmpty(param.SourceColumn) ) {
-					param.Value = e.Row[param.SourceColumn];
-				}
+			if (e.Row.RowState!=DataRowState.Deleted && e.Row.RowState!=DataRowState.Detached)
+				foreach (IDataParameter param in e.Command.Parameters)
+					if ((param.Direction == ParameterDirection.Input ||
+						param.Direction == ParameterDirection.InputOutput) &&
+						!String.IsNullOrEmpty(param.SourceColumn) ) {
+						param.Value = e.Row[param.SourceColumn];
+					}
 		}
 
 		public void RowUpdatedHandler(object sender, RowUpdatedEventArgs e) {

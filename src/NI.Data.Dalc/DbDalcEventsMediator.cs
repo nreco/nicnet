@@ -38,22 +38,22 @@ namespace NI.Data.Dalc
 
 		public void OnRowUpdating(object sender, RowUpdatingEventArgs e) {
 			if (RowUpdating!=null)
-				RowUpdating(this, e);		
+				RowUpdating(sender, e);		
 		}
 
 		public void OnRowUpdated(object sender, RowUpdatedEventArgs e) {
 			if (RowUpdated!=null)
-				RowUpdated(this, e);
+				RowUpdated(sender, e);
 		}
 
 		public void OnCommandExecuting(object sender, DbCommandEventArgs e) {
 			if (CommandExecuting!=null)
-				CommandExecuting(this, e);
+				CommandExecuting(sender, e);
 		}
 
 		public void OnCommandExecuted(object sender, DbCommandEventArgs e) {
 			if (CommandExecuted!=null)
-				CommandExecuted(this, e);
+				CommandExecuted(sender, e);
 		}
 
 	}
