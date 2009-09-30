@@ -19,6 +19,7 @@ using System.Data;
 using System.Diagnostics;
 
 using NI.Common;
+using NI.Common.Providers;
 
 namespace NI.Data.Dalc {
 	
@@ -31,6 +32,7 @@ namespace NI.Data.Dalc {
 		bool _ReplaceParamPlaceholders = true;
 		string _LogMsgPrefix = "[SQL]";
 		bool _Enabled = true;
+		IObjectProvider _LogFilter = null;
 
 		/// <summary>
 		/// Get or set flag that indicates whether logger is enabled
@@ -40,6 +42,15 @@ namespace NI.Data.Dalc {
 			get { return _Enabled; }
 			set { _Enabled = value; }
 		}
+
+		/// <summary>
+		/// Get or set custom log filter 
+		/// </summary>
+		public IObjectProvider LogFilter {
+			get { return _LogFilter; }
+			set { _LogFilter = value; }
+		}
+
 
 		/// <summary>
 		/// Get or set log message prefix 
@@ -115,7 +126,12 @@ namespace NI.Data.Dalc {
 
 		protected virtual void Write(IDbCommand cmd, string message) {
 			LastLogTime[cmd.GetHashCode()] = DateTime.Now;
-			Trace.WriteLine( String.Format("{0} [{1}] {2}", LogMsgPrefix, cmd.GetHashCode(), message ) );
+			string msg = String.Format("{0} [{1}] {2}", LogMsgPrefix, cmd.GetHashCode(), message );
+			if (LogFilter != null) {
+				msg = LogFilter.GetObject(msg) as string;
+			}
+			if (msg!=null)
+				Trace.WriteLine( msg );
 		}
 
 
