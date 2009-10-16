@@ -364,9 +364,22 @@ namespace NI.Winter
 				int lastDotIndex = type_description.LastIndexOf('.');
                 if (lastDotIndex >= 0)
                 {
-                    return ResolveType(String.Format("{0}{1}", type_description, genericTypePart) + "," + type_description.Substring(0, lastDotIndex));
+                    // try suggest assembly name by namespace
+					try {
+						return ResolveType(String.Format("{0}{1}", type_description, genericTypePart) + "," + type_description.Substring(0, lastDotIndex));
+					} catch {
+						//bag suggestion. 
+					}
                 }
+				// finally, lets just try all loaded assemblies
+				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+					var type = assembly.GetType(type_description, false);
+					if (type != null)
+						return type;
+				}
+
 			}
+			
 			throw new Exception("Cannot resolve type "+type_description);
 		}		
 		
