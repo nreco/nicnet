@@ -77,7 +77,7 @@ namespace NI.Data.Dalc {
 		public DataRow Load(IQuery q) {
 			DataSet ds = DataSetProvider.GetDataSet(q.SourceName);
 			if (ds == null)
-				throw new Exception("Unknown source name");
+				ds = new DataSet();
 			Dalc.Load(ds, q);
 			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
 		}
@@ -85,7 +85,7 @@ namespace NI.Data.Dalc {
 		public DataTable LoadAll(IQuery q) {
 			DataSet ds = DataSetProvider.GetDataSet(q.SourceName);
 			if (ds == null)
-				throw new Exception("Unknown source name");
+				ds = new DataSet();
 			Dalc.Load(ds, q);
 			return ds.Tables[q.SourceName];
 		}
