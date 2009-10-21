@@ -372,8 +372,8 @@ namespace NI.Winter
 					}
                 }
 				// finally, lets just try all loaded assemblies
-				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
-					var type = assembly.GetType(type_description, false);
+				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+					Type type = assembly.GetType(type_description, false);
 					if (type != null)
 						return type;
 				}
