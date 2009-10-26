@@ -51,6 +51,8 @@ namespace NI.Data.Dalc
 			if (type==typeof(DateTime) ) return DbType.DateTime;
 			if (type==typeof(Guid) ) return DbType.Guid;
 			if (type==typeof(Decimal) ) return DbType.Decimal;
+			if (type==typeof(TimeSpan)) return DbType.Time;
+			if (type == typeof(DateTimeOffset)) return DbType.DateTimeOffset;
 			return DbType.Object;
 		}
 		
