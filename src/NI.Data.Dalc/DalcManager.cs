@@ -75,19 +75,21 @@ namespace NI.Data.Dalc {
 		}
 
 		public DataRow Load(IQuery q) {
-			DataSet ds = DataSetProvider.GetDataSet(q.SourceName);
+			QSourceName source = new QSourceName(q.SourceName);
+			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
 				ds = new DataSet();
 			Dalc.Load(ds, q);
-			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
+			return ds.Tables[source.Name].Rows.Count > 0 ? ds.Tables[source.Name].Rows[0] : null;
 		}
 
 		public DataTable LoadAll(IQuery q) {
-			DataSet ds = DataSetProvider.GetDataSet(q.SourceName);
+			QSourceName source = new QSourceName(q.SourceName);
+			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
 				ds = new DataSet();
 			Dalc.Load(ds, q);
-			return ds.Tables[q.SourceName];
+			return ds.Tables[source.Name];
 		}
 
 		public void Delete(string sourceName, object pk) {

@@ -95,7 +95,8 @@ namespace NI.Data.Dalc {
 		/// </summary>
 		virtual public void Load(DataSet ds, IQuery query) {
 			IDbCommandWrapper selectCmdWrapper = CommandGenerator.ComposeSelect( query );
-			
+			QSourceName source = new QSourceName(query.SourceName);
+
 			selectCmdWrapper.Command.Connection = Connection;
 			selectCmdWrapper.SetTransaction(Transaction);
 
@@ -105,12 +106,12 @@ namespace NI.Data.Dalc {
 
 			adapterWrapper.SelectCommadWrapper = selectCmdWrapper;
 			
-			OnCommandExecuting(query.SourceName, StatementType.Select, selectCmdWrapper.Command);
+			OnCommandExecuting(source.Name, StatementType.Select, selectCmdWrapper.Command);
 			if (adapterWrapper.Adapter is DbDataAdapter)
-				((DbDataAdapter)adapterWrapper.Adapter).Fill(ds, query.StartRecord, query.RecordCount, query.SourceName);
+				((DbDataAdapter)adapterWrapper.Adapter).Fill(ds, query.StartRecord, query.RecordCount, source.Name);
 			else
 				adapterWrapper.Adapter.Fill( ds );
-			OnCommandExecuted(query.SourceName, StatementType.Select, selectCmdWrapper.Command);
+			OnCommandExecuted(source.Name, StatementType.Select, selectCmdWrapper.Command);
 		}
 
 		/// <summary>
@@ -214,6 +215,7 @@ namespace NI.Data.Dalc {
 		/// </summary>
 		public IDataReader LoadReader(IQuery q) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
+			
 			cmdWrapper.SetTransaction( Transaction );
 			cmdWrapper.Command.Connection = Connection;
 			
@@ -251,9 +253,10 @@ namespace NI.Data.Dalc {
 			// allow command generator build optimized sql select by specifying only one record to load
 			Query oneRecordQuery = new Query(query);
 			oneRecordQuery.RecordCount = 1;
+			QSourceName source = new QSourceName(query.SourceName);
 
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect( oneRecordQuery );
-			return LoadRecordInternal(data, cmdWrapper, query.SourceName);
+			return LoadRecordInternal(data, cmdWrapper, source.Name);
 		}
 		
 		/// <summary>
