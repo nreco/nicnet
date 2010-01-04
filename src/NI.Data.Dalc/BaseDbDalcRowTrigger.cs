@@ -60,7 +60,17 @@ namespace NI.Data.Dalc {
 			/// <summary>
 			/// Occurs after row delete
 			/// </summary>
-			Deleted = 32
+			Deleted = 32,
+
+			/// <summary>
+			/// Inserting or Updating
+			/// </summary>
+			Saving = 1+4,
+
+			/// <summary>
+			/// Inserted or Updated
+			/// </summary>
+			Saved = 2+8
 		}
 
 		string _MatchSourceName = null;
