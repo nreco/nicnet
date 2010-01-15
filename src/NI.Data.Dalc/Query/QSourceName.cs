@@ -37,11 +37,10 @@ namespace NI.Data.Dalc
 		}
 
 		public QSourceName(string sourceName) {
-			int dotIdx = sourceName.IndexOf('.');
+			int dotIdx = sourceName.LastIndexOf('.'); // allow dot in table name (alias for this case is required), like dbo.users.u
 			if (dotIdx >= 0) {
-				string[] parts = sourceName.Split('.');
-				_Name = parts[0];
-				_Alias = parts[1];
+				_Name = sourceName.Substring(0, dotIdx);
+				_Alias = sourceName.Substring(dotIdx+1);
 			}
 			else {
 				_Name = sourceName;
