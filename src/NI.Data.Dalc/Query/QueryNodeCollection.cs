@@ -30,6 +30,10 @@ namespace NI.Data.Dalc
 			List.Add(item);
 		}
 		
+		public void Prepend(IQueryNode item) {
+			if (item != null)
+				List.Insert(0, item);
+		}
 		
 		/*public DataConditionNode Find(string field_name) {
 			for (int i=0; i<Items.Count; i++) {

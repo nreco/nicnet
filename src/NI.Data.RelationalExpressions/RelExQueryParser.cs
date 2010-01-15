@@ -534,14 +534,41 @@ namespace NI.Data.RelationalExpressions
 			// check for group
 			lexemType = GetLexemType(input, endIdx, out nextEndIdx);
 			GroupType groupType = GroupType.And;
-			if (GetGroupType(lexemType, input, endIdx, ref nextEndIdx, ref groupType)) {
-				QueryGroupNode group = new QueryGroupNode(groupType);
-				group.Nodes.Add(node);
-				group.Nodes.Add( ParseConditionGroup(input, nextEndIdx, out endIdx) );
-				return group;
-			}
+			if (GetGroupType(lexemType, input, endIdx, ref nextEndIdx, ref groupType))
+				return ComposeGroupNode(node, ParseConditionGroup(input, nextEndIdx, out endIdx), groupType);
 
 			return node;		
+		}
+
+		protected IQueryGroupNode ComposeGroupNode(IQueryNode node1, IQueryNode node2, GroupType groupType) {
+			QueryGroupNode group1 = node1 as QueryGroupNode, group2 = node2 as QueryGroupNode;
+			if (group1 != null && group1.Group != groupType)
+				group1 = null;
+			if (group2 != null && group2.Group != groupType)
+				group2 = null;
+
+			// don't corrupt named groups
+			if (group1 != null && group1.Name != null || group2 != null && group2.Name != null)
+				group1 = group2 = null;
+
+			if (group1 == null) {
+				if (group2 == null) {
+					QueryGroupNode group = new QueryGroupNode(groupType);
+					group.Nodes.Add(node1);
+					group.Nodes.Add(node2);
+					return group;				
+				} else {
+					group2.Nodes.Prepend(node1);
+					return group2;				
+				}
+			} else {
+				if (group2 == null)
+					group1.Nodes.Add(node2);
+				else
+					foreach (IQueryNode qn in group2.Nodes)
+						group1.Nodes.Add(qn);
+				return group1;
+			}
 		}
 		
 		protected IQueryNode ParseCondition(string input, int startIdx, out int endIdx) {
