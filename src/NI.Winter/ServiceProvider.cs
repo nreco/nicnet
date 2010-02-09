@@ -512,7 +512,7 @@ namespace NI.Winter
 			public ReflectionPropertyCacheKey(Type t, string propName) {
 				this.t = t;
 				this.propName = propName;
-				hashCode = (t.AssemblyQualifiedName+propName).GetHashCode();
+				hashCode = (t.FullName+propName).GetHashCode();
 			}
 
 			public override int GetHashCode() {
