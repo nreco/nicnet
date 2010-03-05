@@ -98,8 +98,17 @@ namespace NI.Data.Dalc {
 
 		public void Delete(string sourceName, params object[] pk) {
 			DataRow r = Load(sourceName, pk);
-			Delete(r);
+            if (r != null) {
+                Delete(r);
+            }
 		}
+
+        public void Delete(Query q) {
+            DataTable tbl = LoadAll(q);
+			foreach (DataRow r in tbl.Rows)
+				r.Delete();
+			Update(tbl);
+        }
 
 		public void Delete(DataRow r) {
 			if (r.RowState != DataRowState.Deleted)
