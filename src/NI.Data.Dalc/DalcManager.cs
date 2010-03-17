@@ -118,9 +118,10 @@ namespace NI.Data.Dalc {
 
 		public void Update(DataRow r) {
 			// this is good place to replace 'null' with DBNull
-			foreach (DataColumn c in r.Table.Columns)
-				if (c.AllowDBNull && r[c] == null)
-					r[c] = DBNull.Value;
+			if (r.RowState!=DataRowState.Deleted)
+				foreach (DataColumn c in r.Table.Columns)
+					if (c.AllowDBNull && r[c] == null)
+						r[c] = DBNull.Value;
 
 			if (r.RowState == DataRowState.Detached)
 				r.Table.Rows.Add(r);
