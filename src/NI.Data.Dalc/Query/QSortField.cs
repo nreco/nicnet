@@ -14,7 +14,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Text.RegularExpressions;
 
 namespace NI.Data.Dalc
 {
@@ -23,8 +22,6 @@ namespace NI.Data.Dalc
 	/// </summary>
 	public class QSortField : IQueryFieldValue
 	{
-		static Regex SortFieldRegex = new Regex(@"\s*(?<fldName>[^\s]*)\s*(?<order>asc|desc|ascending|descending){0,1}", RegexOptions.IgnoreCase);
-		
 		public const string Asc = "asc";
 		public const string Desc = "desc";
 	
@@ -42,14 +39,20 @@ namespace NI.Data.Dalc
 		}
 				
 		public QSortField(string sortFld) {
-			Match match = SortFieldRegex.Match(sortFld);
-			if (match.Success) {
-				_Name = match.Groups["fldName"].Value;
-				if (match.Groups["order"].Value.ToLower().StartsWith(Asc))
-					_SortDirection = ListSortDirection.Ascending;
-				if (match.Groups["order"].Value.ToLower().StartsWith(Desc))
-					_SortDirection = ListSortDirection.Descending;
-			} else
+			sortFld = sortFld.Trim();
+			int lastSpaceIdx = sortFld.LastIndexOf(' ');
+			string lastWord = lastSpaceIdx != -1 ? sortFld.Substring(lastSpaceIdx + 1).ToLower() : null;
+			bool sortDirectionFound = true;
+
+			if (lastWord == Asc || lastWord == "ascending")
+				_SortDirection = ListSortDirection.Ascending;
+			else if (lastWord == Desc || lastWord == "descending")
+				_SortDirection = ListSortDirection.Descending;
+			else
+				sortDirectionFound = false;
+
+			_Name = sortDirectionFound ? sortFld.Substring(0, lastSpaceIdx).TrimEnd() : sortFld;
+			if (_Name == String.Empty)
 				throw new ArgumentException("Invalid sort field");
 		}
 		
@@ -60,7 +63,6 @@ namespace NI.Data.Dalc
 		public override string ToString() {
 			return String.Format("{0} {1}", Name, SortDirection==ListSortDirection.Ascending ? Asc : Desc );
 		}
-		
 		
 	}
 }
