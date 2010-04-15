@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{18403EE8-1014-45C2-9594-E4C5417F013B}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -148,6 +148,7 @@
     <Compile Include="Expressions\ComponentExprResolver.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Expressions\ExpressionObjectProvider.cs" />
     <Compile Include="Expressions\ResourceExprResolver.cs" />
     <Compile Include="Expressions\DataBindExprResolver.cs" />
     <Compile Include="Expressions\ExpressionDescriptor.cs">
