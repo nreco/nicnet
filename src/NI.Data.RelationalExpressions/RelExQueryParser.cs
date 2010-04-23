@@ -360,7 +360,7 @@ namespace NI.Data.RelationalExpressions
 				string sourceName = lexem;
 				IQueryNode rootCondition = null;
 				string[] fields = null;
-				string[] sort = null;
+                string[] sort = null;
 				
 				LexemType nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 				string nextLexem = GetLexem(input, endIdx, nextEndIdx);
@@ -385,32 +385,36 @@ namespace NI.Data.RelationalExpressions
 					nextEndIdx = endIdx;
 					
 					StringBuilder fieldsBuilder = new StringBuilder();
-					StringBuilder sortBuilder = new StringBuilder();
-					fieldsBuilder.Append(nextLexem);
-					bool sortPart = false;
-					do {
+                    StringBuilder sortBuilder = new StringBuilder();
+                    fieldsBuilder.Append(nextLexem);
+                    bool sortPart = false;
+                    do {
+						LexemType prevLexemType = nextLexemType;
 						nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 						nextLexem = GetLexem(input, endIdx, nextEndIdx, nextLexemType);
+						//Console.Write(nextLexemType.ToString() + ":'" + nextLexem + "' ");
 						endIdx = nextEndIdx;
-						if (nextLexemType==LexemType.Delimiter && nextLexem=="]")
-							break;
-						if (nextLexemType==LexemType.Stop)
-							break;
-						// handle sort separator
-						if (nextLexemType == LexemType.Delimiter && nextLexem == ";") {
-							sortPart = true;
-						} else {
-							if (sortPart)
+                        if (nextLexemType==LexemType.Delimiter && nextLexem=="]")
+		                        break;
+                        if (nextLexemType==LexemType.Stop)
+		                        break;
+                        // handle sort separator
+                        if (nextLexemType == LexemType.Delimiter && nextLexem == ";") {
+		                        sortPart = true;
+                        } else {
+							if (sortPart) {
+								if (prevLexemType != LexemType.Delimiter)
+									sortBuilder.Append(' '); // default delimiter for asc/desc
 								sortBuilder.Append(nextLexem);
-							else
+							} else
 								fieldsBuilder.Append(nextLexem);
-						}
-					} while (true);
-					string fieldsStr = fieldsBuilder.ToString();
-					if (fieldsStr!="*")
-						fields = fieldsStr.Split(',');
-					if (sortBuilder.Length > 0)
-						sort = sortBuilder.ToString().Split(',');
+                        }
+                    } while (true);
+                    string fieldsStr = fieldsBuilder.ToString();
+                    if (fieldsStr!="*")
+	                        fields = fieldsStr.Split(',');
+                    if (sortBuilder.Length > 0)
+	                        sort = sortBuilder.ToString().Split(',');
 				} else {
 					// if brackets [] not specified near the name, threat it as field name
 					if (AllowDumpConstants && lexem.ToLower()!=nullField)
@@ -463,8 +467,8 @@ namespace NI.Data.RelationalExpressions
 				}
 								
 				q.Fields = fields;
-				if (sort != null)
-					q.Sort = sort;
+                if (sort != null)
+	                q.Sort = sort;
 				return q;
 			}
 			
