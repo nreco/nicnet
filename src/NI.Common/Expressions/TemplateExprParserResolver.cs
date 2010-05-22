@@ -147,6 +147,21 @@ namespace NI.Common.Expressions {
             return expression;
         }
 
+		IExpressionResolver GetExprResolverByMarker(string marker) {
+			IExpressionResolver result = null;
+            if (ResolversHashtable != null) {
+                ResolversHashtable.TryGetValue(marker, out result);
+            } else {
+                foreach (IExpressionDescriptor exprDescriptor in ExprDescriptors) {
+                    if (exprDescriptor.Marker == marker) {
+                        result = exprDescriptor.ExprResolver;
+                        break;
+                    }
+                }
+            }
+			return result;
+		}
+
         bool EvaluateInternal(IDictionary context, ref StringBuilder expression, ref int idx) {
             bool exprFound = false;
             int startIdx = idx, markerIdx = -1, len = expression.Length;
@@ -156,29 +171,19 @@ namespace NI.Common.Expressions {
                     if (c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' || c >= 'A' && c <= 'Z' || c == '#' || c=='_') {
                         continue;
                     } else if (c == ':') {
-                        IExpressionResolver properExprResolver = null;
                         string marker = expression.ToString(markerIdx, idx - markerIdx - 1);
-                        if (ResolversHashtable != null) {
-                            ResolversHashtable.TryGetValue(marker, out properExprResolver);
-                        } else {
-                            foreach (IExpressionDescriptor exprDescriptor in ExprDescriptors) {
-                                if (exprDescriptor.Marker == marker) {
-                                    properExprResolver = exprDescriptor.ExprResolver;
-                                    break;
-                                }
-                            }
-                        }
+                        IExpressionResolver properExprResolver = GetExprResolverByMarker(marker);
                         if (properExprResolver != null) {
                             int exprIdx = idx;
                             bool rc = EvaluateInternal(context, ref expression, ref idx);
                             len = expression.Length;
                             if (!rc) continue;
                             expression.Replace(@"\}", "}", exprIdx, idx - 1 - exprIdx);
-                            idx = idx + expression.Length - len;
+                            idx += expression.Length - len;
+                            len = expression.Length;
                             string evalResult = ConvertToString(properExprResolver.Evaluate(context, expression.ToString(exprIdx, idx - 1 - exprIdx)));
-                            len = evalResult.Length;
-                            expression.Remove(markerIdx - 1, idx - markerIdx + 1).Insert(markerIdx - 1, evalResult).Replace("}", @"\}", markerIdx - 1, len);
-                            idx = markerIdx - 1 + len;
+                            expression.Remove(markerIdx - 1, idx - markerIdx + 1).Insert(markerIdx - 1, evalResult).Replace("}", @"\}", markerIdx - 1, evalResult.Length);
+                            idx += expression.Length - len;
                             len = expression.Length;
                             exprFound = true;
                             markerIdx = -1;
