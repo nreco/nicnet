@@ -196,7 +196,7 @@ namespace NI.Data.Dalc
 					return base.BuildValue( new QConst(resValues) );
 				}
 				
-				throw new Exception("Invalid nested query result (empty result)");
+				return "NULL";
 			}
 			return base.BuildValue( value );
 		}
@@ -222,9 +222,11 @@ namespace NI.Data.Dalc
 				return "#"+constValue.ToString()+"#";
 			}
 
-			if (constValue is string) {
+			if (constValue is string)
 				return "'"+constValue.ToString().Replace("'", "''")+"'";
-			}
+
+			if (constValue == DBNull.Value)
+				return "NULL";
 									
 			return constValue.ToString();
 		}
