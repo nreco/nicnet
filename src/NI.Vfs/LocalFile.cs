@@ -205,7 +205,8 @@ namespace NI.Vfs
 		}
 		
 		/// <summary>
-		/// <see cref="IFileObject.CreateFile"/>
+		/// Creates this file, if it does not exist. Also creates any ancestor folders
+		/// which do not exist. This method throws IOException if this file or folder already exists        
 		/// </summary>		
 		public virtual void CreateFile() {
 			if (LocalFs.ReadOnly)
@@ -217,7 +218,8 @@ namespace NI.Vfs
 			
 			try {
 
-				if (Type!=FileType.Imaginary) Delete();
+				if (Type != FileType.Imaginary)
+					throw new IOException("Cannot create a file when that file already exists");
 
 				string fileParentLocalFolder = Path.GetDirectoryName(LocalName);
 				if (!Directory.Exists(fileParentLocalFolder))
