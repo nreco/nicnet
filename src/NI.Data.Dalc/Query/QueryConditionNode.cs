@@ -29,14 +29,17 @@ namespace NI.Data.Dalc {
 
 		public IQueryValue LValue {
 			get { return _LValue; }
+			set { _LValue = value; }
 		}
 
 		public Conditions Condition {
 			get { return _Condition; }
+			set { _Condition = value; }
 		} 
 	
 		public IQueryValue RValue {
 			get { return _RValue; }
+			set { _RValue = value; }
 		}
 		
 		public override IEnumerable Nodes { get { return null; } }

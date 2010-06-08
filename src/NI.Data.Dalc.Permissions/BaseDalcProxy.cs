@@ -83,13 +83,48 @@ namespace NI.Data.Dalc.Permissions {
 				Query modifiedQuery = CloneQuery(query);
 				QueryGroupNode newRoot = new QueryGroupNode(GroupType.And);
 				newRoot.Nodes.Add( modifiedQuery.Root );
-				newRoot.Nodes.Add( permissionCondition );
+				newRoot.Nodes.Add( PreparePermissionCondition( permissionCondition, qSourceName) );
 				modifiedQuery.Root = newRoot;
 				return modifiedQuery;
 			}
 			return query;
 		}
-		
+
+		protected IQueryNode PreparePermissionCondition(IQueryNode permissionCondition, QSourceName qSourceName) {
+			// check if alias is used
+			if (!String.IsNullOrEmpty(qSourceName.Alias))
+				FixConditionFieldNames(permissionCondition, qSourceName);
+			return permissionCondition;
+		}
+		protected void FixConditionFieldNames(IQueryNode node, QSourceName qSourceName) {
+			if (node is QueryConditionNode) {
+				QueryConditionNode condNode = (QueryConditionNode)node;
+				condNode.LValue = FixConditionFieldNames(condNode.LValue, qSourceName);
+			}
+			if (node is IQueryGroupNode) {
+				IQueryGroupNode grpNode = (IQueryGroupNode)node;
+				foreach (IQueryNode grpChildNode in grpNode.Nodes)
+					FixConditionFieldNames(grpChildNode, qSourceName);
+			}
+		}
+		protected IQueryValue FixConditionFieldNames(IQueryValue qValue, QSourceName qSourceName) {
+			if (qValue is IQueryFieldValue) {
+				IQueryFieldValue qFld = (IQueryFieldValue)qValue;
+				int dotIdx = qFld.Name.IndexOf('.');
+				if (dotIdx >= 0) {
+					string prefix = qFld.Name.Substring(0, dotIdx);
+					string suffix = qFld.Name.Substring(dotIdx);
+					if (prefix == qSourceName.Name)
+						return new QField(qSourceName.Alias + suffix);
+				}
+			}
+			if (qValue is IQuery) {
+				IQuery q = (IQuery)qValue;
+				FixConditionFieldNames(q.Root, qSourceName);
+			}
+			return qValue;
+		}
+
 		protected object ContextSubject {
 			get {
 				return Thread.CurrentPrincipal.Identity.Name;
