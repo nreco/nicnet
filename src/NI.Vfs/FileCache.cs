@@ -64,6 +64,8 @@ namespace NI.Vfs {
 		public void Put(string key, object value) {
 			byte[] serializedValue = Serializer.ToByteArray(value);
 			IFileObject fileObj = FileSystem.ResolveFile( FileNameProvider.GetString(key) );
+			if (fileObj.Exists())
+				fileObj.Delete();
 			fileObj.CreateFile();
 			using (Stream outStream = fileObj.GetContent().OutputStream)
 				outStream.Write(serializedValue, 0, serializedValue.Length);
