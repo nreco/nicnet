@@ -34,9 +34,15 @@ namespace NI.Common.Globalization {
 		IDecimalProvider _TimeZoneOffsetProvider = null;
 		IDateTimeProvider _DateTimeProvider = null;
 		AdjustDirectionType _AdjustDirection = AdjustDirectionType.From;
-		
+		bool _AutoAdjustDaylightSavingDelta = false;
+
 		public enum AdjustDirectionType {
 			From = 1, To = 2
+		}
+
+		public bool AutoAdjustDaylightSavingDelta {
+			get { return _AutoAdjustDaylightSavingDelta; }
+			set { _AutoAdjustDaylightSavingDelta = value; }
 		}
 		
 		public AdjustDirectionType AdjustDirection {
@@ -60,17 +66,25 @@ namespace NI.Common.Globalization {
 		}
 		
 		public object GetObject(object context) {
-			return GetDateTime(context);
+			DateTime dt = GetDateTime(context);
+			return dt == DateTime.MinValue ? null : (object)dt;
 		}
 
 		public DateTime GetDateTime(object context) {
 			decimal timeZoneOffset = TimeZoneOffsetProvider!=null ? TimeZoneOffsetProvider.GetDecimal(context) : TimeZoneOffset;
-			DateTime dateTime = DateTimeProvider.GetDateTime(context);
+			DateTime dateTime = DateTimeProvider!=null ? 
+				DateTimeProvider.GetDateTime(context) : 
+				(context is DateTime ? (DateTime)context : DateTime.MinValue);
 			if (dateTime==DateTime.MinValue)
 				return dateTime; // minvalue used by datetimeprovider for representing 'null' time
 			
 			decimal localZoneOffset = (decimal)TimeZone.CurrentTimeZone.GetUtcOffset(dateTime).TotalHours;
 			decimal timeZoneDiff = timeZoneOffset-localZoneOffset; // calculate difference between desired timezone and local
+			if (AutoAdjustDaylightSavingDelta) {
+				var daylightChanges = TimeZone.CurrentTimeZone.GetDaylightChanges(dateTime.Year);
+				if (TimeZone.CurrentTimeZone.IsDaylightSavingTime(dateTime))
+					timeZoneDiff += (decimal)daylightChanges.Delta.TotalHours;
+			}
 			return dateTime.AddHours( 
 				AdjustDirection==AdjustDirectionType.From ? - (double)timeZoneDiff : (double)timeZoneDiff); // apply difference
 		}
