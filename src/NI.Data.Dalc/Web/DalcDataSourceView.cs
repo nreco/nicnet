@@ -66,6 +66,8 @@ namespace NI.Data.Dalc.Web {
 			if (arguments.MaximumRows>0)
 				q.RecordCount = arguments.MaximumRows;
 			DataSource.Dalc.Load(ds, q);
+            // store fetched rows count (different from arguments.TotalRowCount: takes into account q.RecordCount)
+            eArgs.FetchedRowCount = ds.Tables[q.SourceName].Rows.Count;
 			// raise event
 			DataSource.OnSelected(this, eArgs);
 
