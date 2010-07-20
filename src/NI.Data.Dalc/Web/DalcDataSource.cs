@@ -219,7 +219,6 @@ namespace NI.Data.Dalc.Web {
 		Query _SelectQuery;
 		DataSet _Data;
 		DataSourceSelectArguments _SelectArgs;
-        int _FetchedRowCount;
 
 		public Query SelectQuery {
 			get { return _SelectQuery; }
@@ -237,8 +236,7 @@ namespace NI.Data.Dalc.Web {
 		}
 
         public int FetchedRowCount {
-            get { return _FetchedRowCount; }
-            set { _FetchedRowCount = value; }
+            get { return Data.Tables[SelectQuery.SourceName].Rows.Count; }
         }
 
 		public DalcDataSourceSelectEventArgs(Query q, DataSourceSelectArguments args, DataSet ds) {
