@@ -102,10 +102,9 @@ namespace NI.Data.Dalc.Web {
 						r[col] = PrepareDataRowValue(values[col.ColumnName]);
 				tbl.Rows.Add(r);
 				DataSource.Dalc.Update(ds, Name);
-				// push back autoincrement field
+				// push back into context all fields
 				foreach (DataColumn c in tbl.Columns)
-					if (c.AutoIncrement)
-						values[c.ColumnName] = r[c.ColumnName];
+					values[c.ColumnName] = r[c];
 				
 			} else {
 				DataSource.Dalc.Insert(values, Name);
@@ -137,14 +136,19 @@ namespace NI.Data.Dalc.Web {
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
 				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
-				EnsureDataSchema(ds.Tables[Name]);
+				var tbl = ds.Tables[Name];
+				EnsureDataSchema(tbl);
 
-				eArgs.AffectedCount = ds.Tables[Name].Rows.Count;
-				foreach (DataRow r in ds.Tables[Name].Rows)
-					foreach (DataColumn col in ds.Tables[Name].Columns)
+				eArgs.AffectedCount = tbl.Rows.Count;
+				foreach (DataRow r in tbl.Rows)
+					foreach (DataColumn col in tbl.Columns)
 						if (values.Contains(col.ColumnName))
 							r[col] = PrepareDataRowValue( values[col.ColumnName] );
 				DataSource.Dalc.Update(ds, Name);
+				// push back into context all fields (if only 1 record is updated)
+				if (tbl.Rows.Count == 1)
+					foreach (DataColumn c in tbl.Columns)
+						values[c.ColumnName] = tbl.Rows[0][c];
 			} else {
 				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
 			}
