@@ -151,13 +151,14 @@ namespace NI.Data.Dalc {
 			Dalc.Update(ds, sourceName);
 		}
 
-		public void Update(IQuery q, IDictionary<string, object> changeset) {
+		public int Update(IQuery q, IDictionary<string, object> changeset) {
 			var tbl = LoadAll(q);
 			foreach (DataRow r in tbl.Rows)
 				foreach (var entry in changeset)
 					if (tbl.Columns.Contains(entry.Key))
 						r[entry.Key] = entry.Value;
 			Update(tbl);
+			return tbl.Rows.Count;
 		}
 
 
