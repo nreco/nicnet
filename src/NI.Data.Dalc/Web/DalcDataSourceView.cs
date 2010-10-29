@@ -56,7 +56,7 @@ namespace NI.Data.Dalc.Web {
 
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, arguments, ds);
 			// raise event
-			DataSource.OnSelecting(this, eArgs);
+			DataSource.OnSelecting(DataSource, eArgs);
 
 			if (arguments.RetrieveTotalRowCount) {
 				arguments.TotalRowCount = DataSource.Dalc.RecordsCount(q.SourceName, q.Root);
@@ -67,7 +67,7 @@ namespace NI.Data.Dalc.Web {
 				q.RecordCount = arguments.MaximumRows;
 			DataSource.Dalc.Load(ds, q);
 			// raise event
-			DataSource.OnSelected(this, eArgs);
+			DataSource.OnSelected(DataSource, eArgs);
 
 			if (ds.Tables[q.SourceName].Rows.Count == 0 && DataSource.InsertMode)
 				ds.Tables[q.SourceName].Rows.Add(ds.Tables[q.SourceName].NewRow());
@@ -87,7 +87,7 @@ namespace NI.Data.Dalc.Web {
 
 		protected override int ExecuteInsert(IDictionary values) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, null, null, values);
-			DataSource.OnInserting(this, eArgs);
+			DataSource.OnInserting(DataSource, eArgs);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
 				// if schema is unknown, lets try to load from datasource
@@ -109,7 +109,7 @@ namespace NI.Data.Dalc.Web {
 			} else {
 				DataSource.Dalc.Insert(values, Name);
 			}
-			DataSource.OnInserted(this, eArgs);
+			DataSource.OnInserted(DataSource, eArgs);
 			return 1;
 		}
 
@@ -131,7 +131,7 @@ namespace NI.Data.Dalc.Web {
 
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, values);
-			DataSource.OnUpdating(this, eArgs);
+			DataSource.OnUpdating(DataSource, eArgs);
 			IQueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
@@ -153,13 +153,13 @@ namespace NI.Data.Dalc.Web {
 				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
 			}
 			// raise event
-			DataSource.OnUpdated(this, eArgs);
+			DataSource.OnUpdated(DataSource, eArgs);
 			return eArgs.AffectedCount;
 		}
 
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, oldValues);
-			DataSource.OnDeleting(this, eArgs);
+			DataSource.OnDeleting(DataSource, eArgs);
 			IQueryNode uidCondition = ComposeUidCondition(keys);
 
 			if (DataSource.DataSetMode) {
@@ -176,7 +176,7 @@ namespace NI.Data.Dalc.Web {
 			}
 
 			// raise event
-			DataSource.OnDeleted(this, eArgs);
+			DataSource.OnDeleted(DataSource, eArgs);
 			return eArgs.AffectedCount;
 		}
 
