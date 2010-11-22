@@ -52,6 +52,15 @@ namespace NI.Data.RelationalExpressions {
 				return base.BuildExpression(node);
 			}
 
+			protected override string BuildGroup(IQueryGroupNode node) {
+				var grp = base.BuildGroup(node);
+				if (node is INamedQueryNode && !String.IsNullOrEmpty( ((INamedQueryNode)node).Name ) ) {
+					return String.Format("(<{0}> {1})", ((INamedQueryNode)node).Name, grp);
+				} else return grp;
+				
+			}
+
+
 			public string BuildQueryString(IQuery q, bool isNested) {
 				string rootExpression = BuildExpression(q.Root);
 				if (rootExpression != null && rootExpression.Length > 0)

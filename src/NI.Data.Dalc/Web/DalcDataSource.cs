@@ -129,7 +129,18 @@ namespace NI.Data.Dalc.Web {
 		}
 
 		public DalcDataSource() { }
-
+		
+		public Query GetSelectQuery(string viewName) {
+			Query q = new Query(viewName == SourceName ? SelectSourceName : viewName);
+			q.Root = Condition;
+			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
+			DataSet ds = DataSetProvider.GetDataSet(viewName);
+			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, selectArgs, ds);
+			// raise event
+			OnSelecting(this, eArgs);
+			return q;
+		}
+		
 		protected override DataSourceView GetView(string viewName) {
 			return new DalcDataSourceView(this, String.IsNullOrEmpty(viewName) ? SourceName : viewName );
 		}
