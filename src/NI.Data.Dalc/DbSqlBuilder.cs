@@ -65,14 +65,14 @@ namespace NI.Data.Dalc
 		public virtual string BuildSelect(IQuery query) {
 			return BuildSelectInternal(query, false);
 		}
-		
-		
+
+
 		public virtual string BuildSort(IQuery query) {
 			// Compose 'order by' part
 			if (query.Sort!=null && query.Sort.Length>0) {
-				string[] sortFields = query.Sort;
+				string[] sortFields = new string[query.Sort.Length];
 				for (int i=0; i<sortFields.Length; i++) {
-					QSortField sortFld = (QSortField)sortFields[i];
+					QSortField sortFld = (QSortField)query.Sort[i];
 					sortFld.Name = BuildValue( sortFld );
 					sortFields[i] = sortFld.ToString();
 				}
@@ -81,7 +81,7 @@ namespace NI.Data.Dalc
 			}
 			return null;
 		}
-		
+
 		public virtual string BuildFields(IQuery query) {
 			// Compose fields part
 			string[] fields = (query.Fields==null || query.Fields.Length==0) ?
