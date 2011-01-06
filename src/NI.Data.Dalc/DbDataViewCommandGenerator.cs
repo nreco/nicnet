@@ -85,7 +85,7 @@ namespace NI.Data.Dalc
 			string whereExpression = BuildWhereExpression( dbSqlBuilder, dataView, query);
 			string fields = dbSqlBuilder.BuildFields(query);
 
-			Hashtable context = new Hashtable();
+			Hashtable context = (query is Query && ((Query)query).ExtendedProperties != null) ? new Hashtable(((Query)query).ExtendedProperties) : new Hashtable();
 			
 			BuildNamedQueryNodeContext(context, query.Root, dbSqlBuilder);
 			

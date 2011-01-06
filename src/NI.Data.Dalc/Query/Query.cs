@@ -13,6 +13,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Runtime.Serialization;
 
 namespace NI.Data.Dalc
@@ -30,6 +31,7 @@ namespace NI.Data.Dalc
 		private int _StartRecord = 0;
 		private int _RecordCount = Int32.MaxValue;
 		private string _SourceName = null;
+		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
 		/// Filter expression root group. Can be null
@@ -71,6 +73,15 @@ namespace NI.Data.Dalc
 		public string SourceName { 
 			get { return _SourceName; }
 			set { _SourceName = value; }
+		}
+		
+		public IDictionary ExtendedProperties {
+			get {
+				if (_ExtendedProperties==null)
+					_ExtendedProperties = new Hashtable();
+				return _ExtendedProperties;
+			}
+			set { _ExtendedProperties = value; }
 		}
 		
 		/*private string _Prefix = String.Empty;
