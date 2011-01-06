@@ -135,6 +135,8 @@ namespace NI.Data.Dalc
 			_RecordCount = q.RecordCount;
 			_Root = q.Root;
 			_Fields = q.Fields;
+			if (q is Query)
+				_ExtendedProperties = ((Query)q).ExtendedProperties;
 		}
 
 		
