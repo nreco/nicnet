@@ -26,16 +26,17 @@ namespace NI.Data.Dalc.SqlClient
 		DbTypeResolver DbTypeResolver;
 		bool TopOptimizationEnabled = false;
 		bool ConstOptimizationEnabled = false;
+		bool NameBracketsEnabled = false;
 		
 		public IDbCommand Command { get { return _Command; } }
-		
 
-		public SqlCommandWrapper(IDbCommand command, DbTypeResolver dbTypeResolver, bool topOptEnabled, bool constOptEnabled)
+		public SqlCommandWrapper(IDbCommand command, DbTypeResolver dbTypeResolver, bool topOptEnabled, bool constOptEnabled, bool nameBraketsEnabled)
 		{
 			_Command = command;
 			DbTypeResolver = dbTypeResolver;
 			TopOptimizationEnabled = topOptEnabled;
 			ConstOptimizationEnabled = constOptEnabled;
+			NameBracketsEnabled = nameBraketsEnabled;
 		}
 		
 		public string GetCmdParameterPlaceholder(string paramName) {
@@ -80,7 +81,7 @@ namespace NI.Data.Dalc.SqlClient
 		}
 
 		public IDbSqlBuilder CreateSqlBuilder() {
-			IDbSqlBuilder builder = new SqlClientDbSqlBuilder(this, TopOptimizationEnabled, ConstOptimizationEnabled);
+			IDbSqlBuilder builder = new SqlClientDbSqlBuilder(this, TopOptimizationEnabled, ConstOptimizationEnabled, NameBracketsEnabled);
 			return builder;
 		}
 			
@@ -93,11 +94,6 @@ namespace NI.Data.Dalc.SqlClient
 			cmd.Transaction = (SqlTransaction) Command.Transaction;
 			return cmd.ExecuteScalar();
 		}
-		
-		
-		
-		
-		
 		
 	}
 }

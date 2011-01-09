@@ -27,6 +27,7 @@ namespace NI.Data.Dalc.SqlClient
 		DbTypeResolver _DbTypeResolver = new DbTypeResolver();
 		bool _TopOptimizationEnabled = false;
 		bool _ConstOptimizationEnabled = false;
+		bool _NameBracketsEnabled = false;
 
 		public DbTypeResolver DbTypeResolver {
 			get { return _DbTypeResolver; }
@@ -47,13 +48,17 @@ namespace NI.Data.Dalc.SqlClient
 			get { return _ConstOptimizationEnabled; }
 			set { _ConstOptimizationEnabled = value; }
 		}
-		
+
+		public bool NameBracketsEnabled {
+			get { return _NameBracketsEnabled; }
+			set { _NameBracketsEnabled = value; }
+		}
 		
 		IDbCommandWrapper IDbCommandWrapperFactory.CreateInstance() {
 			SqlCommand sqlCmd = new SqlCommand();
 			if (CommandTimeout>=0)
 				sqlCmd.CommandTimeout = CommandTimeout;
-			return new SqlCommandWrapper(sqlCmd, DbTypeResolver, TopOptimizationEnabled, ConstOptimizationEnabled);
+			return new SqlCommandWrapper(sqlCmd, DbTypeResolver, TopOptimizationEnabled, ConstOptimizationEnabled, NameBracketsEnabled);
 		}
 
 		IDbDataAdapterWrapper IDbDataAdapterWrapperFactory.CreateInstance() {

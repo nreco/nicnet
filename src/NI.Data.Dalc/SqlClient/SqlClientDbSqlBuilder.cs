@@ -28,19 +28,50 @@ namespace NI.Data.Dalc.SqlClient {
 		protected const string AsciiConstFormatStr = "'{0}'";
 		bool TopOptimization = true;
 		bool ConstOptimization = true;
+		bool UseNameBrackets = false;
 		protected static Regex asciiConstRegex = new Regex("^[-_0-9A-Za-z ,.%]*$", RegexOptions.Singleline|RegexOptions.Compiled);
-		
-		public SqlClientDbSqlBuilder(IDbCommandWrapper cmdWrapper, bool enableTopOpt, bool enableConstOpt) : base(cmdWrapper) {
+		protected const string BracketFormatStr = "[{0}]";
+
+		public SqlClientDbSqlBuilder(IDbCommandWrapper cmdWrapper, bool enableTopOpt, bool enableConstOpt, bool enableNameBrackets) : base(cmdWrapper) {
 			TopOptimization = enableTopOpt;
 			ConstOptimization = enableConstOpt;
+			UseNameBrackets = enableNameBrackets;
 		}
-		
+
+		protected string FormatInBrackets(string s) {
+			string[] parts = s.Split( new[]{'.'}, StringSplitOptions.RemoveEmptyEntries);
+			for (int i=0; i<parts.Length; i++)
+				if (Char.IsLetter(parts[i][0]))
+					parts[i] = String.Format(BracketFormatStr, parts[i]);
+			return String.Join(".", parts);
+		}
+
+		protected override string GetTableName(string sourceName) {
+			if (UseNameBrackets) {
+				QSourceName qSourceName = (QSourceName)sourceName;
+				if (!String.IsNullOrEmpty(qSourceName.Alias))
+					return FormatInBrackets(qSourceName.Name) + " " + qSourceName.Alias;
+				return FormatInBrackets(qSourceName.Name);
+			}
+			return base.GetTableName(sourceName);
+		}		
+
 		protected override string BuildValue(IQueryConstantValue value) {
 			if (ConstOptimization) {
 				if (value.Type==TypeCode.String && (value.Value is string) && IsAsciiConst( (string)value.Value ))
 					return String.Format(AsciiConstFormatStr, value.Value);
 			}
 			return base.BuildValue(value);
+		}
+
+		protected override string BuildValue(IQueryFieldValue fieldValue) {
+			string fldName = base.BuildValue(fieldValue);
+			if (UseNameBrackets) {
+				// additional check: base method may return SQL code for "virtual" field names
+				if (fldName == fieldValue.Name)
+					return FormatInBrackets(fldName);
+			}
+			return fldName;
 		}
 		
 		protected bool IsAsciiConst(string str) {
