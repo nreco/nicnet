@@ -33,6 +33,7 @@ namespace NI.Data.RelationalExpressions
 		IRelExQueryParser _RelExQueryParser = new RelExQueryParser();
 		string _ContextArgumentKey = "arg";
 		IStringListProvider _SortProvider = null;
+        IObjectProvider _ExtendedPropertiesProvider = null;
 
 		
 		/// <summary>
@@ -79,6 +80,16 @@ namespace NI.Data.RelationalExpressions
 			get { return _SortProvider; }
 			set { _SortProvider = value; }
 		}
+
+        /// <summary>
+        /// Get or set query extended properties provider
+        /// </summary>
+        [Dependency(Required = false)]
+        public IObjectProvider ExtendedPropertiesProvider
+        {
+            get { return _ExtendedPropertiesProvider; }
+            set { _ExtendedPropertiesProvider = value; }
+        }
 		
 	
 		public RelExQueryProvider()
@@ -100,8 +111,13 @@ namespace NI.Data.RelationalExpressions
 				Query query = (Query)q;
 				if (SortProvider!=null)
 					query.Sort = SortProvider.GetStringList(context);
+                if (ExtendedPropertiesProvider != null) {
+                    object extPropsObj = ExtendedPropertiesProvider.GetObject(context);
+                    if(extPropsObj is IDictionary)
+                        query.ExtendedProperties = (IDictionary)extPropsObj;
+                }
 			}
-			
+        
 			return q;
 		}
 
