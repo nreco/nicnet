@@ -165,8 +165,7 @@ namespace NI.Data.Dalc {
 			int paramIndex = cmdText.IndexOf(dbParam.ParameterName);
 			if (paramIndex<0)
 				return cmdText += FormatDbParameter(dbParam);
-			cmdText = cmdText.Remove(paramIndex, dbParam.ParameterName.Length);
-			return cmdText.Insert(paramIndex, FormatDbParameterValue( dbParam ) ); 
+			return cmdText.Replace(dbParam.ParameterName, FormatDbParameterValue( dbParam ) ); 
 		}
 
 	}
