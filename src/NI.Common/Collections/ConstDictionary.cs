@@ -5,7 +5,7 @@ using System.Text;
 namespace NI.Common.Collections {
 	
 	[Serializable]
-    public class ConstDictionary : IDictionary {
+    public class ConstDictionary : IDictionary, IEnumerable {
 		object[] ArrKeys;
 		object[] ArrValues;
 		object[] orderedKeys = null;
