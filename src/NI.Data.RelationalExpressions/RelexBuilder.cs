@@ -98,7 +98,10 @@ namespace NI.Data.RelationalExpressions {
 					res = "!" + res;
 				if ((node.Condition & Conditions.Null) == Conditions.Null)
 					rvalue = "null";
-				return String.Format("{0}{1}{2}", lvalue, res, rvalue);
+				string result = String.Format("{0}{1}{2}", lvalue, res, rvalue);
+				if (node is INamedQueryNode && !String.IsNullOrEmpty( ((INamedQueryNode)node).Name ) )
+					result = String.Format("(<{0}> {1})", ((INamedQueryNode)node).Name, result);
+				return result;
 			}
 			
 
