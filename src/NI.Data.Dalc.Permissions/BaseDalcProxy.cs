@@ -66,21 +66,11 @@ namespace NI.Data.Dalc.Permissions {
 		public BaseDalcProxy() {
 		}
 		
-		protected Query CloneQuery(IQuery query) {
-			Query q = new Query(query.SourceName);
-			q.Fields = query.Fields;
-			q.Root = query.Root;
-			q.RecordCount = query.RecordCount;
-			q.StartRecord = query.StartRecord;
-			q.Sort = query.Sort;
-			return q;
-		}
-		
 		protected IQuery AddPermissionCondition(DalcOperation operation, IQuery query) {
 			QSourceName qSourceName = (QSourceName)query.SourceName;
 			IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextSubject, operation, qSourceName.Name);
 			if (permissionCondition!=null) {
-				Query modifiedQuery = CloneQuery(query);
+				Query modifiedQuery = new Query(query);
 				QueryGroupNode newRoot = new QueryGroupNode(GroupType.And);
 				newRoot.Nodes.Add( modifiedQuery.Root );
 				newRoot.Nodes.Add( PreparePermissionCondition( permissionCondition, qSourceName) );
