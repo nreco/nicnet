@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Diagnostics;
 using System.Text;
 using System.Data;
 using System.Data.Common;
@@ -98,6 +99,14 @@ namespace NI.Data.Dalc {
 		public BaseDbDalcRowTrigger(string sourceName) {
 			MatchSourceName = sourceName;
 		}
+
+		protected virtual void LogDebug(string s) {
+			Debug.Write(s);
+		}
+
+		protected virtual void LogError(string s) {
+			Trace.TraceError(s);
+		}		
 
 		private EventType GetBeforeEventType(StatementType statement) {
 			switch (statement) {

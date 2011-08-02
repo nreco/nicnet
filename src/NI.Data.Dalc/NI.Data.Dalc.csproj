@@ -293,6 +293,8 @@
     <Compile Include="ThreadsafeDalc.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />
+    <Compile Include="Web\DalcCacheDependency.cs" />
+    <Compile Include="Web\DalcCacheDependencyDataRowTrigger.cs" />
     <Compile Include="XmlDataSetProvider.cs" />
     <EmbeddedResource Include="DbDALC.resx">
       <DependentUpon>DbDALC.cs</DependentUpon>
