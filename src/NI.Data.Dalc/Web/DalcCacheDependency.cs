@@ -23,11 +23,15 @@ namespace NI.Data.Dalc.Web {
 				DependencyPool.Add(this);
 			}
 		}
-
+		
+		public virtual bool IsMatch(string dataSource, string sourceName) {
+			return DataSource==dataSource && Array.IndexOf(SourceNames,sourceName)>=0;
+		}
+		
 		public static void NotifyChanged(string dataSource, string sourceName) {
 			for (int i = 0; i < DependencyPool.Count; i++) {
 				var dep = DependencyPool[i];
-				if (!dep.Disposed && dep.DataSource==dataSource && Array.IndexOf(dep.SourceNames,sourceName)>=0)
+				if (!dep.Disposed && dep.IsMatch(dataSource, sourceName) )
 					dep.NotifyDependencyChanged(dep, EventArgs.Empty);
 			}
 		}
