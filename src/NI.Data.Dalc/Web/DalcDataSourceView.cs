@@ -58,9 +58,22 @@ namespace NI.Data.Dalc.Web {
 			// raise event
 			DataSource.OnSelecting(DataSource, eArgs);
 
-			if (arguments.RetrieveTotalRowCount) {
-				arguments.TotalRowCount = DataSource.Dalc.RecordsCount(q.SourceName, q.Root);
-			}
+            if (arguments.RetrieveTotalRowCount) {
+                var cntResult = new Hashtable();
+                var cntQuery = new Query(q);
+                cntQuery.Sort = null;
+                cntQuery.StartRecord = 0;
+                cntQuery.RecordCount = 1;
+                cntQuery.Fields = new string[] { "count(*)" };
+                if (DataSource.Dalc.LoadRecord(cntResult, cntQuery)) {
+                    foreach (object v in cntResult.Values) {
+                        arguments.TotalRowCount = Convert.ToInt32(v);
+                        break;
+                    }
+                } else{
+                    arguments.TotalRowCount = 0;
+                }
+            }
 
 			q.StartRecord = arguments.StartRowIndex;
 			if (arguments.MaximumRows>0)
