@@ -177,15 +177,15 @@ namespace NI.Data.Dalc.Web {
 
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
-				EnsureDataSchema(ds.Tables[Name]);
-				eArgs.AffectedCount = ds.Tables[Name].Rows.Count;
-				foreach (DataRow r in ds.Tables[Name].Rows)
+				DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, uidCondition));
+				EnsureDataSchema(ds.Tables[eArgs.SourceName]);
+				eArgs.AffectedCount = ds.Tables[eArgs.SourceName].Rows.Count;
+				foreach (DataRow r in ds.Tables[eArgs.SourceName].Rows)
 					r.Delete();
-				DataSource.Dalc.Update(ds, Name);
+				DataSource.Dalc.Update(ds, eArgs.SourceName);
 
 			} else {
-				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(Name, uidCondition));
+				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(eArgs.SourceName, uidCondition));
 			}
 
 			// raise event
