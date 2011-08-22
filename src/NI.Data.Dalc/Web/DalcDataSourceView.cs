@@ -104,9 +104,9 @@ namespace NI.Data.Dalc.Web {
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
 				// if schema is unknown, lets try to load from datasource
-				if (!ds.Tables.Contains(Name))
-					DataSource.Dalc.Load(ds, new Query(Name, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
-				DataTable tbl = ds.Tables[Name];
+				if (!ds.Tables.Contains(eArgs.SourceName))
+					DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
+				DataTable tbl = ds.Tables[eArgs.SourceName];
 				EnsureDataSchema(tbl);
 				
 				DataRow r = tbl.NewRow();
@@ -114,13 +114,13 @@ namespace NI.Data.Dalc.Web {
 					if (values.Contains(col.ColumnName))
 						r[col] = PrepareDataRowValue(values[col.ColumnName]);
 				tbl.Rows.Add(r);
-				DataSource.Dalc.Update(ds, Name);
+				DataSource.Dalc.Update(ds, eArgs.SourceName);
 				// push back into context all fields
 				foreach (DataColumn c in tbl.Columns)
 					values[c.ColumnName] = r[c];
 				
 			} else {
-				DataSource.Dalc.Insert(values, Name);
+				DataSource.Dalc.Insert(values, eArgs.SourceName);
 			}
 			DataSource.OnInserted(DataSource, eArgs);
 			return 1;
@@ -148,8 +148,8 @@ namespace NI.Data.Dalc.Web {
 			IQueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				DataSource.Dalc.Load(ds, new Query(Name, uidCondition));
-				var tbl = ds.Tables[Name];
+				DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, uidCondition));
+				var tbl = ds.Tables[eArgs.SourceName];
 				EnsureDataSchema(tbl);
 
 				eArgs.AffectedCount = tbl.Rows.Count;
@@ -157,13 +157,13 @@ namespace NI.Data.Dalc.Web {
 					foreach (DataColumn col in tbl.Columns)
 						if (values.Contains(col.ColumnName))
 							r[col] = PrepareDataRowValue( values[col.ColumnName] );
-				DataSource.Dalc.Update(ds, Name);
+				DataSource.Dalc.Update(ds, eArgs.SourceName);
 				// push back into context all fields (if only 1 record is updated)
 				if (tbl.Rows.Count == 1)
 					foreach (DataColumn c in tbl.Columns)
 						values[c.ColumnName] = tbl.Rows[0][c];
 			} else {
-				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(Name, uidCondition));
+				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(eArgs.SourceName, uidCondition));
 			}
 			// raise event
 			DataSource.OnUpdated(DataSource, eArgs);
