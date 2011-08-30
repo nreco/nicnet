@@ -166,14 +166,18 @@ namespace NI.Data.Dalc
 		/// <returns>Success flag</returns>
 		public bool LoadRecord(IDictionary data, IQuery query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
-				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
-			
-			string whereExpression = BuildExpression( query.Root );
-			string sortExpression = BuildSort( query );
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
-			if (result.Length==0) return false;
-			foreach (DataColumn c in PersistedDS.Tables[query.SourceName].Columns)
-				data[ c.ColumnName ] = result[0][ c.ColumnName ];
+				throw new Exception("Persisted dataset does not contain table with name " + query.SourceName);
+
+			string whereExpression = BuildExpression(query.Root);
+			string sortExpression = BuildSort(query);
+			DataRow[] result = PersistedDS.Tables[query.SourceName].Select(whereExpression, sortExpression);
+			if (result.Length == 0) return false;
+			if (query.Fields.Length > 0 && query.Fields[0].ToLower() == "count(*)") {
+				data[query.Fields[0]] = result.Length;
+			} else {
+				foreach (DataColumn c in PersistedDS.Tables[query.SourceName].Columns)
+					data[c.ColumnName] = result[0][c.ColumnName];
+			}
 			return true;
 		}
 		
