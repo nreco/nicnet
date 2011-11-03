@@ -66,6 +66,9 @@ namespace NI.Data.RelationalExpressions {
 				if (rootExpression != null && rootExpression.Length > 0)
 					rootExpression = String.Format("({0})", rootExpression);
 				string fieldExpression = q.Fields != null ? String.Join(",", q.Fields) : "*";
+				if (q.Sort != null && q.Sort.Length > 0) {
+					fieldExpression = String.Format("{0};{1}", fieldExpression, String.Join(",", q.Sort));
+				}
 				string limitExpression = isNested || (q.StartRecord==0 && q.RecordCount==Int32.MaxValue) ? 
 					String.Empty : String.Format("{{{0},{1}}}", q.StartRecord, q.RecordCount);
 				return String.Format("{0}{1}[{2}]{3}", q.SourceName, rootExpression,
