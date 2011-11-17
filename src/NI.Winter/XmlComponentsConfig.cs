@@ -91,7 +91,7 @@ namespace NI.Winter
 			xmlDoc.Validate(new ValidationEventHandler(ValidationCallBack));
 			#endif
 			
-			this.Load( xmlDoc.SelectSingleNode("/components") );
+			this.Load( xmlDoc.DocumentElement );
 		}
 
 
@@ -103,11 +103,7 @@ namespace NI.Winter
 		
 		object IConfigurationSectionHandler.Create(object parent, object input, XmlNode section) {
 			try {
-				StringBuilder xmlBuiler = new StringBuilder();
-				xmlBuiler.Append("<components>");
-				xmlBuiler.Append( section.InnerXml );
-				xmlBuiler.Append("</components>");
-				XmlComponentsConfig config = new XmlComponentsConfig(xmlBuiler.ToString(), Preprocessor); 
+				XmlComponentsConfig config = new XmlComponentsConfig(section.OuterXml, Preprocessor); 
 				return config;
 			} catch (Exception ex) {
 				throw new ConfigurationException( ex.Message, ex);

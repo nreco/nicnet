@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 using System.ComponentModel;
 
@@ -25,9 +26,20 @@ namespace NI.Winter
 	public class ComponentsConfig : Component, IComponentsConfig
 	{
 		ComponentInitInfo[] Components;
+		IDictionary<string,ComponentInitInfo> ComponentsByName;
+		
 		bool _DefaultLazyInit = false;
+		bool _StrictComponentNames = false;
 		string _Description = null;
-	
+		
+		/// <summary>
+		/// Enables strict mode for component names (duplicate names will cause an exception)
+		/// </summary>
+		public bool StrictComponentNames {
+			get { return _StrictComponentNames; }
+			set { _StrictComponentNames = value; }
+		}
+		
 		/// <summary>
 		/// Default value of lazy init flag for components in this collection
 		/// False by default
@@ -42,13 +54,15 @@ namespace NI.Winter
 		
 		public ComponentsConfig()
 		{
-
+			
 		}
 		
 		public void Load(XmlNode componentsNode) {
 			// extract default lazy init value
 			if (componentsNode.Attributes["default-lazy-init"]!=null)
 				_DefaultLazyInit = Convert.ToBoolean( componentsNode.Attributes["default-lazy-init"].Value );
+			if (componentsNode.Attributes["strict-names"] != null)
+				StrictComponentNames = Convert.ToBoolean(componentsNode.Attributes["strict-names"].Value);
 		
 			// extract description value
 			XmlNode descriptionNode = componentsNode.SelectSingleNode("description");
@@ -57,9 +71,23 @@ namespace NI.Winter
 			// build components info collection
 			XmlNodeList componentNodes = componentsNode.SelectNodes("component");
 			Components = new ComponentInitInfo[componentNodes.Count];
-			
-			for (int i=0; i<componentNodes.Count; i++)
-				Components[i] = new ComponentInitInfo( componentNodes[i], this );
+
+			ComponentsByName = new Dictionary<string, ComponentInitInfo>();
+			for (int i=0; i<componentNodes.Count; i++) {
+				var componentInfo = new ComponentInitInfo( componentNodes[i], this );;
+				Components[i] = componentInfo;
+
+				if (componentInfo.Name!=null) {
+					if (ComponentsByName.ContainsKey(componentInfo.Name)) {
+						if (StrictComponentNames)
+							throw new System.Configuration.ConfigurationException(
+								String.Format("Duplicate component name is found: {0}", componentInfo.Name), componentNodes[i]);
+					} else {
+						ComponentsByName[ componentInfo.Name ] = componentInfo;
+					}
+				}
+				
+			}
 			
 			// initialize components info
 			for (int i=0; i<componentNodes.Count; i++)
@@ -74,10 +102,7 @@ namespace NI.Winter
 		
 		public IComponentInitInfo this[string name] {
 			get {
-				for (int i=0; i<Components.Length; i++)
-					if (Components[i]!=null && Components[i].Name==name)
-						return Components[i];
-				return null;
+				return ComponentsByName.ContainsKey(name) ? ComponentsByName[name] : null;
 			}
 		}
 		
