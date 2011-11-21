@@ -97,9 +97,16 @@ namespace NI.Data.Dalc
 			diffProcessor.DiffHandler = diffHandler;
 			diffProcessor.Sync( ds.Tables[tableName].Rows, PersistedDS.Tables[tableName].Rows );
 
-			foreach (DataRow r in diffHandler.ForImport)
-				PersistedDS.Tables[tableName].ImportRow(r);
-			
+			foreach (DataRow r in diffHandler.ForImport) {
+				DataRow rToImport = PersistedDS.Tables[tableName].NewRow();
+				for (int i = 0; i < PersistedDS.Tables[tableName].Columns.Count; ++i) {
+					var c = PersistedDS.Tables[tableName].Columns[i];
+					if (!c.AutoIncrement && Array.IndexOf(c.Table.PrimaryKey, c) < 0) {
+						rToImport[c.ColumnName] = r[c.ColumnName];
+					}
+				}
+				PersistedDS.Tables[tableName].Rows.Add(rToImport);
+			}
 			PersistedDS.Tables[tableName].AcceptChanges();
 			ds.Tables[tableName].AcceptChanges();
 		}
@@ -265,6 +272,10 @@ namespace NI.Data.Dalc
 			/// Compare two elements
 			/// </summary>
 			public int Compare(object arg1, object arg2) {
+				// if we are adding the row it cannot be present in the destination, so it isn't equal to any row in the destination
+				if (arg1 is DataRow && ((DataRow)arg1).RowState == DataRowState.Added) {
+					return 1;
+				}
 				return ExtractUid(arg1).CompareTo( ExtractUid(arg2) );
 			}
 		
