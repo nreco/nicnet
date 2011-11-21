@@ -102,6 +102,8 @@ namespace NI.Winter
 		
 		public IComponentInitInfo this[string name] {
 			get {
+				if (name==null)
+					return null; // legacy compatibility behavour
 				return ComponentsByName.ContainsKey(name) ? ComponentsByName[name] : null;
 			}
 		}
