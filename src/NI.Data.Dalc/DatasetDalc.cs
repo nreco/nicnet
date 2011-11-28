@@ -101,7 +101,7 @@ namespace NI.Data.Dalc
 				DataRow rToImport = PersistedDS.Tables[tableName].NewRow();
 				for (int i = 0; i < PersistedDS.Tables[tableName].Columns.Count; ++i) {
 					var c = PersistedDS.Tables[tableName].Columns[i];
-					if (!c.AutoIncrement && Array.IndexOf(c.Table.PrimaryKey, c) < 0) {
+					if (!c.AutoIncrement) {
 						rToImport[c.ColumnName] = r[c.ColumnName];
 					}
 				}
