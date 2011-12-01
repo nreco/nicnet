@@ -273,7 +273,7 @@ namespace NI.Data.Dalc
 			/// </summary>
 			public int Compare(object arg1, object arg2) {
 				// if we are adding the row it cannot be present in the destination, so it isn't equal to any row in the destination
-				if (arg1 is DataRow && ((DataRow)arg1).RowState == DataRowState.Added) {
+				if (arg1 is DataRow && (((DataRow)arg1).RowState == DataRowState.Added || ((DataRow)arg1).RowState == DataRowState.Detached)) {
 					return 1;
 				}
 				return ExtractUid(arg1).CompareTo( ExtractUid(arg2) );
