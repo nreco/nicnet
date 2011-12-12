@@ -41,7 +41,7 @@ namespace NI.Data.Dalc.SqlClient {
 		protected string FormatInBrackets(string s) {
 			string[] parts = s.Split( new[]{'.'}, StringSplitOptions.RemoveEmptyEntries);
 			for (int i=0; i<parts.Length; i++)
-				if (Char.IsLetter(parts[i][0]))
+				if (parts[i][0] != '[' && !Char.IsDigit(parts[i][0]))
 					parts[i] = String.Format(BracketFormatStr, parts[i]);
 			return String.Join(".", parts);
 		}
@@ -68,11 +68,16 @@ namespace NI.Data.Dalc.SqlClient {
 			string fldName = base.BuildValue(fieldValue);
 			if (UseNameBrackets) {
 				// additional check: base method may return SQL code for "virtual" field names
-				if (fldName == fieldValue.Name)
+				if (fldName == fieldValue.Name && !IsSqlExpression(fldName))
 					return FormatInBrackets(fldName);
 			}
 			return fldName;
 		}
+		
+		protected bool IsSqlExpression(string fieldName) {
+			return fieldName.IndexOfAny(new[] {'(', ')', '+', '-', '*', '/', ' '})>=0;
+		}
+		
 		
 		protected bool IsAsciiConst(string str) {
 			if (str.Length>=50)
