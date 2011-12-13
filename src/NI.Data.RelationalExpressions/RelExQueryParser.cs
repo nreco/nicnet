@@ -24,6 +24,12 @@ namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// </summary>
+	public class RelExParseException : ApplicationException {
+		public RelExParseException() : base() {}
+		public RelExParseException(string message) : base(message) {}
+		public RelExParseException(string message, Exception innerException) : base(message, innerException) {}
+	}
+	
 	public class RelExQueryParser : IRelExQueryParser, IRelExQueryNodeParser
 	{
 		static readonly string[] nameGroups = new string[] { "and", "or"};
@@ -139,7 +145,7 @@ namespace NI.Data.RelationalExpressions
 					if (lexemType==LexemType.Unknown)
 						lexemType=LexemType.Constant;
 					if (lexemType!=LexemType.Name && lexemType!=LexemType.Constant && lexemType!=LexemType.QuotedConstant)
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1}", startIdx, s ) );
 				} else if (s[endIdx]==charQuote) {
 					if (lexemType==LexemType.Unknown)
@@ -166,7 +172,7 @@ namespace NI.Data.RelationalExpressions
 			
 			if (lexemType==LexemType.Unknown) return LexemType.Stop;
 			if (lexemType==LexemType.Constant)
-				throw new Exception(
+				throw new RelExParseException(
 					String.Format("Unterminated constant (position: {0}, expression: {1}", startIdx, s ) );
 			return lexemType;
 		}
@@ -254,7 +260,7 @@ namespace NI.Data.RelationalExpressions
 			int endIdx;
 			IQueryValue qValue = ParseInternal(relEx, 0, out endIdx );
 			if (!(qValue is IQuery)) 
-				throw new Exception("Invalid expression: result is not a query");
+				throw new RelExParseException("Invalid expression: result is not a query");
 			IQuery q = (IQuery)qValue;
 			if (QueryModifier!=null)
 				q = QueryModifier.Modify(q);
@@ -370,7 +376,7 @@ namespace NI.Data.RelationalExpressions
 					// read ')'
 					nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 					if (nextLexemType!=LexemType.Delimiter || GetLexem(input, endIdx,nextEndIdx)!=")")
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 					
 					// read next lexem
@@ -435,7 +441,7 @@ namespace NI.Data.RelationalExpressions
 					nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 					nextLexem = GetLexem(input, endIdx, nextEndIdx);
 					if (nextLexemType!=LexemType.Constant)
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 					q.StartRecord = Int32.Parse(nextLexem);
 					// read comma
@@ -443,7 +449,7 @@ namespace NI.Data.RelationalExpressions
 					nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 					nextLexem = GetLexem(input, endIdx, nextEndIdx);
 					if (nextLexemType!=LexemType.Delimiter || nextLexem!=",")
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 						
 					// read record count
@@ -451,7 +457,7 @@ namespace NI.Data.RelationalExpressions
 					nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 					nextLexem = GetLexem(input, endIdx, nextEndIdx);
 					if (nextLexemType!=LexemType.Constant)
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 					q.RecordCount = Int32.Parse(nextLexem);				
 					
@@ -460,7 +466,7 @@ namespace NI.Data.RelationalExpressions
 					nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 					nextLexem = GetLexem(input, endIdx, nextEndIdx);
 					if (nextLexemType!=LexemType.Delimiter || nextLexem!="}")
-						throw new Exception(
+						throw new RelExParseException(
 							String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 
 					endIdx = nextEndIdx;
@@ -472,7 +478,7 @@ namespace NI.Data.RelationalExpressions
 				return q;
 			}
 			
-			throw new Exception(
+			throw new RelExParseException(
 				String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 		}
 
@@ -485,7 +491,7 @@ namespace NI.Data.RelationalExpressions
 				startIdx = endIdx;
 				lexemType = GetLexemType(input, startIdx, out endIdx);
 				if (lexemType!=LexemType.Name && lexemType!=LexemType.Constant && lexemType!=LexemType.QuotedConstant)
-					throw new Exception(
+					throw new RelExParseException(
 						String.Format("Invalid syntax - node name expected (position: {0}, expression: {1})", startIdx, input ) );
 				nodeName = GetLexem(input, startIdx, endIdx);
 				startIdx = endIdx;
@@ -493,7 +499,7 @@ namespace NI.Data.RelationalExpressions
 				lexemType = GetLexemType(input, startIdx, out endIdx);
 				lexem = GetLexem(input, startIdx, endIdx);
 				if (lexemType!=LexemType.Delimiter || lexem!=">")
-					throw new Exception(
+					throw new RelExParseException(
 						String.Format("Invalid syntax (position: {0}, expression: {1})", startIdx, input ) );
 			} else {
 				endIdx = startIdx; 
@@ -534,7 +540,7 @@ namespace NI.Data.RelationalExpressions
 				// read ')'
 				lexemType = GetLexemType(input, endIdx, out nextEndIdx);
 				if (lexemType!=LexemType.Delimiter || GetLexem(input,endIdx,nextEndIdx)!=")")
-					throw new Exception(
+					throw new RelExParseException(
 						String.Format("Invalid syntax (position: {0}, expression: {1})", endIdx, input ) );
 				endIdx = nextEndIdx;
 			} else {
@@ -594,7 +600,7 @@ namespace NI.Data.RelationalExpressions
 
 			LexemType nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 			if (!GetCondition(nextLexemType, input, endIdx, ref nextEndIdx, ref conditions))
-				throw new Exception(
+				throw new RelExParseException(
 					String.Format("Invalid syntax (position: {0}, expression: {1})", startIdx, input ) );
 
 			IQueryValue rightValue = ParseInternal(input, nextEndIdx, out endIdx);
@@ -603,7 +609,7 @@ namespace NI.Data.RelationalExpressions
 				if ( (conditions & Conditions.Equal)!=0 )
 					node = new QueryConditionNode( leftValue, Conditions.Null | (conditions & ~Conditions.Equal), null);
 				else
-					throw new Exception(
+					throw new RelExParseException(
 						String.Format("Invalid syntax - such condition cannot be used with 'null' (position: {0}, expression: {1})", startIdx, input ) );
 			} else
 				node = new QueryConditionNode( leftValue, conditions, rightValue);
