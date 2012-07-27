@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C# Express 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Examples.Dalc", "NI.Examples.Dalc\NI.Examples.Dalc.csproj", "{F558B3E3-BB9C-4709-ACF6-69F205D827F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Examples.Vfs", "NI.Examples.Vfs\NI.Examples.Vfs.csproj", "{951DCACD-D565-498C-92B3-67E8E668B848}"
