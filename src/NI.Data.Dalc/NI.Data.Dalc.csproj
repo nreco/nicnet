@@ -28,7 +28,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>http://localhost/NI.Data.Dalc/</PublishUrl>
     <Install>true</Install>
@@ -236,7 +236,17 @@
     <Compile Include="DbDalcProxy.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Linq\DalcData.cs" />
+    <Compile Include="Linq\DalcLinqExtensions.cs" />
+    <Compile Include="Linq\DalcRecord.cs" />
+    <Compile Include="Linq\QueryProvider.cs" />
     <Compile Include="ObjectQueryConditionEvaluator.cs" />
+    <Compile Include="Odbc\OdbcAdapterWrapper.cs" />
+    <Compile Include="Odbc\OdbcCommandWrapper.cs" />
+    <Compile Include="Odbc\OdbcFactory.cs" />
+    <Compile Include="OleDb\OleDbAdapterWrapper.cs" />
+    <Compile Include="OleDb\OleDbCommandWrapper.cs" />
+    <Compile Include="OleDb\OleDbFactory.cs" />
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -288,9 +298,7 @@
     <Compile Include="SqlClient\SqlCommandWrapper.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SqlClient\SqlFactory.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="SqlClient\SqlFactory.cs" />
     <Compile Include="SubstQueryModifier.cs" />
     <Compile Include="ThreadsafeDalc.cs" />
     <Compile Include="Web\DalcDataSource.cs" />

@@ -21,7 +21,7 @@ using System.ComponentModel;
 namespace NI.Data.Dalc.SqlClient
 {
 
-	public class SqlFactory : Component, IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
+	public class SqlFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
 		int _CommantTimeout = -1;
 		DbTypeResolver _DbTypeResolver = new DbTypeResolver();
