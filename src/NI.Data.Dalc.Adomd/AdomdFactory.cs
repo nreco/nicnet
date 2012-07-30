@@ -21,7 +21,7 @@ using System.ComponentModel;
 namespace NI.Data.Dalc.Adomd
 {
 
-	public class AdomdFactory : Component, IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
+	public class AdomdFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
 		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
 

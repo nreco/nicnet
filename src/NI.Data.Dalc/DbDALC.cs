@@ -41,7 +41,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set database commands generator
 		/// </summary>
-		[Dependency]
 		public IDbCommandGenerator CommandGenerator {
 			get { return _CommandGenerator; }
 			set { _CommandGenerator = value; }
@@ -50,7 +49,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set adapter wrapper factory component
 		/// </summary>
-		[Dependency]
 		public IDbDataAdapterWrapperFactory AdapterWrapperFactory {
 			get { return _AdapterWrapperFactory; }
 			set { _AdapterWrapperFactory = value;	}
@@ -59,7 +57,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set database connection
 		/// </summary>
-		[Dependency]
 		public virtual IDbConnection Connection {
 			get { return _Connection; }
 			set { _Connection = value; }
@@ -68,7 +65,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Database transaction object
 		/// </summary>
-		[Dependency(Required=false)]
 		public virtual IDbTransaction Transaction {
 			get {
 				return _Transaction;
@@ -76,7 +72,6 @@ namespace NI.Data.Dalc {
 			set { _Transaction = value; }
 		}
 		
-		[Dependency(Required=false)]
 		public IDbDalcEventsMediator DbDalcEventsMediator {
 			get { return _DbDalcEventsMediator; }
 			set { _DbDalcEventsMediator = value; }

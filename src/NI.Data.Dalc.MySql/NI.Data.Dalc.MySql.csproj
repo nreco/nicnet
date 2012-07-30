@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NI.Data.Dalc.MySql</RootNamespace>
     <AssemblyName>NI.Data.Dalc.MySql</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -68,9 +68,7 @@
   <ItemGroup>
     <Compile Include="MySqlAdapterWrapper.cs" />
     <Compile Include="MySqlCommandWrapper.cs" />
-    <Compile Include="MySqlFactory.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="MySqlFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -82,12 +80,6 @@
       <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
       <Name>NI.Data.Dalc</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="MySqlFactory.resx">
-      <DependentUpon>MySqlFactory.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

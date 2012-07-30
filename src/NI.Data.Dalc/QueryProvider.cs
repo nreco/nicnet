@@ -29,7 +29,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set underlying object provider
 		/// </summary>
-		[Dependency]
 		public IObjectProvider UnderlyingObjectProvider {
 			get { return _UnderlyingObjectProvider; }
 			set { _UnderlyingObjectProvider = value; }
@@ -38,7 +37,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set query modifier
 		/// </summary>
-		[Dependency(Required=false)]
 		public IQueryModifier QueryModifier {
 			get { return _QueryModifier; }
 			set { _QueryModifier = value; }

@@ -35,7 +35,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set relational expressions used to load data
 		/// </summary>
-		[Dependency]
 		public IQueryProvider[] QueryProviders {
 			get { return _QueryProviders; }
 			set { _QueryProviders = value; }
@@ -44,7 +43,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set DALC component to load data from
 		/// </summary>
-		[Dependency]
 		public IDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }

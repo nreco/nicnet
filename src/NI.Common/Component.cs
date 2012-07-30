@@ -27,7 +27,6 @@ namespace NI.Common
 		/// <summary>
 		/// Get or set dependency resolver component
 		/// </summary>
-		[Dependency(Required=false)]
 		public IDependencyResolver DependencyResolver {
 			get { return _DependencyResolver; }
 			set { _DependencyResolver = value; }

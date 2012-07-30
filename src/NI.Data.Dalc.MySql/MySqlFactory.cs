@@ -22,7 +22,7 @@ using NI.Common.Providers;
 namespace NI.Data.Dalc.MySql
 {
 
-	public class MySqlFactory : Component, IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
+	public class MySqlFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
 		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
         IObjectProvider _CmdParameterPlaceholderProvider;

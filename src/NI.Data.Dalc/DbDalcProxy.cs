@@ -27,7 +27,6 @@ namespace NI.Data.Dalc
         /// <summary>
         /// Underlying dalc
         /// </summary>
-        [Dependency]
         public IDbDalc UnderlyingDalc {
             get { return _UnderlyingDalc; }
             set { _UnderlyingDalc = value; }

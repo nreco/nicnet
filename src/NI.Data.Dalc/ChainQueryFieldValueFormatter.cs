@@ -25,7 +25,6 @@ namespace NI.Data.Dalc
 	{
 		IQueryFieldValueFormatter[] _Formatters;
 		
-		[Dependency]
 		public IQueryFieldValueFormatter[] Formatters {
 			get { return _Formatters; }
 			set { _Formatters = value; }

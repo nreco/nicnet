@@ -30,7 +30,6 @@ namespace NI.Data.Dalc
 		#region Dependencies
 
 		protected IDataSetProvider _UnderlyingDataSetProvider;
-		[Dependency]
 		public IDataSetProvider UnderlyingDataSetProvider
 		{
 			get { return _UnderlyingDataSetProvider; }
@@ -43,7 +42,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// If DataSetName is set, it overrides the name of the dataset provided by UnderlyingDataSetProvider
 		/// </summary>
-		[Dependency(Required = false)]
 		public string DataSetName
 		{
 			get { return _DataSetName; }

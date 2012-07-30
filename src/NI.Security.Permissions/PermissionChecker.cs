@@ -30,13 +30,12 @@ namespace NI.Security.Permissions
 		IPermissionAclEntry[] _AllowAclEntries = new IPermissionAclEntry[0];
 		IPermissionAclEntry[] _DenyAclEntries = new IPermissionAclEntry[0];
 		
-		[Dependency]
+
 		public IPermissionAclEntry[] AllowAclEntries {
 			get { return _AllowAclEntries; }
 			set { _AllowAclEntries = value; }
 		}
 		
-		[Dependency]
 		public IPermissionAclEntry[] DenyAclEntries {
 			get { return _DenyAclEntries; }
 			set { _DenyAclEntries = value; }
@@ -45,7 +44,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set check result in case when neither deny nor allow entry is found.
 		/// </summary>
-		[Dependency(Required=false)]
 		public bool DefaultCheckResult {
 			get { return _DefaultCheckResult; }
 			set { _DefaultCheckResult = value; }

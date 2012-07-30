@@ -36,7 +36,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set explicit permissions list for this ACL entry (obsolete, use provider instead)
 		/// </summary>
-		[Dependency(Required=false)]
 		public Permission[] Permissions {
 			get { return _Permissions; }
 			set { _Permissions = value; }
@@ -45,7 +44,6 @@ namespace NI.Security.Permissions
         /// <summary>
         /// Get or set permissions list provider
         /// </summary>
-        [Dependency(Required=false)]
         public IPermissionListProvider PermissionListProvider {
             get { return _PermissionListProvider; }
             set { _PermissionListProvider = value;  }
@@ -54,7 +52,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Subject groups list provider by subject passed as context
 		/// </summary>
-		[Dependency]
 		public IObjectListProvider SubjectGroupListProvider {
 			get { return _SubjectGroupListProvider; }
 			set { _SubjectGroupListProvider = value; }
@@ -63,7 +60,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Operation groups list provider by operation passed as context
 		/// </summary>
-		[Dependency]
 		public IObjectListProvider OperationGroupListProvider {
 			get { return _OperationGroupListProvider; }
 			set { _OperationGroupListProvider = value; }
@@ -71,8 +67,7 @@ namespace NI.Security.Permissions
 		
 		/// <summary>
 		/// Object groups list provider by object passed as context
-		/// </summary>		
-		[Dependency]
+		/// </summary>
 		public IObjectListProvider ObjectGroupListProvider {
 			get { return _ObjectGroupListProvider; }
 			set { _ObjectGroupListProvider = value; }

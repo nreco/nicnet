@@ -36,7 +36,6 @@ namespace NI.Common.Expressions {
         /// <summary>
         /// Get or set expression descriptors
         /// </summary>
-        [Dependency]
         public IExpressionDescriptor[] ExprDescriptors {
             get { return _ExprDescriptors; }
             set { 
@@ -54,7 +53,6 @@ namespace NI.Common.Expressions {
         /// <summary>
         /// Get or set flag that indicates whether markers should be processed recursively
         /// </summary>
-        [Dependency(Required = false)]
         public bool Recursive {
             get { return _Recursive; }
             set { _Recursive = value; }
@@ -63,7 +61,6 @@ namespace NI.Common.Expressions {
         /// <summary>
         /// Get or set sub-expression regex begin
         /// </summary>
-        [Dependency(Required = false)]
         public string ExprRegexBegin {
             get { return _ExprRegexBegin; }
             set {
@@ -75,7 +72,6 @@ namespace NI.Common.Expressions {
         /// <summary>
         /// Get or set sub-expression regex end
         /// </summary>
-        [Dependency(Required = false)]
         public string ExprRegexEnd {
             get { return _ExprRegexEnd; }
             set {

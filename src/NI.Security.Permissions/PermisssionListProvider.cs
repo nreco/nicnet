@@ -28,25 +28,21 @@ namespace NI.Security.Permissions {
         private string _OperationKey;
         private string _ObjectKey;
 
-        [Dependency]
         public string SubjectKey {
             get { return _SubjectKey; }
             set { _SubjectKey = value; }
         }
 
-        [Dependency]
         public string OperationKey {
             get { return _OperationKey; }
             set { _OperationKey = value; }
         }
 
-        [Dependency]
         public string ObjectKey {
             get { return _ObjectKey; }
             set { _ObjectKey = value; }
         }
 
-        [Dependency]
         public IDictionaryListProvider UnderlyingDictionaryListProvider {
             get { return _UnderlyingDictionaryListProvider; }
             set { _UnderlyingDictionaryListProvider = value;  }

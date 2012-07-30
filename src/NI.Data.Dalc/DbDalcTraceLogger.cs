@@ -37,7 +37,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set flag that indicates whether logger is enabled
 		/// </summary>		
-		[Dependency(Required=false)]
 		public bool Enabled {
 			get { return _Enabled; }
 			set { _Enabled = value; }
@@ -55,7 +54,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set log message prefix 
 		/// </summary>
-		[Dependency(Required=false)]
 		public string LogMsgPrefix {
 			get { return _LogMsgPrefix; }
 			set { _LogMsgPrefix = value; }
@@ -65,7 +63,6 @@ namespace NI.Data.Dalc {
 		/// Get or set flag that indicates whether command parameters
 		/// should be replaced with their values in command text
 		/// </summary>
-		[Dependency(Required=false)]
 		public bool ReplaceParamPlaceholders {
 			get { return _ReplaceParamPlaceholders; }
 			set { _ReplaceParamPlaceholders = value; }
@@ -74,7 +71,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set DALC events mediator
 		/// </summary>
-		[Dependency]
 		public IDbDalcEventsMediator DbDalcEventsMediator {
 			get { return _DbDalcEventsMediator; }
 			set { 

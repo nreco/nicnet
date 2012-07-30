@@ -27,7 +27,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set underlying DB DALC component
 		/// </summary>
-		[Dependency]
 		public IDbDalc UnderlyingDbDalc {
 			get { return (IDbDalc) base.UnderlyingDalc; }
 			set { base.UnderlyingDalc = value; }
@@ -38,7 +37,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set cache instace used for caching 'LoadReader' results
 		/// </summary>
-		[Dependency]
 		public ICache LoadReaderCache {
 			get { return _LoadReaderCache; }
 			set { _LoadReaderCache = value; }

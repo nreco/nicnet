@@ -34,7 +34,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set query provider that specifies data list to load
 		/// </summary>
-		[Dependency]
 		public IQueryProvider QueryProvider {
 			get { return _QueryProvider; }
 			set { _QueryProvider = value; }
@@ -43,7 +42,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// Get or set DALC component used to load list data
 		/// </summary>
-		[Dependency]
 		public IDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }	

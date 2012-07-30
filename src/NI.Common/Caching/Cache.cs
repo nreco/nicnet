@@ -26,7 +26,6 @@ namespace NI.Common.Caching
 
         private bool _Enabled = true;
 
-        [Dependency]
         public bool Enabled {
             get { return _Enabled; }
             set { _Enabled = value; }

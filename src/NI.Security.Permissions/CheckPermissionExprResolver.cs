@@ -34,7 +34,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set permission checker component
 		/// </summary>
-		[Dependency]
 		public IPermissionChecker PermissionChecker {
 			get { return _PermissionChecker; }
 			set { _PermissionChecker = value; }

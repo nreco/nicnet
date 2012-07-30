@@ -36,7 +36,6 @@ namespace NI.Common.Providers
 		/// this filter allows perform some action with objects retrieved from cache \
 		/// (if filter returns different object from context it will be updated in the cache)
 		/// </remarks>
-		[Dependency(Required=false)]
 		public IObjectProvider CacheFilter {
 			get { return _CacheFilter; }
 			set { _CacheFilter = value; }
@@ -45,7 +44,6 @@ namespace NI.Common.Providers
 		/// <summary>
 		/// Get or set cache instance
 		/// </summary>
-		[Dependency(Required=false)]
 		public ICache Cache {
 			get { return _Cache; }
 			set { _Cache = value; }
@@ -54,7 +52,6 @@ namespace NI.Common.Providers
 		/// <summary>
 		/// Get or set underlying object provider
 		/// </summary>
-		[Dependency]
 		public IObjectProvider UnderlyingObjectProvider {
 			get { return _UnderlyingObjectProvider; }
 			set { _UnderlyingObjectProvider = value; }
@@ -63,7 +60,6 @@ namespace NI.Common.Providers
 		/// <summary>
 		/// Get or set cache key provider
 		/// </summary>
-		[Dependency(Required=false)]
 		public IStringProvider CacheKeyProvider {
 			get { return _CacheKeyProvider; }
 			set { _CacheKeyProvider = value; }

@@ -29,7 +29,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set group list
 		/// </summary>
-		[Dependency]
 		public IBooleanProvider[] Groups {
 			get { return _Groups; }
 			set { _Groups = value; }

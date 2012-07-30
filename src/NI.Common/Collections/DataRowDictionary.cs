@@ -28,7 +28,6 @@ namespace NI.Common.Collections
 		/// <summary>
 		/// Get or set data row
 		/// </summary>
-		[Dependency]
 		public DataRow Row {
 			get { return _Row; }
 			set { _Row = value; }

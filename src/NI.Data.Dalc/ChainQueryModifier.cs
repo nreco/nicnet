@@ -16,7 +16,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set chain modifiers list
 		/// </summary>
-		[Dependency]
 		public IQueryModifier[] Modifiers {
 			get { return _Modifiers; }
 			set { _Modifiers = value; }

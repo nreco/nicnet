@@ -37,7 +37,6 @@ namespace NI.Security.Permissions
 		string _ObjectContextKey = "object";
 		string _OperationContextKey = "operation";
 		
-		[Dependency]
 		public IBooleanProvider BooleanProvider {
 			get { return _BooleanProvider; }
 			set { _BooleanProvider = value; }
@@ -46,7 +45,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set operation regex that should be matched by this entry
 		/// </summary>
-		[Dependency]
 		public string MatchSubject {
 			get { return _MatchSubject; }
 			set { _MatchSubject = value; }
@@ -55,7 +53,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set operation regex that should be matched by this entry
 		/// </summary>
-		[Dependency]
 		public string MatchOperation {
 			get { return _MatchOperation; }
 			set { _MatchOperation = value; }
@@ -64,7 +61,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set object regex that should be matched by this entry
 		/// </summary>
-		[Dependency]
 		public string MatchObject {
 			get { return _MatchObject; }
 			set { _MatchObject = value; }
@@ -73,7 +69,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set subject context key
 		/// </summary>
-		[Dependency(Required=false)]
 		public string SubjectContextKey {
 			get { return _SubjectContextKey; }
 			set { _SubjectContextKey = value; }
@@ -82,7 +77,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set operation context key
 		/// </summary>
-		[Dependency(Required=false)]
 		public string OperationContextKey {
 			get { return _OperationContextKey; }
 			set { _OperationContextKey = value; }
@@ -91,7 +85,6 @@ namespace NI.Security.Permissions
 		/// <summary>
 		/// Get or set object context key
 		/// </summary>
-		[Dependency(Required=false)]
 		public string ObjectContextKey {
 			get { return _ObjectContextKey; }
 			set { _ObjectContextKey = value; }

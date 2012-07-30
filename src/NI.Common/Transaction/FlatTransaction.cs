@@ -29,7 +29,6 @@ namespace NI.Common.Transaction
 		/// <summary>
 		/// Get or set transaction events mediator
 		/// </summary>
-		[Dependency(Required=false)]
 		public ITransactionEventsMediator TransactionEventsMediator {
 			get { return _TransactionEventsMediator; }
 			set { _TransactionEventsMediator = value; }

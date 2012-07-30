@@ -25,13 +25,11 @@ namespace NI.Common.Caching
 		ICache _UnderlyingCache;
 		string _Prefix;
 		
-		[Dependency]
 		public ICache UnderlyingCache {
 			get { return _UnderlyingCache; }
 			set { _UnderlyingCache = value; }
 		}
 		
-		[Dependency]
 		public string Prefix {
 			get { return _Prefix; }
 			set { _Prefix = value; }

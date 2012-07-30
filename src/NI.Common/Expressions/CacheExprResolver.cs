@@ -31,7 +31,6 @@ namespace NI.Common.Expressions
 		/// <summary>
 		/// Get or set ICache instance
 		/// </summary>
-		[Dependency]
 		public ICache Cache {
 			get { return _Cache; }
 			set { _Cache = value; }
@@ -40,7 +39,6 @@ namespace NI.Common.Expressions
 		/// <summary>
 		/// Get or set underlying expression provider
 		/// </summary>
-		[Dependency]
 		public IExpressionResolver UnderlyingExprResolver {
 			get { return _UnderlyingExprResolver; }
 			set { _UnderlyingExprResolver = value; }
@@ -49,7 +47,6 @@ namespace NI.Common.Expressions
 		/// <summary>
 		/// Get or set cache-key provider
 		/// </summary>
-		[Dependency(Required=false)]
 		public IStringProvider CacheKeyProvider {
 			get { return _CacheKeyProvider; }
 			set { _CacheKeyProvider = value; }

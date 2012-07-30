@@ -45,7 +45,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set cache instace used for caching 'Load' results
 		/// </summary>
-		[Dependency]
 		public ICache LoadCache {
 			get { return _LoadCache; }
 			set { _LoadCache = value; }
@@ -54,7 +53,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set cache instace used for caching 'LoadRecord' results
 		/// </summary>
-		[Dependency]
 		public ICache LoadRecordCache {
 			get { return _LoadRecordCache; }
 			set { _LoadRecordCache = value; }
@@ -63,7 +61,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set cache instace used for caching 'RecordCount' results
 		/// </summary>
-		[Dependency]
 		public ICache RecordCountCache {
 			get { return _RecordCountCache; }
 			set { _RecordCountCache = value; }
@@ -72,7 +69,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set underlying DALC instance
 		/// </summary>
-		[Dependency]
 		public IDalc UnderlyingDalc {
 			get { return _UnderlyingDalc; }
 			set { _UnderlyingDalc = value; }
@@ -81,7 +77,6 @@ namespace NI.Data.Dalc {
 		/// <summary>
 		/// Get or set cache key provider
 		/// </summary>
-		[Dependency(Required=false)]
 		public IStringProvider CacheKeyProvider {
 			get { return _CacheKeyProvider; }
 			set { _CacheKeyProvider = value; }

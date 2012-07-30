@@ -29,26 +29,21 @@ namespace NI.Vfs {
 		IBinarySerializer _Serializer;
 		string _TocFileName = "cache_TOC";
 
-		[Dependency]
 		public string TocFileName {
 			get { return _TocFileName; }
 			set { _TocFileName = value; }
 		}
 
-		[Dependency(Required=false)]
 		public IStringProvider FileNameProvider {
 			get { return _FileNameProvider; }
 			set { _FileNameProvider = value; }
 		}
 
-		[Dependency(Required=false)]
 		public IBinarySerializer Serializer {
 			get { return _Serializer; }
 			set { _Serializer = value; }
 		}
 
-
-		[Dependency]
 		public IFileSystem FileSystem {
 			get { return _FileSystem; }
 			set { _FileSystem = value; }

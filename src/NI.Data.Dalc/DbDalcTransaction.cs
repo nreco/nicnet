@@ -26,13 +26,11 @@ namespace NI.Data.Dalc {
 		IDbTransaction _DbTransaction;
 		IsolationLevel _IsolationLevel = IsolationLevel.Unspecified;
 
-		[Dependency]
 		public IDbDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }
 		}
 
-		[Dependency(Required=false)]
 		public IsolationLevel IsolationLevel {
 			get { return _IsolationLevel; }
 			set { _IsolationLevel = value; }

@@ -24,7 +24,6 @@ namespace NI.Common.Providers
 		object _Constant = null;
         private Type _ConstantType = null;
 		
-		[Dependency]
 		public object Constant {
 			get { return _Constant; }
 			set { _Constant = value; }

@@ -27,7 +27,6 @@ namespace NI.Common.Expressions
 		/// <summary>
 		/// Get or set named-service provider component
 		/// </summary>
-		[Dependency]
 		public INamedServiceProvider NamedServiceProvider {
 			get { return _NamedServiceProvider; }
 			set { _NamedServiceProvider = value; }

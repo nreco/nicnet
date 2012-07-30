@@ -30,7 +30,6 @@ namespace NI.Common
 		/// <summary>
 		/// Get or set underyling IFormatter component
 		/// </summary>
-		[Dependency]
 		public IFormatter StringFormatter {
 			get {
 				if (_StringFormatter!=null) {

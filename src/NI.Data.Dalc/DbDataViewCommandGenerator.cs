@@ -25,8 +25,7 @@ namespace NI.Data.Dalc
 	public class DbDataViewCommandGenerator : DbCommandGenerator
 	{
 		IDbDataView[] _DataViews = new IDbDataView[0];
-	
-		[Dependency]
+
 		public IDbDataView[] DataViews {
 			get { return _DataViews; }
 			set { _DataViews = value; }

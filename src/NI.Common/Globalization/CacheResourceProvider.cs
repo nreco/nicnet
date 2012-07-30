@@ -37,7 +37,6 @@ namespace NI.Common.Globalization {
 		/// <summary>
 		/// Get or set cache key provider
 		/// </summary>
-		[Dependency(Required = false)]
 		public IStringProvider CacheKeyProvider {
 			get { return _CacheKeyProvider; }
 			set { _CacheKeyProvider = value; }
@@ -46,7 +45,6 @@ namespace NI.Common.Globalization {
 		/// <summary>
 		/// Get or set cache instance
 		/// </summary>
-		[Dependency(Required = false)]
 		public ICache Cache {
 			get { return _Cache; }
 			set { _Cache = value; }

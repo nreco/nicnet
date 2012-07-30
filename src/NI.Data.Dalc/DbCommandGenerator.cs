@@ -32,7 +32,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// DB Command Wrapper Factory
 		/// </summary>
-		[Dependency]
 		public IDbCommandWrapperFactory CommandWrapperFactory { 
 			get { return _CommandWrapperFactory; }
 			set { _CommandWrapperFactory = value; }

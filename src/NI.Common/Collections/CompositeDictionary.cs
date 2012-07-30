@@ -37,7 +37,6 @@ namespace NI.Common.Collections
 		/// <summary>
 		/// Get or set flag that specifies set operation behaviour for satellite dictionaries
 		/// </summary>
-		[Dependency(Required=false)]
 		public SetSatteliteBehaviourType SetSatelliteBehaviour {
 			get { return _SetSatelliteBehaviour; }
 			set { _SetSatelliteBehaviour = value; }
@@ -46,7 +45,6 @@ namespace NI.Common.Collections
 		/// <summary>
 		/// Get or set master dictionary instance
 		/// </summary>
-		[Dependency]
 		public IDictionary MasterDictionary {
 			get { return _MasterDictionary; }
 			set { _MasterDictionary = value; }

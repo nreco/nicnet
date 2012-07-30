@@ -28,13 +28,11 @@ namespace NI.Common.Providers {
 		IBooleanProvider[] _Conditions;
 		GroupType _Group = GroupType.And;
 
-		[Dependency]
 		public IBooleanProvider[] Conditions {
 			get { return _Conditions; }
 			set { _Conditions = value; }
 		}
 
-		[Dependency(Required=false)]
 		public GroupType Group {
 			get { return _Group; }
 			set { _Group = value; }

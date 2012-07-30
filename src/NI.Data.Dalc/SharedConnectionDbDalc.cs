@@ -50,7 +50,6 @@ namespace NI.Data.Dalc
 		/// <summary>
 		/// <see cref="DbDalc.Transaction"/>
 		/// </summary>
-		[Dependency(Required=false)]
 		public override IDbTransaction Transaction {
 			get {
 				return base.Transaction;
