@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -23,7 +23,7 @@ namespace NI.Vfs
 	/// <summary>
 	/// Local file system component
 	/// </summary>
-	public class LocalFileSystem : NI.Common.Component, IFileSystem
+	public class LocalFileSystem : IFileSystem
 	{
 		string _RootFolder;
 		bool _ReadOnly = false;
@@ -35,7 +35,6 @@ namespace NI.Vfs
 		/// <summary>
 		/// Get or set root folder for this instance of local filesystem
 		/// </summary>
-		[Dependency]
 		public string RootFolder {
 			get { return _RootFolder; }
 			set { _RootFolder = value; }
@@ -47,7 +46,6 @@ namespace NI.Vfs
 		/// <remarks>
 		/// When ReadOnly is true file system will allow only 'read' operations.
 		/// </remarks>
-		[Dependency(Required=false)]
 		public bool ReadOnly {
 			get { return _ReadOnly; }
 			set { _ReadOnly = value; }
@@ -71,7 +69,6 @@ namespace NI.Vfs
 		/// <summary>
 		/// Get or set cache for caching results from OS API (can be null)
 		/// </summary>
-		[Dependency(Required=false)]
 		public ICache Cache {
 			get { return _Cache; }
 			set { _Cache = value; }

@@ -10,9 +10,10 @@ bin
 obj
 /src\NI.Common/NI.Common.xml
 /src/NICNET.suo
-/src\NI.Common/NI.Common.xml
-/src\NI.Data.Dalc/NI.Data.Dalc.csproj.user
-/src\NI.Data.Dalc/NI.Data.Dalc.xml
-/src\NI.Common/NI.Common.xml
-/src\NI.Data.Dalc/NI.Data.Dalc.csproj.user
-/src\NI.Data.Dalc/NI.Data.Dalc.xml
+/src/NI.Common/NI.Common.xml
+/src/NI.Data.Permissions/NI.Data.Permissions.xml
+/src/NI.Data.RelationalExpressions/NI.Data.RelationalExpressions.xml
+/src/NI.Data/NI.Data.xml
+/src/NI.Tests/NI.Tests.csproj.user
+/src/NI.Vfs/NI.Vfs.xml
+/src/NI.Ioc/NI.Ioc.xml

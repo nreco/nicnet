@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,7 +16,7 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 
-using NI.Data.Dalc;
+using NI.Data;
 using NI.Common;
 using NI.Common.Expressions;
 using NI.Common.Providers;
@@ -26,7 +26,7 @@ namespace NI.Data.RelationalExpressions
 	/// <summary>
 	/// Relex-based query provider.
 	/// </summary>
-	public class RelExQueryProvider : NI.Data.Dalc.IQueryProvider, IObjectProvider
+	public class RelExQueryProvider : NI.Data.IQueryProvider, IObjectProvider
 	{
 		IExpressionResolver _ExprResolver;
 		string _RelEx;
@@ -39,7 +39,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set key in context where provider argument should be stored
 		/// </summary>
-		[Dependency(Required=false)]
 		public string ContextArgumentKey {
 			get { return _ContextArgumentKey; }
 			set { _ContextArgumentKey = value; }
@@ -48,7 +47,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set relational expression parser
 		/// </summary>
-		[Dependency(Required=false)]
 		public IRelExQueryParser RelExQueryParser {
 			get { return _RelExQueryParser; }
 			set { _RelExQueryParser = value; }
@@ -57,7 +55,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set relational expression
 		/// </summary>
-		[Dependency]
 		public string RelEx {
 			get { return _RelEx; }
 			set { _RelEx = value; }
@@ -66,7 +63,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set expression resolver used for preparsing relex
 		/// </summary>
-		[Dependency]
 		public IExpressionResolver ExprResolver {
 			get { return _ExprResolver; }
 			set { _ExprResolver = value; }
@@ -75,7 +71,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set query sort settings 
 		/// </summary>
-		[Dependency(Required=false)]
 		public IStringListProvider SortProvider {
 			get { return _SortProvider; }
 			set { _SortProvider = value; }
@@ -84,7 +79,6 @@ namespace NI.Data.RelationalExpressions
         /// <summary>
         /// Get or set query extended properties provider
         /// </summary>
-        [Dependency(Required = false)]
         public IObjectProvider ExtendedPropertiesProvider
         {
             get { return _ExtendedPropertiesProvider; }

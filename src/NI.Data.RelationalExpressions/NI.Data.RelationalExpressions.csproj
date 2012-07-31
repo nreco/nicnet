@@ -104,7 +104,7 @@
       <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
       <Name>NI.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NI.Data.Dalc\NI.Data.Dalc.csproj">
+    <ProjectReference Include="..\NI.Data\NI.Data.csproj">
       <Name>NI.Data.Dalc</Name>
       <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>

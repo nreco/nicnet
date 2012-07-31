@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -21,7 +21,7 @@ namespace NI.Vfs
 	/// <summary>
 	/// In-memory filesystem provider implementation.
 	/// </summary>
-	public class MemoryFileSystem : NI.Common.Component, IFileSystem
+	public class MemoryFileSystem : IFileSystem
 	{
 		protected IDictionary MemoryFilesMap;
 		

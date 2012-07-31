@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{15BD2A38-A1FF-404F-9BD5-BC8CED68BF17}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NI.Tests</RootNamespace>
+    <AssemblyName>NI.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dalc\DatasetDalcTest.cs" />
+    <Compile Include="Dalc\DbCommandGeneratorTest.cs" />
+    <Compile Include="Dalc\QueryTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RelationalExpressions\RelExQueryParserTest.cs" />
+    <Compile Include="Vfs\VfsTest.cs" />
+    <Compile Include="Winter\ArrayFactoryTest.cs" />
+    <Compile Include="Winter\EventBinderTest.cs" />
+    <Compile Include="Winter\MethodInvokingFactoryTest.cs" />
+    <Compile Include="Winter\ServiceProviderTest.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Winter\StaticMethodInvokingFactoryTest.cs" />
+    <Compile Include="Winter\StaticPropertyInvokingFactoryTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NI.Common\NI.Common.csproj">
+      <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
+      <Name>NI.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Data.RelationalExpressions\NI.Data.RelationalExpressions.csproj">
+      <Project>{93F1250A-634F-4D4F-B4F3-546A3EE3C7BE}</Project>
+      <Name>NI.Data.RelationalExpressions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Data.Vfs\NI.Data.Vfs.csproj">
+      <Project>{9882195A-1A0B-46CF-A2E1-C5EFDCA88F52}</Project>
+      <Name>NI.Data.Vfs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Data\NI.Data.csproj">
+      <Project>{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}</Project>
+      <Name>NI.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Ioc\NI.Ioc.csproj">
+      <Project>{25702474-5D4D-4EEA-A68A-3662A0966ED6}</Project>
+      <Name>NI.Ioc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Vfs\NI.Vfs.csproj">
+      <Project>{19856FA8-F282-4758-B0F9-9A8572987171}</Project>
+      <Name>NI.Vfs</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

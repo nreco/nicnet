@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -17,7 +17,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using System.Text;
 
-using NI.Data.Dalc;
+using NI.Data;
 using NI.Common;
 
 namespace NI.Data.RelationalExpressions
@@ -91,13 +91,11 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set flag that indicates whether 'dump' constants are allowed
 		/// </summary>
-		[Dependency(Required=false)]
 		public bool AllowDumpConstants {
 			get { return _AllowDumpConstants; }
 			set { _AllowDumpConstants = value; }
 		}
 
-		[Dependency(Required=false)]
 		public IQueryModifier QueryModifier {
 			get { return _QueryModifier; }
 			set { _QueryModifier = value; }

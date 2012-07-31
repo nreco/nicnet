@@ -132,27 +132,19 @@
     <Compile Include="ListFileSelector.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="LocalFile.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="LocalFile.cs" />
     <Compile Include="LocalFileContent.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="LocalFilesystem.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="LocalFilesystem.cs" />
     <Compile Include="MaskFileSelector.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MemoryFile.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="MemoryFile.cs" />
     <Compile Include="MemoryFileContent.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MemoryFileSystem.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="MemoryFileSystem.cs" />
     <Compile Include="RegexFileSelector.cs">
       <SubType>Code</SubType>
     </Compile>

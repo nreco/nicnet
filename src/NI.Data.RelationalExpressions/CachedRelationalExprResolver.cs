@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -30,7 +30,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set cache instance used for caching relex results
 		/// </summary>
-		[Dependency(Required=false)]
 		public ICache Cache {
 			get { return _Cache; }
 			set { _Cache = value; }

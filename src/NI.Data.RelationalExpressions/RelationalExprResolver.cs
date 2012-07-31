@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2008 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,7 +15,7 @@
 using System;
 using System.Collections;
 
-using NI.Data.Dalc;
+using NI.Data;
 using NI.Common;
 using NI.Common.Expressions;
 
@@ -35,7 +35,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set flag that idicates whether this resolver should return records count as result
 		/// </summary>
-		[Dependency(Required=false)]
 		public bool ReturnCount {
 			get { return _ReturnCount; }
 			set { _ReturnCount = value; }
@@ -44,7 +43,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set flag that indicates whether this resolver should return result as objects list
 		/// </summary>
-		[Dependency(Required=false)]
 		public bool ReturnList {
 			get { return _ReturnList; }
 			set { _ReturnList = value; }
@@ -53,7 +51,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set context relational expressions to query parser
 		/// </summary>
-		[Dependency]
 		public IRelExQueryParser RelExQueryParser {
 			get { return _RelExQueryParser; }
 			set { _RelExQueryParser = value; }
@@ -62,7 +59,6 @@ namespace NI.Data.RelationalExpressions
 		/// <summary>
 		/// Get or set DALC component
 		/// </summary>
-		[Dependency]
 		public IDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }
