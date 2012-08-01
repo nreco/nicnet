@@ -25,7 +25,7 @@ namespace NI.Data
 	/// <summary>
 	/// Database Command Generator
 	/// </summary>
-	public class DbCommandGenerator : NI.Common.Component, IDbCommandGenerator
+	public class DbCommandGenerator : IDbCommandGenerator
 	{
 		private IDbCommandWrapperFactory _CommandWrapperFactory = null;
 

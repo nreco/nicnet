@@ -140,13 +140,9 @@
     <Compile Include="DbCommandEventArgs.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbCommandGenerator.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DbCommandGenerator.cs" />
     <Compile Include="DbDalcTraceLogger.cs" />
-    <Compile Include="DbDALC.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DbDALC.cs" />
     <Compile Include="DbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -157,9 +153,7 @@
     <Compile Include="DbDataView.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDataViewCommandGenerator.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DbDataViewCommandGenerator.cs" />
     <Compile Include="DbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -233,9 +227,7 @@
     <Compile Include="Interfaces\ISqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDalcProxy.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DbDalcProxy.cs" />
     <Compile Include="Linq\DalcData.cs" />
     <Compile Include="Linq\DalcLinqExtensions.cs" />
     <Compile Include="Linq\DalcRecord.cs" />
@@ -247,6 +239,24 @@
     <Compile Include="OleDb\OleDbAdapterWrapper.cs" />
     <Compile Include="OleDb\OleDbCommandWrapper.cs" />
     <Compile Include="OleDb\OleDbFactory.cs" />
+    <Compile Include="Permissions\BaseDalcProxy.cs" />
+    <Compile Include="Permissions\CompositeDalcConditionComposer.cs" />
+    <Compile Include="Permissions\DalcConditionComposer.cs" />
+    <Compile Include="Permissions\DalcConditionDescriptor.cs" />
+    <Compile Include="Permissions\DalcOperation.cs" />
+    <Compile Include="Permissions\DalcPermission.cs" />
+    <Compile Include="Permissions\DalcPermissionAclEntry.cs" />
+    <Compile Include="Permissions\DalcPermissionChecker.cs" />
+    <Compile Include="Permissions\DalcProxy.cs" />
+    <Compile Include="Permissions\DalcRecordFieldInfo.cs" />
+    <Compile Include="Permissions\DalcRecordInfo.cs" />
+    <Compile Include="Permissions\DbDalcProxy.cs" />
+    <Compile Include="Permissions\DbDataViewCommandGenerator.cs" />
+    <Compile Include="Permissions\FieldDalcPermissionAclEntry.cs" />
+    <Compile Include="Permissions\Interfaces\IDalcConditionComposer.cs" />
+    <Compile Include="Permissions\Interfaces\IDalcConditionDescriptor.cs" />
+    <Compile Include="Permissions\Interfaces\IDalcPermissionChecker.cs" />
+    <Compile Include="Permissions\Interfaces\IPermissionAclEntry.cs" />
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -285,9 +295,17 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RecordsCountQueryModifier.cs" />
-    <Compile Include="SharedConnectionDbDalc.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="RelationalExpressions\CachedRelationalExprResolver.cs" />
+    <Compile Include="RelationalExpressions\Interfaces\IRelExQueryNodeParser.cs" />
+    <Compile Include="RelationalExpressions\Interfaces\IRelExQueryParser.cs" />
+    <Compile Include="RelationalExpressions\ObjectRelexConditionExprResolver.cs" />
+    <Compile Include="RelationalExpressions\RelationalExprResolver.cs" />
+    <Compile Include="RelationalExpressions\RelexBuilder.cs" />
+    <Compile Include="RelationalExpressions\RelExQueryNodeParser.cs" />
+    <Compile Include="RelationalExpressions\RelExQueryNodeProvider.cs" />
+    <Compile Include="RelationalExpressions\RelExQueryParser.cs" />
+    <Compile Include="RelationalExpressions\RelExQueryProvider.cs" />
+    <Compile Include="SharedConnectionDbDalc.cs" />
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -306,10 +324,6 @@
     <Compile Include="Web\DalcCacheDependency.cs" />
     <Compile Include="Web\DalcCacheDependencyDataRowTrigger.cs" />
     <Compile Include="XmlDataSetProvider.cs" />
-    <EmbeddedResource Include="DbDALC.resx">
-      <DependentUpon>DbDALC.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="SqlClient\SqlFactory.resx">
       <DependentUpon>SqlFactory.cs</DependentUpon>
       <SubType>Designer</SubType>

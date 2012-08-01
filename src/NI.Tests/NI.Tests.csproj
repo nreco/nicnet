@@ -61,10 +61,6 @@
       <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
       <Name>NI.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NI.Data.RelationalExpressions\NI.Data.RelationalExpressions.csproj">
-      <Project>{93F1250A-634F-4D4F-B4F3-546A3EE3C7BE}</Project>
-      <Name>NI.Data.RelationalExpressions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NI.Data.Vfs\NI.Data.Vfs.csproj">
       <Project>{9882195A-1A0B-46CF-A2E1-C5EFDCA88F52}</Project>
       <Name>NI.Data.Vfs</Name>

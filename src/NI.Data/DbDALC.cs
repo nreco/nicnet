@@ -28,7 +28,7 @@ namespace NI.Data {
 	/// <summary>
 	/// Database Data Access Layer Component
 	/// </summary>
-	public class DbDalc : NI.Common.Component, IDbDalc {
+	public class DbDalc : IDbDalc {
 
 		IDbConnection _Connection;
 		IDbTransaction _Transaction;

@@ -20,7 +20,7 @@ namespace NI.Data
     /// <summary>
     /// Pipe Db dalc
     /// </summary>
-    public class DbDalcProxy : NI.Common.Component, IDbDalc {
+    public class DbDalcProxy : IDbDalc {
 
         private IDbDalc _UnderlyingDalc;
 
