@@ -90,7 +90,7 @@ namespace NI.Data.RelationalExpressions
 		{
 		}
 		
-		public virtual IQuery GetQuery(object contextObj) {
+		public virtual Query GetQuery(object contextObj) {
 			IDictionary context;
 			if (contextObj is IDictionary) {
 				context = (IDictionary)contextObj;
@@ -100,7 +100,7 @@ namespace NI.Data.RelationalExpressions
 			}
 			
 			string relEx = Convert.ToString( ExprResolver.Evaluate(context, RelEx) );
-			IQuery q = RelExQueryParser.Parse(relEx);
+			Query q = RelExQueryParser.Parse(relEx);
 			if (q is Query) {
 				Query query = (Query)q;
 				if (SortProvider!=null)

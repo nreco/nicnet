@@ -72,9 +72,9 @@ namespace NI.Data.Permissions
 			UnderlyingDbDalc.Load(ds, sqlText);
 		}
 		
-		public IDataReader LoadReader(IQuery q) {
+		public IDataReader LoadReader(Query q) {
 			if (Enabled) {
-				IQuery modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, q);
+				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, q);
 				return UnderlyingDbDalc.LoadReader(modifiedQuery);
 			} else {
 				return UnderlyingDbDalc.LoadReader(q);

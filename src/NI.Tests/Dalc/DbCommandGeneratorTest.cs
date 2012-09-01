@@ -17,7 +17,7 @@ namespace NI.Tests.Data.Dalc {
 	[Category("NI.Data")]
 	public class DbCommandGeneratorTest {
 
-		IQueryNode createTestQuery() {
+		QueryNode createTestQuery() {
 			return  (
 						(QField)"name" % (QConst)"Anna" | new QueryNegationNode( (QField)"age" >= (QConst)18 )
 					) & (
@@ -64,7 +64,7 @@ namespace NI.Tests.Data.Dalc {
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
 			
 			Query q = new Query( "test" );
-			q.Root = createTestQuery();
+			q.Condition = createTestQuery();
 			q.Fields = new string[] { "name", "age" };
 
 			// SELECT TEST

@@ -45,10 +45,10 @@ namespace NI.Data
 			return qSourceName.Name;
 		}
 
-		protected virtual string BuildSelectInternal(IQuery query, bool isNested) {
+		protected virtual string BuildSelectInternal(Query query, bool isNested) {
 			string fields = BuildFields(query);
 			string sort = BuildSort(query);
-			string whereExpression = BuildExpression(query.Root);
+			string whereExpression = BuildExpression(query.Condition);
 			
 			// compose select sql
 			StringBuilder cmdTextBuilder = new StringBuilder();
@@ -62,12 +62,12 @@ namespace NI.Data
 			return cmdTextBuilder.ToString();
 		}
 
-		public virtual string BuildSelect(IQuery query) {
+		public virtual string BuildSelect(Query query) {
 			return BuildSelectInternal(query, false);
 		}
 
 
-		public virtual string BuildSort(IQuery query) {
+		public virtual string BuildSort(Query query) {
 			// Compose 'order by' part
 			if (query.Sort!=null && query.Sort.Length>0) {
 				string[] sortFields = new string[query.Sort.Length];
@@ -82,7 +82,7 @@ namespace NI.Data
 			return null;
 		}
 
-		public virtual string BuildFields(IQuery query) {
+		public virtual string BuildFields(Query query) {
 			// Compose fields part
 			string[] fields = (query.Fields==null || query.Fields.Length==0) ?
 					new string[] {"*"} :
@@ -94,8 +94,8 @@ namespace NI.Data
 		}
 
 		protected override string BuildValue(IQueryValue value) {
-			if (value is IQuery)
-				return "("+BuildSelectInternal( (IQuery)value, true )+")";
+			if (value is Query)
+				return "("+BuildSelectInternal( (Query)value, true )+")";
 
 			return base.BuildValue(value);
 		}

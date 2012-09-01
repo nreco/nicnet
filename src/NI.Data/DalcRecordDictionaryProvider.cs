@@ -55,14 +55,14 @@ namespace NI.Data
 		/// <see cref="IDictionaryProvider.GetDictionary"/>
 		/// </summary>
 		public IDictionary GetDictionary(object context) {
-			IQuery q = GetQuery(context);
+			Query q = GetQuery(context);
 			ListDictionary result = new ListDictionary();
 			if (Dalc.LoadRecord(result, q))
 				return result;
 			return null;
 		}
 		
-		protected virtual IQuery GetQuery(object context) {
+		protected virtual Query GetQuery(object context) {
 			return QueryProvider.GetQuery(context);
 		}	
 		

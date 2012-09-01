@@ -26,7 +26,7 @@ namespace NI.Data
             set { _RecordCount = value; }
         }
 
-        public IQuery Modify(IQuery q)
+        public Query Modify(Query q)
         {
             (q as Query).RecordCount = RecordCount;
             return q;

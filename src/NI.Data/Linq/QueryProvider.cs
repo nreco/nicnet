@@ -131,7 +131,7 @@ namespace NI.Data.Linq
 
 		protected void ApplyWhere(Query q, MethodCallExpression call) {
 			BuildDalcQuery(q, call.Arguments[0]);
-			q.Root = ComposeCondition(call.Arguments[1]);
+			q.Condition = ComposeCondition(call.Arguments[1]);
 			if (call.Arguments[1] is UnaryExpression) {
 				UnaryExpression unExpr = (UnaryExpression)call.Arguments[1];
 				if (unExpr.Operand is LambdaExpression) {
@@ -189,10 +189,10 @@ namespace NI.Data.Linq
 			}
 		}
 
-		protected IQueryNode ComposeCondition(Expression expression) {
+		protected QueryNode ComposeCondition(Expression expression) {
 			if (expression is UnaryExpression) {
 				UnaryExpression unExpr = (UnaryExpression)expression;
-				IQueryNode qNode = ComposeCondition(unExpr.Operand);
+				QueryNode qNode = ComposeCondition(unExpr.Operand);
 				return (unExpr.NodeType==ExpressionType.Not ? new QueryNegationNode(qNode) : qNode );
 			}
 			if (expression is LambdaExpression) {

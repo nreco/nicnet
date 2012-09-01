@@ -60,7 +60,7 @@ namespace NI.Data
             return UnderlyingDalc.ExecuteReader(sqlText);
         }
 
-        public System.Data.IDataReader LoadReader(IQuery q) {
+        public System.Data.IDataReader LoadReader(Query q) {
             return UnderlyingDalc.LoadReader(q);
         }
 
@@ -76,7 +76,7 @@ namespace NI.Data
 
         #region IDalc Members
 
-        public void Load(System.Data.DataSet ds, IQuery query) {
+        public void Load(System.Data.DataSet ds, Query query) {
             UnderlyingDalc.Load(ds, query);
         }
 
@@ -84,7 +84,7 @@ namespace NI.Data
             UnderlyingDalc.Update(ds, sourceName);
         }
 
-        public int Update(System.Collections.IDictionary data, IQuery query) {
+        public int Update(System.Collections.IDictionary data, Query query) {
             return UnderlyingDalc.Update(data, query);
         }
 
@@ -92,15 +92,15 @@ namespace NI.Data
             UnderlyingDalc.Insert(data, sourceName);
         }
 
-        public int Delete(IQuery query) {
+        public int Delete(Query query) {
             return UnderlyingDalc.Delete(query);
         }
 
-        public bool LoadRecord(System.Collections.IDictionary data, IQuery query) {
+        public bool LoadRecord(System.Collections.IDictionary data, Query query) {
             return UnderlyingDalc.LoadRecord(data, query);
         }
 
-        public int RecordsCount(string sourceName, IQueryNode conditions) {
+        public int RecordsCount(string sourceName, QueryNode conditions) {
             return UnderlyingDalc.RecordsCount(sourceName, conditions);
         }
 

@@ -23,6 +23,6 @@ namespace NI.Data
 	/// </summary>
 	public interface IQueryProvider
 	{
-		IQuery GetQuery(object context);
+		Query GetQuery(object context);
 	}
 }

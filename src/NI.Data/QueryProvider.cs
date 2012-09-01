@@ -48,8 +48,8 @@ namespace NI.Data
 			UnderlyingObjectProvider = prv;
 		}
 
-		public IQuery GetQuery(object context) {
-			IQuery q = (IQuery)UnderlyingObjectProvider.GetObject(context);
+		public Query GetQuery(object context) {
+			Query q = (Query)UnderlyingObjectProvider.GetObject(context);
 			if (QueryModifier!=null)
 				q = QueryModifier.Modify(q);
 			return q;

@@ -13,15 +13,13 @@
 #endregion
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 
 namespace NI.Data {
 
-
-
 	[Serializable]
-	public class QueryConditionNode : QueryNode, IQueryConditionNode {
+	public class QueryConditionNode : QueryNode {
 		
 		private IQueryValue _LValue;
 		private Conditions _Condition;
@@ -42,7 +40,16 @@ namespace NI.Data {
 			set { _RValue = value; }
 		}
 		
-		public override IEnumerable Nodes { get { return null; } }
+		public override IList<QueryNode> Nodes { 
+			get {
+				var l = new List<QueryNode>();
+				if (LValue is QueryNode)
+					l.Add( (QueryNode)LValue );
+				if (RValue is QueryNode)
+					l.Add( (QueryNode)RValue );
+				return l; 
+			}
+		}
 
 	
 		public QueryConditionNode(IQueryValue lvalue, Conditions conditions, IQueryValue rvalue) {
@@ -57,5 +64,16 @@ namespace NI.Data {
 		}
 	
 	}
-	
+
+	[Flags]
+	public enum Conditions {
+		Equal = 1,
+		LessThan = 2,
+		GreaterThan = 4,
+		Like = 8,
+		In = 16,
+		Null = 32,
+		Not = 64
+	}
+
 }

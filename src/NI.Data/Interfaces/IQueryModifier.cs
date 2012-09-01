@@ -22,6 +22,6 @@ namespace NI.Data {
 	/// Query structure modifier interface
 	/// </summary>
 	public interface IQueryModifier {
-		IQuery Modify(IQuery q);
+		Query Modify(Query q);
 	}
 }

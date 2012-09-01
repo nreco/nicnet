@@ -57,7 +57,7 @@ namespace NI.Data
 		/// <see cref="IObjectListProvider.GetObjectList"/>
 		/// </summary>
 		public IList GetObjectList(object context) {
-			IQuery q = GetQuery(context);
+			Query q = GetQuery(context);
 			object[] result = null;
 			
 			// datareader-based optimized logic
@@ -129,7 +129,7 @@ namespace NI.Data
 		}
 		
 		
-		protected virtual IQuery GetQuery(object context) {
+		protected virtual Query GetQuery(object context) {
 			return QueryProvider.GetQuery(context);
 		}
 		

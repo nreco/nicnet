@@ -43,10 +43,10 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 
-		public IQueryNode Parse(string relExCondition) {
+		public QueryNode Parse(string relExCondition) {
 			string relEx = String.Format("sourcename({0})[*]", relExCondition);
-			IQuery q = RelExQueryParser.Parse(relEx);
-			return q.Root;
+			Query q = RelExQueryParser.Parse(relEx);
+			return q.Condition;
 		}
 	}
 }

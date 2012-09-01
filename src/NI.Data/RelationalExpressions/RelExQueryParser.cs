@@ -254,26 +254,26 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 		
-		public virtual IQuery Parse(string relEx) {
+		public virtual Query Parse(string relEx) {
 			int endIdx;
 			IQueryValue qValue = ParseInternal(relEx, 0, out endIdx );
-			if (!(qValue is IQuery)) 
+			if (!(qValue is Query)) 
 				throw new RelExParseException("Invalid expression: result is not a query");
-			IQuery q = (IQuery)qValue;
+			Query q = (Query)qValue;
 			if (QueryModifier!=null)
 				q = QueryModifier.Modify(q);
 			return q;
 		}
 		
-		public virtual IQueryNode ParseCondition(string relExCondition) {
+		public virtual QueryNode ParseCondition(string relExCondition) {
 			int endIdx;
 			if (String.IsNullOrEmpty(relExCondition))
 				return null;
-			IQueryNode node = ParseConditionGroup(relExCondition, 0, out endIdx);
+			QueryNode node = ParseConditionGroup(relExCondition, 0, out endIdx);
 			return node;
 		}
 
-		IQueryNode IRelExQueryNodeParser.Parse(string relExCondition) {
+		QueryNode IRelExQueryNodeParser.Parse(string relExCondition) {
 			return ParseCondition(relExCondition);
 		}
 		
@@ -362,7 +362,7 @@ namespace NI.Data.RelationalExpressions
 				
 				// query
 				string sourceName = lexem;
-				IQueryNode rootCondition = null;
+				QueryNode rootCondition = null;
 				string[] fields = null;
                 string[] sort = null;
 				
@@ -506,12 +506,12 @@ namespace NI.Data.RelationalExpressions
 			return nodeName;
 		}
 		
-		protected IQueryNode ParseConditionGroup(string input, int startIdx, out int endIdx) {
+		protected QueryNode ParseConditionGroup(string input, int startIdx, out int endIdx) {
 			int nextEndIdx;
 			LexemType lexemType = GetLexemType(input, startIdx, out nextEndIdx);
 			string lexem = GetLexem(input, startIdx, nextEndIdx);
 			
-			IQueryNode node;
+			QueryNode node;
 			if (lexemType==LexemType.Delimiter && lexem=="(") {
 				string nodeName = ParseNodeName(input, nextEndIdx, out endIdx);
 				nextEndIdx = endIdx;
@@ -555,7 +555,7 @@ namespace NI.Data.RelationalExpressions
 			return node;		
 		}
 
-		protected IQueryGroupNode ComposeGroupNode(IQueryNode node1, IQueryNode node2, GroupType groupType) {
+		protected QueryGroupNode ComposeGroupNode(QueryNode node1, QueryNode node2, GroupType groupType) {
 			QueryGroupNode group1 = node1 as QueryGroupNode, group2 = node2 as QueryGroupNode;
 			if (group1 != null && group1.Group != groupType)
 				group1 = null;
@@ -573,20 +573,20 @@ namespace NI.Data.RelationalExpressions
 					group.Nodes.Add(node2);
 					return group;				
 				} else {
-					group2.Nodes.Prepend(node1);
+					group2.Nodes.Insert(0, node1);
 					return group2;				
 				}
 			} else {
 				if (group2 == null)
 					group1.Nodes.Add(node2);
 				else
-					foreach (IQueryNode qn in group2.Nodes)
+					foreach (QueryNode qn in group2.Nodes)
 						group1.Nodes.Add(qn);
 				return group1;
 			}
 		}
 		
-		protected IQueryNode ParseCondition(string input, int startIdx, out int endIdx) {
+		protected QueryNode ParseCondition(string input, int startIdx, out int endIdx) {
 			
 			IQueryValue leftValue = ParseInternal(input, startIdx, out endIdx); 
 			// special case if legacy 'allow dump constants' mode is on
@@ -602,7 +602,7 @@ namespace NI.Data.RelationalExpressions
 					String.Format("Invalid syntax (position: {0}, expression: {1})", startIdx, input ) );
 
 			IQueryValue rightValue = ParseInternal(input, nextEndIdx, out endIdx);
-			IQueryNode node;
+			QueryNode node;
 			if (IsNullValue(rightValue)) {
 				if ( (conditions & Conditions.Equal)!=0 )
 					node = new QueryConditionNode( leftValue, Conditions.Null | (conditions & ~Conditions.Equal), null);

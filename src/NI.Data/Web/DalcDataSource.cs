@@ -29,7 +29,7 @@ namespace NI.Data.Web {
 		string _SourceName;
 		string _SelectSourceName = null;
 		IDalc _Dalc;
-		IQueryNode _Condition = null;
+		QueryNode _Condition = null;
 		bool _DataSetMode = false;
 		bool _InsertMode = false;
 		string[] _AutoIncrementNames = null;
@@ -123,7 +123,7 @@ namespace NI.Data.Web {
 		/// <summary>
 		/// Get or set data condition (optional).
 		/// </summary>
-		public IQueryNode Condition {
+		public QueryNode Condition {
 			get { return _Condition; }
 			set { _Condition = value; }
 		}
@@ -132,7 +132,7 @@ namespace NI.Data.Web {
 		
 		public Query GetSelectQuery(string viewName) {
 			Query q = new Query(viewName == SourceName ? SelectSourceName : viewName);
-			q.Root = Condition;
+			q.Condition = Condition;
 			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
 			DataSet ds = DataSetProvider.GetDataSet(viewName);
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, selectArgs, ds);

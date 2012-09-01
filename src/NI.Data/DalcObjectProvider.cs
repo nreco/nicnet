@@ -50,7 +50,7 @@ namespace NI.Data
 		}
 		
 		public object GetObject(object context) {
-			IQuery q = QueryProvider.GetQuery(context);
+			Query q = QueryProvider.GetQuery(context);
 			
 			Hashtable record = new Hashtable();
 			if (Dalc.LoadRecord(record, q)) {

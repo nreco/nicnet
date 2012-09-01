@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace NI.Data
@@ -23,9 +24,8 @@ namespace NI.Data
 	/// Generic query implementation
 	/// </summary>
 	[Serializable]
-	public class Query : IQuery
+	public class Query : QueryNode, IQueryValue
 	{
-		private IQueryNode _Root = null;
 		private string[] _Sort = null;
 		private string[] _Fields = null;
 		private int _StartRecord = 0;
@@ -36,11 +36,12 @@ namespace NI.Data
 		/// <summary>
 		/// Filter expression root group. Can be null
 		/// </summary>
-		public IQueryNode Root {
-			get { return _Root; }
-			set { _Root = value; }
+		public QueryNode Condition { get; set; }
+
+		public override IList<QueryNode> Nodes {
+			get { return new QueryNode[] { Condition }; }
 		}
-		
+
 		/// <summary>
 		/// Sort expression. Can be null.
 		/// </summary>
@@ -96,23 +97,23 @@ namespace NI.Data
 			_SourceName = sourceName;
 		}
 
-		public Query(string sourceName, IQueryNode root) {
+		public Query(string sourceName, QueryNode root) {
 			_SourceName = sourceName;
-			Root = root;
+			Condition = root;
 		}
 
-		public Query(string sourceName, IQueryNode root, string[] sort) {
+		public Query(string sourceName, QueryNode root, string[] sort) {
 			_SourceName = sourceName;
-			Root = root;
+			Condition = root;
 			_Sort = sort;
 		}
 		
-		public Query(string sourceName, IQueryNode root, string[] sort, int start_record, int record_count) {
+		public Query(string sourceName, QueryNode root, string[] sort, int start_record, int record_count) {
 			_SourceName = sourceName;
 			_Sort = sort;
 			_StartRecord = start_record;
 			_RecordCount = record_count;
-			Root = root;
+			Condition = root;
 		}
 		
 		public Query(string sourceName, int start_record, int record_count) {
@@ -128,15 +129,14 @@ namespace NI.Data
 			_RecordCount = record_count;
 		}
 
-		public Query(IQuery q) {
+		public Query(Query q) {
 			_SourceName = q.SourceName;
 			_Sort = q.Sort;
 			_StartRecord = q.StartRecord;
 			_RecordCount = q.RecordCount;
-			_Root = q.Root;
+			Condition = q.Condition;
 			_Fields = q.Fields;
-			if (q is Query)
-				_ExtendedProperties = ((Query)q).ExtendedProperties;
+			_ExtendedProperties = new Hashtable( q.ExtendedProperties );
 		}
 
 		
@@ -146,8 +146,8 @@ namespace NI.Data
 		
 		class QueryStringBuilder : SqlBuilder {
 
-			public string BuildQueryString(IQuery q) {
-				string rootExpression = BuildExpression( q.Root );
+			public string BuildQueryString(Query q) {
+				string rootExpression = BuildExpression( q.Condition );
 				if (rootExpression!=null && rootExpression.Length>0)
 					rootExpression = String.Format("({0})", rootExpression);
 			
@@ -159,8 +159,8 @@ namespace NI.Data
 			}
 			
 			protected override string BuildValue(IQueryValue value) {
-				if (value is IQuery) 
-					return BuildQueryString( (IQuery) value );
+				if (value is Query) 
+					return BuildQueryString( (Query) value );
 				return base.BuildValue (value);
 			}
 

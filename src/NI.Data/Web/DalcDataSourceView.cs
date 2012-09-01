@@ -49,7 +49,7 @@ namespace NI.Data.Web {
 
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
 			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
-			q.Root = DataSource.Condition;
+			q.Condition = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
 				q.Sort = arguments.SortExpression.Split(',');
 			DataSet ds = GetDataSet();
@@ -88,7 +88,7 @@ namespace NI.Data.Web {
 			return ds.Tables[q.SourceName].DefaultView;
 		}
 
-		protected IQueryNode ComposeUidCondition(IDictionary keys) {
+		protected QueryNode ComposeUidCondition(IDictionary keys) {
 			if (keys.Count == 0)
 				throw new MissingPrimaryKeyException();
 			// compose UID condition
@@ -145,7 +145,7 @@ namespace NI.Data.Web {
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, values);
 			DataSource.OnUpdating(DataSource, eArgs);
-			IQueryNode uidCondition = ComposeUidCondition(keys);
+			QueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
 				DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, uidCondition));
@@ -173,7 +173,7 @@ namespace NI.Data.Web {
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
 			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, oldValues);
 			DataSource.OnDeleting(DataSource, eArgs);
-			IQueryNode uidCondition = ComposeUidCondition(keys);
+			QueryNode uidCondition = ComposeUidCondition(keys);
 
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();

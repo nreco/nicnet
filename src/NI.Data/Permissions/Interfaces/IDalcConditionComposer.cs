@@ -25,7 +25,7 @@ namespace NI.Data.Permissions
 		/// Compose condition
 		/// </summary>
 		/// <returns>condition or null (means no additional conditions)</returns>
-		IQueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName);
+		QueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName);
 	}
 
 

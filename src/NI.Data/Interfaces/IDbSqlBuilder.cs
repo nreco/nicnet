@@ -22,9 +22,9 @@ namespace NI.Data
 	/// </summary>
 	public interface IDbSqlBuilder : ISqlBuilder
 	{
-		string BuildSelect(IQuery query);
-		string BuildSort(IQuery query);
-		string BuildFields(IQuery query);
+		string BuildSelect(Query query);
+		string BuildSort(Query query);
+		string BuildFields(Query query);
 		string BuildSetExpression(string[] fieldNames, string[] fieldValues);
 		string BuildCommandParameter(object value);
 		string BuildCommandParameter(DataColumn col, DataRowVersion sourceVersion);

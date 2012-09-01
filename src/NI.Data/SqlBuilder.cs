@@ -38,26 +38,26 @@ namespace NI.Data
 		}
 		
 		
-		public virtual string BuildExpression(IQueryNode node) {
+		public virtual string BuildExpression(QueryNode node) {
 			if (node==null) return null;
 			
-			if (node is IQueryGroupNode)
-				return BuildGroup( (IQueryGroupNode)node );
-			if (node is IQueryConditionNode)
-				return BuildCondition( (IQueryConditionNode)node );
-			if (node is IQueryNegationNode)
-				return BuildNegation( (IQueryNegationNode)node );
+			if (node is QueryGroupNode)
+				return BuildGroup( (QueryGroupNode)node );
+			if (node is QueryConditionNode)
+				return BuildCondition( (QueryConditionNode)node );
+			if (node is QueryNegationNode)
+				return BuildNegation( (QueryNegationNode)node );
 			
 			throw new ArgumentException("Cannot build node with such type", node.GetType().ToString() );
 		}
 		
-		protected virtual string BuildGroup(IQueryGroupNode node) {
+		protected virtual string BuildGroup(QueryGroupNode node) {
 			// do not render empty group
 			if (node.Nodes==null) return null;
 			
 			// if group contains only one node ignore group node...
 			ArrayList subNodes = new ArrayList();
-			foreach (IQueryNode childNode in node.Nodes) {
+			foreach (QueryNode childNode in node.Nodes) {
 				string childNodeExpression = BuildExpression( childNode );
 				if (childNodeExpression!=null)
 					subNodes.Add( "("+childNodeExpression+")" ); 
@@ -77,14 +77,14 @@ namespace NI.Data
 				(string[])subNodes.ToArray(typeof(string)) );
 		}
 		
-		protected virtual string BuildNegation(IQueryNegationNode node) {
-			if (node.ExpressionNode==null) return null;
-			string expression = BuildExpression(node.ExpressionNode);
+		protected virtual string BuildNegation(QueryNegationNode node) {
+			if (node.Nodes.Count==0) return null;
+			string expression = BuildExpression(node.Nodes[0]);
 			if (expression==null) return null;
 			return String.Format("NOT({0})", expression);
 		}
 
-		protected virtual string BuildCondition(IQueryConditionNode node) {
+		protected virtual string BuildCondition(QueryConditionNode node) {
 			Conditions condition = node.Condition & (
 				Conditions.Equal | Conditions.GreaterThan |
 				Conditions.In | Conditions.LessThan |

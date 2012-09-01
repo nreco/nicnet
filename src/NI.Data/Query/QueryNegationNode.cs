@@ -13,24 +13,22 @@
 #endregion
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace NI.Data {
 	
 	[Serializable]
-	public class QueryNegationNode : QueryNode, IQueryNegationNode {
+	public class QueryNegationNode : QueryNode {
 		
-		private IQueryNode _Node;
+		private QueryNode _Node;
 	
 		/// <summary>
 		/// Nodes collection
 		/// </summary>
-		public override IEnumerable Nodes { get { return new IQueryNode[] { _Node }; } }
+		public override IList<QueryNode> Nodes { get { return new QueryNode[] { _Node }; } }
 		
-		public IQueryNode ExpressionNode { get { return _Node; } }
-		
-		public QueryNegationNode(IQueryNode node) {
+		public QueryNegationNode(QueryNode node) {
 			_Node = node;
 		}
 

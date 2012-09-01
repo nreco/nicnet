@@ -195,7 +195,7 @@ namespace NI.Data.Vfs {
         private void DeleteInternal(string name, string sourceName, string keyFieldName) {
             if (name.Length > 0) name = FormatPath(name);    
             Query q = new Query(sourceName);
-            q.Root = new QueryConditionNode((QField)keyFieldName, Conditions.Equal, (QConst)name);
+            q.Condition = new QueryConditionNode((QField)keyFieldName, Conditions.Equal, (QConst)name);
             Dalc.Delete(q);
         }
 

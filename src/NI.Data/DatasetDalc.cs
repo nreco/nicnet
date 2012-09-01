@@ -36,7 +36,7 @@ namespace NI.Data
 		{
 		}
 
-		virtual public int RecordsCount(string sourceName, IQueryNode conditions) {
+		virtual public int RecordsCount(string sourceName, QueryNode conditions) {
 			Query q = new Query(sourceName, conditions);
 			// overhead. TODO: write more optimal implementation here
 			DataSet ds = new DataSet();
@@ -50,11 +50,11 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="ds">Destination dataset</param>
 		/// <param name="query">Query</param>
-		public virtual void Load(DataSet ds, IQuery query) {
+		public virtual void Load(DataSet ds, Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
-			string whereExpression = BuildExpression( query.Root );
+			string whereExpression = BuildExpression( query.Condition );
 			string sortExpression = BuildSort( query );
 			if (!ds.Tables.Contains(query.SourceName))
 				ds.Tables.Add( PersistedDS.Tables[query.SourceName].Clone() );
@@ -116,11 +116,11 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
-			string whereExpression = BuildExpression( query.Root );
+			string whereExpression = BuildExpression( query.Condition );
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
 			for (int i=0; i<result.Length; i++) {
 				foreach (object columnName in data.Keys)
@@ -153,11 +153,11 @@ namespace NI.Data
 		/// Delete data from dataset by query
 		/// </summary>
 		/// <param name="query"></param>
-		public int Delete(IQuery query) {
+		public int Delete(Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
-			string whereExpression = BuildExpression( query.Root );
+			string whereExpression = BuildExpression( query.Condition );
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
 			for (int i=0; i<result.Length; i++)
 				result[i].Delete();
@@ -171,11 +171,11 @@ namespace NI.Data
 		/// <param name="data">Container for record data</param>
 		/// <param name="query">query</param>
 		/// <returns>Success flag</returns>
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name " + query.SourceName);
 
-			string whereExpression = BuildExpression(query.Root);
+			string whereExpression = BuildExpression(query.Condition);
 			string sortExpression = BuildSort(query);
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select(whereExpression, sortExpression);
 			if (result.Length == 0) return false;
@@ -190,11 +190,11 @@ namespace NI.Data
 		
 		
 		protected override string BuildValue(IQueryValue value) {
-			if (value is IQuery) {
-				IQuery q = (IQuery)value;
+			if (value is Query) {
+				Query q = (Query)value;
 				if (q.Fields==null || q.Fields.Length!=1)
 					throw new Exception("Invalid nested query");
-				string whereExpression = BuildExpression( q.Root );
+				string whereExpression = BuildExpression( q.Condition );
 				string sortExpression = BuildSort( q );
 				DataRow[] result = PersistedDS.Tables[q.SourceName].Select( whereExpression, sortExpression );
 				if (result.Length==1)
@@ -212,7 +212,7 @@ namespace NI.Data
 			return base.BuildValue( value );
 		}
 		
-		protected virtual string BuildSort(IQuery q) {
+		protected virtual string BuildSort(Query q) {
 			if (q.Sort!=null && q.Sort.Length>0)
 				return string.Join(",", q.Sort);
 			return null;

@@ -24,14 +24,14 @@ namespace NI.Data.Adomd
 	{
 		IDbCommand _Command;
 		DbTypeResolver DbTypeResolver;
-		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
+		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
 		
 		public IDbCommand Command { get { return _Command; } }
 		
 		/// <summary>
 		/// Get or set default query field value formatter
 		/// </summary>
-		public IQueryFieldValueFormatter QueryFieldValueFormatter {
+		public QueryFieldValueFormatter QueryFieldValueFormatter {
 			get { return _QueryFieldValueFormatter; }
 			set { _QueryFieldValueFormatter = value; }
 		}

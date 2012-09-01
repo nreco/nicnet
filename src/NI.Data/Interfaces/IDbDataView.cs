@@ -36,6 +36,6 @@ namespace NI.Data
 		
 		string FormatSqlCommandText(IDictionary context);
 		
-		IQueryFieldValueFormatter GetQueryFieldValueFormatter(IQuery q);
+		IQueryFieldValueFormatter GetQueryFieldValueFormatter(Query q);
 	}
 }

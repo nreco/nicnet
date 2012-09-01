@@ -27,15 +27,15 @@ namespace NI.Data
 	{
 		IDbCommandWrapperFactory CommandWrapperFactory { get; set; }
 	
-		IDbCommandWrapper ComposeSelect(IQuery query);
+		IDbCommandWrapper ComposeSelect(Query query);
 		
 		IDbCommandWrapper ComposeInsert(DataTable table);
 		IDbCommandWrapper ComposeInsert(IDictionary data, string sourceName);
 
 		IDbCommandWrapper ComposeDelete(DataTable table);
-		IDbCommandWrapper ComposeDelete(IQuery query);
+		IDbCommandWrapper ComposeDelete(Query query);
 
 		IDbCommandWrapper ComposeUpdate(DataTable table);
-		IDbCommandWrapper ComposeUpdate(IDictionary changesData, IQuery query);
+		IDbCommandWrapper ComposeUpdate(IDictionary changesData, Query query);
 	}
 }

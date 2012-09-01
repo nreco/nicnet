@@ -36,7 +36,7 @@ namespace NI.Data
 		{
 		}
 		
-		public override IDbCommandWrapper ComposeSelect(IQuery query) {
+		public override IDbCommandWrapper ComposeSelect(Query query) {
 			QSourceName qSourceName = (QSourceName)query.SourceName;
 			for (int i=0; i<DataViews.Length; i++)
 				if (DataViews[i].MatchSourceName(qSourceName.Name))
@@ -47,7 +47,7 @@ namespace NI.Data
 		
 		/// <summary>
 		/// </summary>
-		protected virtual IDbCommandWrapper ComposeDataViewSelect(IDbDataView dataView, IQuery query) {
+		protected virtual IDbCommandWrapper ComposeDataViewSelect(IDbDataView dataView, Query query) {
 			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
 			
 			IDictionary context = BuildSqlCommandContext(cmdWrapper, dataView, query);
@@ -72,7 +72,7 @@ namespace NI.Data
 				
 		}
 		
-		protected virtual IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, IQuery query) {
+		protected virtual IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, Query query) {
 			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 			
 			// add dataview field formatter in the formatting chain
@@ -86,7 +86,7 @@ namespace NI.Data
 
 			Hashtable context = (query is Query && ((Query)query).ExtendedProperties != null) ? new Hashtable(((Query)query).ExtendedProperties) : new Hashtable();
 			
-			BuildNamedQueryNodeContext(context, query.Root, dbSqlBuilder);
+			BuildNamedQueryNodeContext(context, query.Condition, dbSqlBuilder);
 			
 			context["whereExpression"] = IsolateWhereExpression( whereExpression );
 			context["sortExpression"] = sort;
@@ -106,20 +106,18 @@ namespace NI.Data
 			return expression!=null && expression.Length>0 ? "("+expression+")" : expression;
 		}
 		
-		protected void BuildNamedQueryNodeContext(IDictionary context, IQueryNode node, IDbSqlBuilder dbSqlBuilder) {
+		protected void BuildNamedQueryNodeContext(IDictionary context, QueryNode node, IDbSqlBuilder dbSqlBuilder) {
 			if (node==null) return;
-			if (node is INamedQueryNode) {
-				string name = ((INamedQueryNode)node).Name;
-				if (name!=null)
-					context[name] = dbSqlBuilder.BuildExpression( node );
+			if (!String.IsNullOrEmpty( node.Name )) {
+				context[node.Name] = dbSqlBuilder.BuildExpression( node );
 			}
 			if (node.Nodes!=null)
-				foreach (IQueryNode childNode in node.Nodes)
+				foreach (QueryNode childNode in node.Nodes)
 					BuildNamedQueryNodeContext(context, childNode, dbSqlBuilder);
 		}
 		
-		protected virtual string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, IQuery query) {
-			return dbSqlBuilder.BuildExpression(query.Root);
+		protected virtual string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, Query query) {
+			return dbSqlBuilder.BuildExpression(query.Condition);
 		}
 		
 		

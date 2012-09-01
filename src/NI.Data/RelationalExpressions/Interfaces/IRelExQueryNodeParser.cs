@@ -21,7 +21,7 @@ namespace NI.Data.RelationalExpressions
 	/// </summary>
 	public interface IRelExQueryNodeParser
 	{
-		IQueryNode Parse(string relExCondition); 
+		QueryNode Parse(string relExCondition); 
 	}
 	
 	

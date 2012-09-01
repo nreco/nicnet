@@ -34,7 +34,7 @@ namespace NI.Data
 		public ThreadsafeDalc() {
 		}
 
-		public void Load(DataSet ds, IQuery query) {
+		public void Load(DataSet ds, Query query) {
 			lock (Dalc) {
 				Dalc.Load(ds, query);
 			}
@@ -46,7 +46,7 @@ namespace NI.Data
 			} 
 		}
 
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			lock (Dalc) {
 				return Dalc.Update(data, query);
 			}		
@@ -58,19 +58,19 @@ namespace NI.Data
 			}		
 		}
 		
-		public int Delete(IQuery query) {
+		public int Delete(Query query) {
 			lock (Dalc) {
 				return Dalc.Delete(query);
 			}
 		}
 		
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			lock (Dalc) {
 				return Dalc.LoadRecord(data, query);
 			}
 		}
 		
-		public int RecordsCount(string sourceName, IQueryNode conditions) {
+		public int RecordsCount(string sourceName, QueryNode conditions) {
 			lock (Dalc) {
 				return Dalc.RecordsCount(sourceName, conditions);
 			}

@@ -118,7 +118,7 @@ namespace NI.Data {
 			set { collectStatistics = value; }
 		}        
 
-        protected bool CachingAllowed(IQuery query){
+        protected bool CachingAllowed(Query query){
             return QueryCachingAllowedProvider == null || QueryCachingAllowedProvider.GetBoolean(query);
         }
 		
@@ -130,33 +130,33 @@ namespace NI.Data {
 			return ValueCachingAllowedProvider == null || ValueCachingAllowedProvider.GetBoolean(context);
         }
 
-        private void GetAccessibleSourceNames(IQueryNode node, List<string> names){
-            if (node is IQueryConditionNode){
-                IQueryConditionNode cn = (IQueryConditionNode) node;
-                if (cn.LValue is IQuery) {
-					IQuery q = (IQuery)cn.LValue;
+        private void GetAccessibleSourceNames(QueryNode node, List<string> names){
+            if (node is QueryConditionNode){
+                var cn = (QueryConditionNode) node;
+                if (cn.LValue is Query) {
+					Query q = (Query)cn.LValue;
 					if (!names.Contains(q.SourceName))
 						names.Add(q.SourceName);					
-					GetAccessibleSourceNames( q.Root, names);
+					GetAccessibleSourceNames( q.Condition, names);
 				}
-				if (cn.RValue is IQuery) {
-					IQuery q = (IQuery)cn.RValue;
+				if (cn.RValue is Query) {
+					Query q = (Query)cn.RValue;
 					if (!names.Contains(q.SourceName))
 						names.Add(q.SourceName);
-					GetAccessibleSourceNames(q.Root, names);
+					GetAccessibleSourceNames(q.Condition, names);
 				}
-            } else if (node is IQueryGroupNode){
-                foreach (IQueryNode child in node.Nodes){
+            } else if (node is QueryGroupNode){
+                foreach (QueryNode child in node.Nodes){
                     GetAccessibleSourceNames(child, names);
                 }
             }
         }
 
-        protected ICacheEntryValidator GetValidator(IQuery query){
+        protected ICacheEntryValidator GetValidator(Query query){
             if (CacheValidatorProvider != null){
                 List<string> list = new List<string>();
 				list.Add(query.SourceName);
-				GetAccessibleSourceNames(query.Root, list);
+				GetAccessibleSourceNames(query.Condition, list);
 				return CacheValidatorProvider.GetValidator(list.ToArray());
             }
             return null;
@@ -169,7 +169,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.Load"/>
 		/// </summary>
-		public void Load(DataSet ds, IQuery query) {
+		public void Load(DataSet ds, Query query) {
             if (collectStatistics) statistics.totalLoad += 1;
 				
             if ( Enabled && CachingAllowed(query) ){
@@ -198,7 +198,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.LoadRecord"/>
 		/// </summary>
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			if (collectStatistics) statistics.totalLoadRecord += 1;
             
             if ( Enabled && CachingAllowed(query) ){
@@ -226,7 +226,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.RecordCount"/>
 		/// </summary>
-		public int RecordsCount(string sourceName, IQueryNode conditions) {
+		public int RecordsCount(string sourceName, QueryNode conditions) {
 			if (collectStatistics) statistics.totalRecordsCount += 1;
 			
 			Query recordCountQuery = new Query(sourceName, conditions);
@@ -258,7 +258,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.Update"/>
 		/// </summary>
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			return UnderlyingDalc.Update(data, query);
 		}
 
@@ -272,7 +272,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.Delete"/>
 		/// </summary>
-		public int Delete(IQuery query) {
+		public int Delete(Query query) {
 			return UnderlyingDalc.Delete(query);
 		}
 		
@@ -303,20 +303,20 @@ namespace NI.Data {
 		
 		public class LoadRecordValueContext {
 			IDictionary _RecordData;
-			IQuery _Query;
-			public IQuery Query { get { return _Query; } }
+			Query _Query;
+			public Query Query { get { return _Query; } }
 			public IDictionary RecordData { get { return _RecordData; } }
-			public LoadRecordValueContext(IQuery query, IDictionary recordData) {
+			public LoadRecordValueContext(Query query, IDictionary recordData) {
 				this._RecordData = recordData;
 				this._Query = query;
 			}
 		}
 		public class LoadDataSetValueContext {
 			DataSet _Data;
-			IQuery _Query;
-			public IQuery Query { get { return _Query; } }
+			Query _Query;
+			public Query Query { get { return _Query; } }
 			public DataSet Data { get { return _Data; } }
-			public LoadDataSetValueContext(IQuery query, DataSet data) {
+			public LoadDataSetValueContext(Query query, DataSet data) {
 				this._Data = data;
 				this._Query = query;
 			}

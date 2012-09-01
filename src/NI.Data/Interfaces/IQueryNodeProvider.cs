@@ -23,6 +23,6 @@ namespace NI.Data
 	/// </summary>
 	public interface IQueryNodeProvider
 	{
-		IQueryNode GetQueryNode(object context);
+		QueryNode GetQueryNode(object context);
 	}
 }

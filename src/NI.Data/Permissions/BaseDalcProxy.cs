@@ -67,34 +67,34 @@ namespace NI.Data.Permissions {
 		public BaseDalcProxy() {
 		}
 		
-		protected IQuery AddPermissionCondition(DalcOperation operation, IQuery query) {
+		protected Query AddPermissionCondition(DalcOperation operation, Query query) {
 			QSourceName qSourceName = (QSourceName)query.SourceName;
-			IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, operation, qSourceName.Name);
+			QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, operation, qSourceName.Name);
 			if (permissionCondition!=null) {
 				Query modifiedQuery = new Query(query);
 				QueryGroupNode newRoot = new QueryGroupNode(GroupType.And);
-				newRoot.Nodes.Add( modifiedQuery.Root );
+				newRoot.Nodes.Add( modifiedQuery.Condition );
 				newRoot.Nodes.Add( PreparePermissionCondition( permissionCondition, qSourceName) );
-				modifiedQuery.Root = newRoot;
+				modifiedQuery.Condition = newRoot;
 				return modifiedQuery;
 			}
 			return query;
 		}
 
-		protected IQueryNode PreparePermissionCondition(IQueryNode permissionCondition, QSourceName qSourceName) {
+		protected QueryNode PreparePermissionCondition(QueryNode permissionCondition, QSourceName qSourceName) {
 			// check if alias is used
 			if (!String.IsNullOrEmpty(qSourceName.Alias))
 				FixConditionFieldNames(permissionCondition, qSourceName);
 			return permissionCondition;
 		}
-		protected void FixConditionFieldNames(IQueryNode node, QSourceName qSourceName) {
+		protected void FixConditionFieldNames(QueryNode node, QSourceName qSourceName) {
 			if (node is QueryConditionNode) {
 				QueryConditionNode condNode = (QueryConditionNode)node;
 				condNode.LValue = FixConditionFieldNames(condNode.LValue, qSourceName);
 			}
-			if (node is IQueryGroupNode) {
-				IQueryGroupNode grpNode = (IQueryGroupNode)node;
-				foreach (IQueryNode grpChildNode in grpNode.Nodes)
+			if (node is QueryGroupNode) {
+				var grpNode = (QueryGroupNode)node;
+				foreach (QueryNode grpChildNode in grpNode.Nodes)
 					FixConditionFieldNames(grpChildNode, qSourceName);
 			}
 		}
@@ -109,16 +109,16 @@ namespace NI.Data.Permissions {
 						return new QField(qSourceName.Alias + suffix);
 				}
 			}
-			if (qValue is IQuery) {
-				IQuery q = (IQuery)qValue;
-				FixConditionFieldNames(q.Root, qSourceName);
+			if (qValue is Query) {
+				Query q = (Query)qValue;
+				FixConditionFieldNames(q.Condition, qSourceName);
 			}
 			return qValue;
 		}
 
-		public void Load(DataSet ds, IQuery query) {
+		public void Load(DataSet ds, Query query) {
 			if (Enabled) {
-				IQuery modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
+				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
 				Dalc.Load(ds, modifiedQuery);
 			} else {
 				Dalc.Load(ds, query);
@@ -212,9 +212,9 @@ namespace NI.Data.Permissions {
 			Dalc.Update(ds, sourceName);
 		}
 
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			if (Enabled) {
-				IQuery modifiedQuery = AddPermissionCondition(DalcOperation.Update, query);
+				Query modifiedQuery = AddPermissionCondition(DalcOperation.Update, query);
 				return Dalc.Update(data, modifiedQuery);		
 			} else {
 				return Dalc.Update(data, query);	
@@ -234,27 +234,27 @@ namespace NI.Data.Permissions {
 			Dalc.Insert(data, sourceName);		
 		}
 
-		public int Delete(IQuery query) {
+		public int Delete(Query query) {
 			if (Enabled) {
-				IQuery modifiedQuery = AddPermissionCondition(DalcOperation.Delete, query);
+				Query modifiedQuery = AddPermissionCondition(DalcOperation.Delete, query);
 				return Dalc.Delete( modifiedQuery );
 			} else {
 				return Dalc.Delete(query);
 			}
 		}
 
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			if (Enabled) {
-				IQuery modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
+				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
 				return Dalc.LoadRecord( data, modifiedQuery);
 			} else {
 				return Dalc.LoadRecord(data, query);
 			}
 		}
 
-		public int RecordsCount(string sourceName, IQueryNode conditions) {
+		public int RecordsCount(string sourceName, QueryNode conditions) {
 			if (Enabled) {
-				IQueryNode permissionCondition = DalcConditionComposer.Compose( ContextUser, DalcOperation.Retrieve, sourceName );
+				QueryNode permissionCondition = DalcConditionComposer.Compose( ContextUser, DalcOperation.Retrieve, sourceName );
 				if (permissionCondition!=null) {
 					QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 					groupAnd.Nodes.Add( conditions );

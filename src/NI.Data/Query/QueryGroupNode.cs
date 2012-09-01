@@ -13,58 +13,49 @@
 #endregion
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace NI.Data
 {
 	
 	[Serializable]
-	public class QueryGroupNode : IQueryGroupNode, INamedQueryNode {
+	public class QueryGroupNode : QueryNode {
 		
-		private QueryNodeCollection _Nodes;
+		private List<QueryNode> _Nodes;
 		private GroupType _Group;
-		string _Name = null;
-
-		public string Name {
-			get { return _Name; }
-			set { _Name = value; }
-		}
-
 
 	
 		/// <summary>
 		/// Nodes collection
 		/// </summary>
-		IEnumerable IQueryNode.Nodes { get { return _Nodes; } }
-		
-		public QueryNodeCollection Nodes { get { return _Nodes; } }
+		public override IList<QueryNode> Nodes {
+			get {
+				return _Nodes;
+			}
+		}
 		
 		/// <summary>
 		/// Group type
 		/// </summary>
-		public GroupType Group { get { return _Group; } }
+		public GroupType Group { get; set; }
 		
 		public QueryGroupNode(GroupType type) {
-			_Group = type;
-			_Nodes = new QueryNodeCollection();
+			Group = type;
+			_Nodes = new List<QueryNode>();
 		}
 		
-		public QueryGroupNode(string name, GroupType type) : this(type) {
-			Name = name;
-		}
-
-		public QueryGroupNode(IQueryGroupNode likeGroup)
+		public QueryGroupNode(QueryGroupNode likeGroup)
 			: this(likeGroup.Group) {
-			if (likeGroup is INamedQueryNode)
-				Name = ((INamedQueryNode)likeGroup).Name;
+			Name = likeGroup.Name;
+			_Nodes.AddRange(likeGroup.Nodes);
 		}
 		
 
 		/// <summary>
 		/// OR operator
 		/// </summary>
-		public static QueryGroupNode operator | (QueryGroupNode node1, IQueryNode node2) {
+		public static QueryGroupNode operator | (QueryGroupNode node1, QueryNode node2) {
 			
 			if ( node1.Group==GroupType.Or) {
 				node1.Nodes.Add( node2 );
@@ -79,7 +70,7 @@ namespace NI.Data
 		/// <summary>
 		/// AND operator
 		/// </summary>
-		public static QueryGroupNode operator & (QueryGroupNode node1, IQueryNode node2) {
+		public static QueryGroupNode operator & (QueryGroupNode node1, QueryNode node2) {
 			
 			if ( node1.Group==GroupType.And) {
 				node1.Nodes.Add( node2 );
@@ -92,6 +83,10 @@ namespace NI.Data
 		}	
 
 	}
+
+	public enum GroupType {
+		Or, And
+	}	
 
 
 	

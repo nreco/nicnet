@@ -41,12 +41,12 @@ namespace NI.Data.Permissions
 		/// <summary>
 		/// <see cref="IDalcConditionComposer.Compose"/>
 		/// </summary>
-		public IQueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName) {
+		public QueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName) {
 			QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 			for (int i=0; i<ConditionDescriptors.Length; i++)
 				if (ConditionDescriptors[i].Operation==operation && 
 					ConditionDescriptors[i].SourceName==sourceName) {
-					IQueryNode condition = ConditionDescriptors[i].ConditionProvider.GetQueryNode(user);
+					QueryNode condition = ConditionDescriptors[i].ConditionProvider.GetQueryNode(user);
 					if (condition!=null)
 						groupAnd.Nodes.Add( condition );
 				}

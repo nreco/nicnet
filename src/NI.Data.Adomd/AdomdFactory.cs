@@ -23,12 +23,12 @@ namespace NI.Data.Adomd
 
 	public class AdomdFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
-		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
+		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
 
 		/// <summary>
 		/// Get or set default query field value formatter
 		/// </summary>
-		public IQueryFieldValueFormatter QueryFieldValueFormatter {
+		public QueryFieldValueFormatter QueryFieldValueFormatter {
 			get { return _QueryFieldValueFormatter; }
 			set { _QueryFieldValueFormatter = value; }
 		}

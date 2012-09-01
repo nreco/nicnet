@@ -90,7 +90,7 @@ namespace NI.Tests.Data.RelationalExpressions
 
 			for (int i=0; i<oldRelExSamples.Length; i++) {
 				string relEx = oldRelExSamples[i];
-				IQuery q = relExParser.Parse(relEx);
+				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;
 				
 				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed (AllowDumpConstations=true): "+i.ToString() );
@@ -99,7 +99,7 @@ namespace NI.Tests.Data.RelationalExpressions
 			relExParser.AllowDumpConstants = false;
 			for (int i=0; i<relExSamples.Length; i++) {
 				string relEx = relExSamples[i];
-				IQuery q = relExParser.Parse(relEx);
+				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;
 				
 				Assert.AreEqual(cmd.CommandText, relExCommandTexts[i], "Parse failed (AllowDumpConstations=false): "+i.ToString() );
@@ -107,23 +107,23 @@ namespace NI.Tests.Data.RelationalExpressions
 
 			// test for named nodes
 			string relexWithNamedNodes = @"users( (<idGroup> id=null and id!=null) and (<ageGroup> age>5 or age<2) and (<emptyGroup>) )[count(*)]";
-			IQuery qWithGroups = relExParser.Parse(relexWithNamedNodes);
-			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Root, "idGroup"), "named group not found");
-			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Root, "ageGroup"), "named group not found");
-			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Root, "emptyGroup"), "named group not found");
+			Query qWithGroups = relExParser.Parse(relexWithNamedNodes);
+			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Condition, "idGroup"), "named group not found");
+			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Condition, "ageGroup"), "named group not found");
+			Assert.AreNotEqual(null, FindNodeByName(qWithGroups.Condition, "emptyGroup"), "named group not found");
 		
 			// just a parse test for real complex relex
 			string sss = "sourcename( ( ((\"False\"=\"True\") or (\"False\"=\"True\")) and \"contact-of\" in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and (right_uid=agent_institutions.id) )[role_uid] ) or ( ((agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[client_institution_id]) or (agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[supplier_institution_id])) and (\"False\"=\"True\") ) or ( (agent_institutions.id in agent_to_agent_role( (left_uid in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and role_uid='contact-of' )[right_uid]) and role_uid='supplier-of')[right_uid] ) or (agent_institutions.id in events( events.supplier_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.client_institution_id]) or (agent_institutions.id in events( events.client_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.supplier_institution_id]) ) or (\"False\"=\"True\") or ( (\"False\"=\"True\") and (agent_institutions.id in agent_to_agent_role( role_uid='supplier-of' and right_uid = \"\" )[left_uid]) ) or (\"False\"=\"True\") )[*]";
 			relExParser.Parse(sss);
 		}
 
-		protected IQueryNode FindNodeByName(IQueryNode node, string name) {
+		protected QueryNode FindNodeByName(QueryNode node, string name) {
 			if (node is INamedQueryNode)
 				if (((INamedQueryNode)node).Name == name)
 					return node;
 			if (node.Nodes!=null)
-				foreach (IQueryNode cNode in node.Nodes) {
-					IQueryNode r = FindNodeByName(cNode, name);
+				foreach (QueryNode cNode in node.Nodes) {
+					QueryNode r = FindNodeByName(cNode, name);
 					if (r!=null) return r;
 				}
 

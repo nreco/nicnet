@@ -69,10 +69,10 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 		public override object Evaluate(IDictionary context, string expression) {
-			IQuery q = RelExQueryParser.Parse(expression);
+			Query q = RelExQueryParser.Parse(expression);
 			
 			if (ReturnCount)
-				return Dalc.RecordsCount(q.SourceName, q.Root);
+				return Dalc.RecordsCount(q.SourceName, q.Condition);
 			
 			if (ReturnList) {
 				DalcObjectListProvider dalcObjListProvider = new DalcObjectListProvider();
@@ -91,13 +91,13 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 		class ConstQueryProvider : IQueryProvider {
-			IQuery ConstQuery;
+			Query ConstQuery;
 			
-			public ConstQueryProvider(IQuery constQuery) {
+			public ConstQueryProvider(Query constQuery) {
 				ConstQuery = constQuery;
 			}
 			
-			public IQuery GetQuery(object context) {
+			public Query GetQuery(object context) {
 				return ConstQuery;
 			}
 

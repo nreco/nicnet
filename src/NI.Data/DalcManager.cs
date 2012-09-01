@@ -74,7 +74,7 @@ namespace NI.Data {
 			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
 		}
 
-		public DataRow Load(IQuery q) {
+		public DataRow Load(Query q) {
 			QSourceName source = new QSourceName(q.SourceName);
 			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
@@ -83,7 +83,7 @@ namespace NI.Data {
 			return ds.Tables[source.Name].Rows.Count > 0 ? ds.Tables[source.Name].Rows[0] : null;
 		}
 
-		public DataTable LoadAll(IQuery q) {
+		public DataTable LoadAll(Query q) {
 			QSourceName source = new QSourceName(q.SourceName);
 			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
@@ -151,7 +151,7 @@ namespace NI.Data {
 			Dalc.Update(ds, sourceName);
 		}
 
-		public int Update(IQuery q, IDictionary<string, object> changeset) {
+		public int Update(Query q, IDictionary<string, object> changeset) {
 			var tbl = LoadAll(q);
 			foreach (DataRow r in tbl.Rows)
 				foreach (var entry in changeset)
@@ -162,7 +162,7 @@ namespace NI.Data {
 		}
 
 
-		protected IQueryNode ComposePkCondition(DataTable tbl, params object[] pk) {
+		protected QueryNode ComposePkCondition(DataTable tbl, params object[] pk) {
 			QueryGroupNode grp = new QueryGroupNode(GroupType.And);
 			if (tbl.PrimaryKey.Length != pk.Length)
 				throw new Exception("Invalid primary key");

@@ -23,6 +23,6 @@ namespace NI.Data
 	{
 		IQueryFieldValueFormatter QueryFieldValueFormatter { get; set; }
 		
-		string BuildExpression(IQueryNode node);
+		string BuildExpression(QueryNode node);
 	}
 }

@@ -46,7 +46,7 @@ namespace NI.Data.Permissions
 			}
 		}		
 		
-		protected override IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, IQuery query) {
+		protected override IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, Query query) {
 			IDictionary context = base.BuildSqlCommandContext (cmdWrapper, dataView, query);
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.SourceNameOrigin==null)
@@ -59,7 +59,7 @@ namespace NI.Data.Permissions
 				string alias = m.Groups["alias"].Captures[i].Value;
 				string whereExpressionPrefix = alias.Length>0 ? alias : sourceName;
 
-				IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, sourceName);
+				QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, sourceName);
 				IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 				if (alias.Length>0)
 					dbSqlBuilder.QueryFieldValueFormatter = InsertFormatter(
@@ -73,7 +73,7 @@ namespace NI.Data.Permissions
 		}
 
 		
-		protected override string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, IQuery query) {
+		protected override string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, Query query) {
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.SourceNameOrigin==null)
 				return base.BuildWhereExpression(dbSqlBuilder, dataView, query);
@@ -93,8 +93,8 @@ namespace NI.Data.Permissions
 						m.Groups["alias"].Captures[0].Value) );
 			
 			// compose permission condition
-			IQueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, m.Groups["sourceName"].Captures[0].Value);
-			IQueryNode condition = query.Root;
+			QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, m.Groups["sourceName"].Captures[0].Value);
+			QueryNode condition = query.Condition;
 			QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 			if (condition != null)
 				groupAnd.Nodes.Add(condition);

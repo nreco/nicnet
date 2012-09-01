@@ -37,7 +37,7 @@ namespace NI.Data.RelationalExpressions {
 		}
 		
 		public object Evaluate(IDictionary context, string expression) {
-			IQueryNode condition = ConditionParser.Parse(expression);
+			QueryNode condition = ConditionParser.Parse(expression);
 			return EvaluateInternal(context, condition);
 		}
 		

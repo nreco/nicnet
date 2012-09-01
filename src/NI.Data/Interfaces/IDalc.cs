@@ -31,7 +31,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="ds">Destination dataset</param>
 		/// <param name="query">Query</param>
-		void Load(DataSet ds, IQuery query);
+		void Load(DataSet ds, Query query);
 		
 		/// <summary>
 		/// Update data from dataset to datasource
@@ -45,7 +45,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		int Update(IDictionary data, IQuery query);
+		int Update(IDictionary data, Query query);
 		
 		/// <summary>
 		/// Insert data from dictionary container to datasource
@@ -58,7 +58,7 @@ namespace NI.Data
 		/// Delete data from dataset by query
 		/// </summary>
 		/// <param name="query"></param>
-		int Delete(IQuery query);
+		int Delete(Query query);
 		
 		/// <summary>
 		/// Load first record by query
@@ -66,7 +66,7 @@ namespace NI.Data
 		/// <param name="data">Container for record data</param>
 		/// <param name="query">query</param>
 		/// <returns>Success flag</returns>
-		bool LoadRecord(IDictionary data, IQuery query);
+		bool LoadRecord(IDictionary data, Query query);
 		
 		/// <summary>
 		/// Count the number of records
@@ -74,7 +74,7 @@ namespace NI.Data
 		/// <param name="sourceName">source name</param>
 		/// <param name="conditions">additional conditions (can be null)</param>
 		/// <returns>the number of records</returns>
-		int RecordsCount(string sourceName, IQueryNode conditions);
+		int RecordsCount(string sourceName, QueryNode conditions);
 		
 		
 	}

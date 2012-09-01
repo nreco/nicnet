@@ -54,7 +54,7 @@ namespace NI.Data
 		
 		/// <summary>
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeSelect(IQuery query) {
+		public virtual IDbCommandWrapper ComposeSelect(Query query) {
 			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
 			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 			cmdWrapper.Command.CommandText = dbSqlBuilder.BuildSelect(query);
@@ -120,12 +120,12 @@ namespace NI.Data
 		/// <summary>
 		/// Generates DELETE statement by query
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeDelete(IQuery query) {
+		public virtual IDbCommandWrapper ComposeDelete(Query query) {
 			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
 			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 
 			// prepare WHERE part
-			string whereExpression = dbSqlBuilder.BuildExpression( query.Root );
+			string whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
 			
 			cmdWrapper.Command.CommandText = String.Format("DELETE FROM {0}",query.SourceName);
 			if (whereExpression!=null && whereExpression.Length>0)
@@ -183,7 +183,7 @@ namespace NI.Data
 		/// <param name="changesData"></param>
 		/// <param name="query"></param>
 		/// <returns></returns>
-		public virtual IDbCommandWrapper ComposeUpdate(IDictionary changesData, IQuery query) {
+		public virtual IDbCommandWrapper ComposeUpdate(IDictionary changesData, Query query) {
 			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
 			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 
@@ -204,7 +204,7 @@ namespace NI.Data
 				(string[])updateFieldValues.ToArray(typeof(string)) );
 			
 			// prepare WHERE part
-			string whereExpression = dbSqlBuilder.BuildExpression( query.Root );
+			string whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
 			
 			cmdWrapper.Command.CommandText = String.Format(
 				"UPDATE {0} SET {1}",

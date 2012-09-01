@@ -49,7 +49,7 @@ namespace NI.Tests.Data.Dalc
 			DatasetDalc dsDalc = createDsDalc();
 			Hashtable res = new Hashtable();
 			Query q = new Query("users");
-			q.Root = (QField)"name" == (QConst)"Vitalik";
+			q.Condition = (QField)"name" == (QConst)"Vitalik";
 			if (!dsDalc.LoadRecord(res, q))
 				throw new Exception("LoadRecord failed");
 			if ((int)res["id"]!=1)
@@ -62,11 +62,11 @@ namespace NI.Tests.Data.Dalc
 			DataSet ds = new DataSet();
 			
 			Query subQuery = new Query("roles");
-			subQuery.Root = (QField)"role"==(QConst)"admin";
+			subQuery.Condition = (QField)"role"==(QConst)"admin";
 			subQuery.Fields = new string[] { "id" };
 			
 			Query q = new Query("users");
-			q.Root = (QField)"role" == subQuery;
+			q.Condition = (QField)"role" == subQuery;
 			q.Sort = new string[] { "name" };
 
 			dsDalc.Load( ds, q );
@@ -84,7 +84,7 @@ namespace NI.Tests.Data.Dalc
 				ds.Tables["users"].Rows[1]["name"].ToString()!="Darina")
 				throw new Exception("Load failed");
 			
-			q.Root = (QField)"role" == subQuery & (QField)"id">(QConst)5;
+			q.Condition = (QField)"role" == subQuery & (QField)"id">(QConst)5;
 			dsDalc.Load( ds, q );
 			if (ds.Tables["users"].Rows.Count!=0)
 				throw new Exception("Load failed");
@@ -95,10 +95,10 @@ namespace NI.Tests.Data.Dalc
 			DatasetDalc dsDalc = createDsDalc();
 
 			Query subQuery = new Query("roles");
-			subQuery.Root = (QField)"role"==(QConst)"user";
+			subQuery.Condition = (QField)"role"==(QConst)"user";
 			subQuery.Fields = new string[] { "id" };
 			Query q = new Query("users");
-			q.Root = (QField)"role" == subQuery;
+			q.Condition = (QField)"role" == subQuery;
 			
 			dsDalc.Delete( q );
 			
@@ -112,7 +112,7 @@ namespace NI.Tests.Data.Dalc
 			DatasetDalc dsDalc = createDsDalc();
 			DataSet ds = new DataSet();
 			Query q = new Query("users");
-			q.Root = (QField)"id" == (QConst)1;
+			q.Condition = (QField)"id" == (QConst)1;
 			
 			dsDalc.Load( ds, q );
 			ds.Tables["users"].Rows[0]["name"] = "Vit";

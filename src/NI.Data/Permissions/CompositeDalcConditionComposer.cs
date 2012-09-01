@@ -30,7 +30,7 @@ namespace NI.Data.Permissions
 		public CompositeDalcConditionComposer() {
 		}
 
-		public IQueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName) {
+		public QueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName) {
 			QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 			for (int i=0; i<ConditionComposers.Length; i++)
 				groupAnd.Nodes.Add( ConditionComposers[i].Compose(user, operation, sourceName) );

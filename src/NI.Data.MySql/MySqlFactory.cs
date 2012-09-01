@@ -24,7 +24,7 @@ namespace NI.Data.MySql
 
 	public class MySqlFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
-		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
+		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
         IObjectProvider _CmdParameterPlaceholderProvider;
 
         public IObjectProvider CmdParameterPlaceholderProvider
@@ -35,7 +35,7 @@ namespace NI.Data.MySql
 		/// <summary>
 		/// Get or set default query field value formatter
 		/// </summary>
-		public IQueryFieldValueFormatter QueryFieldValueFormatter {
+		public QueryFieldValueFormatter QueryFieldValueFormatter {
 			get { return _QueryFieldValueFormatter; }
 			set { _QueryFieldValueFormatter = value; }
 		}

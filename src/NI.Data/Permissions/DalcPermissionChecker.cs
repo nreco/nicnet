@@ -100,7 +100,7 @@ namespace NI.Data.Permissions
 					QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 					foreach (DictionaryEntry entry in dalcPermission.Object.UidFields)
 						groupAnd.Nodes.Add( (QField)entry.Key.ToString() == new QConst(entry.Value) );					
-					q.Root = groupAnd;
+					q.Condition = groupAnd;
 					OriginalDalc.LoadRecord(dalcPermission.Object.Fields, q);
 				}
 
@@ -134,7 +134,7 @@ namespace NI.Data.Permissions
 				IList groupList = (IList)massGroupEntry.Value;
 				
 				QueryGroupNode queryGroupAnd = new QueryGroupNode(GroupType.And);
-				IQueryNode permissionCondition = DalcConditionComposer.Compose(
+				QueryNode permissionCondition = DalcConditionComposer.Compose(
 					opParams.Subject, opParams.Operation, opParams.SourceName);
 				if (permissionCondition!=null)
 					queryGroupAnd.Nodes.Add( permissionCondition );
@@ -197,7 +197,7 @@ namespace NI.Data.Permissions
 			if (permission.Operation!=DalcOperation.Create && !isFieldPermission) {
 				// check 'deny' constraints defined by DalcConditionComposer
 				QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
-				IQueryNode permissionCondition = DalcConditionComposer.Compose(
+				QueryNode permissionCondition = DalcConditionComposer.Compose(
 					permission.Subject, permission.Operation, permission.Object.SourceName);
 				if (permissionCondition!=null)
 					groupAnd.Nodes.Add( permissionCondition );
@@ -213,7 +213,7 @@ namespace NI.Data.Permissions
 			return true;
 		}
 
-		protected bool RecordExists(string sourcename, IQueryNode condition) {
+		protected bool RecordExists(string sourcename, QueryNode condition) {
 			if (RecordExistsMethod==RecordExistsMethodName.RecordsCount)
 				return OriginalDalc.RecordsCount(sourcename, condition)>0;
 			ListDictionary rInfo = new ListDictionary();

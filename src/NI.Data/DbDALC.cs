@@ -88,7 +88,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Load data to dataset by query
 		/// </summary>
-		virtual public void Load(DataSet ds, IQuery query) {
+		virtual public void Load(DataSet ds, Query query) {
 			IDbCommandWrapper selectCmdWrapper = CommandGenerator.ComposeSelect( query );
 			QSourceName source = new QSourceName(query.SourceName);
 
@@ -112,7 +112,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Delete data by query
 		/// </summary>
-		virtual public int Delete(IQuery query) {
+		virtual public int Delete(Query query) {
 			IDbCommandWrapper deleteCmd = CommandGenerator.ComposeDelete(query);
 			return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
 		}
@@ -156,7 +156,7 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		virtual public int Update(IDictionary data, IQuery query) {
+		virtual public int Update(IDictionary data, Query query) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeUpdate(data, query);
 			cmdWrapper.Command.Connection = Connection;
 			cmdWrapper.SetTransaction( Transaction );
@@ -208,7 +208,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDbDalc.Execute"/>
 		/// </summary>
-		public IDataReader LoadReader(IQuery q) {
+		public IDataReader LoadReader(Query q) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
 			
 			cmdWrapper.SetTransaction( Transaction );
@@ -244,7 +244,7 @@ namespace NI.Data {
 		/// <param name="tablename">Table's name</param>
 		/// <param name="filter">Record filter</param>
 		/// <returns>Hashtable with 'field'=>'value' pairs (or null if no data)</returns>
-		virtual public bool LoadRecord(IDictionary data, IQuery query) {
+		virtual public bool LoadRecord(IDictionary data, Query query) {
 			// allow command generator build optimized sql select by specifying only one record to load
 			Query oneRecordQuery = new Query(query);
 			oneRecordQuery.RecordCount = 1;
@@ -265,7 +265,7 @@ namespace NI.Data {
 			return LoadRecordInternal(data, cmdWrapper, null);			
 		}
 
-		virtual public int RecordsCount(string sourceName, IQueryNode conditions) {
+		virtual public int RecordsCount(string sourceName, QueryNode conditions) {
 			Query q = new Query(sourceName, conditions);
 			q.Fields = new string[] {"count(*)"}; // standart sql
 			ListDictionary res = new ListDictionary();

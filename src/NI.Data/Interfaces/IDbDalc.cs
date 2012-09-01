@@ -62,7 +62,7 @@ namespace NI.Data
 		/// </remarks>
 		/// <param name="query">query</param>
 		/// <returns>data reader with possible query execution results</returns>
-		IDataReader LoadReader(IQuery q);
+		IDataReader LoadReader(Query q);
 
 		/// <summary>
 		/// Execute custom SQL command and store result in specified dataset

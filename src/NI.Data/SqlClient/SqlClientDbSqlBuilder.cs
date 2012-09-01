@@ -86,13 +86,13 @@ namespace NI.Data.SqlClient {
 		}
 		
 		
-		protected override string BuildSelectInternal(IQuery query, bool isNested) {
+		protected override string BuildSelectInternal(Query query, bool isNested) {
 			if (!TopOptimization)
 				return base.BuildSelectInternal(query, isNested);
 			
 			string fields = BuildFields(query);
 			string sort = BuildSort(query);
-			string whereExpression = BuildExpression(query.Root);
+			string whereExpression = BuildExpression(query.Condition);
 			
 			// compose select sql
 			StringBuilder cmdTextBuilder = new StringBuilder();

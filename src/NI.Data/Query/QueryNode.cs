@@ -13,7 +13,7 @@
 #endregion
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace NI.Data
 {
@@ -21,25 +21,19 @@ namespace NI.Data
 	/// Base class for query nodes.
 	/// </summary>
 	[Serializable]
-	public abstract class QueryNode : IQueryNode, INamedQueryNode
+	public abstract class QueryNode
 	{
-		string _Name = null;
-		
-		public abstract IEnumerable Nodes { get; }
-		
-		public string Name {
-			get { return _Name; }
-			set { _Name = value; }
-		}	
+		public abstract IList<QueryNode> Nodes { get; }
+
+		public string Name { get; set; }	
 	
-		public QueryNode()
-		{
+		public QueryNode() {
 		}
 		
 		/// <summary>
 		/// OR operator
 		/// </summary>
-		public static QueryGroupNode operator | (QueryNode node1, IQueryNode node2) {
+		public static QueryGroupNode operator | (QueryNode node1, QueryNode node2) {
 			QueryGroupNode res = new QueryGroupNode(GroupType.Or);
 			res.Nodes.Add(node1);
 			res.Nodes.Add(node2);
@@ -49,7 +43,7 @@ namespace NI.Data
 		/// <summary>
 		/// AND operator
 		/// </summary>
-		public static QueryGroupNode operator & (QueryNode node1, IQueryNode node2) {
+		public static QueryGroupNode operator & (QueryNode node1, QueryNode node2) {
 			QueryGroupNode res = new QueryGroupNode(GroupType.And);
 			res.Nodes.Add(node1);
 			res.Nodes.Add(node2);

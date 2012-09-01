@@ -41,7 +41,7 @@ namespace NI.Data {
 			ConditionEvaluator.QFieldResolver = new FileObjectFieldProvider(this);
 		}
 		
-		public void Load(DataSet ds, IQuery query) {
+		public void Load(DataSet ds, Query query) {
 			if (ds.Tables.Contains(query.SourceName))
 				ds.Tables.Remove(query.SourceName);
 			DataTable tbl = ds.Tables.Add(query.SourceName);
@@ -56,7 +56,7 @@ namespace NI.Data {
 			tbl.Columns.Add(CreateColumn("shared_file_id", typeof(int), true, null));
 			tbl.Columns.Add(CreateColumn("shared_public_id", typeof(string), true, null));
 			
-			IFileObject[] files = Select(query.SourceName, query.Root);
+			IFileObject[] files = Select(query.SourceName, query.Condition);
 			files = ApplySortAndPaging(query, files);
 
 			for (int i=0; i<files.Length; i++) {
@@ -76,7 +76,7 @@ namespace NI.Data {
 			ds.AcceptChanges();
 		}
 
-		protected IFileObject[] ApplySortAndPaging(IQuery q, IFileObject[] files) {
+		protected IFileObject[] ApplySortAndPaging(Query q, IFileObject[] files) {
 			if (q.Sort!=null) {
 				if (q.Sort.Length>1)
 					throw new Exception("FileSystemDalc doesn't support sorting by multiple fields");
@@ -102,11 +102,11 @@ namespace NI.Data {
 			throw new NotSupportedException("FileSystemDalc does not supports update operations.");
 		}
 
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			var newName = data["name"] as string;
 			if (String.IsNullOrEmpty(newName))
 				return 0;
-			IFileObject[] files = Select(query.SourceName, query.Root);
+			IFileObject[] files = Select(query.SourceName, query.Condition);
 			
 			foreach (var f in files) {
 				var newFileName = Path.Combine( Path.GetDirectoryName( f.Name ), newName );
@@ -119,21 +119,21 @@ namespace NI.Data {
 			throw new NotSupportedException("FileSystemDalc does not supports insert operations.");
 		}
 
-		public int Delete(IQuery query) {
-			IFileObject[] files = Select(query.SourceName, query.Root);
+		public int Delete(Query query) {
+			IFileObject[] files = Select(query.SourceName, query.Condition);
 			foreach (var f in files) {
 				f.Delete();
 			}
 			return files.Length;
 		}
 
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			if (query.Fields.Length==1 && query.Fields[0]=="count(*)") {
-				data["count(*)"] = RecordsCount( query.SourceName, query.Root );
+				data["count(*)"] = RecordsCount( query.SourceName, query.Condition );
 				return true;
 			}
 			
-			var res = Select( query.SourceName, query.Root );
+			var res = Select( query.SourceName, query.Condition );
 			if (res.Length>0) {
 				var firstRow = res[0];
 				data["is_file"] = GetFileObjectField("is_file", firstRow);
@@ -149,11 +149,11 @@ namespace NI.Data {
 			return false;
 		}
 
-		public int RecordsCount(string sourceName, IQueryNode condition) {
+		public int RecordsCount(string sourceName, QueryNode condition) {
 			return Select(sourceName, condition).Length;
 		}
 		
-		protected IFileObject[] Select(string sourceName, IQueryNode condition) {
+		protected IFileObject[] Select(string sourceName, QueryNode condition) {
 			if (sourceName=="." || sourceName==Path.AltDirectorySeparatorChar.ToString() || sourceName==Path.DirectorySeparatorChar.ToString())
 				sourceName = "";
 			IFileObject fileObj = FileSystem.ResolveFile(sourceName);
@@ -187,7 +187,7 @@ namespace NI.Data {
 			
 			public object GetObject(object context) {
 				ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext = (ObjectQueryConditionEvaluator.ResolveNodeContext)context;
-				IQueryFieldValue fldValue = (IQueryFieldValue)resolveContext.Node;
+				QueryFieldValue fldValue = (QueryFieldValue)resolveContext.Node;
 				return FsDalc.GetFileObjectField(fldValue.Name,(IFileObject)resolveContext.Context["file"]);
 			}
 		}
@@ -195,10 +195,10 @@ namespace NI.Data {
 		internal class QueryFileSelector : IFileSelector {
 			bool FindAll = false;
 			ObjectQueryConditionEvaluator Evaluator;
-			IQueryNode CondNode;
+			QueryNode CondNode;
 			IDictionary Context;
 			
-			internal QueryFileSelector(bool findAll,ObjectQueryConditionEvaluator evaluator,IQueryNode condNode) {
+			internal QueryFileSelector(bool findAll,ObjectQueryConditionEvaluator evaluator,QueryNode condNode) {
 				FindAll = findAll;
 				Evaluator = evaluator;
 				CondNode = condNode;

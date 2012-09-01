@@ -196,25 +196,10 @@
     <Compile Include="Interfaces\IDbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IQuery.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IQueryConditionNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\IQueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IQueryGroupNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\IQueryModifier.cs" />
-    <Compile Include="Interfaces\IQueryNegationNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IQueryNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\IQueryNodeProvider.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -291,9 +276,6 @@
     <Compile Include="Query\QueryNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Query\QueryNodeCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="RecordsCountQueryModifier.cs" />
     <Compile Include="RelationalExpressions\CachedRelationalExprResolver.cs" />
     <Compile Include="RelationalExpressions\Interfaces\IRelExQueryNodeParser.cs" />
@@ -317,7 +299,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SqlClient\SqlFactory.cs" />
-    <Compile Include="SubstQueryModifier.cs" />
     <Compile Include="ThreadsafeDalc.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />

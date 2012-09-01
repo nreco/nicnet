@@ -69,7 +69,7 @@ namespace NI.Data.RelationalExpressions
 		{
 		}
 		
-		public virtual IQueryNode GetQueryNode(object contextObj) {
+		public virtual QueryNode GetQueryNode(object contextObj) {
 			IDictionary context;
 			if (contextObj is IDictionary) {
 				context = (IDictionary)contextObj;
@@ -79,8 +79,8 @@ namespace NI.Data.RelationalExpressions
 			}
 			string relexCondition = ExprResolver!=null ? Convert.ToString( ExprResolver.Evaluate(context, RelExCondition) ) : RelExCondition;
 			string relEx = String.Format("sourcename({0})[*]", relexCondition);
-			IQuery q = RelExQueryParser.Parse(relEx);
-			return q.Root;
+			Query q = RelExQueryParser.Parse(relEx);
+			return q.Condition;
 		}
 
 		public object GetObject(object context) {

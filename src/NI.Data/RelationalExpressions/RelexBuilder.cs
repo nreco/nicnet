@@ -24,20 +24,20 @@ namespace NI.Data.RelationalExpressions {
 	
 	public class RelexBuilder : IStringProvider, IObjectProvider {
 		
-		public string BuildRelex(IQueryNode node) {
+		public string BuildRelex(QueryNode node) {
 			InternalBuilder builder = new InternalBuilder();
 			return builder.BuildExpression(node);
 		}
 
-        public string BuildRelex(IQuery node) {
+        public string BuildRelex(Query node) {
             InternalBuilder builder = new InternalBuilder();
             return builder.BuildQueryString(node, false);
         }
 		
 		public string GetString(object context) {
-			if (!(context is IQueryNode))
+			if (!(context is QueryNode))
 				throw new Exception("Expected IQueryNode object");
-			return BuildRelex( (IQueryNode)context );
+			return BuildRelex( (QueryNode)context );
 		}
 
 		public object GetObject(object context) {
@@ -46,23 +46,23 @@ namespace NI.Data.RelationalExpressions {
 
 		class InternalBuilder : SqlBuilder {
 
-			public override string BuildExpression(IQueryNode node) {
-				if (node is IQuery)
-					return BuildQueryString((IQuery)node, false);
+			public override string BuildExpression(QueryNode node) {
+				if (node is Query)
+					return BuildQueryString((Query)node, false);
 				return base.BuildExpression(node);
 			}
 
-			protected override string BuildGroup(IQueryGroupNode node) {
+			protected override string BuildGroup(QueryGroupNode node) {
 				var grp = base.BuildGroup(node);
-				if (node is INamedQueryNode && !String.IsNullOrEmpty( ((INamedQueryNode)node).Name ) ) {
-					return String.Format("(<{0}> {1})", ((INamedQueryNode)node).Name, grp);
+				if (!String.IsNullOrEmpty( node.Name ) ) {
+					return String.Format("(<{0}> {1})", node.Name, grp);
 				} else return grp;
 				
 			}
 
 
-			public string BuildQueryString(IQuery q, bool isNested) {
-				string rootExpression = BuildExpression(q.Root);
+			public string BuildQueryString(Query q, bool isNested) {
+				string rootExpression = BuildExpression(q.Condition);
 				if (rootExpression != null && rootExpression.Length > 0)
 					rootExpression = String.Format("({0})", rootExpression);
 				string fieldExpression = q.Fields != null ? String.Join(",", q.Fields) : "*";
@@ -85,7 +85,7 @@ namespace NI.Data.RelationalExpressions {
 					Conditions.In, Conditions.Like, Conditions.Null
 			};
 
-			protected override string BuildCondition(IQueryConditionNode node) {
+			protected override string BuildCondition(QueryConditionNode node) {
 				string lvalue = BuildValue(node.LValue);
 				string rvalue = BuildValue(node.RValue);
 				Conditions condition = (node.Condition | Conditions.Not) ^ Conditions.Not;
@@ -102,15 +102,15 @@ namespace NI.Data.RelationalExpressions {
 				if ((node.Condition & Conditions.Null) == Conditions.Null)
 					rvalue = "null";
 				string result = String.Format("{0}{1}{2}", lvalue, res, rvalue);
-				if (node is INamedQueryNode && !String.IsNullOrEmpty( ((INamedQueryNode)node).Name ) )
-					result = String.Format("(<{0}> {1})", ((INamedQueryNode)node).Name, result);
+				if ( !String.IsNullOrEmpty( node.Name ) )
+					result = String.Format("(<{0}> {1})", node.Name, result);
 				return result;
 			}
 			
 
 			protected override string BuildValue(IQueryValue value) {
-				if (value is IQuery)
-					return BuildQueryString((IQuery)value, true);
+				if (value is Query)
+					return BuildQueryString((Query)value, true);
 				if (value is IQueryRawValue) 
 					return BuildValue( ((IQueryRawValue)value).Value )+":sql";
 				return base.BuildValue(value);

@@ -64,7 +64,7 @@ namespace NI.Data {
 			return ValueCachingAllowedProvider == null || ValueCachingAllowedProvider.GetBoolean(context);
 		}
 
-        public IDataReader LoadReader(IQuery q) {
+        public IDataReader LoadReader(Query q) {
 			//if (collectStatistics) statistics.totalLoadRecord += 1;
 			if (Enabled && CachingAllowed(q)) {
 				string key = CacheKeyProvider.GetString(q);
@@ -124,10 +124,10 @@ namespace NI.Data {
 
 		public class LoadReaderValueContext {
 			IDataReader _DataReader;
-			IQuery _Query;
-			public IQuery Query { get { return _Query; } }
+			Query _Query;
+			public Query Query { get { return _Query; } }
 			public IDataReader DataReader { get { return _DataReader; } }
-			public LoadReaderValueContext(IQuery query, IDataReader dataRdr) {
+			public LoadReaderValueContext(Query query, IDataReader dataRdr) {
 				this._DataReader = dataRdr;
 				this._Query = query;
 			}

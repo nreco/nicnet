@@ -95,7 +95,7 @@ namespace NI.Data
 			return Convert.ToString( ExprResolver.Evaluate(context,SqlCommandTextProvider!=null?SqlCommandTextProvider.GetString(context):SqlCommandTextTemplate) );
 		}
 		
-		public virtual IQueryFieldValueFormatter GetQueryFieldValueFormatter(IQuery q) {
+		public virtual IQueryFieldValueFormatter GetQueryFieldValueFormatter(Query q) {
 			return this;
 		}
 		

@@ -40,7 +40,7 @@ namespace NI.Data
 		public FailsafeDalc() {
 		}
 
-		public void Load(DataSet ds, IQuery query) {
+		public void Load(DataSet ds, Query query) {
 			try {
 				MainDalc.Load(ds, query);
 			} catch (Exception ex) {
@@ -58,7 +58,7 @@ namespace NI.Data
 			}
 		}
 
-		public int Update(IDictionary data, IQuery query) {
+		public int Update(IDictionary data, Query query) {
 			try {
 				return MainDalc.Update(data, query);
 			} catch (Exception ex) {
@@ -76,7 +76,7 @@ namespace NI.Data
 			}
 		}
 		
-		public int Delete(IQuery query) {
+		public int Delete(Query query) {
 			try {
 				return MainDalc.Delete(query);
 			} catch (Exception ex) {
@@ -85,7 +85,7 @@ namespace NI.Data
 			}
 		}
 		
-		public bool LoadRecord(IDictionary data, IQuery query) {
+		public bool LoadRecord(IDictionary data, Query query) {
 			try {
 				return MainDalc.LoadRecord(data, query);
 			} catch (Exception ex) {
@@ -94,7 +94,7 @@ namespace NI.Data
 			}
 		}
 		
-		public int RecordsCount(string sourceName, IQueryNode conditions) {
+		public int RecordsCount(string sourceName, QueryNode conditions) {
 			try {
 				return MainDalc.RecordsCount(sourceName, conditions);
 			} catch (Exception ex) {

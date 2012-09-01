@@ -48,7 +48,7 @@ namespace NI.Data {
 			set { _QConstResolver = value; }
 		}
 		
-		public object Evaluate(IDictionary context, IQueryNode condition) {
+		public object Evaluate(IDictionary context, QueryNode condition) {
 			if (condition==null)
 				return true;
 			return EvaluateInternal(context, condition);
@@ -62,9 +62,9 @@ namespace NI.Data {
 			throw new Exception("Cannot resolve value node type: " + nodeContext.Node.GetType().ToString());
 		}
 		
-		protected bool EvaluateInternal(IDictionary context, IQueryNode node) {
-			if (node is IQueryConditionNode) {
-				IQueryConditionNode condNode = (IQueryConditionNode)node;
+		protected bool EvaluateInternal(IDictionary context, QueryNode node) {
+			if (node is QueryConditionNode) {
+				var condNode = (QueryConditionNode)node;
 				
 				IQueryValue lValue = condNode.LValue;
 				IQueryValue rValue = condNode.RValue;
@@ -126,10 +126,10 @@ namespace NI.Data {
 				return negate ? !compareResult : compareResult;
 		
 			}
-			if (node is IQueryGroupNode) {
-				IQueryGroupNode groupNode = (IQueryGroupNode)node;
+			if (node is QueryGroupNode) {
+				var groupNode = (QueryGroupNode)node;
 				bool groupResult = groupNode.Group == GroupType.And ? true : false;
-				foreach (IQueryNode groupChildNode in groupNode.Nodes) {
+				foreach (QueryNode groupChildNode in groupNode.Nodes) {
 					bool childResult = EvaluateInternal(context, groupChildNode);
 					if (groupNode.Group==GroupType.And)
 						groupResult = groupResult && childResult;

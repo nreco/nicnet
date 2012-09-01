@@ -28,7 +28,7 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="q">query to modify</param>
 		/// <returns>modified query</returns>
-		public IQuery Modify(IQuery q) {
+		public Query Modify(Query q) {
 			for (int i=0; i<Modifiers.Length; i++)
 				q = Modifiers[i].Modify(q);
 			return q;
