@@ -114,6 +114,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChainQueryModifier.cs" />
+    <Compile Include="DalcExt.cs" />
     <Compile Include="DalcManager.cs" />
     <Compile Include="DataSetFactory.cs" />
     <Compile Include="DbDalcRowTrigger.cs" />
@@ -178,7 +179,7 @@
     <Compile Include="Interfaces\IDbCommandWrapperFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IDbDalc.cs">
+    <Compile Include="Interfaces\ISqlDalc.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbDalcEventsMediator.cs">
@@ -276,7 +277,6 @@
     <Compile Include="Query\QueryNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RecordsCountQueryModifier.cs" />
     <Compile Include="RelationalExpressions\CachedRelationalExprResolver.cs" />
     <Compile Include="RelationalExpressions\Interfaces\IRelExQueryNodeParser.cs" />
     <Compile Include="RelationalExpressions\Interfaces\IRelExQueryParser.cs" />

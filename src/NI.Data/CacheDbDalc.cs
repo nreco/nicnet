@@ -22,13 +22,13 @@ using NI.Common.Caching;
 
 namespace NI.Data {
 
-    public class CacheDbDalc : CacheDalc, IDbDalc {
+    public class CacheDbDalc : CacheDalc, ISqlDalc {
 
 		/// <summary>
 		/// Get or set underlying DB DALC component
 		/// </summary>
-		public IDbDalc UnderlyingDbDalc {
-			get { return (IDbDalc) base.UnderlyingDalc; }
+		public ISqlDalc UnderlyingDbDalc {
+			get { return (ISqlDalc) base.UnderlyingDalc; }
 			set { base.UnderlyingDalc = value; }
 		}
 

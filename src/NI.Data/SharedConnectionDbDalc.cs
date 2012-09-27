@@ -22,14 +22,14 @@ namespace NI.Data
 	/// <summary>
 	/// Composite DbDalc.
 	/// </summary>
-	public class SharedConnectionDbDalc : DbDalc
+	/*public class SharedConnectionDbDalc : DbDalc
 	{
-		IDbDalc[] _Satellites = null;
+		ISqlDalc[] _Satellites = null;
 		
 		/// <summary>
 		/// Get or set satellite DbDalc objects
 		/// </summary>
-		public IDbDalc[] Satellites {
+		public ISqlDalc[] Satellites {
 			get { return _Satellites; }
 			set { _Satellites = value; }
 		}
@@ -66,5 +66,5 @@ namespace NI.Data
 		public SharedConnectionDbDalc()
 		{
 		}
-	}
+	}*/
 }

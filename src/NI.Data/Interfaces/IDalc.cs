@@ -24,57 +24,43 @@ namespace NI.Data
 	/// </summary>
 	public interface IDalc
 	{
-		
+
+		/// <summary>
+		/// Execute given query and passes data reader to handler
+		/// </summary>
+		void ExecuteReader(Query q, Action<IDataReader> handler);		
 	
 		/// <summary>
-		/// Load data from data source to dataset
+		/// Load data into dataset by query
 		/// </summary>
-		/// <param name="ds">Destination dataset</param>
-		/// <param name="query">Query</param>
-		void Load(DataSet ds, Query query);
+		DataTable Fill(Query query, DataSet ds);
 		
 		/// <summary>
 		/// Update data from dataset to datasource
 		/// </summary>
 		/// <param name="ds">DataSet</param>
 		/// <param name="sourceName"></param>
-		void Update(DataSet ds, string sourceName);
+		void Update(DataTable t);
 
 		/// <summary>
 		/// Update data from dictionary container to datasource by query
 		/// </summary>
-		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		int Update(IDictionary data, Query query);
+		/// <param name="data">Container with record changes</param>
+		int Update(Query query, IDictionary changeset);
 		
 		/// <summary>
 		/// Insert data from dictionary container to datasource
 		/// </summary>
 		/// <param name="data">Container with record data</param>
 		/// <param name="sourceName">Source name for data</param>
-		void Insert(IDictionary data, string sourceName);
+		void Insert(string sourceName, IDictionary data);
 
 		/// <summary>
 		/// Delete data from dataset by query
 		/// </summary>
 		/// <param name="query"></param>
 		int Delete(Query query);
-		
-		/// <summary>
-		/// Load first record by query
-		/// </summary>
-		/// <param name="data">Container for record data</param>
-		/// <param name="query">query</param>
-		/// <returns>Success flag</returns>
-		bool LoadRecord(IDictionary data, Query query);
-		
-		/// <summary>
-		/// Count the number of records
-		/// </summary>
-		/// <param name="sourceName">source name</param>
-		/// <param name="conditions">additional conditions (can be null)</param>
-		/// <returns>the number of records</returns>
-		int RecordsCount(string sourceName, QueryNode conditions);
 		
 		
 	}

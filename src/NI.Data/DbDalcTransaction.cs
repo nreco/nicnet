@@ -22,11 +22,11 @@ namespace NI.Data {
 
 	public class DbDalcTransaction : NI.Common.Transaction.FlatTransaction {
 		
-		IDbDalc _Dalc;
+		ISqlDalc _Dalc;
 		IDbTransaction _DbTransaction;
 		IsolationLevel _IsolationLevel = IsolationLevel.Unspecified;
 
-		public IDbDalc Dalc {
+		public ISqlDalc Dalc {
 			get { return _Dalc; }
 			set { _Dalc = value; }
 		}

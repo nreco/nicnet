@@ -61,8 +61,8 @@ namespace NI.Data
 			object[] result = null;
 			
 			// datareader-based optimized logic
-			if (UseDataReader && Dalc is IDbDalc) {
-				IDbDalc dbDalc = (IDbDalc)Dalc;
+			if (UseDataReader && Dalc is ISqlDalc) {
+				ISqlDalc dbDalc = (ISqlDalc)Dalc;
 				// store data here
 				ArrayList listData = new ArrayList();
 				// ensure that connection is open

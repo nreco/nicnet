@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012: NewtonIdeas, modifications and v2 by Vitaliy Fedorchenko
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,13 +15,14 @@
 using System;
 using System.Data;
 using System.Collections;
+using System.Collections.Generic;
 
 using NI.Common;
 
 namespace NI.Data
 {
 	/// <summary>
-	/// Dataset Data Access Layer Component.
+	/// Dataset-based (in-memory) DALC implementation.
 	/// </summary>
 	public class DatasetDalc : SqlBuilder, IDalc
 	{
@@ -36,21 +37,10 @@ namespace NI.Data
 		{
 		}
 
-		virtual public int RecordsCount(string sourceName, QueryNode conditions) {
-			Query q = new Query(sourceName, conditions);
-			// overhead. TODO: write more optimal implementation here
-			DataSet ds = new DataSet();
-			Load(ds, q);
-			return ds.Tables[sourceName].Rows.Count;
-		}
-
-
 		/// <summary>
 		/// Load data from data source to dataset
 		/// </summary>
-		/// <param name="ds">Destination dataset</param>
-		/// <param name="query">Query</param>
-		public virtual void Load(DataSet ds, Query query) {
+		public virtual DataTable Fill(Query query, DataSet ds) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
@@ -62,6 +52,16 @@ namespace NI.Data
 				ds.Tables[query.SourceName].Rows.Clear();
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
 			if (query.Fields != null && query.Fields.Length != 0) {
+				if (query.Fields.Length == 1 && query.Fields[0] == "count(*)") {
+					ds.Tables.Remove(query.SourceName);
+					var t = ds.Tables.Add(query.SourceName);
+					t.Columns.Add("count", typeof(int));
+					var cntRow = t.NewRow();
+					cntRow["count"] = result.Length;
+					t.Rows.Add(cntRow);
+					return t;
+				}
+
 				for (int i=0; i<query.Fields.Length; i++) {
 					string fld = query.Fields[i];
 					if (ds.Tables[query.SourceName].Columns.Contains(fld))
@@ -81,6 +81,8 @@ namespace NI.Data
 			}
 			for (int i=0; i<result.Length; i++)
 				ds.Tables[query.SourceName].ImportRow(result[i]);
+
+			return ds.Tables[query.SourceName];
 		}
 		
 		/// <summary>
@@ -88,27 +90,64 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="ds">DataSet</param>
 		/// <param name="tableName"></param>
-		public void Update(DataSet ds, string tableName) {
-			if (!PersistedDS.Tables.Contains(tableName))
-				throw new Exception("Persisted dataset does not contain table with name "+tableName);
+		public void Update(DataTable t) {
+			if (!PersistedDS.Tables.Contains(t.TableName))
+				throw new Exception("Persisted dataset does not contain table with name "+t.TableName);
+			var pTable = PersistedDS.Tables[t.TableName];
+			if (pTable.PrimaryKey==null || pTable.PrimaryKey.Length==0)
+				throw new Exception("Cannot update table without primary key: "+t.TableName);
 			
-			DiffProcessor diffProcessor = new DiffProcessor();
-			DataRowDiffHandler diffHandler = new DataRowDiffHandler(PersistedDS.Tables[tableName]);
-			diffProcessor.DiffHandler = diffHandler;
-			diffProcessor.Sync( ds.Tables[tableName].Rows, PersistedDS.Tables[tableName].Rows );
+			Func<DataRow, DataRow> findRowById = (r) => {
+				foreach (DataRow pr in pTable.Rows) {
+					var matched = true;
+					foreach (DataColumn c in pTable.PrimaryKey) {
+						if (!r.Table.Columns.Contains(c.ColumnName) 
+							||
+							Convert.ToString(pr[c.ColumnName]) == Convert.ToString(r[c.ColumnName, r.HasVersion(DataRowVersion.Current) ? DataRowVersion.Current : DataRowVersion.Original]))
+							matched = false;
+					}
+					if (matched)
+						return pr;
+				}
+				return null;
+			};
 
-			foreach (DataRow r in diffHandler.ForImport) {
-				DataRow rToImport = PersistedDS.Tables[tableName].NewRow();
-				for (int i = 0; i < PersistedDS.Tables[tableName].Columns.Count; ++i) {
-					var c = PersistedDS.Tables[tableName].Columns[i];
-					if (!c.AutoIncrement) {
-						rToImport[c.ColumnName] = r[c.ColumnName];
+			// remove deleted / import new
+			var deleteRows = new List<DataRow>();
+			foreach (DataRow r in t.Rows) {
+				if (r.RowState == DataRowState.Added) {
+					DataRow rToImport = pTable.NewRow();
+					foreach (DataColumn c in pTable.Columns) {
+						if (!c.AutoIncrement && t.Columns.Contains(c.ColumnName)) {
+							rToImport[c.ColumnName] = r[c.ColumnName];
+						}
 					}
 				}
-				PersistedDS.Tables[tableName].Rows.Add(rToImport);
+				if (r.RowState == DataRowState.Deleted) {
+					var pr = findRowById(r);
+					if (pr == null)
+						throw new DBConcurrencyException("Cannot find datarow for deletion");
+					deleteRows.Add(pr);
+				}
+				if (r.RowState == DataRowState.Modified) {
+					var pr = findRowById(r);
+					if (pr == null)
+						throw new DBConcurrencyException("Cannot find datarow for update");
+
+					foreach (DataColumn c in pTable.Columns) {
+						if (!c.AutoIncrement && t.Columns.Contains(c.ColumnName)) {
+							pr[c.ColumnName] = r[c.ColumnName];
+						}
+					}
+
+				}
 			}
-			PersistedDS.Tables[tableName].AcceptChanges();
-			ds.Tables[tableName].AcceptChanges();
+			// remove rows marked for deletion
+			foreach (DataRow pr in deleteRows)
+				pr.Delete();
+
+			PersistedDS.Tables[t.TableName].AcceptChanges();
+			t.AcceptChanges();
 		}
 
 		/// <summary>
@@ -165,27 +204,11 @@ namespace NI.Data
 			return result.Length;
 		}
 		
-		/// <summary>
-		/// Load first record by query
-		/// </summary>
-		/// <param name="data">Container for record data</param>
-		/// <param name="query">query</param>
-		/// <returns>Success flag</returns>
-		public bool LoadRecord(IDictionary data, Query query) {
-			if (!PersistedDS.Tables.Contains(query.SourceName))
-				throw new Exception("Persisted dataset does not contain table with name " + query.SourceName);
-
-			string whereExpression = BuildExpression(query.Condition);
-			string sortExpression = BuildSort(query);
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select(whereExpression, sortExpression);
-			if (result.Length == 0) return false;
-			if (query.Fields.Length > 0 && query.Fields[0].ToLower() == "count(*)") {
-				data[query.Fields[0]] = result.Length;
-			} else {
-				foreach (DataColumn c in PersistedDS.Tables[query.SourceName].Columns)
-					data[c.ColumnName] = result[0][c.ColumnName];
-			}
-			return true;
+		public void ExecuteReader(Query q, Action<IDataReader> handler) {
+			var ds = new DataSet();
+			var tbl = Fill(q, ds);
+			var rdr = new DataTableReader(tbl);
+			handler(rdr);
 		}
 		
 		
@@ -242,74 +265,6 @@ namespace NI.Data
 			return constValue.ToString();
 		}
 		
-
-#region Nested classes
-
-		class DataRowDiffHandler : IDiffHandler {
-			DataTable DestDataTable;
-			public ArrayList ForImport;
-			
-			
-			public DataRowDiffHandler(DataTable destDataTable) {
-				DestDataTable = destDataTable;
-				ForImport = new ArrayList();
-			}
-			
-			string ExtractUid(object arg) {
-				if (arg is DataRow) {
-					DataRow r = (DataRow)arg;
-					string[] pk = new string[r.Table.PrimaryKey.Length];
-					if (pk.Length==0)
-						throw new Exception("Cannot synchronize tables without primary key");
-					for (int i=0; i<pk.Length; i++)
-						pk[i] = r[ r.Table.PrimaryKey[i], r.HasVersion(DataRowVersion.Current)?DataRowVersion.Current:DataRowVersion.Original ].ToString();
-					return String.Join(",", pk);
-				}
-				throw new ArgumentException();
-			}
-			
-			/// <summary>
-			/// Compare two elements
-			/// </summary>
-			public int Compare(object arg1, object arg2) {
-				// if we are adding the row it cannot be present in the destination, so it isn't equal to any row in the destination
-				if (arg1 is DataRow && (((DataRow)arg1).RowState == DataRowState.Added || ((DataRow)arg1).RowState == DataRowState.Detached)) {
-					return 1;
-				}
-				return ExtractUid(arg1).CompareTo( ExtractUid(arg2) );
-			}
-		
-			/// <summary>
-			/// Merge action for two elements
-			/// </summary>
-			public void Merge(object arg1, object arg2) {
-				DataRow sourceRow = (DataRow)arg1;
-				DataRow destRow = (DataRow)arg2;
-				if (sourceRow.RowState==DataRowState.Deleted)
-					destRow.Delete();
-				else
-					destRow.ItemArray = sourceRow.ItemArray;
-			}
-
-			/// <summary>
-			/// Add action
-			/// </summary>
-			public void Add(object arg) {
-				DataRow r = (DataRow)arg;
-				ForImport.Add(r);
-			}
-
-			/// <summary>
-			/// Remove action
-			/// </summary>
-			public void Remove(object arg) {
-				// no action here ...
-			}
-			
-		}
-
-
-#endregion
 
 		
 		

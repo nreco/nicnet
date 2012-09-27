@@ -20,14 +20,14 @@ namespace NI.Data
     /// <summary>
     /// Pipe Db dalc
     /// </summary>
-    public class DbDalcProxy : IDbDalc {
+    /*public class DbDalcProxy : ISqlDalc {
 
-        private IDbDalc _UnderlyingDalc;
+        private ISqlDalc _UnderlyingDalc;
 
         /// <summary>
         /// Underlying dalc
         /// </summary>
-        public IDbDalc UnderlyingDalc {
+        public ISqlDalc UnderlyingDalc {
             get { return _UnderlyingDalc; }
             set { _UnderlyingDalc = value; }
         }
@@ -105,5 +105,5 @@ namespace NI.Data
         }
 
         #endregion
-    }
+    }*/
 }

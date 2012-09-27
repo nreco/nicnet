@@ -22,7 +22,7 @@ namespace NI.Data
 	/// <summary>
 	/// 'Threadsafe' IDbDalc wrapper.
 	/// </summary>
-	public class ThreadsafeDalc : IDalc
+	/*public class ThreadsafeDalc : IDalc
 	{
 		IDalc _Dalc;
 		
@@ -78,5 +78,5 @@ namespace NI.Data
 
 
 
-	}
+	}*/
 }

@@ -24,9 +24,9 @@ namespace NI.Data.Permissions
 	/// <summary>
 	/// DbDALC proxy
 	/// </summary>
-	public class DbDalcProxy : BaseDalcProxy, IDbDalc
+	public class DbDalcProxy : BaseDalcProxy, ISqlDalc
 	{
-		IDbDalc _UnderlyingDbDalc;
+		ISqlDalc _UnderlyingDbDalc;
 		
 		protected override IDalc Dalc {
 			get { return _UnderlyingDbDalc; }
@@ -35,7 +35,7 @@ namespace NI.Data.Permissions
 		/// <summary>
 		/// Get or set underlying DB DALC component
 		/// </summary>
-		public IDbDalc UnderlyingDbDalc {
+		public ISqlDalc UnderlyingDbDalc {
 			get { return _UnderlyingDbDalc; }
 			set { _UnderlyingDbDalc = value; }
 		}

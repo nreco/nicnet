@@ -28,7 +28,7 @@ namespace NI.Data {
 	/// <summary>
 	/// Database Data Access Layer Component
 	/// </summary>
-	public class DbDalc : IDbDalc {
+	public class DbDalc : ISqlDalc {
 
 		IDbConnection _Connection;
 		IDbTransaction _Transaction;
@@ -88,7 +88,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Load data to dataset by query
 		/// </summary>
-		virtual public void Load(DataSet ds, Query query) {
+		public virtual DataTable Fill(Query query, DataSet ds) {
 			IDbCommandWrapper selectCmdWrapper = CommandGenerator.ComposeSelect( query );
 			QSourceName source = new QSourceName(query.SourceName);
 
@@ -107,12 +107,14 @@ namespace NI.Data {
 			else
 				adapterWrapper.Adapter.Fill( ds );
 			OnCommandExecuted(source.Name, StatementType.Select, selectCmdWrapper.Command);
+
+			return ds.Tables[source.Name];
 		}
 
 		/// <summary>
 		/// Delete data by query
 		/// </summary>
-		virtual public int Delete(Query query) {
+		public virtual int Delete(Query query) {
 			IDbCommandWrapper deleteCmd = CommandGenerator.ComposeDelete(query);
 			return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
 		}
@@ -121,17 +123,17 @@ namespace NI.Data {
 		
 		/// <summary>
 		/// Update one table in DataSet
-		/// Note: method 'AcceptChanges' will not called automatically
 		/// </summary>
-		virtual public void Update(DataSet ds, string tableName) {
-			
+		public virtual void Update(DataTable t) {
+			var tableName = t.TableName;
+
 			IDbDataAdapterWrapper adapterWrapper = adapterCache[tableName] as IDbDataAdapterWrapper;
 			if (adapterWrapper==null) {
 				adapterWrapper = AdapterWrapperFactory.CreateInstance();
 				adapterWrapper.RowUpdating += new DbRowUpdatingEventHandler(this.OnRowUpdating);
 				adapterWrapper.RowUpdated += new DbRowUpdatedEventHandler(this.OnRowUpdated);
 				
-				GenerateAdapterCommands( adapterWrapper, ds.Tables[tableName]);
+				GenerateAdapterCommands( adapterWrapper, t);
 				
 				adapterCache[tableName] = adapterWrapper;
 			}
@@ -146,9 +148,9 @@ namespace NI.Data {
 			adapterWrapper.DeleteCommandWrapper.SetTransaction( Transaction );
 			
 			if (adapterWrapper.Adapter is DbDataAdapter)
-				((DbDataAdapter)adapterWrapper.Adapter).Update(ds, tableName);
+				((DbDataAdapter)adapterWrapper.Adapter).Update(t.DataSet, tableName);
 			else
-				adapterWrapper.Adapter.Update(ds);
+				adapterWrapper.Adapter.Update(t.DataSet);
 		}
 		
 		/// <summary>
@@ -156,7 +158,7 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		virtual public int Update(IDictionary data, Query query) {
+		public virtual int Update(Query query, IDictionary data) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeUpdate(data, query);
 			cmdWrapper.Command.Connection = Connection;
 			cmdWrapper.SetTransaction( Transaction );
@@ -167,7 +169,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.Insert"/>
 		/// </summary>
-		virtual public void Insert(IDictionary data, string sourceName) {
+		public virtual void Insert(string sourceName, IDictionary data) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeInsert(data, sourceName);
 			cmdWrapper.Command.Connection = Connection;
 			cmdWrapper.SetTransaction( Transaction );
@@ -181,7 +183,7 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="sqlText">SQL command text to execute</param>
 		/// <returns>number of rows affected</returns>
-		public virtual int Execute(string sqlText) {
+		public virtual int ExecuteNonQuery(string sqlText) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
 			cmdWrapper.Command.Connection = Connection;
 			cmdWrapper.SetTransaction( Transaction );
@@ -190,23 +192,34 @@ namespace NI.Data {
 		}
 		
 		/// <summary>
-		/// <see cref="IDbDalc.Execute"/>
+		/// <see cref="ISqlDalc.Execute"/>
 		/// </summary>
-		public IDataReader ExecuteReader(string sqlText) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction( Transaction );
-			cmdWrapper.Command.CommandText = sqlText;
-			
-			OnCommandExecuting(null, StatementType.Select, cmdWrapper.Command);
-			IDataReader rdr = cmdWrapper.Command.ExecuteReader();
-			OnCommandExecuted(null, StatementType.Select, cmdWrapper.Command);
+		public virtual void ExecuteReader(string sqlText, Action<IDataReader> callback) {
+			bool closeConnection = false;
+			if (Connection.State != ConnectionState.Open) {
+				Connection.Open();
+				closeConnection = true;
+			}
+			try {
+				IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
+				cmdWrapper.Command.Connection = Connection;
+				cmdWrapper.SetTransaction(Transaction);
+				cmdWrapper.Command.CommandText = sqlText;
 
-			return rdr;
+				OnCommandExecuting(null, StatementType.Select, cmdWrapper.Command);
+				IDataReader rdr = cmdWrapper.Command.ExecuteReader();
+				OnCommandExecuted(null, StatementType.Select, cmdWrapper.Command);
+
+				callback(rdr);
+			} finally {
+				// close only if was opened
+				if (closeConnection)
+					Connection.Close();
+			}
 		}
 		
 		/// <summary>
-		/// <see cref="IDbDalc.Execute"/>
+		/// <see cref="ISqlDalc.Execute"/>
 		/// </summary>
 		public IDataReader LoadReader(Query q) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
@@ -222,7 +235,7 @@ namespace NI.Data {
 		}
 		
 		/// <summary>
-		/// <see cref="IDbDalc.Load"/>
+		/// <see cref="ISqlDalc.Load"/>
 		/// </summary>
 		public virtual void Load(DataSet ds, string sqlText) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();

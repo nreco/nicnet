@@ -22,7 +22,7 @@ namespace NI.Data
 	/// <summary>
 	/// 'Failsafe' IDbDalc wrapper.
 	/// </summary>
-	public class FailsafeDalc : IDalc
+	/*public class FailsafeDalc : IDalc
 	{
 		IDalc _MainDalc;
 		IDalc _BackupDalc;
@@ -105,5 +105,5 @@ namespace NI.Data
 
 
 
-	}
+	}*/
 }
