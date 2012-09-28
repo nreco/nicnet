@@ -88,7 +88,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Load data to dataset by query
 		/// </summary>
-		public virtual DataTable Fill(Query query, DataSet ds) {
+		public virtual DataTable Load(Query query, DataSet ds) {
 			IDbCommandWrapper selectCmdWrapper = CommandGenerator.ComposeSelect( query );
 			QSourceName source = new QSourceName(query.SourceName);
 
@@ -190,54 +190,56 @@ namespace NI.Data {
 			cmdWrapper.Command.CommandText = sqlText;
 			return ExecuteInternal(cmdWrapper, null, StatementType.Update);
 		}
-		
-		/// <summary>
-		/// <see cref="ISqlDalc.Execute"/>
-		/// </summary>
+
+        protected virtual void ExecuteReaderInternal(IDbCommandWrapper cmdWrapper, string sourceName, Action<IDataReader> callback) {
+            bool closeConnection = false;
+            if (Connection.State != ConnectionState.Open) {
+                Connection.Open();
+                closeConnection = true;
+            }
+            try {
+                OnCommandExecuting(sourceName, StatementType.Select, cmdWrapper.Command);
+                IDataReader rdr = cmdWrapper.Command.ExecuteReader();
+                OnCommandExecuted(sourceName, StatementType.Select, cmdWrapper.Command);
+
+                callback(rdr);
+
+                if (!rdr.IsClosed)
+                    rdr.Close();
+            } finally {
+                // close only if was opened
+                if (closeConnection)
+                    Connection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Load data into datareader by custom SQL
+        /// </summary>
 		public virtual void ExecuteReader(string sqlText, Action<IDataReader> callback) {
-			bool closeConnection = false;
-			if (Connection.State != ConnectionState.Open) {
-				Connection.Open();
-				closeConnection = true;
-			}
-			try {
-				IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-				cmdWrapper.Command.Connection = Connection;
-				cmdWrapper.SetTransaction(Transaction);
-				cmdWrapper.Command.CommandText = sqlText;
-
-				OnCommandExecuting(null, StatementType.Select, cmdWrapper.Command);
-				IDataReader rdr = cmdWrapper.Command.ExecuteReader();
-				OnCommandExecuted(null, StatementType.Select, cmdWrapper.Command);
-
-				callback(rdr);
-			} finally {
-				// close only if was opened
-				if (closeConnection)
-					Connection.Close();
-			}
-		}
-		
-		/// <summary>
-		/// <see cref="ISqlDalc.Execute"/>
-		/// </summary>
-		public IDataReader LoadReader(Query q) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
-			
-			cmdWrapper.SetTransaction( Transaction );
+   			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
 			cmdWrapper.Command.Connection = Connection;
-			
-			OnCommandExecuting(q.SourceName, StatementType.Select, cmdWrapper.Command);
-			IDataReader rdr = cmdWrapper.Command.ExecuteReader();
-			OnCommandExecuted(q.SourceName, StatementType.Select, cmdWrapper.Command);
+			cmdWrapper.SetTransaction(Transaction);
+			cmdWrapper.Command.CommandText = sqlText;
 
-			return rdr;
+            ExecuteReaderInternal(cmdWrapper, null, callback);
 		}
+
+        /// <summary>
+        /// Load data into datareader by query
+        /// </summary>
+        public virtual void ExecuteReader(Query q, Action<IDataReader> callback) {
+            IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
+            cmdWrapper.SetTransaction(Transaction);
+            cmdWrapper.Command.Connection = Connection;
+
+            ExecuteReaderInternal(cmdWrapper, q.SourceName, callback);
+        }
 		
-		/// <summary>
-		/// <see cref="ISqlDalc.Load"/>
-		/// </summary>
-		public virtual void Load(DataSet ds, string sqlText) {
+        /// <summary>
+        /// Load data into dataset by custom SQL
+        /// </summary>
+        public virtual void Load(string sqlText, DataSet ds) {
 			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
 			cmdWrapper.Command.Connection = Connection;
 			cmdWrapper.SetTransaction( Transaction );
@@ -249,55 +251,6 @@ namespace NI.Data {
 			OnCommandExecuting(null, StatementType.Select, cmdWrapper.Command);
 			adapterWrapper.Adapter.Fill( ds );
 			OnCommandExecuted(null, StatementType.Select, cmdWrapper.Command);
-		}
-
-		/// <summary>
-		/// Load single record into hashtable
-		/// </summary>
-		/// <param name="tablename">Table's name</param>
-		/// <param name="filter">Record filter</param>
-		/// <returns>Hashtable with 'field'=>'value' pairs (or null if no data)</returns>
-		virtual public bool LoadRecord(IDictionary data, Query query) {
-			// allow command generator build optimized sql select by specifying only one record to load
-			Query oneRecordQuery = new Query(query);
-			oneRecordQuery.RecordCount = 1;
-			QSourceName source = new QSourceName(query.SourceName);
-
-			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect( oneRecordQuery );
-			return LoadRecordInternal(data, cmdWrapper, source.Name);
-		}
-		
-		/// <summary>
-		/// Load single record into hashtable
-		/// </summary>
-		/// <param name="sqlCommandText">SQL command text to execute</param>
-		/// <returns>Hashtable with 'field'=>'value' pairs (or null if no data)</returns>
-		virtual public bool LoadRecord(IDictionary data, string sqlCommandText) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-			cmdWrapper.Command.CommandText = sqlCommandText;
-			return LoadRecordInternal(data, cmdWrapper, null);			
-		}
-
-		virtual public int RecordsCount(string sourceName, QueryNode conditions) {
-			Query q = new Query(sourceName, conditions);
-			q.Fields = new string[] {"count(*)"}; // standart sql
-			ListDictionary res = new ListDictionary();
-			if (LoadRecord(res, q)) {
-                foreach (object value in res.Values)
-                {
-                    try
-                    {
-                        return Convert.ToInt32(value);
-                    }
-                    // CHECK: some very strange bug here: sometimes 'value' cannot be cast to int (???)
-                    catch (Exception ex)
-                    {
-                        Trace.WriteLine("Count query returned incorrect value that cannot be casted to int, returning 0 instead. Exception: " + ex.ToString());
-                        return 0;
-                    }
-                }
-			}
-			throw new Exception( "Count is not supported for sourcename="+sourceName); //TODO: add structured exception here
 		}
 		
 		

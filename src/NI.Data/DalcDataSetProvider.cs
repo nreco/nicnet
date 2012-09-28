@@ -56,7 +56,7 @@ namespace NI.Data
 			DataSet ds = new DataSet();
 			foreach (IQueryProvider queryProvider in QueryProviders) {
 				Query q = queryProvider.GetQuery(contextObj);
-				Dalc.Load( ds, q );
+				Dalc.Load(q, ds);
 			}
 		
 			return ds;

@@ -65,34 +65,23 @@ namespace NI.Data
 				ISqlDalc dbDalc = (ISqlDalc)Dalc;
 				// store data here
 				ArrayList listData = new ArrayList();
-				// ensure that connection is open
-				bool closeConnection = false;
-				if (dbDalc.Connection.State != ConnectionState.Open) {
-					dbDalc.Connection.Open();
-					closeConnection = true;
-				}
-				try {
-					IDataReader rdr = dbDalc.LoadReader(q);
-					int index = 0;
-                    while (rdr.Read() && index < (long)q.RecordCount + (long)q.StartRecord)
-                    {
-						if (index>=q.StartRecord) {
-							Hashtable recordInfo = new Hashtable();
-							// fetch all fields & values in dictionary
-							for (int i = 0; i < rdr.FieldCount; i++) {
-								recordInfo[rdr.GetName(i)] = rdr.GetValue(i);
-								if (i==0) recordInfo[0] = rdr.GetValue(i);
-							}
-							listData.Add(recordInfo);
-						}
-						index++;
-					}
-					rdr.Close();
-				} finally {
-					// close only if was opened
-					if (closeConnection)
-						dbDalc.Connection.Close();
-				}
+
+                dbDalc.ExecuteReader(q, (rdr) => {
+                    int index = 0;
+                    while (rdr.Read() && index < (long)q.RecordCount + (long)q.StartRecord) {
+                        if (index >= q.StartRecord) {
+                            Hashtable recordInfo = new Hashtable();
+                            // fetch all fields & values in dictionary
+                            for (int i = 0; i < rdr.FieldCount; i++) {
+                                recordInfo[rdr.GetName(i)] = rdr.GetValue(i);
+                                if (i == 0) recordInfo[0] = rdr.GetValue(i);
+                            }
+                            listData.Add(recordInfo);
+                        }
+                        index++;
+                    }
+                });
+
 				// data fetched. Lets prepare result.
 				result = new object[listData.Count];
 				for (int i=0; i<result.Length; i++)
@@ -100,7 +89,7 @@ namespace NI.Data
 			} else {
 				// classic dataset-based logic
 				DataSet ds = new DataSet();
-				Dalc.Load(ds, q);
+				Dalc.Load(q, ds);
 				
 				result = new object[ds.Tables[q.SourceName].Rows.Count];
 				for (int i=0; i<result.Length; i++)

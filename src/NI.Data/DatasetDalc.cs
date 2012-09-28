@@ -40,7 +40,7 @@ namespace NI.Data
 		/// <summary>
 		/// Load data from data source to dataset
 		/// </summary>
-		public virtual DataTable Fill(Query query, DataSet ds) {
+		public virtual DataTable Load(Query query, DataSet ds) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
@@ -155,7 +155,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		public int Update(IDictionary data, Query query) {
+		public int Update(Query query, IDictionary data) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
@@ -175,7 +175,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="sourceName">source name</param>
-		public void Insert(IDictionary data, string sourceName) {
+        public void Insert(string sourceName, IDictionary data) {
 			if (!PersistedDS.Tables.Contains(sourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+sourceName);
 			
@@ -206,7 +206,7 @@ namespace NI.Data
 		
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
 			var ds = new DataSet();
-			var tbl = Fill(q, ds);
+			var tbl = Load(q, ds);
 			var rdr = new DataTableReader(tbl);
 			handler(rdr);
 		}

@@ -45,16 +45,12 @@ namespace NI.Data.Permissions
 		{
 		}
 
-		public bool LoadRecord(IDictionary data, string sqlCommandText) {
-			return UnderlyingDbDalc.LoadRecord(data, sqlCommandText);
+        public int ExecuteNonQuery(string sqlText) {
+            return UnderlyingDbDalc.ExecuteNonQuery(sqlText);
 		}
 
-		public int Execute(string sqlText) {
-			return UnderlyingDbDalc.Execute(sqlText);
-		}
-
-		public IDataReader ExecuteReader(string sqlText) {
-			return UnderlyingDbDalc.ExecuteReader(sqlText);
+		public void ExecuteReader(string sqlText, Action<IDataReader> callback) {
+			UnderlyingDbDalc.ExecuteReader(sqlText, callback);
 		}
 
 		public IDbConnection Connection {
@@ -68,20 +64,9 @@ namespace NI.Data.Permissions
 		}
 
 
-		public void Load(DataSet ds, string sqlText) {
-			UnderlyingDbDalc.Load(ds, sqlText);
+        public virtual void Load(string sqlText, DataSet ds) {
+			UnderlyingDbDalc.Load(sqlText, ds);
 		}
-		
-		public IDataReader LoadReader(Query q) {
-			if (Enabled) {
-				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, q);
-				return UnderlyingDbDalc.LoadReader(modifiedQuery);
-			} else {
-				return UnderlyingDbDalc.LoadReader(q);
-			}		
-		}
-
-
 
 	}
 }

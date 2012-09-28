@@ -116,12 +116,12 @@ namespace NI.Data.Permissions {
 			return qValue;
 		}
 
-		public void Load(DataSet ds, Query query) {
+        public DataTable Load(Query query, DataSet ds) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
-				Dalc.Load(ds, modifiedQuery);
+				Dalc.Load(modifiedQuery, ds);
 			} else {
-				Dalc.Load(ds, query);
+				Dalc.Load(query,ds);
 			}
 		}
 
@@ -164,9 +164,9 @@ namespace NI.Data.Permissions {
 			return idInfo;
 		}
 
-		public void Update(DataSet ds, string sourceName) {
+		public virtual void Update(DataTable t) {
 			if (Enabled)
-				foreach (DataRow r in ds.Tables[sourceName].Rows) {
+				foreach (DataRow r in t.Rows) {
 					// check for modifications
 					if (r.RowState==DataRowState.Unchanged)
 						continue;
@@ -178,7 +178,7 @@ namespace NI.Data.Permissions {
 						throw new SecurityException(
 							String.Format("{0} operation is not allowed for {1}({2})",
 							recordPermission.Operation.ToString(),
-							sourceName,
+							t.TableName,
 							FormatRowIndentification(r) ) );
 					
 					// check field permissions for IComparable data columns
@@ -209,19 +209,19 @@ namespace NI.Data.Permissions {
 						}
 					
 				}
-			Dalc.Update(ds, sourceName);
+			Dalc.Update(t);
 		}
 
-		public int Update(IDictionary data, Query query) {
+        public virtual int Update(Query query, IDictionary data) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Update, query);
-				return Dalc.Update(data, modifiedQuery);		
+				return Dalc.Update(modifiedQuery, data);		
 			} else {
-				return Dalc.Update(data, query);	
+				return Dalc.Update(query, data);	
 			}
 		}
 
-		public void Insert(IDictionary data, string sourceName) {
+        public virtual void Insert(string sourceName, IDictionary data) {
 			if (Enabled) {
 				DalcPermission recordPermission = new DalcPermission(
 					ContextUser, DalcOperation.Create, new DalcRecordInfo(sourceName, data, data) );
@@ -231,10 +231,10 @@ namespace NI.Data.Permissions {
 						recordPermission.Operation.ToString(),
 						sourceName) );
 			}
-			Dalc.Insert(data, sourceName);		
+            Dalc.Insert(sourceName, data);
 		}
 
-		public int Delete(Query query) {
+		public virtual int Delete(Query query) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Delete, query);
 				return Dalc.Delete( modifiedQuery );
@@ -243,27 +243,15 @@ namespace NI.Data.Permissions {
 			}
 		}
 
-		public bool LoadRecord(IDictionary data, Query query) {
+		public virtual void ExecuteReader(Query query, Action<IDataReader> callback) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
-				return Dalc.LoadRecord( data, modifiedQuery);
+				Dalc.ExecuteReader(modifiedQuery, callback);
 			} else {
-				return Dalc.LoadRecord(data, query);
+                Dalc.ExecuteReader(query, callback);
 			}
 		}
 
-		public int RecordsCount(string sourceName, QueryNode conditions) {
-			if (Enabled) {
-				QueryNode permissionCondition = DalcConditionComposer.Compose( ContextUser, DalcOperation.Retrieve, sourceName );
-				if (permissionCondition!=null) {
-					QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
-					groupAnd.Nodes.Add( conditions );
-					groupAnd.Nodes.Add( permissionCondition );
-					conditions = groupAnd;
-				}
-			}
-			return Dalc.RecordsCount(sourceName, conditions);
-		}
 
 	}
 }

@@ -59,26 +59,13 @@ namespace NI.Data.Web {
 			DataSource.OnSelecting(DataSource, eArgs);
 
             if (arguments.RetrieveTotalRowCount) {
-                var cntResult = new Hashtable();
-                var cntQuery = new Query(q);
-                cntQuery.Sort = null;
-                cntQuery.StartRecord = 0;
-                cntQuery.RecordCount = 1;
-                cntQuery.Fields = new string[] { "count(*)" };
-                if (DataSource.Dalc.LoadRecord(cntResult, cntQuery)) {
-                    foreach (object v in cntResult.Values) {
-                        arguments.TotalRowCount = Convert.ToInt32(v);
-                        break;
-                    }
-                } else{
-                    arguments.TotalRowCount = 0;
-                }
+                arguments.TotalRowCount = DataSource.Dalc.RecordsCount(q);
             }
 
 			q.StartRecord = arguments.StartRowIndex;
 			if (arguments.MaximumRows>0)
 				q.RecordCount = arguments.MaximumRows;
-			DataSource.Dalc.Load(ds, q);
+			DataSource.Dalc.Load(q, ds);
 			// raise event
 			DataSource.OnSelected(DataSource, eArgs);
 

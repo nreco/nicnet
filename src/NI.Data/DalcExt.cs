@@ -6,10 +6,12 @@ using System.Text;
 
 namespace NI.Data {
 	
-	public class DalcExt {
+	public static class DalcExt {
 		public static IDictionary LoadRecord(this IDalc dalc, Query q) {
 			IDictionary data = null;
-			dalc.ExecuteReader(q, (reader) => {
+            var oneRecordQuery = new Query(q);
+            q.RecordCount = 1;
+            dalc.ExecuteReader(oneRecordQuery, (reader) => {
 				if (reader.Read()) {
 					data = new Hashtable();
 					// fetch all fields & values in hashtable
@@ -30,11 +32,13 @@ namespace NI.Data {
 			return val;
 		}
 
-		public static long RecordsCount(this IDalc dalc, Query q) {
+		public static int RecordsCount(this IDalc dalc, Query q) {
 			var qCount = new Query(q);
 			qCount.Sort = null;
 			qCount.Fields = new[] { "count(*)" };
-			return Convert.ToInt64( LoadValue(dalc, qCount ) );
+            qCount.StartRecord = 0;
+            qCount.RecordCount = 1;
+			return Convert.ToInt32( LoadValue(dalc, qCount ) );
 		}
 
 	}

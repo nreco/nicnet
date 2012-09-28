@@ -51,7 +51,7 @@ namespace NI.Data
 		/// <summary>
 		/// Execute custom SQL command and store result in specified dataset
 		/// </summary>
-		void Load(string sqlText, DataTable t);
+		void Load(string sqlText, DataSet ds);
 
 	
 	}

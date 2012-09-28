@@ -70,7 +70,7 @@ namespace NI.Data {
 			if (ds == null)
 				throw new Exception("Unknown source name");
 			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk));
-			Dalc.Load(ds, q);
+			Dalc.Load(q, ds);
 			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
 		}
 
@@ -79,8 +79,8 @@ namespace NI.Data {
 			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
 				ds = new DataSet();
-			Dalc.Load(ds, q);
-			return ds.Tables[source.Name].Rows.Count > 0 ? ds.Tables[source.Name].Rows[0] : null;
+			var tbl = Dalc.Load(q, ds);
+			return tbl.Rows.Count > 0 ? tbl.Rows[0] : null;
 		}
 
 		public DataTable LoadAll(Query q) {
@@ -88,8 +88,8 @@ namespace NI.Data {
 			DataSet ds = DataSetProvider.GetDataSet(source.Name);
 			if (ds == null)
 				ds = new DataSet();
-			Dalc.Load(ds, q);
-			return ds.Tables[source.Name];
+			var tbl = Dalc.Load(q, ds);
+			return tbl;
 		}
 
 		public void Delete(string sourceName, object pk) {
@@ -113,7 +113,7 @@ namespace NI.Data {
 		public void Delete(DataRow r) {
 			if (r.RowState != DataRowState.Deleted)
 				r.Delete();
-			Dalc.Update(r.Table.DataSet, r.Table.TableName);
+			Dalc.Update(r.Table);
 		}
 
 		public void Update(DataRow r) {
@@ -125,11 +125,11 @@ namespace NI.Data {
 
 			if (r.RowState == DataRowState.Detached)
 				r.Table.Rows.Add(r);
-			Dalc.Update(r.Table.DataSet, r.Table.TableName);
+			Dalc.Update(r.Table);
 		}
 
 		public void Update(DataTable tbl) {
-			Dalc.Update(tbl.DataSet, tbl.TableName);
+			Dalc.Update(tbl);
 		}
 
 		public void Update(string sourceName, object pk, IDictionary<string, object> changeset) {
@@ -141,14 +141,14 @@ namespace NI.Data {
 			if (ds == null)
 				throw new Exception("Unknown source name");
 			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk) );
-			Dalc.Load(ds, q);
-			if (ds.Tables[q.SourceName].Rows.Count==0)
+			var t = Dalc.Load(q, ds);
+			if (t.Rows.Count==0)
 				throw new Exception("Record does not exist");
-			foreach (DataRow r in ds.Tables[q.SourceName].Rows) {
+			foreach (DataRow r in t.Rows) {
 				foreach (KeyValuePair<string, object> entry in changeset)
 					r[entry.Key] = PrepareValue(entry.Value);
 			}
-			Dalc.Update(ds, sourceName);
+			Dalc.Update(t);
 		}
 
 		public int Update(Query q, IDictionary<string, object> changeset) {

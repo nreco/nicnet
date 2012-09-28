@@ -52,12 +52,12 @@ namespace NI.Data
 		public object GetObject(object context) {
 			Query q = QueryProvider.GetQuery(context);
 			
-			Hashtable record = new Hashtable();
-			if (Dalc.LoadRecord(record, q)) {
-				if (q.Fields!=null && q.Fields.Length>0 && record.ContainsKey(q.Fields[0]) )
+			var record = Dalc.LoadRecord(q);
+			if (record!=null) {
+				if (q.Fields!=null && q.Fields.Length>0 && record.Contains(q.Fields[0]) )
 					return record[q.Fields[0]];
 				else
-					// return any available field...
+					// return first available field...
 					foreach (DictionaryEntry entry in record)
 						return entry.Value;
 			}

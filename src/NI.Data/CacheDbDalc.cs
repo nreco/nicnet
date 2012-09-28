@@ -22,7 +22,7 @@ using NI.Common.Caching;
 
 namespace NI.Data {
 
-    public class CacheDbDalc : CacheDalc, ISqlDalc {
+    /*public class CacheDbDalc : CacheDalc, ISqlDalc {
 
 		/// <summary>
 		/// Get or set underlying DB DALC component
@@ -188,7 +188,8 @@ namespace NI.Data {
 			}
 
 			public int RecordsAffected {
-				get { return 0; /* cache data reader is used only for select queries */ }
+				get { return 0; //* cache data reader is used only for select queries  
+                }
 			}
 
 			public void Dispose() {
@@ -342,6 +343,6 @@ namespace NI.Data {
 		}
 
 
-    }
+    }*/
 
 }

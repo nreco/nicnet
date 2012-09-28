@@ -72,7 +72,7 @@ namespace NI.Data.RelationalExpressions
 			Query q = RelExQueryParser.Parse(expression);
 			
 			if (ReturnCount)
-				return Dalc.RecordsCount(q.SourceName, q.Condition);
+				return Dalc.RecordsCount(q);
 			
 			if (ReturnList) {
 				DalcObjectListProvider dalcObjListProvider = new DalcObjectListProvider();

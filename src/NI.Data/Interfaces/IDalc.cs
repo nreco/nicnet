@@ -33,7 +33,7 @@ namespace NI.Data
 		/// <summary>
 		/// Load data into dataset by query
 		/// </summary>
-		DataTable Fill(Query query, DataSet ds);
+		DataTable Load(Query query, DataSet ds);
 		
 		/// <summary>
 		/// Update data from dataset to datasource

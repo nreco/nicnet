@@ -56,10 +56,7 @@ namespace NI.Data
 		/// </summary>
 		public IDictionary GetDictionary(object context) {
 			Query q = GetQuery(context);
-			ListDictionary result = new ListDictionary();
-			if (Dalc.LoadRecord(result, q))
-				return result;
-			return null;
+            return Dalc.LoadRecord(q);
 		}
 		
 		protected virtual Query GetQuery(object context) {

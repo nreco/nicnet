@@ -26,7 +26,7 @@ namespace NI.Data {
 	/// <summary>
 	/// IDalc proxy that enables caching for 'load' results.
 	/// </summary>
-	public class CacheDalc : IDalc {
+	/*public class CacheDalc : IDalc {
 
 		private IDalc _UnderlyingDalc;
 		private ICache _LoadCache;
@@ -323,5 +323,5 @@ namespace NI.Data {
 		}
 		
 		
-	}
+	}*/
 }
