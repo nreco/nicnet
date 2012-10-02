@@ -63,16 +63,12 @@ namespace NI.Data.Linq
 			BuildDalcQuery(q, expression);
 
 			object result = null;
-			IQueryProvider dalcQueryPrv = new NI.Data.QueryProvider(new ConstObjectProvider(q));
 			if (q.RecordCount == 1 && q.Fields != null && q.Fields.Length == 1) {
-				DalcObjectProvider prv = new DalcObjectProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
-				result = prv.GetObject(null);
+				result = Dalc.LoadValue(q);
 			} else if (q.RecordCount == 1) {
-				DalcRecordDictionaryProvider prv = new DalcRecordDictionaryProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
-				result = prv.GetDictionary(null);
+				result = Dalc.LoadRecord(q);
 			} else {
-				DalcDictionaryListProvider prv = new DalcDictionaryListProvider() { Dalc = Dalc, QueryProvider = dalcQueryPrv };
-				result = prv.GetDictionaryList(null);
+				result = Dalc.LoadAllRecords(q);
 			}
 			// now lets try to convert 
 

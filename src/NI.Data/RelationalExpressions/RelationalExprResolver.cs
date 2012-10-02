@@ -75,33 +75,14 @@ namespace NI.Data.RelationalExpressions
 				return Dalc.RecordsCount(q);
 			
 			if (ReturnList) {
-				DalcObjectListProvider dalcObjListProvider = new DalcObjectListProvider();
-				dalcObjListProvider.Dalc = Dalc;
-				dalcObjListProvider.QueryProvider = new ConstQueryProvider(q);
-				return dalcObjListProvider.GetObjectList(context);			
+				return Dalc.LoadAllValues(q);			
 			} else {
-				DalcObjectProvider dalcObjProvider = new DalcObjectProvider();
-				dalcObjProvider.Dalc = Dalc;
-				dalcObjProvider.QueryProvider = new ConstQueryProvider(q);
-				object value = dalcObjProvider.GetObject(context);
+				object value = Dalc.LoadValue(q);
 				return value!=null ? PrepareValue(value) : null;
-			}
-			
-			return null;
-		}
-		
-		class ConstQueryProvider : IQueryProvider {
-			Query ConstQuery;
-			
-			public ConstQueryProvider(Query constQuery) {
-				ConstQuery = constQuery;
-			}
-			
-			public Query GetQuery(object context) {
-				return ConstQuery;
 			}
 
 		}
+		
 
 		
 	}

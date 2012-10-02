@@ -123,18 +123,6 @@
     <Compile Include="DalcDataSetProvider.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DalcDictionaryListProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DalcObjectListProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DalcObjectProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DalcRecordDictionaryProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DatasetDalc.cs">
       <SubType>Code</SubType>
     </Compile>

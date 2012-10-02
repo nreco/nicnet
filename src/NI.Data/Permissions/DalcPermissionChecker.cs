@@ -95,13 +95,12 @@ namespace NI.Data.Permissions
 				// load record fields if they wasn't provided
 				DalcPermission dalcPermission = (DalcPermission)permission;
 				if (dalcPermission.Object.Fields==null) {
-					dalcPermission.Object.Fields = new Hashtable();
 					Query q = new Query(dalcPermission.Object.SourceName);
 					QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
 					foreach (DictionaryEntry entry in dalcPermission.Object.UidFields)
 						groupAnd.Nodes.Add( (QField)entry.Key.ToString() == new QConst(entry.Value) );					
 					q.Condition = groupAnd;
-					OriginalDalc.LoadRecord(dalcPermission.Object.Fields, q);
+					dalcPermission.Object.Fields = OriginalDalc.LoadRecord(q);
 				}
 
 				if (!CheckDalcDenyPermissions( (DalcPermission)permission ))
@@ -156,7 +155,7 @@ namespace NI.Data.Permissions
 				DataSet ds = new DataSet();
 				Query query = new Query(opParams.SourceName, queryGroupAnd);
 				query.Fields = (string[])fieldsToExtract.ToArray(typeof(string));
-				OriginalDalc.Load(ds, query);
+				OriginalDalc.Load(query, ds);
 
 				// process results
 				foreach (DalcPermission dalcPermission in groupList) {
@@ -215,11 +214,11 @@ namespace NI.Data.Permissions
 
 		protected bool RecordExists(string sourcename, QueryNode condition) {
 			if (RecordExistsMethod==RecordExistsMethodName.RecordsCount)
-				return OriginalDalc.RecordsCount(sourcename, condition)>0;
+				return OriginalDalc.RecordsCount( new Query(sourcename, condition) )>0;
 			ListDictionary rInfo = new ListDictionary();
 			Query q = new Query(sourcename, condition);
 			q.Fields = new string[] {"1"};
-			return OriginalDalc.LoadRecord(rInfo, q);
+			return OriginalDalc.LoadRecord(q)!=null;
 		}
 
 		internal class MassOperationParams {

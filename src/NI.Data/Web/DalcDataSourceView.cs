@@ -92,7 +92,7 @@ namespace NI.Data.Web {
 				DataSet ds = GetDataSet();
 				// if schema is unknown, lets try to load from datasource
 				if (!ds.Tables.Contains(eArgs.SourceName))
-					DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)));
+					DataSource.Dalc.Load(new Query(eArgs.SourceName, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)), ds);
 				DataTable tbl = ds.Tables[eArgs.SourceName];
 				EnsureDataSchema(tbl);
 				
@@ -101,13 +101,13 @@ namespace NI.Data.Web {
 					if (values.Contains(col.ColumnName))
 						r[col] = PrepareDataRowValue(values[col.ColumnName]);
 				tbl.Rows.Add(r);
-				DataSource.Dalc.Update(ds, eArgs.SourceName);
+				DataSource.Dalc.Update(tbl);
 				// push back into context all fields
 				foreach (DataColumn c in tbl.Columns)
 					values[c.ColumnName] = r[c];
 				
 			} else {
-				DataSource.Dalc.Insert(values, eArgs.SourceName);
+				DataSource.Dalc.Insert(eArgs.SourceName, values);
 			}
 			DataSource.OnInserted(DataSource, eArgs);
 			return 1;
@@ -135,8 +135,7 @@ namespace NI.Data.Web {
 			QueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, uidCondition));
-				var tbl = ds.Tables[eArgs.SourceName];
+				var tbl = DataSource.Dalc.Load(new Query(eArgs.SourceName, uidCondition), ds);
 				EnsureDataSchema(tbl);
 
 				eArgs.AffectedCount = tbl.Rows.Count;
@@ -144,13 +143,13 @@ namespace NI.Data.Web {
 					foreach (DataColumn col in tbl.Columns)
 						if (values.Contains(col.ColumnName))
 							r[col] = PrepareDataRowValue( values[col.ColumnName] );
-				DataSource.Dalc.Update(ds, eArgs.SourceName);
+				DataSource.Dalc.Update(tbl);
 				// push back into context all fields (if only 1 record is updated)
 				if (tbl.Rows.Count == 1)
 					foreach (DataColumn c in tbl.Columns)
 						values[c.ColumnName] = tbl.Rows[0][c];
 			} else {
-				eArgs.AffectedCount = DataSource.Dalc.Update(values, new Query(eArgs.SourceName, uidCondition));
+				eArgs.AffectedCount = DataSource.Dalc.Update(new Query(eArgs.SourceName, uidCondition), values);
 			}
 			// raise event
 			DataSource.OnUpdated(DataSource, eArgs);
@@ -164,12 +163,12 @@ namespace NI.Data.Web {
 
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				DataSource.Dalc.Load(ds, new Query(eArgs.SourceName, uidCondition));
-				EnsureDataSchema(ds.Tables[eArgs.SourceName]);
-				eArgs.AffectedCount = ds.Tables[eArgs.SourceName].Rows.Count;
-				foreach (DataRow r in ds.Tables[eArgs.SourceName].Rows)
+				var tbl = DataSource.Dalc.Load(new Query(eArgs.SourceName, uidCondition), ds);
+				EnsureDataSchema(tbl);
+				eArgs.AffectedCount = tbl.Rows.Count;
+				foreach (DataRow r in tbl.Rows)
 					r.Delete();
-				DataSource.Dalc.Update(ds, eArgs.SourceName);
+				DataSource.Dalc.Update(tbl);
 
 			} else {
 				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(eArgs.SourceName, uidCondition));

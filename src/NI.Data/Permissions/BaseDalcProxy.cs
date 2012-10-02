@@ -119,9 +119,9 @@ namespace NI.Data.Permissions {
         public DataTable Load(Query query, DataSet ds) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Retrieve, query);
-				Dalc.Load(modifiedQuery, ds);
+				return Dalc.Load(modifiedQuery, ds);
 			} else {
-				Dalc.Load(query,ds);
+				return Dalc.Load(query,ds);
 			}
 		}
 
@@ -171,7 +171,7 @@ namespace NI.Data.Permissions {
 					if (r.RowState==DataRowState.Unchanged)
 						continue;
 					
-					DalcRecordInfo recordInfo = new DalcRecordInfo(sourceName, ComposeRecordIdInfo(r), new DataRowDictionary(r) );
+					DalcRecordInfo recordInfo = new DalcRecordInfo(t.TableName, ComposeRecordIdInfo(r), new DataRowDictionary(r) );
 					DalcPermission recordPermission = new DalcPermission(
 						ContextUser, ConvertToDalcOperation(r.RowState), recordInfo);
 					if (!PermissionChecker.Check(recordPermission))
