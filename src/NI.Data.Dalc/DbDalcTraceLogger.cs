@@ -116,7 +116,7 @@ namespace NI.Data.Dalc {
 					Write(args.Command, "Cannot calculate execution time - 'executing' event wasn't raised?!");
 				else {
 					DateTime executingTime = (DateTime)LastLogTime[args.Command.GetHashCode()];
-					string cmdTimeMsg = String.Format("execution time: {0:f}", DateTime.Now.Subtract(executingTime) );
+					string cmdTimeMsg = String.Format("execution time: {0}", DateTime.Now.Subtract(executingTime) );
 					Write(args.Command, cmdTimeMsg);
 				}
 			} catch (Exception ex) {
