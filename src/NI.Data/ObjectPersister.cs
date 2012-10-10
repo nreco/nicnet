@@ -5,7 +5,7 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 
-namespace NI.Data.Dalc {
+namespace NI.Data {
 	
 	
 	public class ObjectPersister<T> where T : class, new() {
@@ -34,7 +34,7 @@ namespace NI.Data.Dalc {
 			var recordQ = new Query(q);
 			q.StartRecord = 0;
 			q.RecordCount = 1;
-			DbManager.Dalc.Load(ds, recordQ);
+			DbManager.Dalc.Load(recordQ, ds);
 			var srcName = new QSourceName(q.SourceName);
 			if (ds.Tables[srcName.Name].Rows.Count == 0)
 				return null;
@@ -45,7 +45,7 @@ namespace NI.Data.Dalc {
 
 		public IEnumerable<T> LoadAll(Query q) {
 			var ds = new DataSet();
-			DbManager.Dalc.Load(ds, q);
+			DbManager.Dalc.Load(q, ds);
 			var srcName = new QSourceName(q.SourceName);
 			var rs = new List<T>();
 			foreach (DataRow r in ds.Tables[srcName.Name].Rows) {
@@ -74,7 +74,7 @@ namespace NI.Data.Dalc {
 			DbManager.Delete(new Query(SourceName, ComposePkCondition(record)));
 		}
 
-		protected IQueryNode ComposePkCondition(T t) {
+		protected QueryNode ComposePkCondition(T t) {
 			var qcnd = new QueryGroupNode(GroupType.And);
 			var ds = DbManager.DataSetProvider.GetDataSet(SourceName);
 			foreach (DataColumn c in ds.Tables[SourceName].PrimaryKey) {
