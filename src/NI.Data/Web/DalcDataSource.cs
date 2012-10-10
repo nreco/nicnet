@@ -187,7 +187,7 @@ namespace NI.Data.Web {
 	public delegate void DalcDataSourceSelectEventHandler(object sender, DalcDataSourceSelectEventArgs e);
 	public delegate void DalcDataSourceSaveEventHandler(object sender, DalcDataSourceSaveEventArgs e);
 
-	public class DalcDataSourceSaveEventArgs {
+	public class DalcDataSourceSaveEventArgs : CancelEventArgs {
 		string _SourceName;
 		IDictionary _OldValues;
 		IDictionary _Values;
@@ -226,7 +226,7 @@ namespace NI.Data.Web {
 		}
 	}
 
-	public class DalcDataSourceSelectEventArgs {
+	public class DalcDataSourceSelectEventArgs : CancelEventArgs {
 		Query _SelectQuery;
 		DataSet _Data;
 		DataSourceSelectArguments _SelectArgs;

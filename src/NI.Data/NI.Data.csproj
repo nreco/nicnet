@@ -206,6 +206,7 @@
     <Compile Include="Linq\DalcLinqExtensions.cs" />
     <Compile Include="Linq\DalcRecord.cs" />
     <Compile Include="Linq\QueryProvider.cs" />
+    <Compile Include="ObjectPersister.cs" />
     <Compile Include="ObjectQueryConditionEvaluator.cs" />
     <Compile Include="Odbc\OdbcAdapterWrapper.cs" />
     <Compile Include="Odbc\OdbcCommandWrapper.cs" />
