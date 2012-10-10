@@ -236,6 +236,7 @@
     <Compile Include="DbDalcProxy.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ObjectPersister.cs" />
     <Compile Include="ObjectQueryConditionEvaluator.cs" />
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
