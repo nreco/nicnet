@@ -113,6 +113,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BaseMethodInvokingFactory.cs" />
+    <Compile Include="DelegateFactory.cs" />
     <Compile Include="StringFormatFactory.cs">
     </Compile>
     <Compile Include="StaticFieldInvokingFactory.cs">

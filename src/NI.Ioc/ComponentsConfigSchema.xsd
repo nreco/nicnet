@@ -29,7 +29,8 @@
 	<xsd:element name="constructor-arg">
 		<xsd:complexType>
 			<xsd:group ref="valuegroup" />
-			<xsd:attribute name="index" type="xsd:integer" use="required" />
+			<xsd:attribute name="index" type="xsd:integer" use="optional" />
+			<xsd:attribute name="name" type="xsd:string" use="optional"/>
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:element name="property">
