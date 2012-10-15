@@ -170,14 +170,37 @@ namespace NI.Winter
 			
 			// extract constructor arguments
 			XmlNodeList constructorArgNodes = componentNode.SelectNodes("constructor-arg");
+			var autoIdx = 0;
 			foreach (XmlNode constructorArgNode in constructorArgNodes) {
-				int index = Convert.ToInt32( constructorArgNode.Attributes["index"].Value );
+				int index = constructorArgNode.Attributes["index"]!=null ? Convert.ToInt32(constructorArgNode.Attributes["index"].Value) : autoIdx;
+				if (constructorArgNode.Attributes["name"] != null) {
+					var explicitArgName = constructorArgNode.Attributes["name"].Value;
+					// try to find argument by name
+					var paramByNameFound = false;
+					foreach (var constrInfo in _Type.GetConstructors() ) {
+						var cParams = constrInfo.GetParameters();
+						if (cParams.Length == constructorArgNodes.Count) {
+							for (int i=0; i<cParams.Length; i++)
+								if (cParams[i].Name == explicitArgName) {
+									index = cParams[i].Position;
+									paramByNameFound = true;
+									break;
+								}
+						}
+						if (paramByNameFound)
+							break;
+					}
+					if (!paramByNameFound)
+						throw new Exception(String.Format("Cannot find constructor argument by name='{0}' for component (name='{1}', type='{2}')",
+							explicitArgName, _Name, _Type));
+				}
 				try {
 					constructorArgs[index] = ResolveValueInfo( constructorArgNode, components );
 				} catch (Exception ex) {
 					throw new Exception(
 						String.Format("Cannot resolve value for constructor arg #{0}", index), ex );
 				}
+				autoIdx++;
 			}
 			// compose final constructor args list
 			// 1) find greatest index
