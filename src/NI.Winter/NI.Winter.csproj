@@ -115,6 +115,7 @@
     <Compile Include="BaseMethodInvokingFactory.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DelegateFactory.cs" />
     <Compile Include="StringFormatFactory.cs">
     </Compile>
     <Compile Include="StaticFieldInvokingFactory.cs">

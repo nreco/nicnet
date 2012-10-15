@@ -309,7 +309,8 @@ namespace NI.Winter
 						break;
 					}
 					if (instance == null && lastTryException!=null)
-						throw new Exception(componentInfo.ComponentType.ToString() + " invalid constructor args", lastTryException);
+						throw new Exception(String.Format("Cannot find contructor for {0} (args count={1}) ", componentInfo.ComponentType,
+							componentInfo.ConstructorArgs==null ? 0 : componentInfo.ConstructorArgs.Length), lastTryException);
 				}
 				
 				// instance created ?
