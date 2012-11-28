@@ -7,26 +7,28 @@ using System.Text;
 
 namespace NI.Data.Dalc {
 	
-	
+	/// <summary>
+	/// Simple plain object persister for typical CRUD operations
+	/// </summary>
 	public class ObjectPersister<T> where T : class, new() {
 
-		public string SourceName { get; set; }
+		protected string SourceName { get; set; }
 
-		public IDictionary<string,string> FieldToProperty { get; set; }
+		protected IObjectMapper ObjectMapper { get; set; }
 
-		public DalcManager DbManager { get; set; }
+		protected DalcManager DbManager { get; set; }
 
-		public ObjectPersister() {
-		}
 
 		public ObjectPersister(string sourceName, IDictionary<string, string> fieldToProperty, DalcManager dbMgr) {
 			SourceName = sourceName;
-			FieldToProperty = fieldToProperty;
+			ObjectMapper = new PropertyObjectMapper(fieldToProperty);
 			DbManager = dbMgr;
 		}
 
-		protected string GetPropertyName(string fldName) {
-			return FieldToProperty!=null && FieldToProperty.ContainsKey(fldName) ? FieldToProperty[fldName] : fldName;
+		public ObjectPersister(string sourceName, IObjectMapper customObjectMapper, DalcManager dbMgr) {
+			SourceName = sourceName;
+			ObjectMapper = customObjectMapper;
+			DbManager = dbMgr;
 		}
 
 		public T Load(Query q) {
@@ -78,50 +80,19 @@ namespace NI.Data.Dalc {
 			var qcnd = new QueryGroupNode(GroupType.And);
 			var ds = DbManager.DataSetProvider.GetDataSet(SourceName);
 			foreach (DataColumn c in ds.Tables[SourceName].PrimaryKey) {
-				var pInfo = typeof(T).GetProperty(GetPropertyName(c.ColumnName));
-				var pVal = pInfo.GetValue(t, null);
+				var pVal = ObjectMapper.GetFieldValue(t, c);
 				qcnd.Nodes.Add(new QueryConditionNode((QField)c.ColumnName, Conditions.Equal, new QConst( pVal )));
 			}
 			return qcnd;
 		}
 
 		protected void CopyObjectToDataRow(object o, DataRow r, bool ignorePk) {
-			foreach (DataColumn c in r.Table.Columns) {
-				var pInfo = typeof(T).GetProperty( GetPropertyName( c.ColumnName ) );
-				if (pInfo == null)
-					continue;
-				if (ignorePk && Array.IndexOf(r.Table.PrimaryKey, c) >= 0)
-					continue;
-
-				var pVal = pInfo.GetValue(o, null);
-				if (pVal == null) {
-					pVal = DBNull.Value;
-				} else {
-					pVal = Convert.ChangeType(pVal, c.DataType, CultureInfo.InvariantCulture);
-				}
-				r[c] = pVal;
-			}
+			ObjectMapper.MapFrom(o, r, ignorePk);
 		}
 
 		protected void CopyDataRowToObject(DataRow r, object o) {
-			foreach (DataColumn c in r.Table.Columns) {
-				var pInfo = typeof(T).GetProperty( GetPropertyName(c.ColumnName) );
-				if (pInfo != null) {
-					var rVal = r[c];
-					if (rVal == null || DBNull.Value.Equals(rVal)) {
-						rVal = Nullable.GetUnderlyingType(pInfo.PropertyType) != null ? null : default(T);
-					} else {
-						var propType = pInfo.PropertyType;
-						if (Nullable.GetUnderlyingType(propType) != null)
-							propType = Nullable.GetUnderlyingType(propType);
-
-						rVal = Convert.ChangeType(rVal, propType, CultureInfo.InvariantCulture);
-					}
-					pInfo.SetValue(o, rVal, null);
-				}
-			}
+			ObjectMapper.MapTo(r,o);
 		}
-
 
 	}
 
