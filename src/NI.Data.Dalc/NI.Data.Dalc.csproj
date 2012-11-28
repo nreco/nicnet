@@ -202,6 +202,7 @@
     <Compile Include="Interfaces\IDbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Interfaces\IObjectMapper.cs" />
     <Compile Include="Interfaces\IQuery.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -238,6 +239,7 @@
     </Compile>
     <Compile Include="ObjectPersister.cs" />
     <Compile Include="ObjectQueryConditionEvaluator.cs" />
+    <Compile Include="PropertyObjectMapper.cs" />
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
