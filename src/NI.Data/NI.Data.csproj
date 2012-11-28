@@ -185,6 +185,7 @@
     <Compile Include="Interfaces\IDbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Interfaces\IObjectMapper.cs" />
     <Compile Include="Interfaces\IQueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -232,6 +233,7 @@
     <Compile Include="Permissions\Interfaces\IDalcConditionDescriptor.cs" />
     <Compile Include="Permissions\Interfaces\IDalcPermissionChecker.cs" />
     <Compile Include="Permissions\Interfaces\IPermissionAclEntry.cs" />
+    <Compile Include="PropertyObjectMapper.cs" />
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
