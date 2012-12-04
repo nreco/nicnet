@@ -101,9 +101,8 @@ namespace NI.Data.Vfs {
             Query query = new Query(SourceName,
                                     new QueryConditionNode((QField)KeyFieldName, 
                                                              Conditions.Equal, (QConst)name));
-            IDictionary fileData = new Hashtable();
-            bool result = Dalc.LoadRecord(fileData, query);
-            if (result) {
+            IDictionary fileData = Dalc.LoadRecord(query);
+			if (fileData!=null) {
                 return (IFileObject)FileSystemHelper.SetFileProperties(new DalcFileObject(this), fileData);
             }
             else  {
@@ -123,7 +122,7 @@ namespace NI.Data.Vfs {
             if (name.Length > 0) name = FormatPath(name);    
             Query q = new Query(SourceName, new QueryConditionNode((QField)ParentFieldName,Conditions.Equal,(QConst)name));
             DataSet ds = new DataSet();
-            Dalc.Load(ds,q);
+			Dalc.Load(q,ds);
             ArrayList fileList = new ArrayList();
             foreach (DataRow row in ds.Tables[SourceName].Rows) 
                 fileList.Add(FileSystemHelper.SetFileProperties(new DalcFileObject(this), 
@@ -142,9 +141,9 @@ namespace NI.Data.Vfs {
             Query q = new Query(ContentSourceName,
                                 new QueryConditionNode((QField)KeyFieldName,
                                                         Conditions.Equal,(QConst)name));
-            IDictionary contentData = new Hashtable();
-            bool result = Dalc.LoadRecord(contentData, q);
-            if (result) fileContent = FileSystemHelper.SetContentProperties(fileContent, contentData);
+            IDictionary contentData = Dalc.LoadRecord(q);
+			if (contentData!=null)
+				fileContent = FileSystemHelper.SetContentProperties(fileContent, contentData);
             return fileContent;
         }
 
@@ -183,13 +182,14 @@ namespace NI.Data.Vfs {
            QueryConditionNode conditions =  new QueryConditionNode((QField)keyFieldName,
                                             Conditions.Equal, (QConst)fileObject.Name);
            Hashtable recordData = new Hashtable();
-           int result = Dalc.RecordsCount(sourceName, conditions);
+           int result = Dalc.RecordsCount(new Query(sourceName, conditions));
            if (result > 0) {
                if ( data.Contains(keyFieldName) ){
                    data.Remove(keyFieldName); // fixed DB bug on update
                }
-               Dalc.Update(data, new Query(sourceName, conditions));
-           } else Dalc.Insert(data, sourceName);           
+			   Dalc.Update(new Query(sourceName, conditions), data);
+		   } else
+			   Dalc.Insert(sourceName, data);           
         }
 
         private void DeleteInternal(string name, string sourceName, string keyFieldName) {

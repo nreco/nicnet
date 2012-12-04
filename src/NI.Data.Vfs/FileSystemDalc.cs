@@ -40,11 +40,22 @@ namespace NI.Data {
 			ConditionEvaluator = new ObjectQueryConditionEvaluator();
 			ConditionEvaluator.QFieldResolver = new FileObjectFieldProvider(this);
 		}
-		
-		public void Load(DataSet ds, Query query) {
+
+		public DataTable Load(Query query, DataSet ds) {
 			if (ds.Tables.Contains(query.SourceName))
 				ds.Tables.Remove(query.SourceName);
 			DataTable tbl = ds.Tables.Add(query.SourceName);
+
+			IFileObject[] files = Select(query.SourceName, query.Condition);
+
+			if (query.Fields.Length == 1 && query.Fields[0] == "count(*)") {
+				tbl.Columns.Add("count", typeof(int));
+				var cntRow = tbl.NewRow();
+				cntRow["count"] = files.Length;
+				tbl.Rows.Add(cntRow);
+				return tbl;
+			}
+
 			tbl.Columns.Add(CreateColumn("is_file", typeof(bool),false,true) );
 			tbl.Columns.Add(CreateColumn("is_folder", typeof(bool), false, false));
 			tbl.Columns.Add(CreateColumn("name", typeof(string), false, String.Empty));
@@ -55,8 +66,7 @@ namespace NI.Data {
 			tbl.Columns.Add(CreateColumn("last_modified", typeof(DateTime), true, null));
 			tbl.Columns.Add(CreateColumn("shared_file_id", typeof(int), true, null));
 			tbl.Columns.Add(CreateColumn("shared_public_id", typeof(string), true, null));
-			
-			IFileObject[] files = Select(query.SourceName, query.Condition);
+
 			files = ApplySortAndPaging(query, files);
 
 			for (int i=0; i<files.Length; i++) {
@@ -74,6 +84,8 @@ namespace NI.Data {
 				tbl.Rows.Add(r);
 			}
 			ds.AcceptChanges();
+
+			return tbl;
 		}
 
 		protected IFileObject[] ApplySortAndPaging(Query q, IFileObject[] files) {
@@ -98,11 +110,12 @@ namespace NI.Data {
 		}
 		
 
-		public void Update(DataSet ds, string sourceName) {
+		public void Update(DataTable tbl) {
+			//TODO: implement update for file attributes
 			throw new NotSupportedException("FileSystemDalc does not supports update operations.");
 		}
 
-		public int Update(IDictionary data, Query query) {
+		public int Update(Query query, IDictionary data) {
 			var newName = data["name"] as string;
 			if (String.IsNullOrEmpty(newName))
 				return 0;
@@ -115,7 +128,7 @@ namespace NI.Data {
 			return files.Length;
 		}
 
-		public void Insert(IDictionary data, string sourceName) {
+		public void Insert(string sourceName, IDictionary data) {
 			throw new NotSupportedException("FileSystemDalc does not supports insert operations.");
 		}
 
@@ -125,6 +138,13 @@ namespace NI.Data {
 				f.Delete();
 			}
 			return files.Length;
+		}
+
+		public void ExecuteReader(Query q, Action<IDataReader> handler) {
+			var ds = new DataSet();
+			var tbl = Load(q, ds);
+			var rdr = new DataTableReader(tbl);
+			handler(rdr);
 		}
 
 		public bool LoadRecord(IDictionary data, Query query) {

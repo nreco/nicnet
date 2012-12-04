@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data", "NI.Data\NI.Data.csproj", "{AC4B7A7E-55CA-4EAE-9FFA-DD6582390E81}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Adomd", "NI.Data.Adomd\NI.Data.Adomd.csproj", "{47F4C0E3-1B86-458B-A236-F1CCA0FA29DE}"
