@@ -31,11 +31,14 @@ namespace NI.Data {
 			dalc.ExecuteReader(q, (reader) => {
 				if (reader.Read()) {
 					if (q.Fields != null && q.Fields.Length == 1) {
-						try {
-							val = reader[q.Fields[0]];
-						} catch (IndexOutOfRangeException ex) {
+						var fldMatched = false;
+						for (int i=0; i<reader.FieldCount; i++)
+							if (reader.GetName(i) == q.Fields[0]) {
+								val = reader.GetValue(i);
+								fldMatched = true;
+							}
+						if (!fldMatched)
 							val = reader[0];
-						}
 					} else {
 						val = reader[0];
 					}

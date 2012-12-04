@@ -118,9 +118,8 @@ namespace NI.Tests.Data.RelationalExpressions
 		}
 
 		protected QueryNode FindNodeByName(QueryNode node, string name) {
-			if (node is INamedQueryNode)
-				if (((INamedQueryNode)node).Name == name)
-					return node;
+			if (node.Name!=null && node.Name==name)
+				return node;
 			if (node.Nodes!=null)
 				foreach (QueryNode cNode in node.Nodes) {
 					QueryNode r = FindNodeByName(cNode, name);

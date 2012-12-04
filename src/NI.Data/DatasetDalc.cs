@@ -46,11 +46,13 @@ namespace NI.Data
 			
 			string whereExpression = BuildExpression( query.Condition );
 			string sortExpression = BuildSort( query );
+			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
+
 			if (!ds.Tables.Contains(query.SourceName))
-				ds.Tables.Add( PersistedDS.Tables[query.SourceName].Clone() );
+				ds.Tables.Add(PersistedDS.Tables[query.SourceName].Clone());
 			else
 				ds.Tables[query.SourceName].Rows.Clear();
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
+			
 			if (query.Fields != null && query.Fields.Length != 0) {
 				if (query.Fields.Length == 1 && query.Fields[0] == "count(*)") {
 					ds.Tables.Remove(query.SourceName);
@@ -103,7 +105,7 @@ namespace NI.Data
 					foreach (DataColumn c in pTable.PrimaryKey) {
 						if (!r.Table.Columns.Contains(c.ColumnName) 
 							||
-							Convert.ToString(pr[c.ColumnName]) == Convert.ToString(r[c.ColumnName, r.HasVersion(DataRowVersion.Current) ? DataRowVersion.Current : DataRowVersion.Original]))
+							Convert.ToString(pr[c.ColumnName]) != Convert.ToString(r[c.ColumnName, r.HasVersion(DataRowVersion.Current) ? DataRowVersion.Current : DataRowVersion.Original]))
 							matched = false;
 					}
 					if (matched)
@@ -122,6 +124,10 @@ namespace NI.Data
 							rToImport[c.ColumnName] = r[c.ColumnName];
 						}
 					}
+					pTable.Rows.Add(rToImport);
+					foreach (DataColumn c in pTable.Columns)
+						if (c.AutoIncrement && t.Columns.Contains(c.ColumnName))
+							r[c.ColumnName] = rToImport[c];
 				}
 				if (r.RowState == DataRowState.Deleted) {
 					var pr = findRowById(r);
@@ -146,7 +152,7 @@ namespace NI.Data
 			foreach (DataRow pr in deleteRows)
 				pr.Delete();
 
-			PersistedDS.Tables[t.TableName].AcceptChanges();
+			pTable.AcceptChanges();
 			t.AcceptChanges();
 		}
 

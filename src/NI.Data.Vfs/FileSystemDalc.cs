@@ -207,7 +207,7 @@ namespace NI.Data {
 			
 			public object GetObject(object context) {
 				ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext = (ObjectQueryConditionEvaluator.ResolveNodeContext)context;
-				QueryFieldValue fldValue = (QueryFieldValue)resolveContext.Node;
+				IQueryFieldValue fldValue = (IQueryFieldValue)resolveContext.Node;
 				return FsDalc.GetFileObjectField(fldValue.Name,(IFileObject)resolveContext.Context["file"]);
 			}
 		}
