@@ -353,7 +353,7 @@ namespace NI.Vfs
 		}
 
 		protected ChildrenList GetChildrenList() {
-			ChildrenList childrenList = null;
+			/*ChildrenList childrenList = null;
 			string cacheKey = LocalName+"|ChildrenList";
 			if (LocalFs.Cache!=null)
 				childrenList = LocalFs.Cache.Get(cacheKey) as ChildrenList;
@@ -361,11 +361,11 @@ namespace NI.Vfs
 			if (childrenList!=null && Directory.GetLastWriteTime(LocalName)>childrenList.Timestamp)
 				childrenList = null;
 			
-			if (childrenList==null)
-				childrenList = new ChildrenList( Directory.GetFiles(LocalName), Directory.GetDirectories(LocalName) );
+			if (childrenList==null)*/
+			var childrenList = new ChildrenList( Directory.GetFiles(LocalName), Directory.GetDirectories(LocalName) );
 			
-			if (LocalFs.Cache!=null)
-				LocalFs.Cache.Put(cacheKey, childrenList);
+			/*if (LocalFs.Cache!=null)
+				LocalFs.Cache.Put(cacheKey, childrenList);*/
 
 			return childrenList;
 		}

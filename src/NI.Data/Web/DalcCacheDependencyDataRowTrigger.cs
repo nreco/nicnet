@@ -9,7 +9,7 @@ using NI.Data;
 
 namespace NI.Data.Web {
 
-	public class DalcCacheDependencyDataRowTrigger : BaseDbDalcRowTrigger {
+	public class DalcCacheDependencyDataRowTrigger : DbDalcDataRowTrigger {
 
 		public string DataSource { get; set; }
 
@@ -20,7 +20,7 @@ namespace NI.Data.Web {
 			return true;
 		}
 
-		protected override void Execute(BaseDbDalcRowTrigger.EventType eventType, DataRow r, object sender, EventArgs args) {
+		protected override void Execute(DbDalcDataRowTrigger.EventType eventType, DataRow r, object sender, EventArgs args) {
 			var sourceName = r.Table.TableName;
 			
 			try {

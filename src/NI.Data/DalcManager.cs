@@ -10,39 +10,30 @@ namespace NI.Data {
 	/// </summary>
 	public class DalcManager {
 
-		IDalc _Dalc;
-		IDataSetProvider _DataSetProvider;
-
 		/// <summary>
 		/// Get or set DALC instance
 		/// </summary>
-		public IDalc Dalc {
-			get { return _Dalc; }
-			set { _Dalc = value; }
-		}
+		public IDalc Dalc { get; set; }
 
 		/// <summary>
-		/// Get or set initialized dataset provider
+		/// Get or set provider that returns initialized dataset with schema by source name
 		/// </summary>
-		public IDataSetProvider DataSetProvider {
-			get { return _DataSetProvider; }
-			set { _DataSetProvider = value; }
-		}
+		public Func<string,DataSet> GetDataSetForSourceName { get; set; }
 
 		public DalcManager() {
 
 		}
 
-		public DalcManager(IDalc dalc, IDataSetProvider dsPrv) {
+		public DalcManager(IDalc dalc, Func<string, DataSet> dsPrv) {
 			Dalc = dalc;
-			DataSetProvider = dsPrv;
+			GetDataSetForSourceName = dsPrv;
 		}
 
 		/// <summary>
 		/// Create new record instance
 		/// </summary>
 		public DataRow Create(string sourceName) {
-			DataSet ds = DataSetProvider.GetDataSet(sourceName);
+			DataSet ds = GetDataSetForSourceName(sourceName);
 			return ds.Tables[sourceName].NewRow();
 		}
 
@@ -66,7 +57,7 @@ namespace NI.Data {
 		}
 
 		public DataRow Load(string sourceName, params object[] pk) {
-			DataSet ds = DataSetProvider.GetDataSet(sourceName);
+			DataSet ds = GetDataSetForSourceName(sourceName);
 			if (ds == null)
 				throw new Exception("Unknown source name");
 			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk));
@@ -76,7 +67,7 @@ namespace NI.Data {
 
 		public DataRow Load(Query q) {
 			QSourceName source = new QSourceName(q.SourceName);
-			DataSet ds = DataSetProvider.GetDataSet(source.Name);
+			DataSet ds = GetDataSetForSourceName(source.Name);
 			if (ds == null)
 				ds = new DataSet();
 			var tbl = Dalc.Load(q, ds);
@@ -85,7 +76,7 @@ namespace NI.Data {
 
 		public DataTable LoadAll(Query q) {
 			QSourceName source = new QSourceName(q.SourceName);
-			DataSet ds = DataSetProvider.GetDataSet(source.Name);
+			DataSet ds = GetDataSetForSourceName(source.Name);
 			if (ds == null)
 				ds = new DataSet();
 			var tbl = Dalc.Load(q, ds);
@@ -137,7 +128,7 @@ namespace NI.Data {
 		}
 
 		public void Update(string sourceName, object[] pk, IDictionary<string, object> changeset) {
-			DataSet ds = DataSetProvider.GetDataSet(sourceName);
+			DataSet ds = GetDataSetForSourceName(sourceName);
 			if (ds == null)
 				throw new Exception("Unknown source name");
 			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk) );

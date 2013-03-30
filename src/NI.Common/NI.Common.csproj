@@ -136,8 +136,6 @@
     <Compile Include="Component.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DiffProcessor.cs">
-    </Compile>
     <Compile Include="Expressions\CacheExprResolver.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -172,8 +170,6 @@
     <Compile Include="Globalization\NumberFormPrefixProvider.cs" />
     <Compile Include="Globalization\ResourceProvider.cs" />
     <Compile Include="Globalization\ResourceStringFormatter.cs" />
-    <Compile Include="Globalization\SetThreadCultureFromProviderOperation.cs" />
-    <Compile Include="Globalization\SetThreadCultureOperation.cs" />
     <Compile Include="IBinarySerializer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -201,7 +197,6 @@
     <Compile Include="IStringSerializer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Operations\IOperation.cs" />
     <Compile Include="OperatorHelper.cs" />
     <Compile Include="Providers\CacheObjectProvider.cs">
       <SubType>Code</SubType>

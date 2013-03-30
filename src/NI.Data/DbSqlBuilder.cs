@@ -18,8 +18,6 @@ using System.Collections;
 using System.Reflection;
 using System.Text;
 
-using NI.Common;
-
 namespace NI.Data
 {
 	/// <summary>

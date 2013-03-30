@@ -15,9 +15,6 @@
 using System;
 using System.Collections;
 
-using NI.Common;
-using NI.Common.Expressions;
-using NI.Common.Providers;
 
 namespace NI.Data
 {
@@ -32,7 +29,6 @@ namespace NI.Data
 		string _SqlCountFields;
 		string _SqlFields;
 		IDictionary _FieldsMapping;
-		IExpressionResolver _ExprResolver;
 
 		public string SourceNameAlias {
 			get { return _SourceNameAlias; }
@@ -55,12 +51,7 @@ namespace NI.Data
 			set { _SqlFields = value; }
 		}
 
-		IStringProvider _SqlCommandTextProvider;
-		public IStringProvider SqlCommandTextProvider
-		{
-			get { return _SqlCommandTextProvider; }
-			set { _SqlCommandTextProvider = value; }
-		}
+		public Func<IDictionary, string> SqlCommandTextProvider { get; set; }
 
 		public string SqlCommandTextTemplate {
 			get { return _SqlCommandTextTemplate; }
@@ -71,12 +62,8 @@ namespace NI.Data
 			get { return _FieldsMapping; }
 			set { _FieldsMapping = value; }
 		}
-		
-		public IExpressionResolver ExprResolver {
-			get { return _ExprResolver; }
-			set { _ExprResolver = value; }
-		}
 
+		public Func<IDictionary, string, string> ExprResolver { get; set; }
 
 		public DbDataView()
 		{
@@ -88,11 +75,11 @@ namespace NI.Data
 		
 		public virtual string FormatSqlCommandText(IDictionary context) {
 			// legacy
-			context["fields"] = Convert.ToString( ExprResolver.Evaluate(context, 
-				Convert.ToString(context["fields"])=="count(*)" ? SqlCountFields : SqlFields) );
+			context["fields"] = ExprResolver(context, 
+				Convert.ToString(context["fields"])=="count(*)" ? SqlCountFields : SqlFields );
 			
 			// format SQL text
-			return Convert.ToString( ExprResolver.Evaluate(context,SqlCommandTextProvider!=null?SqlCommandTextProvider.GetString(context):SqlCommandTextTemplate) );
+			return Convert.ToString( ExprResolver(context,SqlCommandTextProvider!=null?SqlCommandTextProvider(context):SqlCommandTextTemplate) );
 		}
 		
 		public virtual IQueryFieldValueFormatter GetQueryFieldValueFormatter(Query q) {

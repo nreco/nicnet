@@ -19,8 +19,6 @@ using System.Security;
 using System.Security.Principal;
 using System.Threading;
 
-using NI.Common;
-using NI.Common.Collections;
 
 namespace NI.Data.Permissions {
 	/// <summary>

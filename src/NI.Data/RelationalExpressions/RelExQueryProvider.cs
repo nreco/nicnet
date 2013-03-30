@@ -17,16 +17,13 @@ using System.Collections;
 using System.Collections.Specialized;
 
 using NI.Data;
-using NI.Common;
-using NI.Common.Expressions;
-using NI.Common.Providers;
 
 namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// Relex-based query provider.
 	/// </summary>
-	public class RelExQueryProvider : NI.Data.IQueryProvider, IObjectProvider
+	/*public class RelExQueryProvider
 	{
 		IExpressionResolver _ExprResolver;
 		string _RelEx;
@@ -115,9 +112,6 @@ namespace NI.Data.RelationalExpressions
 			return q;
 		}
 
-		public object GetObject(object context) {
-			return GetQuery(context);
-		}
 
-	}
+	}*/
 }

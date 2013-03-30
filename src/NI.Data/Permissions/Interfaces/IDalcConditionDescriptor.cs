@@ -15,12 +15,13 @@
 using System;
 using System.Collections;
 using System.Text;
+ 
 
 namespace NI.Data.Permissions {
 	
 	public interface IDalcConditionDescriptor {
 		DalcOperation Operation { get; }
 		string SourceName { get; }
-		IQueryNodeProvider ConditionProvider { get; }
+		Func<object,QueryNode> ConditionProvider { get; }
 	}
 }

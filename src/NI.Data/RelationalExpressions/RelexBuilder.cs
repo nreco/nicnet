@@ -18,11 +18,9 @@ using System.Globalization;
 using System.Text;
 using NI.Data;
 
-using NI.Common.Providers;
-
 namespace NI.Data.RelationalExpressions {
 	
-	public class RelexBuilder : IStringProvider, IObjectProvider {
+	public class RelexBuilder {
 		
 		public string BuildRelex(QueryNode node) {
 			InternalBuilder builder = new InternalBuilder();
@@ -34,16 +32,6 @@ namespace NI.Data.RelationalExpressions {
             return builder.BuildQueryString(node, false);
         }
 		
-		public string GetString(object context) {
-			if (!(context is QueryNode))
-				throw new Exception("Expected IQueryNode object");
-			return BuildRelex( (QueryNode)context );
-		}
-
-		public object GetObject(object context) {
-			return GetString(context);
-		}
-
 		class InternalBuilder : SqlBuilder {
 
 			public override string BuildExpression(QueryNode node) {

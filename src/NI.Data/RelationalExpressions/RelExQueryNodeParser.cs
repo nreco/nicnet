@@ -17,18 +17,16 @@ using System.Collections;
 using System.Collections.Specialized;
 
 using NI.Data;
-using NI.Common;
-using NI.Common.Expressions;
-using NI.Common.Providers;
+
 
 namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// Relex-based query node provider.
 	/// </summary>
-	public class RelExQueryNodeParser : IRelExQueryNodeParser
+	/*public class RelExQueryNodeParser : IRelExQueryNodeParser
 	{
-		IRelExQueryParser _RelExQueryParser = new RelExQueryParser(false);
+		IRelExQueryParser _RelExQueryParser = new RelExQueryParser();
 		
 		/// <summary>
 		/// Get or set relational expression parser used to build query node
@@ -48,5 +46,5 @@ namespace NI.Data.RelationalExpressions
 			Query q = RelExQueryParser.Parse(relEx);
 			return q.Condition;
 		}
-	}
+	}*/
 }

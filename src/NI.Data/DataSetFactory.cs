@@ -18,14 +18,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-using NI.Common.Providers;
-
 namespace NI.Data
 {
 	/// <summary>
 	/// DataSetFactory used for creating DataSet objects with schema.
 	/// </summary>
-	public class DataSetFactory : IDataSetProvider, IObjectProvider
+	public class DataSetFactory
 	{
 		SchemaDescriptor[] _Schemas;
 
@@ -79,19 +77,14 @@ namespace NI.Data
 			return ds.Clone();
 		}
 
-		public DataSet GetDataSet(object context) {
-			if (!(context is string))
-				throw new ArgumentException("Source name (string) expected as a context.");
-			string sourceName = (string)context;
+		public DataSet GetDataSet(string sourceName) {
+			if (sourceName==null)
+				throw new ArgumentNullException("Source name cannot be null");
 			SchemaDescriptor schemaDescr = FindDescriptor(sourceName);
 			if (schemaDescr == null)
 				return null; // unknown sourcename
 			DataSet ds = GetDataSetWithSchema(schemaDescr.XmlSchema);
 			return ds;
-		}
-
-		public object GetObject(object context) {
-			return GetDataSet(context);
 		}
 
 		public class SchemaDescriptor {

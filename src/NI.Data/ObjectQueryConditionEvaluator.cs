@@ -17,9 +17,6 @@ using System.Collections;
 using System.Text;
 
 using NI.Data;
-using NI.Common.Expressions;
-using NI.Common.Providers;
-
 
 namespace NI.Data {
 	
@@ -29,24 +26,15 @@ namespace NI.Data {
 	/// <remarks>This resolver does not support all possible IQueryNode tree structures.</remarks>
 	public class ObjectQueryConditionEvaluator {
 
-		IObjectProvider _QFieldResolver;
-		IObjectProvider _QConstResolver;
-
 		/// <summary>
 		/// Field value resolver (required)
 		/// </summary>
-		public IObjectProvider QFieldResolver {
-			get { return _QFieldResolver; }
-			set { _QFieldResolver = value; }
-		}
+		public Func<ResolveNodeContext, object> QFieldResolver { get; set; }
 
 		/// <summary>
 		/// Const value resolver (optional)
 		/// </summary>
-		public IObjectProvider QConstResolver {
-			get { return _QConstResolver; }
-			set { _QConstResolver = value; }
-		}
+		public Func<ResolveNodeContext, object> QConstResolver { get; set; }
 		
 		public object Evaluate(IDictionary context, QueryNode condition) {
 			if (condition==null)
@@ -56,9 +44,9 @@ namespace NI.Data {
 
 		protected object ResolveNodeValue(ResolveNodeContext nodeContext) {
 			if (nodeContext.Node is IQueryConstantValue)
-				return QConstResolver!=null ? QConstResolver.GetObject(nodeContext) : ((IQueryConstantValue)nodeContext.Node).Value;
+				return QConstResolver!=null ? QConstResolver(nodeContext) : ((IQueryConstantValue)nodeContext.Node).Value;
 			if (nodeContext.Node is IQueryFieldValue)
-				return QFieldResolver.GetObject(nodeContext);
+				return QFieldResolver!=null ? QFieldResolver(nodeContext) : nodeContext.Context[ ((IQueryFieldValue)nodeContext.Node).Name ];
 			throw new Exception("Cannot resolve value node type: " + nodeContext.Node.GetType().ToString());
 		}
 		
@@ -79,20 +67,23 @@ namespace NI.Data {
 				
 				bool compareResult = true;
 				if (!isLike && !isIn && !isNull) {
-					CompareBooleanProvider cmpProvider = new CompareBooleanProvider();
-					cmpProvider.LeftObjectProvider = new ConstObjectProvider(ResolveNodeValue(lValueContext));
-					cmpProvider.RightObjectProvider = new ConstObjectProvider(ResolveNodeValue(rValueContext));
+					var leftVal = ResolveNodeValue(lValueContext);
+					var rightVal = ResolveNodeValue(rValueContext);
+					var cmpResult = Compare(leftVal, rightVal);
+
+					compareResult = false;
+					if ((condNode.Condition & Conditions.Equal) == Conditions.Equal && cmpResult == 0) {
+						compareResult = true;
+					}
+					if ((condNode.Condition & Conditions.GreaterThan) == Conditions.GreaterThan && cmpResult > 0) {
+						compareResult = true;
+					}
+					if ((condNode.Condition & Conditions.LessThan) == Conditions.LessThan && cmpResult < 0) {
+						compareResult = true;
+					}
+					if ((condNode.Condition & Conditions.Not) == Conditions.Not)
+						compareResult = !compareResult;
 					
-					CompareBooleanProvider.OperatorType op = 0;
-					if ( (condNode.Condition & Conditions.Equal)==Conditions.Equal)
-						op = op | CompareBooleanProvider.OperatorType.Equal;
-					if ((condNode.Condition & Conditions.GreaterThan) == Conditions.GreaterThan)
-						op = op | CompareBooleanProvider.OperatorType.GreaterThan;
-					if ((condNode.Condition & Conditions.LessThan) == Conditions.LessThan)
-						op = op | CompareBooleanProvider.OperatorType.LessThan;
-					cmpProvider.Operator = op;
-					
-					compareResult = cmpProvider.GetBoolean(context);
 				} else if (isLike) {
 					string lString = Convert.ToString(ResolveNodeValue(lValueContext));
 					string rString = Convert.ToString(ResolveNodeValue(rValueContext));
@@ -140,6 +131,64 @@ namespace NI.Data {
 			}
 			throw new Exception("Cannot resolve query node type: "+node.GetType().ToString() );
 		}
+
+
+		protected int Compare(object a, object b) {
+			if (a == null && b == null)
+				return 0;
+			if (a == null && b != null)
+				return -1;
+			if (a != null && b == null)
+				return 1;
+
+			if ((a is IList) && (b is IList)) {
+				IList aList = (IList)a;
+				IList bList = (IList)b;
+				if (aList.Count < bList.Count)
+					return -1;
+				if (aList.Count > bList.Count)
+					return +1;
+				for (int i = 0; i < aList.Count; i++) {
+					int r = Compare(aList[i], bList[i]);
+					if (r != 0)
+						return r;
+				}
+				// lists are equal
+				return 0;
+			}
+			if (a is IComparable) {
+
+				// try to convert b to a type (because standard impl of IComparable for simple types are stupid enough)
+				try {
+					object bConverted = Convert.ChangeType(b, a.GetType());
+					return ((IComparable)a).CompareTo(bConverted);
+				} catch {
+				}
+
+				// try to compare without any conversions
+				try {
+					return ((IComparable)a).CompareTo(b);
+				} catch { }
+
+
+			}
+			if (b is IComparable) {
+				// try to compare without any conversions
+				try {
+					return -((IComparable)b).CompareTo(a);
+				} catch { }
+
+				// try to convert a to b type
+				try {
+					object aConverted = Convert.ChangeType(a, b.GetType());
+					return -((IComparable)b).CompareTo(aConverted);
+				} catch {
+				}
+			}
+
+			throw new Exception("Cannot compare");
+		}
+
 		
 		public class ResolveNodeContext {
 			IQueryValue _Node;

@@ -18,8 +18,6 @@ using System.Collections;
 using System.Security;
 using System.Threading;
 
-using NI.Common;
-using NI.Common.Collections;
 
 namespace NI.Data.Permissions
 {

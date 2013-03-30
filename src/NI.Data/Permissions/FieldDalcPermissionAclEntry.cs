@@ -16,15 +16,13 @@ using System;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-using NI.Common.Providers;
-using NI.Common;
 
 namespace NI.Data.Permissions
 {
 	/// <summary>
 	/// Field-oriented DalcPermission ACL entry.
 	/// </summary>
-	public class FieldDalcPermissionAclEntry : DalcPermissionAclEntry
+	/*public class FieldDalcPermissionAclEntry : DalcPermissionAclEntry
 	{
 		string _MatchFieldName = ".*"; // means any
 		string _FieldNameContextKey = "__field_name";
@@ -77,5 +75,5 @@ namespace NI.Data.Permissions
 
 
 
-	}
+	}*/
 }

@@ -38,7 +38,7 @@ namespace NI.Data {
 		
 		public FileSystemDalc() {
 			ConditionEvaluator = new ObjectQueryConditionEvaluator();
-			ConditionEvaluator.QFieldResolver = new FileObjectFieldProvider(this);
+			ConditionEvaluator.QFieldResolver = GetFileObjectFieldValue;
 		}
 
 		public DataTable Load(Query query, DataSet ds) {
@@ -197,19 +197,10 @@ namespace NI.Data {
 			if (name=="last_modified") return fContent.LastModifiedTime;
 			throw new ArgumentException("Unknown field name: "+name);
 		}
-		
-		internal class FileObjectFieldProvider : IObjectProvider {
-			FileSystemDalc FsDalc;
-			
-			public FileObjectFieldProvider(FileSystemDalc fsDalc) {
-				FsDalc = fsDalc;
-			}
-			
-			public object GetObject(object context) {
-				ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext = (ObjectQueryConditionEvaluator.ResolveNodeContext)context;
-				IQueryFieldValue fldValue = (IQueryFieldValue)resolveContext.Node;
-				return FsDalc.GetFileObjectField(fldValue.Name,(IFileObject)resolveContext.Context["file"]);
-			}
+
+		protected object GetFileObjectFieldValue(ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext) {
+			IQueryFieldValue fldValue = (IQueryFieldValue)resolveContext.Node;
+			return GetFileObjectField(fldValue.Name, (IFileObject)resolveContext.Context["file"]);
 		}
 			
 		internal class QueryFileSelector : IFileSelector {

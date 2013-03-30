@@ -96,7 +96,6 @@ namespace NI.Tests.Data.RelationalExpressions
 				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed (AllowDumpConstations=true): "+i.ToString() );
 			}
 			
-			relExParser.AllowDumpConstants = false;
 			for (int i=0; i<relExSamples.Length; i++) {
 				string relEx = relExSamples[i];
 				Query q = relExParser.Parse(relEx);

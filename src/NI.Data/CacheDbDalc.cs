@@ -17,11 +17,9 @@ using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 
-using NI.Common;
-using NI.Common.Caching;
 
 namespace NI.Data {
-
+	//TODO: rethink in System.Runtime.Caching
     /*public class CacheDbDalc : CacheDalc, ISqlDalc {
 
 		/// <summary>

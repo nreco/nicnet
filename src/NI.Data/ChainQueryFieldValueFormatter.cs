@@ -14,7 +14,6 @@
 
 using System;
 
-using NI.Common;
 
 namespace NI.Data
 {

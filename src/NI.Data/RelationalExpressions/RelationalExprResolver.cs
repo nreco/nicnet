@@ -16,15 +16,13 @@ using System;
 using System.Collections;
 
 using NI.Data;
-using NI.Common;
-using NI.Common.Expressions;
 
 namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// Relational expression resolver (executed for DALC).
 	/// </summary>
-	public class RelationalExprResolver : VariableExprResolver, NI.Common.Expressions.IExpressionResolver
+	/*public class RelationalExprResolver
 	{
 		IRelExQueryParser _RelExQueryParser;
 		IDalc _Dalc;
@@ -85,5 +83,5 @@ namespace NI.Data.RelationalExpressions
 		
 
 		
-	}
+	}*/
 }

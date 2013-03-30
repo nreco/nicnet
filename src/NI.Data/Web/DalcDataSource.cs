@@ -34,7 +34,6 @@ namespace NI.Data.Web {
 		bool _InsertMode = false;
 		string[] _AutoIncrementNames = null;
 		string[] _DataKeyNames = null;
-		IDataSetProvider _DataSetProvider = null;
 
 		public event DalcDataSourceSelectEventHandler Selecting;
 		public event DalcDataSourceSelectEventHandler Selected;
@@ -115,10 +114,7 @@ namespace NI.Data.Web {
 		/// <summary>
 		/// Get or set DataSet instance provider for specificed sourcename (optional).
 		/// </summary>
-		public IDataSetProvider DataSetProvider {
-			get { return _DataSetProvider; }
-			set { _DataSetProvider = value; }
-		}
+		public Func<string, DataSet> DataSetProvider { get; set; }
 
 		/// <summary>
 		/// Get or set data condition (optional).
@@ -134,7 +130,7 @@ namespace NI.Data.Web {
 			Query q = new Query(viewName == SourceName ? SelectSourceName : viewName);
 			q.Condition = Condition;
 			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
-			DataSet ds = DataSetProvider.GetDataSet(viewName);
+			DataSet ds = DataSetProvider(viewName);
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, selectArgs, ds);
 			// raise event
 			OnSelecting(this, eArgs);

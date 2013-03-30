@@ -18,7 +18,6 @@ using System.Text.RegularExpressions;
 using System.Text;
 
 using NI.Data;
-using NI.Common;
 
 namespace NI.Data.RelationalExpressions
 {
@@ -30,7 +29,7 @@ namespace NI.Data.RelationalExpressions
 		public RelExParseException(string message, Exception innerException) : base(message, innerException) {}
 	}
 	
-	public class RelExQueryParser : IRelExQueryParser, IRelExQueryNodeParser
+	public class RelExQueryParser
 	{
 		static readonly string[] nameGroups = new string[] { "and", "or"};
 		static readonly string[] delimiterGroups = new string[] { "&&", "||"};
@@ -79,26 +78,11 @@ namespace NI.Data.RelationalExpressions
 			Stop
 		}
 		
-		bool _AllowDumpConstants = true;
-		IQueryModifier _QueryModifier = null;
 		bool _AllowLazyConstType = false;
 		
 		public bool AllowLazyConstType {
 			get { return _AllowLazyConstType; }
 			set { _AllowLazyConstType = value; }
-		}
-		
-		/// <summary>
-		/// Get or set flag that indicates whether 'dump' constants are allowed
-		/// </summary>
-		public bool AllowDumpConstants {
-			get { return _AllowDumpConstants; }
-			set { _AllowDumpConstants = value; }
-		}
-
-		public IQueryModifier QueryModifier {
-			get { return _QueryModifier; }
-			set { _QueryModifier = value; }
 		}
 		
 		static RelExQueryParser() {
@@ -113,10 +97,6 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 		public RelExQueryParser() {
-		}
-
-		public RelExQueryParser(bool allowDumpConsts) {
-			AllowDumpConstants = allowDumpConsts;
 		}
 		
 		protected LexemType GetLexemType(string s, int startIdx, out int endIdx) {
@@ -260,8 +240,6 @@ namespace NI.Data.RelationalExpressions
 			if (!(qValue is Query)) 
 				throw new RelExParseException("Invalid expression: result is not a query");
 			Query q = (Query)qValue;
-			if (QueryModifier!=null)
-				q = QueryModifier.Modify(q);
 			return q;
 		}
 		
@@ -272,11 +250,6 @@ namespace NI.Data.RelationalExpressions
 			QueryNode node = ParseConditionGroup(relExCondition, 0, out endIdx);
 			return node;
 		}
-
-		QueryNode IRelExQueryNodeParser.Parse(string relExCondition) {
-			return ParseCondition(relExCondition);
-		}
-		
 		
 		protected virtual IQueryValue ParseTypedConstant(string typeCodeString, string constant) {
 			typeCodeString = typeCodeString.ToLower();
@@ -420,11 +393,7 @@ namespace NI.Data.RelationalExpressions
                     if (sortBuilder.Length > 0)
 	                        sort = sortBuilder.ToString().Split(',');
 				} else {
-					// if brackets [] not specified near the name, threat it as field name
-					if (AllowDumpConstants && lexem.ToLower()!=nullField)
-						return (QConst)lexem;
-					else
-						return (QField)lexem;
+					return (QField)lexem;
 				}
 				endIdx = nextEndIdx;
 
@@ -589,9 +558,6 @@ namespace NI.Data.RelationalExpressions
 		protected QueryNode ParseCondition(string input, int startIdx, out int endIdx) {
 			
 			IQueryValue leftValue = ParseInternal(input, startIdx, out endIdx); 
-			// special case if legacy 'allow dump constants' mode is on
-			if (AllowDumpConstants && leftValue is QConst)
-				leftValue = new QField( ((QConst)leftValue).Value.ToString() );
 			
 			int nextEndIdx;
 			Conditions conditions = Conditions.Equal;

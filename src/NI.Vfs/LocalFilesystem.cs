@@ -15,8 +15,6 @@
 using System;
 using System.IO;
 
-using NI.Common;
-using NI.Common.Caching;
 
 namespace NI.Vfs
 {
@@ -27,7 +25,6 @@ namespace NI.Vfs
 	{
 		string _RootFolder;
 		bool _ReadOnly = false;
-		ICache _Cache = null;
 		FileShare _InputFileShare = FileShare.Read;
 		FileShare _OutputFileShare = FileShare.Read;
 		IFileObjectEventsMediator _EventsMediator = null;
@@ -64,14 +61,6 @@ namespace NI.Vfs
 		public IFileObjectEventsMediator EventsMediator {
 			get { return _EventsMediator; }
 			set { _EventsMediator = value; }
-		}		
-		
-		/// <summary>
-		/// Get or set cache for caching results from OS API (can be null)
-		/// </summary>
-		public ICache Cache {
-			get { return _Cache; }
-			set { _Cache = value; }
 		}
 
 		public LocalFileSystem() {

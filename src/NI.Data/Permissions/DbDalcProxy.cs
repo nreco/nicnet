@@ -16,7 +16,6 @@ using System;
 using System.Data;
 using System.Collections;
 
-using NI.Common;
 using NI.Data;
 
 namespace NI.Data.Permissions

@@ -24,7 +24,6 @@ namespace NI.Data.Permissions {
 	public class DalcConditionDescriptor : IDalcConditionDescriptor {
 		DalcOperation _Operation;
 		string _SourceName;
-		IQueryNodeProvider _ConditionProvider;
 
 		public DalcOperation Operation {
 			get { return _Operation; }
@@ -36,10 +35,7 @@ namespace NI.Data.Permissions {
 			set { _SourceName = value; }
 		}
 
-		public IQueryNodeProvider ConditionProvider {
-			get { return _ConditionProvider; }
-			set { _ConditionProvider = value; }
-		}
+		public Func<object, QueryNode> ConditionProvider { get; set; }
 
 	}
 		

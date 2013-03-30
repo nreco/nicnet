@@ -15,7 +15,7 @@
 using System;
 using System.Data;
 using System.Data.Odbc;
-using NI.Common.Providers;
+
 namespace NI.Data.Odbc
 {
 	/// <summary>
@@ -25,13 +25,8 @@ namespace NI.Data.Odbc
 		IDbCommand _Command;
 		DbTypeResolver DbTypeResolver;
 		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
-        IObjectProvider _CmdParameterPlaceholderProvider;
 
-        public IObjectProvider CmdParameterPlaceholderProvider
-        {
-            get { return _CmdParameterPlaceholderProvider;  }
-            set { _CmdParameterPlaceholderProvider = value;  }
-        }
+		public Func<string, string> CmdParameterPlaceholderProvider { get; set; }
 
 		public IDbCommand Command { get { return _Command; } }
 		
@@ -51,7 +46,7 @@ namespace NI.Data.Odbc
 		
 		public string GetCmdParameterPlaceholder(string paramName) {
             return CmdParameterPlaceholderProvider != null ? 
-                (string)CmdParameterPlaceholderProvider.GetObject(paramName) : paramName;
+                CmdParameterPlaceholderProvider(paramName) : paramName;
 		}
 		
 		public IDbDataParameter CreateCmdParameter(DataColumn sourceColumn) {

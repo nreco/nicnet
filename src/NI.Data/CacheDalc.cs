@@ -17,9 +17,6 @@ using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 
-using NI.Common;
-using NI.Common.Caching;
-using NI.Common.Providers;
 
 namespace NI.Data {
 

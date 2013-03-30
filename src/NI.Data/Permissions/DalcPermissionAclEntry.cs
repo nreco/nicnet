@@ -16,15 +16,13 @@ using System;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-using NI.Common.Providers;
-using NI.Common;
 
 namespace NI.Data.Permissions
 {
 	/// <summary>
 	/// Field-oriented DalcPermission ACL entry.
 	/// </summary>
-	public class DalcPermissionAclEntry : IPermissionAclEntry
+	/*public class DalcPermissionAclEntry : IPermissionAclEntry
 	{
 		string _MatchSourceName = ".*"; // means any
 		string _SourceNameContextKey = "__source_name";
@@ -113,5 +111,5 @@ namespace NI.Data.Permissions
 		}
 
 
-	}
+	}*/
 }

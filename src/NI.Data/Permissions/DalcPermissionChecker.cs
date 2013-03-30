@@ -20,7 +20,6 @@ using System.Data;
 using System.Text.RegularExpressions;
 using System.Security.Principal;
 
-using NI.Common;
 using NI.Data;
 
 namespace NI.Data.Permissions

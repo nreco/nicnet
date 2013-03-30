@@ -16,14 +16,13 @@ using System;
 using System.Collections;
 using System.Text;
 
-using NI.Common.Operations;
 
 namespace NI.Vfs {
 	
 	public class FileObjectTrigger {
 		IFileObjectEventsMediator _EventsMediator;
 		FileObjectEvents _TriggerEvents = FileObjectEvents.None;
-		IOperation _Operation;
+		Action<FileTriggerEventArgs> _Operation;
 		
 		public FileObjectEvents TriggerEvents {
 			get { return _TriggerEvents; }
@@ -35,7 +34,7 @@ namespace NI.Vfs {
 			set { _EventsMediator = value; }
 		}
 		
-		public IOperation Operation {
+		public Action<FileTriggerEventArgs> Operation {
 			get { return _Operation; }
 			set { _Operation = value; }
 		}
@@ -89,14 +88,21 @@ namespace NI.Vfs {
 			ExecuteOperation(FileObjectEvents.FileError, args);
 		}
 		
-		protected void ExecuteOperation(FileObjectEvents eventType, FileObjectEventArgs args) {
-			Hashtable context = new Hashtable();
-			context["event"] = eventType; // NOTE: this feature TBD
-			context["args"] = args;
-			Operation.Execute(context);			
+		protected virtual void ExecuteOperation(FileObjectEvents eventType, FileObjectEventArgs args) {
+			if (Operation!=null)
+				Operation( new FileTriggerEventArgs(eventType, args) );			
 		}
 		
-		
+		public class FileTriggerEventArgs {
+			public FileObjectEvents Event { get; private set; }
+
+			public FileObjectEventArgs Args { get; private set; }
+
+			public FileTriggerEventArgs(FileObjectEvents eventType, FileObjectEventArgs args) {
+				Event = eventType;
+				Args = args;
+			}
+		}
 		
 		
 	}

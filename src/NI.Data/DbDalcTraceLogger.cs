@@ -18,9 +18,6 @@ using System.Text;
 using System.Data;
 using System.Diagnostics;
 
-using NI.Common;
-using NI.Common.Providers;
-
 namespace NI.Data {
 	
 	/// <summary>
@@ -32,7 +29,6 @@ namespace NI.Data {
 		bool _ReplaceParamPlaceholders = true;
 		string _LogMsgPrefix = "[SQL]";
 		bool _Enabled = true;
-		IObjectProvider _LogFilter = null;
 
 		/// <summary>
 		/// Get or set flag that indicates whether logger is enabled
@@ -43,12 +39,9 @@ namespace NI.Data {
 		}
 
 		/// <summary>
-		/// Get or set custom log filter 
+		/// Get or set custom write log method
 		/// </summary>
-		public IObjectProvider LogFilter {
-			get { return _LogFilter; }
-			set { _LogFilter = value; }
-		}
+		public Action<string> WriteLogMessage { get; set; }
 
 
 		/// <summary>
@@ -123,10 +116,9 @@ namespace NI.Data {
 		protected virtual void Write(IDbCommand cmd, string message) {
 			LastLogTime[cmd.GetHashCode()] = DateTime.Now;
 			string msg = String.Format("{0} [{1}] {2}", LogMsgPrefix, cmd.GetHashCode(), message );
-			if (LogFilter != null) {
-				msg = LogFilter.GetObject(msg) as string;
-			}
-			if (msg!=null)
+			if (WriteLogMessage != null)
+				WriteLogMessage(msg);
+			else
 				Trace.WriteLine( msg );
 		}
 

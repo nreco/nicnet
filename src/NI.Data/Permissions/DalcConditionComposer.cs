@@ -17,7 +17,6 @@ using System.Collections;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 
-using NI.Common;
 using NI.Data;
 
 namespace NI.Data.Permissions
@@ -46,7 +45,7 @@ namespace NI.Data.Permissions
 			for (int i=0; i<ConditionDescriptors.Length; i++)
 				if (ConditionDescriptors[i].Operation==operation && 
 					ConditionDescriptors[i].SourceName==sourceName) {
-					QueryNode condition = ConditionDescriptors[i].ConditionProvider.GetQueryNode(user);
+					QueryNode condition = ConditionDescriptors[i].ConditionProvider(user);
 					if (condition!=null)
 						groupAnd.Nodes.Add( condition );
 				}

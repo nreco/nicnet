@@ -18,7 +18,6 @@ using System.Security.Principal;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-using NI.Common;
 
 namespace NI.Data.Permissions
 {

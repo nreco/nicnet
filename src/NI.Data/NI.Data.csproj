@@ -113,16 +113,11 @@
     <Compile Include="ChainQueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChainQueryModifier.cs" />
     <Compile Include="DalcExt.cs" />
     <Compile Include="DalcManager.cs" />
+    <Compile Include="DataHelper.cs" />
+    <Compile Include="DataRowDictionary.cs" />
     <Compile Include="DataSetFactory.cs" />
-    <Compile Include="DbDalcRowTrigger.cs" />
-    <Compile Include="DataSetProvider.cs" />
-    <Compile Include="DataSetXmlProvider.cs" />
-    <Compile Include="DalcDataSetProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DatasetDalc.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -135,10 +130,10 @@
     <Compile Include="DbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDalcTransaction.cs">
+    <Compile Include="DbDalcTransactionManager.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BaseDbDalcRowTrigger.cs" />
+    <Compile Include="DbDalcDataRowTrigger.cs" />
     <Compile Include="DbDataView.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -153,9 +148,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDalc.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IDataSetProvider.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbCommandGenerator.cs">
@@ -187,13 +179,6 @@
     </Compile>
     <Compile Include="Interfaces\IObjectMapper.cs" />
     <Compile Include="Interfaces\IQueryFieldValueFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IQueryModifier.cs" />
-    <Compile Include="Interfaces\IQueryNodeProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IQueryProvider.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IQueryValue.cs">
@@ -237,9 +222,6 @@
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="QueryProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Query\QSourceName.cs" />
     <Compile Include="Query\QConst.cs">
       <SubType>Code</SubType>
@@ -268,10 +250,6 @@
     <Compile Include="Query\QueryNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RelationalExpressions\CachedRelationalExprResolver.cs" />
-    <Compile Include="RelationalExpressions\Interfaces\IRelExQueryNodeParser.cs" />
-    <Compile Include="RelationalExpressions\Interfaces\IRelExQueryParser.cs" />
-    <Compile Include="RelationalExpressions\ObjectRelexConditionExprResolver.cs" />
     <Compile Include="RelationalExpressions\RelationalExprResolver.cs" />
     <Compile Include="RelationalExpressions\RelexBuilder.cs" />
     <Compile Include="RelationalExpressions\RelExQueryNodeParser.cs" />
@@ -295,7 +273,6 @@
     <Compile Include="Web\DalcDataSourceView.cs" />
     <Compile Include="Web\DalcCacheDependency.cs" />
     <Compile Include="Web\DalcCacheDependencyDataRowTrigger.cs" />
-    <Compile Include="XmlDataSetProvider.cs" />
     <EmbeddedResource Include="SqlClient\SqlFactory.resx">
       <DependentUpon>SqlFactory.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -332,12 +309,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NI.Common\NI.Common.csproj">
-      <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
-      <Name>NI.Common</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -21,7 +21,6 @@ using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
 
-using NI.Common;
 
 namespace NI.Data {
 

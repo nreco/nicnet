@@ -17,13 +17,13 @@ using System.Collections;
 using System.Text;
 using System.IO;
 
-using NI.Common;
-using NI.Common.Caching;
-using NI.Common.Providers;
+//using NI.Common;
+//using NI.Common.Caching;
+//using NI.Common.Providers;
 
 namespace NI.Vfs {
 
-	public class FileCache : ICache {
+	/*public class FileCache : ICache {
 		IFileSystem _FileSystem;
 		IStringProvider _FileNameProvider;
 		IBinarySerializer _Serializer;
@@ -149,5 +149,5 @@ namespace NI.Vfs {
 		}
 
 
-	}
+	}*/
 }

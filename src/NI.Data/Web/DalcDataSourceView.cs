@@ -40,7 +40,7 @@ namespace NI.Data.Web {
 
 		protected virtual DataSet GetDataSet() {
 			if (DataSource.DataSetProvider != null) {
-				DataSet ds = DataSource.DataSetProvider.GetDataSet(Name);
+				DataSet ds = DataSource.DataSetProvider(Name);
 				if (ds != null)
 					return ds;
 			}

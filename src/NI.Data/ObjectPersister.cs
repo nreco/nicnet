@@ -59,7 +59,7 @@ namespace NI.Data {
 		}
 
 		public void Add(T record) {
-			var ds = DbManager.DataSetProvider.GetDataSet(SourceName);
+			var ds = DbManager.GetDataSetForSourceName(SourceName);
 			var r = ds.Tables[SourceName].NewRow();
 			CopyObjectToDataRow(record, r, false);
 			ds.Tables[SourceName].Rows.Add(r);
@@ -78,7 +78,7 @@ namespace NI.Data {
 
 		protected QueryNode ComposePkCondition(T t) {
 			var qcnd = new QueryGroupNode(GroupType.And);
-			var ds = DbManager.DataSetProvider.GetDataSet(SourceName);
+			var ds = DbManager.GetDataSetForSourceName(SourceName);
 			foreach (DataColumn c in ds.Tables[SourceName].PrimaryKey) {
 				var pVal = ObjectMapper.GetFieldValue(t, c);
 				qcnd.Nodes.Add(new QueryConditionNode((QField)c.ColumnName, Conditions.Equal, new QConst( pVal )));

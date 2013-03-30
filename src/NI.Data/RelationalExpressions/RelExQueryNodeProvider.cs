@@ -17,16 +17,13 @@ using System.Collections;
 using System.Collections.Specialized;
 
 using NI.Data;
-using NI.Common;
-using NI.Common.Expressions;
-using NI.Common.Providers;
 
 namespace NI.Data.RelationalExpressions
 {
 	/// <summary>
 	/// Relex-based query node provider.
 	/// </summary>
-	public class RelExQueryNodeProvider : NI.Data.IQueryNodeProvider, IObjectProvider
+	/*public class RelExQueryNodeProvider : NI.Data.IQueryNodeProvider, IObjectProvider
 	{
 		IExpressionResolver _ExprResolver;
 		string _RelExCondition;
@@ -79,7 +76,7 @@ namespace NI.Data.RelationalExpressions
 			}
 			string relexCondition = ExprResolver!=null ? Convert.ToString( ExprResolver.Evaluate(context, RelExCondition) ) : RelExCondition;
 			string relEx = String.Format("sourcename({0})[*]", relexCondition);
-			Query q = RelExQueryParser.Parse(relEx);
+			Query q = RelExQueryParser..Parse(relEx);
 			return q.Condition;
 		}
 
@@ -87,5 +84,5 @@ namespace NI.Data.RelationalExpressions
 			return GetQueryNode(context);
 		}
 
-	}
+	}*/
 }
