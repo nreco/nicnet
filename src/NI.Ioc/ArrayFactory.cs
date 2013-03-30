@@ -15,7 +15,7 @@
 using System;
 using System.Collections;
 
-using NI.Common;
+
 
 namespace NI.Ioc
 {

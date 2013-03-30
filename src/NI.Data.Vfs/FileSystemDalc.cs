@@ -21,7 +21,6 @@ using System.Linq;
 
 using NI.Vfs;
 using NI.Data;
-using NI.Common.Providers;
 
 using NI.Vfs;
 

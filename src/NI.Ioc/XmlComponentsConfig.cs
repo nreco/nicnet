@@ -21,8 +21,6 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Text;
 
-using NI.Common;
-using NI.Common.Xml;
 
 namespace NI.Ioc
 {
@@ -41,16 +39,13 @@ namespace NI.Ioc
 	/// </code></example>
 	public class XmlComponentsConfig : ComponentsConfig, IConfigurationSectionHandler {
 
-		IModifyXmlDocumentHandler _Preprocessor;
+		Action<XmlDocument> _Preprocessor;
 		string OriginalXml = null;
 
 		/// <summary>
-		/// Get or set preprocessor component
+		/// Get or set preprocessor handler
 		/// </summary>
-		public IModifyXmlDocumentHandler Preprocessor {
-			get { return _Preprocessor; }
-			set { _Preprocessor = value; }
-		}
+		public Action<XmlDocument> Preprocessor { get; set; }
 
 		/// <summary>
 		/// Without parameters can be used only as IConfigurationSectionHandler
@@ -60,8 +55,8 @@ namespace NI.Ioc
 
 		public XmlComponentsConfig(string xml) : this(xml, null) { }
 
-		
-		public XmlComponentsConfig(string xml, IModifyXmlDocumentHandler preprocessor) {
+
+		public XmlComponentsConfig(string xml, Action<XmlDocument> preprocessor) {
 			Preprocessor = preprocessor;
 			if (Preprocessor!=null)
 				OriginalXml = xml;
@@ -72,27 +67,19 @@ namespace NI.Ioc
 			// load XML into XmlDocument
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.PreserveWhitespace = true; // whitespaces are significant
-			XmlDocumentLoader xmlDocLoader = new XmlDocumentLoader( xml, xmlDoc );
+			xmlDoc.LoadXml(xml);
+			//XmlDocumentLoader xmlDocLoader = new XmlDocumentLoader( xml, xmlDoc );
 			
 			// perform preprocessing
 			if (Preprocessor!=null)
-				Preprocessor.Modify(xmlDoc);
+				Preprocessor(xmlDoc);
 			
-            #if NET_1_1
-            NI.Common.Xml.XmlSchemaValidator schemaValidator = new NI.Common.Xml.XmlSchemaValidator();
-			schemaValidator.Namespaces = false;
-			schemaValidator.Xml = xmlDoc.OuterXml;
-			schemaValidator.Xsd = (new StringLoader(GetXsdStream()) ).Result;
-			schemaValidator.Validate();
-			#else
 			XmlSchema schema = XmlSchema.Read( GetXsdStream(), null);
 			xmlDoc.Schemas.Add( schema );
 			xmlDoc.Validate(new ValidationEventHandler(ValidationCallBack));
-			#endif
 			
 			this.Load( xmlDoc.DocumentElement );
 		}
-
 
 		public void Refresh() {
 			if (OriginalXml!=null)

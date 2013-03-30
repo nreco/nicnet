@@ -18,8 +18,7 @@ using System.IO;
 using System.Data;
 using NI.Vfs;
 using NI.Data;
-using NI.Common;
-using NI.Common.Collections;
+
 namespace NI.Data.Vfs {
     /// <summary>
     /// Dalc based IFileSystem implementation

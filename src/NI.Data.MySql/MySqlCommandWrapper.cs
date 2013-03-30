@@ -15,7 +15,6 @@
 using System;
 using System.Data;
 using MySql.Data.MySqlClient;
-using NI.Common.Providers;
 
 namespace NI.Data.MySql
 {
@@ -26,13 +25,8 @@ namespace NI.Data.MySql
 		IDbCommand _Command;
 		DbTypeResolver DbTypeResolver;
 		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
-        IObjectProvider _CmdParameterPlaceholderProvider;
 
-        public IObjectProvider CmdParameterPlaceholderProvider
-        {
-            get { return _CmdParameterPlaceholderProvider;  }
-            set { _CmdParameterPlaceholderProvider = value;  }
-        }
+		public Func<string, string> CmdParameterPlaceholderProvider { get; set; }
 
 		public IDbCommand Command { get { return _Command; } }
 		
@@ -52,7 +46,7 @@ namespace NI.Data.MySql
 		
 		public string GetCmdParameterPlaceholder(string paramName) {
             return CmdParameterPlaceholderProvider != null ? 
-                (string)CmdParameterPlaceholderProvider.GetObject(paramName) : paramName;
+                CmdParameterPlaceholderProvider(paramName) : paramName;
 		}
 		
 		public IDbDataParameter CreateCmdParameter(DataColumn sourceColumn) {

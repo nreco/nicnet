@@ -15,7 +15,7 @@
 using System;
 using System.ComponentModel;
 
-using NI.Common;
+
 
 namespace NI.Ioc
 {

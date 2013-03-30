@@ -17,7 +17,6 @@ using System.Collections;
 using System.Reflection;
 using System.ComponentModel;
 using System.IO;
-using NI.Common;
 using NI.Vfs;
 using NI.Data;
 

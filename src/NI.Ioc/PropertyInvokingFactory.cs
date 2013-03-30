@@ -15,14 +15,14 @@
 using System;
 using System.Reflection;
 
-using NI.Common;
+
 
 namespace NI.Ioc {
 
 	/// <summary>
 	/// Property invoking factory component
 	/// </summary>
-	public class PropertyInvokingFactory : Component, IFactoryComponent {
+	public class PropertyInvokingFactory : IFactoryComponent {
 		object _TargetObject;
 		string _TargetProperty;
 	

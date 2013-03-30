@@ -15,7 +15,7 @@
 using System;
 using System.Reflection;
 
-using NI.Common;
+
 
 namespace NI.Ioc {
 
@@ -28,7 +28,7 @@ namespace NI.Ioc {
 	///		&lt;property name="TargetProperty"&gt;&lt;value&gt;Now&lt;/value&gt;&lt;/property&gt;
 	/// &lt;/component&gt;
 	/// </code></example>
-	public class StaticPropertyInvokingFactory : Component, IFactoryComponent {
+	public class StaticPropertyInvokingFactory : IFactoryComponent {
 		Type _TargetType;
 		string _TargetProperty;
 	

@@ -15,7 +15,7 @@
 using System;
 using System.Reflection;
 
-using NI.Common;
+
 
 namespace NI.Ioc {
 
@@ -28,7 +28,7 @@ namespace NI.Ioc {
 	///		&lt;property name="TargetField"&gt;&lt;value&gt;Value&lt;/value&gt;&lt;/property&gt;
 	/// &lt;/component&gt;
 	/// </code></example>
-	public class StaticFieldInvokingFactory : Component, IFactoryComponent {
+	public class StaticFieldInvokingFactory : IFactoryComponent {
 		Type _TargetType;
 		string _TargetField;
 	

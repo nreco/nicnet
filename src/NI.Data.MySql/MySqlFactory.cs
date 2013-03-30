@@ -17,7 +17,6 @@ using System.Data;
 using System.Data.Common;
 using MySql.Data.MySqlClient;
 using System.ComponentModel;
-using NI.Common.Providers;
 
 namespace NI.Data.MySql
 {
@@ -25,13 +24,9 @@ namespace NI.Data.MySql
 	public class MySqlFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
 		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
-        IObjectProvider _CmdParameterPlaceholderProvider;
 
-        public IObjectProvider CmdParameterPlaceholderProvider
-        {
-            get { return _CmdParameterPlaceholderProvider; }
-            set { _CmdParameterPlaceholderProvider = value; }
-        }
+		public Func<string, string> CmdParameterPlaceholderProvider { get; set; }
+
 		/// <summary>
 		/// Get or set default query field value formatter
 		/// </summary>

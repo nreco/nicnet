@@ -20,9 +20,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 
-using NI.Common;
-using NI.Common.Providers;
-
 namespace NI.Ioc
 {
 	/// <summary>
@@ -40,7 +37,7 @@ namespace NI.Ioc
 	/// ServiceProvider srvProv = new ServiceProvider(cfg);
 	/// object someService = srvProv.GetObject("someServiceName");
 	/// </code></example>
-	public class ServiceProvider : System.ComponentModel.Component, IServiceProvider, INamedServiceProvider, IObjectProvider
+	public class ServiceProvider : System.ComponentModel.Component, IServiceProvider, INamedServiceProvider
 	{
 		IComponentsConfig _Config = null;
 		
@@ -159,28 +156,19 @@ namespace NI.Ioc
 			foreach (IComponentInitInfo cInfo in Config) 
 				if (!cInfo.LazyInit)
 					GetInstance(cInfo);
-		}
-
-		public object GetObject(object context) {
-			if (context is string)
-				return GetServiceInternal((string)context);
-			if (context is Type)
-				return GetServiceInternal((Type)context);
-			throw new ArgumentException("Unsupported context type.");
-		}
-		
+		}		
 		
 		/// <summary>
 		/// Service provider: get requested service by type.
 		/// </summary>
-		object IServiceProvider.GetService(Type serviceType) {
+		public object GetService(Type serviceType) {
 			return GetServiceInternal(serviceType);
 		}
 		
 		/// <summary>
 		/// Service provider: get requested service by name.
 		/// </summary>
-		object INamedServiceProvider.GetService(string name) {
+		public object GetService(string name) {
 			return GetServiceInternal(name);
 		}
 		
