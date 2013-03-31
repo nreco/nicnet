@@ -151,9 +151,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="PropertyInvokingFactory.cs" />
-    <Compile Include="ReplacingFactory.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="ReplacingFactory.cs" />
     <Compile Include="Schema\ComponentInitInfo.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -4,7 +4,7 @@ using NI.Ioc;
 
 using NUnit.Framework;
 
-namespace NI.Tests.Winter
+namespace NI.Tests.Ioc
 {
 	/// <summary>
 	/// Test for EventBinder.

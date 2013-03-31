@@ -26,7 +26,7 @@ namespace NI.Ioc
 	///		&lt;property name="TargetObject"&gt;&lt;value&gt;&lt;ref name="testEnabledVariable"/&gt;&lt;/property&gt;	
 	///	&lt;/component&gt;
 	/// </code></example>
-	public class ReplacingFactory : Component, IFactoryComponent
+	public class ReplacingFactory : IFactoryComponent
 	{
 		object _TargetObject;
 		
