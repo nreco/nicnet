@@ -64,12 +64,14 @@ namespace NI.Data {
 			CopyObjectToDataRow(record, r, false);
 			ds.Tables[SourceName].Rows.Add(r);
 			DbManager.Update(r);
+			CopyDataRowToObject(r, record);
 		}
 
 		public void Update(T record) {
 			var r = DbManager.Load(new Query(SourceName, ComposePkCondition(record)));
 			CopyObjectToDataRow(record, r, true);
 			DbManager.Update(r);
+			CopyDataRowToObject(r, record);
 		}
 
 		public void Delete(T record) {
