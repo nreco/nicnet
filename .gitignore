@@ -6,3 +6,5 @@
 /examples/NI.Examples.Winter/bin
 /examples/NI.Examples.Winter/obj
 /examples/NI.Examples.suo
+/src/NI.Data.Dalc.SQLite/bin
+/src/NI.Data.Dalc.SQLite/obj
