@@ -179,7 +179,7 @@ namespace NI.Data.Dalc
 			string sortExpression = BuildSort(query);
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select(whereExpression, sortExpression);
 			if (result.Length == 0) return false;
-			if (query.Fields.Length > 0 && query.Fields[0].ToLower() == "count(*)") {
+			if (query.Fields!=null && query.Fields.Length > 0 && query.Fields[0].ToLower() == "count(*)") {
 				data[query.Fields[0]] = result.Length;
 			} else {
 				foreach (DataColumn c in PersistedDS.Tables[query.SourceName].Columns)
