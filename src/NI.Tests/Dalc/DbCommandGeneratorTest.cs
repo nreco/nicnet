@@ -105,9 +105,9 @@ namespace NI.Tests.Data.Dalc {
 			Assert.AreEqual( cmd.Parameters.Count, 5, "Update command generation failed");
 			
 			// UPDATE TEST (by query)
-			IDictionary changes = new NI.Common.Collections.ConstDictionary(
-				new object[] { "name", "age" },
-				new object[] { "Alexandra", 21 });
+			IDictionary changes = new Hashtable() {
+				{ "name", "age" },
+				{ "Alexandra", 21 } };
 			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) ).Command;
 			masterSQL = "UPDATE test SET name=@p0,age=@p1 WHERE id=@p2";
 			

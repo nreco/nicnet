@@ -14,19 +14,19 @@
 
 using System;
 using System.Collections;
-using System.Data;
 using System.Linq;
+using System.Data;
 using System.Reflection;
 
-namespace NI.Ioc
+namespace NI.Expressions
 {
-
+	
 	/// <summary>
 	/// Proxy-class that can be used for accessing indexer of an object
 	/// </summary>
 	internal class IndexerProxy {
 		object IndexedObj;
-
+	
 		/// <summary>
 		/// Initializes a new instance of the IndexerProxy class.
 		/// </summary>
@@ -34,7 +34,7 @@ namespace NI.Ioc
 		public IndexerProxy(object indexed_obj) {
 			IndexedObj = indexed_obj;
 		}
-
+		
 		public static implicit operator IndexerProxy(DataRow o) {
 			return new IndexerProxy(o);
 		}
@@ -42,7 +42,7 @@ namespace NI.Ioc
 		public static implicit operator IndexerProxy(Hashtable o) {
 			return new IndexerProxy(o);
 		}
-
+	
 		/// <summary>
 		/// Get or set underlying object 
 		/// </summary>
@@ -56,13 +56,12 @@ namespace NI.Ioc
 				}
 
 				Type[] arg_types = new Type[i.Length];
-				for (int k = 0; k < i.Length; k++)
-					arg_types[k] = i[k].GetType();
-
-				MethodInfo methodInfo = IndexedObj.GetType().GetMethod("get_Item", arg_types);
-				if (methodInfo != null)
-					return methodInfo.Invoke(IndexedObj, i);
-
+				for (int k=0; k<i.Length; k++)	arg_types[k] = i[k].GetType();
+				
+				MethodInfo methodInfo = IndexedObj.GetType().GetMethod("get_Item", arg_types );
+				if (methodInfo!=null)
+					return methodInfo.Invoke(IndexedObj, i );
+				
 				throw new NotImplementedException("Cannot find get indexer for such arguments");
 			}
 			set {
@@ -72,23 +71,23 @@ namespace NI.Ioc
 					return;
 				}
 
-				Type[] arg_types = new Type[i.Length + 1];
-				object[] args = new object[i.Length + 1];
-				for (int k = 0; k < i.Length; k++) {
+				Type[] arg_types = new Type[i.Length+1];
+				object[] args = new object[i.Length+1];
+				for (int k=0; k<i.Length; k++) {
 					arg_types[k] = i[k].GetType();
 					args[k] = i[k];
 				}
-				arg_types[i.Length] = value != null ? value.GetType() : typeof(object);
+				arg_types[i.Length] = value!=null ? value.GetType() : typeof(object);
 				args[i.Length] = value;
-
-				MethodInfo methodInfo = IndexedObj.GetType().GetMethod("set_Item", arg_types);
-				if (methodInfo != null)
-					methodInfo.Invoke(IndexedObj, args);
+				
+				MethodInfo methodInfo = IndexedObj.GetType().GetMethod("set_Item", arg_types );
+				if (methodInfo!=null)
+					methodInfo.Invoke(IndexedObj, args );
 				else
 					throw new NotImplementedException("Cannot find set indexer for such arguments");
 			}
 		}
-
+		
 	}
 	
 	

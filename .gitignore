@@ -19,3 +19,6 @@ obj
 /src/NI.Ioc/NI.Ioc.xml
 /src/NI.Data/NI.Data.csproj.user
 /src/NICNET.v11.suo
+/src\NI.Expressions/*.user
+/src\NI.Expressions/*.user
+/src\NI.Expressions/NI.Expressions.csproj.user

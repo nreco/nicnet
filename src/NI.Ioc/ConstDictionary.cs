@@ -8,7 +8,7 @@ namespace NI.Ioc {
 	/// Special IDictionary implementation used for immutable dictionaries (constructed through IoC container)
 	/// </summary>
 	[Serializable]
-    public class ConstDictionary : IDictionary, IEnumerable {
+    internal class ConstDictionary : IDictionary, IEnumerable {
 		object[] ArrKeys;
 		object[] ArrValues;
 		object[] orderedKeys = null;

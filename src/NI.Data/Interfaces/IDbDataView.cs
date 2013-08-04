@@ -18,7 +18,7 @@ using System.Collections;
 namespace NI.Data
 {
 	/// <summary>
-	/// IDbDataView.
+	/// Data view interface.
 	/// </summary>
 	public interface IDbDataView
 	{

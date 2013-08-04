@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<namespaces>
+	<namespace name="NI.Expressions">
+		The NI.Expressions namespace contains classes that can evaluate expressions. 
+		Expression is a string that can be evaluated at run time in some context.
+	</namespace>
+
+</namespaces>
