@@ -16,7 +16,7 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 
-namespace NI.Data.Dalc.SQLite
+namespace NI.Data.SQLite
 {
 	/// <summary>
 	/// </summary>

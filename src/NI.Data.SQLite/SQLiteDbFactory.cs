@@ -18,7 +18,7 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.ComponentModel;
 
-namespace NI.Data.Dalc.SQLite
+namespace NI.Data.SQLite
 {
 
 	public class SQLiteFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory

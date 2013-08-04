@@ -7,8 +7,8 @@
     <ProjectGuid>{EF36D55D-E325-4B6E-B19F-1392776E72BF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NI.Data.Dalc.SQLite</RootNamespace>
-    <AssemblyName>NI.Data.Dalc.SQLite</AssemblyName>
+    <RootNamespace>NI.Data.SQLite</RootNamespace>
+    <AssemblyName>NI.Data.SQLite</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -49,13 +49,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NI.Common\NI.Common.csproj">
+    <ProjectReference Include="..\NI.Data\NI.Data.csproj">
+      <Project>{ac4b7a7e-55ca-4eae-9ffa-dd6582390e81}</Project>
+      <Name>NI.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NI.Expressions\NI.Expressions.csproj">
       <Project>{18403ee8-1014-45c2-9594-e4c5417f013b}</Project>
       <Name>NI.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NI.Data.Dalc\NI.Data.Dalc.csproj">
-      <Project>{ac4b7a7e-55ca-4eae-9ffa-dd6582390e81}</Project>
-      <Name>NI.Data.Dalc</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
