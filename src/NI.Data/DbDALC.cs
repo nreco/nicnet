@@ -369,8 +369,8 @@ namespace NI.Data {
 				
 				return false;
 			} finally {
+				if (reader != null) reader.Close();
 				if (closeConn) cmdWrapper.Command.Connection.Close();
-				if (reader!=null) reader.Close();
 			}
 		}
 		

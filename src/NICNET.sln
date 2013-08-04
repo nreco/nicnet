@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Tests", "NI.Tests\NI.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Vfs", "NI.Data.Vfs\NI.Data.Vfs.csproj", "{9882195A-1A0B-46CF-A2E1-C5EFDCA88F52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Dalc.SQLite", "NI.Data.Dalc.SQLite\NI.Data.Dalc.SQLite.csproj", "{EF36D55D-E325-4B6E-B19F-1392776E72BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -31,6 +31,14 @@ namespace NI.Data {
 			DbManager = dbMgr;
 		}
 
+		public T Load(params object[] pk) {
+			var r = DbManager.Load(SourceName, pk);
+			if (r==null) return null;
+			var t = new T();
+			CopyDataRowToObject(r, t);
+			return t;
+		}
+
 		public T Load(Query q) {
 			var ds = new DataSet();
 			var recordQ = new Query(q);
@@ -77,6 +85,11 @@ namespace NI.Data {
 		public void Delete(T record) {
 			DbManager.Delete(new Query(SourceName, ComposePkCondition(record)));
 		}
+
+		public void Delete(params object[] pk) {
+			DbManager.Delete(SourceName, pk);
+		}
+
 
 		protected QueryNode ComposePkCondition(T t) {
 			var qcnd = new QueryGroupNode(GroupType.And);
