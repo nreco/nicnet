@@ -56,7 +56,7 @@ namespace NI.Data.SqlClient {
 			return base.GetTableName(sourceName);
 		}		
 
-		protected override string BuildValue(IQueryConstantValue value) {
+		protected override string BuildValue(QConst value) {
 			if (ConstOptimization) {
 				if (value.Type==TypeCode.String && (value.Value is string) && IsAsciiConst( (string)value.Value ))
 					return String.Format(AsciiConstFormatStr, value.Value);
@@ -64,7 +64,7 @@ namespace NI.Data.SqlClient {
 			return base.BuildValue(value);
 		}
 
-		protected override string BuildValue(IQueryFieldValue fieldValue) {
+		protected override string BuildValue(QField fieldValue) {
 			string fldName = base.BuildValue(fieldValue);
 			if (UseNameBrackets) {
 				// additional check: base method may return SQL code for "virtual" field names

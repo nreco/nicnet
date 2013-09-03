@@ -43,10 +43,10 @@ namespace NI.Data {
 		}
 
 		protected object ResolveNodeValue(ResolveNodeContext nodeContext) {
-			if (nodeContext.Node is IQueryConstantValue)
-				return QConstResolver!=null ? QConstResolver(nodeContext) : ((IQueryConstantValue)nodeContext.Node).Value;
-			if (nodeContext.Node is IQueryFieldValue)
-				return QFieldResolver!=null ? QFieldResolver(nodeContext) : nodeContext.Context[ ((IQueryFieldValue)nodeContext.Node).Name ];
+			if (nodeContext.Node is QConst)
+				return QConstResolver!=null ? QConstResolver(nodeContext) : ((QConst)nodeContext.Node).Value;
+			if (nodeContext.Node is QField)
+				return QFieldResolver!=null ? QFieldResolver(nodeContext) : nodeContext.Context[ ((QField)nodeContext.Node).Name ];
 			throw new Exception("Cannot resolve value node type: " + nodeContext.Node.GetType().ToString());
 		}
 		

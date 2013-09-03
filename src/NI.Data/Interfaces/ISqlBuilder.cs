@@ -21,7 +21,7 @@ namespace NI.Data
 	/// </summary>
 	public interface ISqlBuilder
 	{
-		IQueryFieldValueFormatter QueryFieldValueFormatter { get; set; }
+		Func<QField,string> QueryFieldValueFormatter { get; set; }
 		
 		string BuildExpression(QueryNode node);
 	}

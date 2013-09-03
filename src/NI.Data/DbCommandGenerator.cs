@@ -158,7 +158,7 @@ namespace NI.Data
 				string valueParameterName = dbSqlBuilder.BuildCommandParameter(
 					col, DataRowVersion.Original);
 				primaryKeyGroup.Nodes.Add(
-					(QField)col.ColumnName==new QRawConst(valueParameterName) );
+					(QField)col.ColumnName==new QRawSql(valueParameterName) );
 			}
 			
 			if (primaryKeyGroup.Nodes.Count==0)
@@ -190,9 +190,9 @@ namespace NI.Data
 			ArrayList updateFieldValues = new ArrayList();
 			foreach (object field in changesData.Keys) {
 				updateFieldNames.Add( field );
-				if (changesData[field] is QRawConst) {
+				if (changesData[field] is QRawSql) {
 					// QRawConst can be used for specifying SQL-specific update
-					updateFieldValues.Add( ((QRawConst)changesData[field]).Value );
+					updateFieldValues.Add( ((QRawSql)changesData[field]).SqlText );
 				} else {
 					updateFieldValues.Add( dbSqlBuilder.BuildCommandParameter( changesData[field] ) ); 
 				}

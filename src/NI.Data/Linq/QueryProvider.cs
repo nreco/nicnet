@@ -224,11 +224,11 @@ namespace NI.Data.Linq
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;
 				// check for special method call like 'In' or 'Like'
 				if (methodExpr.Method.Name == "In") { 
-					IQueryFieldValue fldValue = ComposeFieldValue(methodExpr.Object);
+					QField fldValue = ComposeFieldValue(methodExpr.Object);
 					IQueryValue inValue = ComposeValue(methodExpr.Arguments[0]);
 					// possible conversion to IList
-					if (inValue is IQueryConstantValue) {
-						IQueryConstantValue inConstValue = (IQueryConstantValue)inValue;
+					if (inValue is QConst) {
+						var inConstValue = (QConst)inValue;
 						if (!(inConstValue.Value is IList)) {
 							IList constList = new ArrayList();
 							foreach (object o in ((IEnumerable)inConstValue.Value))
@@ -240,7 +240,7 @@ namespace NI.Data.Linq
 					}
 					return new QueryConditionNode(fldValue, Conditions.In, inValue);
 				} else if (methodExpr.Method.Name == "Like") {
-					IQueryFieldValue fldValue = ComposeFieldValue(methodExpr.Object);
+					QField fldValue = ComposeFieldValue(methodExpr.Object);
 					IQueryValue likeValue = ComposeValue(methodExpr.Arguments[0]);
 					return new QueryConditionNode(fldValue, Conditions.Like, likeValue);
 				}
@@ -266,10 +266,10 @@ namespace NI.Data.Linq
             nullConditionMapping[ExpressionType.NotEqual] = Conditions.Null | Conditions.Not;
 		}
 
-		protected IQueryFieldValue ComposeFieldValue(Expression expression) {
+		protected QField ComposeFieldValue(Expression expression) {
 			IQueryValue fldValue = ComposeValue(expression);
-			if (fldValue is IQueryFieldValue)
-				return (IQueryFieldValue)fldValue;
+			if (fldValue is QField)
+				return (QField)fldValue;
 			else
 				throw new NotSupportedException();
 		}

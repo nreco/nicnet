@@ -70,9 +70,8 @@ namespace NI.Data
 			if (query.Sort!=null && query.Sort.Length>0) {
 				string[] sortFields = new string[query.Sort.Length];
 				for (int i=0; i<sortFields.Length; i++) {
-					QSortField sortFld = (QSortField)query.Sort[i];
-					sortFld.Name = BuildValue( sortFld );
-					sortFields[i] = sortFld.ToString();
+					var sortFld = (QSortField)query.Sort[i];
+					sortFields[i] = BuildValue( sortFld );
 				}
 				
 				return String.Join(",", sortFields);
@@ -98,7 +97,7 @@ namespace NI.Data
 			return base.BuildValue(value);
 		}
 		
-		protected override string BuildValue(IQueryConstantValue value) {
+		protected override string BuildValue(QConst value) {
 			object constValue = value.Value;
 				
 			// special processing for arrays

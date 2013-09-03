@@ -23,12 +23,12 @@ namespace NI.Data
 	public class SqlBuilder : ISqlBuilder
 	{
 		
-		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
+		Func<QField,string> _QueryFieldValueFormatter = null;
 		
 		/// <summary>
 		/// Get or set query field value formatter
 		/// </summary>
-		public IQueryFieldValueFormatter QueryFieldValueFormatter {
+		public Func<QField,string> QueryFieldValueFormatter {
 			get { return _QueryFieldValueFormatter; }
 			set { _QueryFieldValueFormatter = value; }
 		}
@@ -133,21 +133,26 @@ namespace NI.Data
 		protected virtual string BuildValue(IQueryValue value) {
 			if (value==null) return null;
 			
-			if (value is IQueryFieldValue)
-				return BuildValue( (IQueryFieldValue)value );
+			if (value is QField)
+				return BuildValue( (QField)value );
 			
-			if (value is IQueryConstantValue)
-				return BuildValue( (IQueryConstantValue)value );
+			if (value is QConst)
+				return BuildValue( (QConst)value );
 			
-			if (value is IQueryRawValue)
-				return ((IQueryRawValue)value).Value;
+			if (value is QRawSql)
+				return ((QRawSql)value).SqlText;
+
+			if (value is QSortField) {
+				var fldName = BuildValue( (QField) ((QSortField)value).Name);
+				return new QSortField(fldName, ((QSortField)value).SortDirection).ToString();
+			}
 			
 			throw new ArgumentException("Invalid query value", value.GetType().ToString() );
 		}
 		
 
-		protected virtual string BuildValue(IQueryConstantValue value) {
-			object constValue = ((IQueryConstantValue)value).Value;
+		protected virtual string BuildValue(QConst value) {
+			object constValue = value.Value;
 				
 			// special processing for arrays
 			if (constValue is IList)
@@ -171,9 +176,9 @@ namespace NI.Data
 				
 		
 		
-		protected virtual string BuildValue(IQueryFieldValue fieldValue) {
+		protected virtual string BuildValue(QField fieldValue) {
 			if (QueryFieldValueFormatter!=null)
-				return QueryFieldValueFormatter.Format(fieldValue);
+				return QueryFieldValueFormatter(fieldValue);
 			return fieldValue.Name;
 		}
 

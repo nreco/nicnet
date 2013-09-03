@@ -97,8 +97,8 @@ namespace NI.Data.Permissions {
 			}
 		}
 		protected IQueryValue FixConditionFieldNames(IQueryValue qValue, QSourceName qSourceName) {
-			if (qValue is IQueryFieldValue) {
-				IQueryFieldValue qFld = (IQueryFieldValue)qValue;
+			if (qValue is QField) {
+				QField qFld = (QField)qValue;
 				int dotIdx = qFld.Name.IndexOf('.');
 				if (dotIdx >= 0) {
 					string prefix = qFld.Name.Substring(0, dotIdx);

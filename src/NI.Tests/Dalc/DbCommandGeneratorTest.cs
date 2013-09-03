@@ -106,13 +106,12 @@ namespace NI.Tests.Data.Dalc {
 			
 			// UPDATE TEST (by query)
 			IDictionary changes = new Hashtable() {
-				{ "name", "age" },
-				{ "Alexandra", 21 } };
+				{ "age", 21 }, { "name", "Alexandra" } };
 			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) ).Command;
-			masterSQL = "UPDATE test SET name=@p0,age=@p1 WHERE id=@p2";
-			
-			Assert.AreEqual( cmd.CommandText, masterSQL, "Update command generation failed");
-			Assert.AreEqual( cmd.Parameters.Count, 3, "Update command generation failed");
+			masterSQL = "UPDATE test SET age=@p0,name=@p1 WHERE id=@p2";
+
+			Assert.AreEqual(masterSQL, cmd.CommandText, "Update command generation failed");
+			Assert.AreEqual(3, cmd.Parameters.Count, "Update command generation failed");
 			
 			// DELETE TEST
 			cmd = cmdGenerator.ComposeDelete( ds.Tables["test"] ).Command;

@@ -60,10 +60,19 @@ namespace NI.Data.Permissions
 
 				QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, sourceName);
 				IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
-				if (alias.Length>0)
-					dbSqlBuilder.QueryFieldValueFormatter = InsertFormatter(
-						dbSqlBuilder.QueryFieldValueFormatter,
-						new PrefixQueryFieldValueFormatter(sourceName, alias) );
+				if (alias.Length > 0) {
+					var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
+					dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
+						var resFld = origFormatter != null ?
+							origFormatter(qFld) : qFld.Name;
+
+						string[] parts = resFld.Split('.');
+						if (parts.Length > 1 && parts[0] == sourceName)
+							return alias + "." + parts[1];
+						return resFld;
+					};
+				}
+
 				context[whereExpressionPrefix+"-permissionWhereExpression"] = 
 					IsolateWhereExpression( dbSqlBuilder.BuildExpression(permissionCondition) );
 			}
@@ -84,12 +93,19 @@ namespace NI.Data.Permissions
 
 			// add one more field-formatter to the formatters chain
 			// if source name alias specified
-			if (m.Groups["alias"].Captures[0].Length>0)
-				dbSqlBuilder.QueryFieldValueFormatter = InsertFormatter(
-					dbSqlBuilder.QueryFieldValueFormatter,
-					new PrefixQueryFieldValueFormatter(
-						m.Groups["sourceName"].Captures[0].Value,
-						m.Groups["alias"].Captures[0].Value) );
+			if (m.Groups["alias"].Captures[0].Length > 0) {
+				var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
+				dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
+					var resFld = origFormatter != null ?
+						origFormatter(qFld) : qFld.Name;
+
+					string[] parts = resFld.Split('.');
+					if (parts.Length > 1 && parts[0] == m.Groups["sourceName"].Captures[0].Value)
+						return m.Groups["alias"].Captures[0].Value + "." + parts[1];
+					return resFld;
+				};
+
+			}
 			
 			// compose permission condition
 			QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, m.Groups["sourceName"].Captures[0].Value);
@@ -103,22 +119,6 @@ namespace NI.Data.Permissions
 			return dbSqlBuilder.BuildExpression( groupAnd );
 		}
 		
-		class PrefixQueryFieldValueFormatter : IQueryFieldValueFormatter {
-			string Prefix;
-			string SourceName;
-			
-			public PrefixQueryFieldValueFormatter(string sourceName, string prefix) {
-				Prefix = prefix;
-				SourceName = sourceName;
-			}
-			
-			public string Format(IQueryFieldValue fieldValue) {
-				string[] parts = fieldValue.Name.Split('.');
-				if (parts.Length>1 && parts[0]==SourceName)
-					return Prefix+"."+parts[1];
-				return fieldValue.Name;
-			}
-		}
 		
 		
 		

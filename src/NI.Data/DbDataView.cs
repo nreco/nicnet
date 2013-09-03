@@ -21,7 +21,7 @@ namespace NI.Data
 	/// <summary>
 	/// Data view info.
 	/// </summary>
-	public class DbDataView : IDbDataView, IQueryFieldValueFormatter
+	public class DbDataView : IDbDataView
 	{
 		string _SourceNameAlias;
 		string _SourceNameOrigin;
@@ -82,15 +82,15 @@ namespace NI.Data
 			return Convert.ToString( ExprResolver(context,SqlCommandTextProvider!=null?SqlCommandTextProvider(context):SqlCommandTextTemplate) );
 		}
 		
-		public virtual IQueryFieldValueFormatter GetQueryFieldValueFormatter(Query q) {
-			return this;
+		public virtual Func<QField,string> GetQueryFieldValueFormatter(Query q) {
+			return FormatDataViewField;
 		}
 		
 		protected virtual string ApplyFieldNameMapping(string fldName) {
 			return FieldsMapping != null && FieldsMapping.Contains(fldName) ? (string)FieldsMapping[fldName] : fldName;
 		}
 		
-		string IQueryFieldValueFormatter.Format(IQueryFieldValue fieldValue) {
+		string FormatDataViewField(QField fieldValue) {
 			return ApplyFieldNameMapping(fieldValue.Name);
 		}
 		

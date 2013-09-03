@@ -23,7 +23,7 @@ namespace NI.Data.SQLite
 
 	public class SQLiteFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
-		public IQueryFieldValueFormatter QueryFieldValueFormatter { get; set; }
+		public Func<QField,string> QueryFieldValueFormatter { get; set; }
 	
 		IDbCommandWrapper IDbCommandWrapperFactory.CreateInstance() {
 			var cmdWrapper = new SQLiteCommandWrapper( new SQLiteCommand() );

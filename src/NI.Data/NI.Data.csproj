@@ -110,9 +110,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CacheDbDalc.cs" />
-    <Compile Include="ChainQueryFieldValueFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DalcExt.cs" />
     <Compile Include="DalcManager.cs" />
     <Compile Include="DataHelper.cs" />
@@ -178,9 +175,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IObjectMapper.cs" />
-    <Compile Include="Interfaces\IQueryFieldValueFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\IQueryValue.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -229,7 +223,7 @@
     <Compile Include="Query\QField.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Query\QRawConst.cs">
+    <Compile Include="Query\QRawSql.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Query\QSortField.cs">
@@ -256,7 +250,6 @@
     <Compile Include="RelationalExpressions\RelExQueryNodeProvider.cs" />
     <Compile Include="RelationalExpressions\RelExQueryParser.cs" />
     <Compile Include="RelationalExpressions\RelExQueryProvider.cs" />
-    <Compile Include="SharedConnectionDbDalc.cs" />
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>

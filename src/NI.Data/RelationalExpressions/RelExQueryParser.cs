@@ -255,7 +255,7 @@ namespace NI.Data.RelationalExpressions
 			typeCodeString = typeCodeString.ToLower();
 			// sql type
 			if (typeCodeString=="sql")
-				return new QRawConst(constant);
+				return new QRawSql(constant);
 			// simple type
 			int typeNameIdx = Array.IndexOf(typeNames, typeCodeString);
 			if (typeNameIdx>=0) {
@@ -582,7 +582,7 @@ namespace NI.Data.RelationalExpressions
 		}
 		
 		protected bool IsNullValue(IQueryValue value) {
-			return ((value is IQueryFieldValue) && ((IQueryFieldValue)value).Name.ToLower()==nullField);
+			return ((value is QField) && ((QField)value).Name.ToLower()==nullField);
 		}
 		
 

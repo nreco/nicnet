@@ -20,40 +20,36 @@ namespace NI.Data
 	/// <summary>
 	/// QSortField
 	/// </summary>
-	public class QSortField : IQueryFieldValue
+	public class QSortField : IQueryValue
 	{
 		public const string Asc = "asc";
 		public const string Desc = "desc";
-	
-		string _Name;
-		ListSortDirection _SortDirection = ListSortDirection.Ascending;
-		
-		public string Name {
-			get { return _Name; }
-			set { _Name = value; }
-		}
-		
-		public ListSortDirection SortDirection {
-			get { return _SortDirection; }
-			set { _SortDirection = value; }
-		}
+
+		public string Name { get; private set; }
+		public ListSortDirection SortDirection { get; private set; }
 				
 		public QSortField(string sortFld) {
+			SortDirection = ListSortDirection.Ascending;
+
 			sortFld = sortFld.Trim();
 			int lastSpaceIdx = sortFld.LastIndexOf(' ');
 			string lastWord = lastSpaceIdx != -1 ? sortFld.Substring(lastSpaceIdx + 1).ToLower() : null;
 			bool sortDirectionFound = true;
 
 			if (lastWord == Asc || lastWord == "ascending")
-				_SortDirection = ListSortDirection.Ascending;
+				SortDirection = ListSortDirection.Ascending;
 			else if (lastWord == Desc || lastWord == "descending")
-				_SortDirection = ListSortDirection.Descending;
+				SortDirection = ListSortDirection.Descending;
 			else
 				sortDirectionFound = false;
 
-			_Name = sortDirectionFound ? sortFld.Substring(0, lastSpaceIdx).TrimEnd() : sortFld;
-			if (_Name == String.Empty)
+			Name = sortDirectionFound ? sortFld.Substring(0, lastSpaceIdx).TrimEnd() : sortFld;
+			if (Name == String.Empty)
 				throw new ArgumentException("Invalid sort field");
+		}
+		public QSortField(string sortFldName, ListSortDirection direction) {
+			Name = sortFldName;
+			SortDirection = direction;
 		}
 		
 		public static explicit operator QSortField(string sortFld) {

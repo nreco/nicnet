@@ -57,27 +57,33 @@ namespace NI.Data
 			return cmdWrapper;
 		}
 		
-		protected IQueryFieldValueFormatter InsertFormatter(IQueryFieldValueFormatter original, IQueryFieldValueFormatter additional) {
+		/*protected Func<QField,string> InsertFormatter(Func<QField,string> original, Func<QField,string> additional) {
 			if (original==null) return additional;
 			
-			IQueryFieldValueFormatter[] origFormatters = original is ChainQueryFieldValueFormatter ?
+			Func<QField,string>[] origFormatters = original is ChainQueryFieldValueFormatter ?
 				((ChainQueryFieldValueFormatter)original).Formatters :
-				new IQueryFieldValueFormatter[] { original };
+				new Func<QField,string>[] { original };
 						
-			IQueryFieldValueFormatter[] newFormatters = new IQueryFieldValueFormatter[origFormatters.Length+1];
+			Func<QField,string>[] newFormatters = new Func<QField,string>[origFormatters.Length+1];
 			Array.Copy(origFormatters, 0, newFormatters, 1, origFormatters.Length);
 			newFormatters[0] = additional;
 			return new ChainQueryFieldValueFormatter(newFormatters);
 				
-		}
+		}*/
 		
 		protected virtual IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, Query query) {
 			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
 			
 			// add dataview field formatter in the formatting chain
-			dbSqlBuilder.QueryFieldValueFormatter = InsertFormatter(
-				dbSqlBuilder.QueryFieldValueFormatter,
-				dataView.GetQueryFieldValueFormatter(query) );
+			var origFormatter =  dbSqlBuilder.QueryFieldValueFormatter;
+			var dataViewFormatter = dataView.GetQueryFieldValueFormatter(query);
+			dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
+				var res = origFormatter != null ?
+					origFormatter(qFld) : qFld.Name;
+				if (dataViewFormatter!=null)
+					res = dataViewFormatter( (QField) res );
+				return res;
+			};
 					
 			string sort = dbSqlBuilder.BuildSort(query);
 			string whereExpression = BuildWhereExpression( dbSqlBuilder, dataView, query);

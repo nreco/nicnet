@@ -249,8 +249,8 @@ namespace NI.Data
 		/// <summary>
 		/// Special implementation for dataset constants
 		/// </summary>
-		protected override string BuildValue(IQueryConstantValue value) {
-			object constValue = ((IQueryConstantValue)value).Value;
+		protected override string BuildValue(QConst value) {
+			object constValue = value.Value;
 				
 			// special processing for arrays
 			if (constValue is IList)

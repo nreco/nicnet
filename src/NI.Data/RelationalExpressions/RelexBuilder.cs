@@ -99,13 +99,12 @@ namespace NI.Data.RelationalExpressions {
 			protected override string BuildValue(IQueryValue value) {
 				if (value is Query)
 					return BuildQueryString((Query)value, true);
-				if (value is IQueryRawValue) 
-					return BuildValue( ((IQueryRawValue)value).Value )+":sql";
+				if (value is QRawSql)
+					return BuildValue(((QRawSql)value).SqlText) + ":sql";
 				return base.BuildValue(value);
 			}
 
-			protected override string BuildValue(IQueryConstantValue value) {
-				IQueryConstantValue qConst = (IQueryConstantValue)value;
+			protected override string BuildValue(QConst qConst) {
 				object constValue = qConst.Value;
 				if (constValue == null)
 					return "null";
@@ -116,7 +115,7 @@ namespace NI.Data.RelationalExpressions {
 				if (constValue is string && qConst.Type==TypeCode.String)
 					return BuildValue((string)constValue);
 
-				TypeCode constTypeCode = ((IQueryConstantValue)value).Type;
+				TypeCode constTypeCode = qConst.Type;
 				string typeSuffix = constTypeCode!=TypeCode.Empty && constTypeCode!=TypeCode.DBNull ? ":"+constTypeCode.ToString() : String.Empty;
 				return BuildValue( Convert.ToString(constValue, CultureInfo.InvariantCulture ) ) + typeSuffix;
 			}

@@ -18,7 +18,7 @@ namespace NI.Data
 {
 	/// <summary>
 	/// </summary>
-	public class QueryFieldValueFormatter : IQueryFieldValueFormatter
+	public class QueryFieldValueFormatter 
 	{
 		char[] specialChars = new char[] {'*', '(', ')'};
 		string _FormatString;
@@ -32,7 +32,7 @@ namespace NI.Data
 		{
 		}
 
-		public string Format(IQueryFieldValue fieldValue) {
+		public string Format(QField fieldValue) {
 			for (int i=0; i<specialChars.Length; i++)
 				if (fieldValue.Name.IndexOf(specialChars[i])>=0) return fieldValue.Name;
 			return String.Format(FormatString, fieldValue.Name);

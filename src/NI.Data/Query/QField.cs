@@ -17,40 +17,33 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// IQueryFieldValue implementation
+	/// QField implementation
 	/// </summary>
 	[Serializable]
-	public struct QField : IQueryFieldValue
+	public class QField : IQueryValue
 	{
-		string _Name;
-		
-		public string Name {
-			get { return _Name; } 
-		}
-	
-		public QField(string field_name) {
-			_Name = field_name;
-		}
-		
-		public override bool Equals(object obj) {
-			return base.Equals (obj);
-		}
-		
-		public override int GetHashCode() {
-			return base.GetHashCode ();
-		}
 
-		
-		
+		public string Name { get; private set; }
+	
+		public QField(string fieldName) {
+			Name = fieldName;
+		}
+				
 		public static explicit operator QField(string fld) {
 			return new QField(fld);
 		}
 		
 		public static QueryConditionNode operator ==(QField lvalue, IQueryValue rvalue) {
+			if (rvalue == null || ((rvalue is QConst) && ((QConst)rvalue).Value == null)) {
+				return new QueryConditionNode(lvalue, Conditions.Null, null);
+			}
 			return new QueryConditionNode( lvalue, Conditions.Equal, rvalue );
 		}		
 
 		public static QueryConditionNode operator !=(QField lvalue, IQueryValue rvalue) {
+			if (rvalue == null || ((rvalue is QConst) && ((QConst)rvalue).Value == null)) {
+				return new QueryConditionNode(lvalue, Conditions.Null|Conditions.Not, null);
+			}
 			return new QueryConditionNode( lvalue, Conditions.Equal|Conditions.Not, rvalue );
 		}		
 

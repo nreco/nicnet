@@ -24,14 +24,14 @@ namespace NI.Data.Odbc
 
 	public class OdbcFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
 	{
-		IQueryFieldValueFormatter _QueryFieldValueFormatter = null;
+		Func<QField,string> _QueryFieldValueFormatter = null;
 
 		public Func<string, string> CmdParameterPlaceholderProvider { get; set; }
 
 		/// <summary>
 		/// Get or set default query field value formatter
 		/// </summary>
-		public IQueryFieldValueFormatter QueryFieldValueFormatter {
+		public Func<QField,string> QueryFieldValueFormatter {
 			get { return _QueryFieldValueFormatter; }
 			set { _QueryFieldValueFormatter = value; }
 		}

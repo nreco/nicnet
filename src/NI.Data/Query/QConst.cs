@@ -17,10 +17,10 @@ using System;
 namespace NI.Data {
 	
 	/// <summary>
-	/// IQueryConstantValue implementation
+	/// Query constant
 	/// </summary>
 	[Serializable]
-	public struct QConst : IQueryConstantValue {
+	public class QConst : IQueryValue {
 		object _Value;
 		TypeCode _Type;
 		

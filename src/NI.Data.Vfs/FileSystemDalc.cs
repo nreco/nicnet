@@ -198,7 +198,7 @@ namespace NI.Data {
 		}
 
 		protected object GetFileObjectFieldValue(ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext) {
-			IQueryFieldValue fldValue = (IQueryFieldValue)resolveContext.Node;
+			QField fldValue = (QField)resolveContext.Node;
 			return GetFileObjectField(fldValue.Name, (IFileObject)resolveContext.Context["file"]);
 		}
 			

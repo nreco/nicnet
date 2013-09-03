@@ -22,28 +22,6 @@ namespace NI.Data
 	public interface IQueryValue
 	{
 	}
-	
-	/// <summary>
-	/// Interface for query field name value
-	/// </summary>
-	public interface IQueryFieldValue : IQueryValue {
-		string Name { get; }
-	}
-	
-	/// <summary>
-	/// Interface for query constant value
-	/// </summary>
-	public interface IQueryConstantValue : IQueryValue {
-		object Value { get; }
-		TypeCode Type { get; }
-	}
-
-	/// <summary>
-	/// Interface for query raw value
-	/// </summary>
-	public interface IQueryRawValue : IQueryValue {
-		string Value { get; }
-	}
 
 	
 }

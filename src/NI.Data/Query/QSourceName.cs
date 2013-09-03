@@ -21,32 +21,30 @@ namespace NI.Data
 	/// <summary>
 	/// Query source name structure
 	/// </summary>
-	public struct QSourceName
+	[Serializable]
+	public class QSourceName
 	{
-		string _Name;
-		string _Alias;
 
-		public string Name {
-			get { return _Name; }
-			set { _Name = value; }
-		}
+		public string Name { get; private set; }
 
-		public string Alias {
-			get { return _Alias; }
-			set { _Alias = value; }
-		}
+		public string Alias { get; private set; }
 
 		public QSourceName(string sourceName) {
 			int dotIdx = sourceName.LastIndexOf('.'); // allow dot in table name (alias for this case is required), like dbo.users.u
 			if (dotIdx >= 0) {
-				_Name = sourceName.Substring(0, dotIdx);
-				_Alias = sourceName.Substring(dotIdx+1);
+				Name = sourceName.Substring(0, dotIdx);
+				Alias = sourceName.Substring(dotIdx+1);
 			}
 			else {
-				_Name = sourceName;
-				_Alias = null;
+				Name = sourceName;
+				Alias = null;
 			}
 
+		}
+
+		public QSourceName(string sourceName, string alias) {
+			Name = sourceName;
+			Alias = alias;
 		}
 
 		public static explicit operator QSourceName(string sourcename) {
