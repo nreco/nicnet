@@ -65,7 +65,7 @@ namespace NI.Tests.Data.Dalc {
 			
 			Query q = new Query( "test" );
 			q.Condition = createTestQuery();
-			q.Fields = new string[] { "name", "age" };
+			q.Fields = new QField[] { "name", "age" };
 
 			// SELECT TEST
 			IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;	

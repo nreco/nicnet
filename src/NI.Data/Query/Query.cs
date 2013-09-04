@@ -15,26 +15,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace NI.Data
 {
 
 	/// <summary>
-	/// Generic query implementation
+	/// Abstract data query structure
 	/// </summary>
 	[Serializable]
 	public class Query : QueryNode, IQueryValue
 	{
-		private string[] _Sort = null;
-		private string[] _Fields = null;
+		private QSortField[] _Sort = null;
+		private QField[] _Fields = null;
 		private int _StartRecord = 0;
 		private int _RecordCount = Int32.MaxValue;
-		private string _SourceName = null;
+		private QSourceName _SourceName = null;
 		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
-		/// Filter expression root group. Can be null
+		/// Query condition. Can be null
 		/// </summary>
 		public QueryNode Condition { get; set; }
 
@@ -43,17 +44,17 @@ namespace NI.Data
 		}
 
 		/// <summary>
-		/// Sort expression. Can be null.
+		/// Sort fields list. Can be null.
 		/// </summary>
-		public string[] Sort {
+		public QSortField[] Sort {
 			get { return _Sort; } 
 			set { _Sort = value; }
 		}
 		
 		/// <summary>
-		/// Fields to load through filter. Null for all
+		/// Fields to load. Null means all available fields.
 		/// </summary>
-		public string[] Fields {
+		public QField[] Fields {
 			get { return _Fields; }
 			set { _Fields = value; }
 		}
@@ -66,12 +67,15 @@ namespace NI.Data
 			set { _StartRecord = value; }
 		}
 		
+		/// <summary>
+		/// Max records count
+		/// </summary>
 		public int RecordCount {
 			get { return _RecordCount; }
 			set { _RecordCount = value; }
 		}
 		
-		public string SourceName { 
+		public QSourceName SourceName { 
 			get { return _SourceName; }
 			set { _SourceName = value; }
 		}
@@ -84,49 +88,41 @@ namespace NI.Data
 			}
 			set { _ExtendedProperties = value; }
 		}
-		
-		/*private string _Prefix = String.Empty;
-		public string Prefix {
-			get { return _Prefix; }
-			set {
-				_Prefix = value;
-			}
-		}*/
 
 		public Query(string sourceName) {
-			_SourceName = sourceName;
+			_SourceName = new QSourceName(sourceName);
 		}
 
-		public Query(string sourceName, QueryNode root) {
+		public Query(string sourceName, QueryNode condition) {
 			_SourceName = sourceName;
-			Condition = root;
+			Condition = condition;
 		}
 
-		public Query(string sourceName, QueryNode root, string[] sort) {
+		public Query(string sourceName, QueryNode condition, string[] sort) {
 			_SourceName = sourceName;
-			Condition = root;
-			_Sort = sort;
+			Condition = condition;
+			_Sort = sort.Select(s => new QSortField(s) ).ToArray();
 		}
 		
-		public Query(string sourceName, QueryNode root, string[] sort, int start_record, int record_count) {
+		public Query(string sourceName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
 			_SourceName = sourceName;
-			_Sort = sort;
-			_StartRecord = start_record;
-			_RecordCount = record_count;
-			Condition = root;
+			SetSort(sort);
+			_StartRecord = startRecord;
+			_RecordCount = recordCount;
+			Condition = condition;
 		}
 		
-		public Query(string sourceName, int start_record, int record_count) {
+		public Query(string sourceName, int startRecord, int recordCount) {
 			_SourceName = sourceName;
-			_StartRecord = start_record;
-			_RecordCount = record_count;
+			_StartRecord = startRecord;
+			_RecordCount = recordCount;
 		}
 
-		public Query(string sourceName, string[] sort, int start_record, int record_count) {
+		public Query(string sourceName, string[] sort, int startRecord, int recordCount) {
 			_SourceName = sourceName;
-			_Sort = sort;
-			_StartRecord = start_record;
-			_RecordCount = record_count;
+			SetSort(sort);
+			_StartRecord = startRecord;
+			_RecordCount = recordCount;
 		}
 
 		public Query(Query q) {
@@ -137,6 +133,21 @@ namespace NI.Data
 			Condition = q.Condition;
 			_Fields = q.Fields;
 			_ExtendedProperties = new Hashtable( q.ExtendedProperties );
+		}
+
+		public void SetSort(params string[] sortFields) {
+			if (sortFields != null && sortFields.Length > 0) {
+				_Sort = sortFields.Select(v => (QSortField)v).ToArray();
+			} else {
+				_Sort = null;
+			}
+		}
+		public void SetFields(params string[] fields) {
+			if (fields != null && fields.Length > 0) {
+				_Fields = fields.Select(v => (QField)v).ToArray();
+			} else {
+				_Fields = null;
+			}
 		}
 
 		
@@ -151,8 +162,8 @@ namespace NI.Data
 				if (rootExpression!=null && rootExpression.Length>0)
 					rootExpression = String.Format("({0})", rootExpression);
 			
-				string sortExpression = q.Sort!=null ? "; "+String.Join(",", q.Sort) : null;
-				string fieldExpression = q.Fields!=null ? String.Join(",", q.Fields) : "*";
+				string sortExpression = q.Sort!=null ? "; "+String.Join(",", q.Sort.Select(v=>v.ToString()).ToArray() ) : null;
+				string fieldExpression = q.Fields!=null ? String.Join(",", q.Fields.Select(v=>v.ToString()).ToArray() ) : "*";
 			
 				return String.Format("{0}{1}[{2}{3}]{{{4},{5}}}", q.SourceName, rootExpression,
 					fieldExpression, sortExpression, q.StartRecord, q.RecordCount);

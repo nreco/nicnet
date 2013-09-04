@@ -28,9 +28,16 @@ namespace NI.Data
 		public QField(string fieldName) {
 			Name = fieldName;
 		}
-				
-		public static explicit operator QField(string fld) {
+
+		public override string ToString() {
+			return Name;
+		}
+
+		public static implicit operator QField(string fld) {
 			return new QField(fld);
+		}
+		public static implicit operator string(QField fld) {
+			return fld.ToString();
 		}
 		
 		public static QueryConditionNode operator ==(QField lvalue, IQueryValue rvalue) {

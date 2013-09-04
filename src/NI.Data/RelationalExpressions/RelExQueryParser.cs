@@ -13,6 +13,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Text;
@@ -439,9 +440,9 @@ namespace NI.Data.RelationalExpressions
 					endIdx = nextEndIdx;
 				}
 								
-				q.Fields = fields;
+				q.SetFields(fields);
                 if (sort != null)
-	                q.Sort = sort;
+					q.SetSort(sort);
 				return q;
 			}
 			

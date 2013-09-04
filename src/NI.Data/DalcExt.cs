@@ -33,7 +33,7 @@ namespace NI.Data {
 					if (q.Fields != null && q.Fields.Length == 1) {
 						var fldMatched = false;
 						for (int i=0; i<reader.FieldCount; i++)
-							if (reader.GetName(i) == q.Fields[0]) {
+							if (reader.GetName(i) == q.Fields[0].Name) {
 								val = reader.GetValue(i);
 								fldMatched = true;
 							}
@@ -67,7 +67,7 @@ namespace NI.Data {
 				throw new ArgumentException("LoadAllValues expects exactly one field to load");
 			dalc.ExecuteReader(q, (reader) => {
 				while (reader.Read()) {
-					rs.Add(reader[q.Fields[0]]);
+					rs.Add(reader[q.Fields[0].Name]);
 				}
 			});
 			return rs.ToArray();
@@ -76,7 +76,7 @@ namespace NI.Data {
 		public static int RecordsCount(this IDalc dalc, Query q) {
 			var qCount = new Query(q);
 			qCount.Sort = null;
-			qCount.Fields = new[] { "count(*)" };
+			qCount.Fields = new QField[] { "count(*)" };
             qCount.StartRecord = 0;
             qCount.RecordCount = 1;
 			return Convert.ToInt32( LoadValue(dalc, qCount ) );

@@ -17,6 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Security.Principal;
 
@@ -153,7 +154,7 @@ namespace NI.Data.Permissions
 
 				DataSet ds = new DataSet();
 				Query query = new Query(opParams.SourceName, queryGroupAnd);
-				query.Fields = (string[])fieldsToExtract.ToArray(typeof(string));
+				query.SetFields( fieldsToExtract.ToArray(typeof(string)).Cast<string>().ToArray() );
 				OriginalDalc.Load(query, ds);
 
 				// process results
@@ -216,7 +217,7 @@ namespace NI.Data.Permissions
 				return OriginalDalc.RecordsCount( new Query(sourcename, condition) )>0;
 			ListDictionary rInfo = new ListDictionary();
 			Query q = new Query(sourcename, condition);
-			q.Fields = new string[] {"1"};
+			q.Fields = new QField[] {"1"};
 			return OriginalDalc.LoadRecord(q)!=null;
 		}
 

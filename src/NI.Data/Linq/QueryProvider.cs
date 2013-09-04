@@ -139,7 +139,7 @@ namespace NI.Data.Linq
 
 		protected void ApplySelect(Query q, MethodCallExpression call) {
 			BuildDalcQuery(q, call.Arguments[0]);
-			q.Fields = new string[] { ComposeFieldValue(call.Arguments[1]).Name };
+			q.Fields = new QField[] { ComposeFieldValue(call.Arguments[1]) };
 		}
 
 		protected void ApplyOrderBy(Query q, MethodCallExpression call) {
@@ -175,12 +175,12 @@ namespace NI.Data.Linq
 
 		protected void AddQuerySort(Query q, string sortFld) {
 			if (q.Sort != null) {
-				string[] newSort = new string[q.Sort.Length + 1];
+				var newSort = new QSortField[q.Sort.Length + 1];
 				Array.Copy(q.Sort, newSort, q.Sort.Length);
 				newSort[q.Sort.Length] = sortFld;
 				q.Sort = newSort;
 			} else {
-				q.Sort = new string[] { sortFld };
+				q.Sort = new QSortField[] { sortFld };
 			}
 		}
 

@@ -62,11 +62,11 @@ namespace NI.Tests.Data.Dalc
 			
 			Query subQuery = new Query("roles");
 			subQuery.Condition = (QField)"role"==(QConst)"admin";
-			subQuery.Fields = new string[] { "id" };
+			subQuery.Fields = new QField[] { "id" };
 			
 			Query q = new Query("users");
 			q.Condition = (QField)"role" == subQuery;
-			q.Sort = new string[] { "name" };
+			q.Sort = new QSortField[] { "name" };
 
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
@@ -75,7 +75,7 @@ namespace NI.Tests.Data.Dalc
 				ds.Tables["users"].Rows[1]["name"].ToString()!="Vitalik")
 				throw new Exception("Load failed");
 			
-			q.Sort = new string[] { "role", "name DESC" };
+			q.Sort = new QSortField[] { "role", "name DESC" };
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
 				throw new Exception("Load failed");
@@ -95,7 +95,7 @@ namespace NI.Tests.Data.Dalc
 
 			Query subQuery = new Query("roles");
 			subQuery.Condition = (QField)"role"==(QConst)"user";
-			subQuery.Fields = new string[] { "id" };
+			subQuery.Fields = new QField[] { "id" };
 			Query q = new Query("users");
 			q.Condition = (QField)"role" == subQuery;
 			

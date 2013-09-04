@@ -143,7 +143,7 @@ namespace NI.Data
 				return ((QRawSql)value).SqlText;
 
 			if (value is QSortField) {
-				var fldName = BuildValue( (QField) ((QSortField)value).Name);
+				var fldName = BuildValue( ((QSortField)value).Field);
 				return new QSortField(fldName, ((QSortField)value).SortDirection).ToString();
 			}
 			

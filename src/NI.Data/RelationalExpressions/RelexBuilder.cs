@@ -13,6 +13,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Globalization;
 using System.Text;
@@ -53,9 +54,11 @@ namespace NI.Data.RelationalExpressions {
 				string rootExpression = BuildExpression(q.Condition);
 				if (rootExpression != null && rootExpression.Length > 0)
 					rootExpression = String.Format("({0})", rootExpression);
-				string fieldExpression = q.Fields != null ? String.Join(",", q.Fields) : "*";
+				string fieldExpression = q.Fields != null ? 
+					String.Join(",", q.Fields.Select(v=>(string)v).ToArray() ) : "*";
 				if (q.Sort != null && q.Sort.Length > 0) {
-					fieldExpression = String.Format("{0};{1}", fieldExpression, String.Join(",", q.Sort));
+					fieldExpression = String.Format("{0};{1}", fieldExpression, 
+						String.Join(",", q.Sort.Select(v=>(string)v).ToArray()));
 				}
 				string limitExpression = isNested || (q.StartRecord==0 && q.RecordCount==Int32.MaxValue) ? 
 					String.Empty : String.Format("{{{0},{1}}}", q.StartRecord, q.RecordCount);

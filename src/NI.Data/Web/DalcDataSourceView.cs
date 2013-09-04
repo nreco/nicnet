@@ -17,6 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using NI.Data;
@@ -51,7 +52,7 @@ namespace NI.Data.Web {
 			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
 			q.Condition = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
-				q.Sort = arguments.SortExpression.Split(',');
+				q.Sort = arguments.SortExpression.Split(',').Select(v=>(QSortField)v).ToArray();
 			DataSet ds = GetDataSet();
 
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, arguments, ds);

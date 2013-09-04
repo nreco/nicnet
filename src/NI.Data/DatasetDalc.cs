@@ -14,6 +14,7 @@
 
 using System;
 using System.Data;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -53,7 +54,7 @@ namespace NI.Data
 				ds.Tables[query.SourceName].Rows.Clear();
 			
 			if (query.Fields != null && query.Fields.Length != 0) {
-				if (query.Fields.Length == 1 && query.Fields[0] == "count(*)") {
+				if (query.Fields.Length == 1 && query.Fields[0].Name == "count(*)") {
 					ds.Tables.Remove(query.SourceName);
 					var t = ds.Tables.Add(query.SourceName);
 					t.Columns.Add("count", typeof(int));
@@ -64,7 +65,7 @@ namespace NI.Data
 				}
 
 				for (int i=0; i<query.Fields.Length; i++) {
-					string fld = query.Fields[i];
+					string fld = query.Fields[i].Name;
 					if (ds.Tables[query.SourceName].Columns.Contains(fld))
 						continue;
 					DataColumn column = new DataColumn();
@@ -226,12 +227,12 @@ namespace NI.Data
 				string sortExpression = BuildSort( q );
 				DataRow[] result = PersistedDS.Tables[q.SourceName].Select( whereExpression, sortExpression );
 				if (result.Length==1)
-					return base.BuildValue( new QConst(result[0][q.Fields[0]]) );
+					return base.BuildValue( new QConst(result[0][q.Fields[0].Name]) );
 				if (result.Length>1) {
 					// build array
 					object[] resValues = new object[result.Length];
 					for (int i=0; i<resValues.Length; i++)
-						resValues[i] = result[i][q.Fields[0]];
+						resValues[i] = result[i][q.Fields[0].Name];
 					return base.BuildValue( new QConst(resValues) );
 				}
 				
@@ -242,7 +243,7 @@ namespace NI.Data
 		
 		protected virtual string BuildSort(Query q) {
 			if (q.Sort!=null && q.Sort.Length>0)
-				return string.Join(",", q.Sort);
+				return string.Join(",", q.Sort.Select(v=>(string)v).ToArray() );
 			return null;
 		}
 

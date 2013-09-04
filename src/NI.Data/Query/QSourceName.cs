@@ -46,15 +46,17 @@ namespace NI.Data
 			Name = sourceName;
 			Alias = alias;
 		}
-
-		public static explicit operator QSourceName(string sourcename) {
-			return new QSourceName(sourcename);
-		}
 		
 		public override string ToString() {
 			return String.IsNullOrEmpty(Alias) ? Name : Name+"."+Alias;
 		}
-		
+
+		public static implicit operator QSourceName(string value) {
+			return new QSourceName(value);
+		}
+		public static implicit operator string(QSourceName value) {
+			return value.ToString();
+		}
 		
 	}
 }

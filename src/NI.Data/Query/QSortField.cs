@@ -13,6 +13,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.ComponentModel;
 
 namespace NI.Data
@@ -25,7 +26,14 @@ namespace NI.Data
 		public const string Asc = "asc";
 		public const string Desc = "desc";
 
-		public string Name { get; private set; }
+		/// <summary>
+		/// Sort field
+		/// </summary>
+		public QField Field { get; private set; }
+		
+		/// <summary>
+		/// Sort direction
+		/// </summary>
 		public ListSortDirection SortDirection { get; private set; }
 				
 		public QSortField(string sortFld) {
@@ -43,22 +51,25 @@ namespace NI.Data
 			else
 				sortDirectionFound = false;
 
-			Name = sortDirectionFound ? sortFld.Substring(0, lastSpaceIdx).TrimEnd() : sortFld;
-			if (Name == String.Empty)
+			Field = new QField( sortDirectionFound ? sortFld.Substring(0, lastSpaceIdx).TrimEnd() : sortFld );
+			if (Field.Name == String.Empty)
 				throw new ArgumentException("Invalid sort field");
 		}
 		public QSortField(string sortFldName, ListSortDirection direction) {
-			Name = sortFldName;
+			Field = (QField)sortFldName;
 			SortDirection = direction;
 		}
 		
-		public static explicit operator QSortField(string sortFld) {
-			return new QSortField(sortFld);
-		}
-		
 		public override string ToString() {
-			return String.Format("{0} {1}", Name, SortDirection==ListSortDirection.Ascending ? Asc : Desc );
+			return String.Format("{0} {1}", Field.ToString(), SortDirection==ListSortDirection.Ascending ? Asc : Desc );
 		}
-		
+
+		public static implicit operator QSortField(string value) {
+			return new QSortField(value);
+		}
+		public static implicit operator string(QSortField value) {
+			return value.ToString();
+		}
+
 	}
 }

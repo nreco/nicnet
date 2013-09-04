@@ -14,6 +14,7 @@
 
 using System;
 using System.Data;
+using System.Linq;
 using System.Collections;
 using System.Reflection;
 using System.Text;
@@ -71,7 +72,7 @@ namespace NI.Data
 				string[] sortFields = new string[query.Sort.Length];
 				for (int i=0; i<sortFields.Length; i++) {
 					var sortFld = (QSortField)query.Sort[i];
-					sortFields[i] = BuildValue( sortFld );
+					sortFields[i] = BuildValue( (IQueryValue)sortFld );
 				}
 				
 				return String.Join(",", sortFields);
@@ -83,7 +84,7 @@ namespace NI.Data
 			// Compose fields part
 			string[] fields = (query.Fields==null || query.Fields.Length==0) ?
 					new string[] {"*"} :
-					(string[])query.Fields.Clone();
+					query.Fields.Select(v=>(string)v).ToArray();
 					
 			for (int i=0; i<fields.Length; i++)
 				fields[i] = this.BuildValue( new QField(fields[i]) );
