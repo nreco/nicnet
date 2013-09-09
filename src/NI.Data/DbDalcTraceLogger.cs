@@ -68,13 +68,13 @@ namespace NI.Data {
 			get { return _DbDalcEventsMediator; }
 			set { 
 				if (_DbDalcEventsMediator!=null) {
-					_DbDalcEventsMediator.CommandExecuting -= new DbCommandEventHandler(DbDalcCommandExecuting);
-					_DbDalcEventsMediator.CommandExecuted -= new DbCommandEventHandler(DbDalcCommandExecuted);
+					_DbDalcEventsMediator.CommandExecuting -= new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuting);
+					_DbDalcEventsMediator.CommandExecuted -= new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuted);
 				}
 				_DbDalcEventsMediator = value;
 				if (_DbDalcEventsMediator!=null) {
-					_DbDalcEventsMediator.CommandExecuting += new DbCommandEventHandler(DbDalcCommandExecuting);
-					_DbDalcEventsMediator.CommandExecuted += new DbCommandEventHandler(DbDalcCommandExecuted);
+					_DbDalcEventsMediator.CommandExecuting += new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuting);
+					_DbDalcEventsMediator.CommandExecuted += new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuted);
 				
 				}
 			}

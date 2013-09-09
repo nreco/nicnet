@@ -64,6 +64,5 @@ namespace NI.Data
 		}
 	}
 	
-	public delegate void DbCommandEventHandler(object sender, DbCommandEventArgs args);
 	
 }

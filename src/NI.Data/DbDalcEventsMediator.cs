@@ -27,9 +27,9 @@ namespace NI.Data
 
 		public event DbRowUpdatedEventHandler RowUpdated;
 
-		public event DbCommandEventHandler CommandExecuting;
+		public event EventHandler<DbCommandEventArgs> CommandExecuting;
 
-		public event DbCommandEventHandler CommandExecuted;
+		public event EventHandler<DbCommandEventArgs> CommandExecuted;
 
 		public DbDalcEventsMediator()
 		{

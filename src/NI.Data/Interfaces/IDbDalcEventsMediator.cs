@@ -36,12 +36,12 @@ namespace NI.Data
 		/// <summary>
 		/// Occurs before a DB command is executed
 		/// </summary>
-		event DbCommandEventHandler CommandExecuting;
+		event EventHandler<DbCommandEventArgs> CommandExecuting;
 
 		/// <summary>
 		/// Occurs after a DB command is executed
 		/// </summary>
-		event DbCommandEventHandler CommandExecuted;
+		event EventHandler<DbCommandEventArgs> CommandExecuted;
 		
 		
 		/// <summary>

@@ -106,10 +106,6 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CacheDalc.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="CacheDbDalc.cs" />
     <Compile Include="DalcExt.cs" />
     <Compile Include="DalcManager.cs" />
     <Compile Include="DataHelper.cs" />
@@ -123,7 +119,7 @@
     </Compile>
     <Compile Include="DbCommandGenerator.cs" />
     <Compile Include="DbDalcTraceLogger.cs" />
-    <Compile Include="DbDALC.cs" />
+    <Compile Include="DbDalc.cs" />
     <Compile Include="DbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -139,9 +135,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbTypeResolver.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FailsafeDalc.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDalc.cs">
@@ -261,7 +254,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SqlClient\SqlFactory.cs" />
-    <Compile Include="ThreadsafeDalc.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />
     <Compile Include="Web\DalcCacheDependency.cs" />
