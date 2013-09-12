@@ -14,7 +14,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Diagnostics;
 using System.ComponentModel;
 
@@ -25,77 +27,63 @@ namespace NI.Data
 	/// </summary>
 	public class DbCommandGenerator : IDbCommandGenerator
 	{
-		private IDbCommandWrapperFactory _CommandWrapperFactory = null;
 
 		/// <summary>
-		/// DB Command Wrapper Factory
+		/// DB Factory instance
 		/// </summary>
-		public IDbCommandWrapperFactory CommandWrapperFactory { 
-			get { return _CommandWrapperFactory; }
-			set { _CommandWrapperFactory = value; }
-		}
-		
-		/// <summary>
-		/// Initializes a new instance of the DbCommandGenerator class.
-		/// Note: DbFactory property should be set before using this component.
-		/// </summary>
-		public DbCommandGenerator() {
-		}
+		protected IDbDalcFactory DbFactory {  get; set; }
 		
 		/// <summary>
 		/// Initializes a new instance of the DbCommandGenerator class.
 		/// </summary>
-		/// <param name="dbFactory">IDbFactory implementation</param>
-		public DbCommandGenerator(IDbCommandWrapperFactory commandWrapperFactory) {
-			CommandWrapperFactory = commandWrapperFactory;
+		public DbCommandGenerator(IDbDalcFactory dbFactory) {
+			DbFactory = dbFactory;
 		}
 		
 		/// <summary>
+		/// Generate SELECT statement by query structure
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeSelect(Query query) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
-			cmdWrapper.Command.CommandText = dbSqlBuilder.BuildSelect(query);
-			return cmdWrapper;
+		public virtual IDbCommand ComposeSelect(Query query) {
+			var cmd = DbFactory.CreateCommand();
+			var cmdSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
+			cmd.CommandText = cmdSqlBuilder.BuildSelect(query);
+			return cmd;
 		}
-
-
-
 		
 		/// <summary>
 		/// Generates INSERT statement by DataTable
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeInsert(DataTable table) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeInsert(DataTable table) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
 			// Prepare fields part
-			ArrayList insertFields = new ArrayList();
-			ArrayList insertValues = new ArrayList();
+			var insertFields = new List<string>();
+			var insertValues = new List<string>();
 			foreach (DataColumn col in table.Columns)
-				if (!col.AutoIncrement || false) {
+				if (!col.AutoIncrement) {
 					insertFields.Add(col.ColumnName);
 					insertValues.Add( dbSqlBuilder.BuildCommandParameter( col, DataRowVersion.Current ) );
 				}
 				
-			cmdWrapper.Command.CommandText = String.Format(
+			cmd.CommandText = String.Format(
 				"INSERT INTO {0} ({1}) VALUES ({2})",
 				table.TableName,
-				String.Join(",", (string[]) insertFields.ToArray(typeof(string))) ,
-				String.Join(",", (string[]) insertValues.ToArray(typeof(string))) );
+				String.Join(",", insertFields.ToArray()) ,
+				String.Join(",", insertValues.ToArray()) );
 			
-			return cmdWrapper;
+			return cmd;
 		}
 		
 		/// <summary>
 		/// Generates DELETE statement by DataTable
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeDelete(DataTable table) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeDelete(DataTable table) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare WHERE part
-			ArrayList primaryKeys = new ArrayList();
+			var primaryKeys = new List<string>();
 			foreach (DataColumn col in table.PrimaryKey) {
 				string condition = String.Format(
 						"{0}={1}",
@@ -107,53 +95,53 @@ namespace NI.Data
 			if (primaryKeys.Count==0)
 				throw new Exception("Cannot generate DELETE command for table without primary key");
 
-			cmdWrapper.Command.CommandText = String.Format(
+			cmd.CommandText = String.Format(
 				"DELETE FROM {0} WHERE {1}",
 				table.TableName,
-				String.Join(" AND ", (string[]) primaryKeys.ToArray(typeof(string))) );
+				String.Join(" AND ", primaryKeys.ToArray()) );
 
-			return cmdWrapper;
+			return cmd;
 		}
 		
 		/// <summary>
 		/// Generates DELETE statement by query
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeDelete(Query query) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeDelete(Query query) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare WHERE part
-			string whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
+			var whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
 			
-			cmdWrapper.Command.CommandText = String.Format("DELETE FROM {0}",query.SourceName);
+			cmd.CommandText = String.Format("DELETE FROM {0}",query.SourceName);
 			if (whereExpression!=null && whereExpression.Length>0)
-				cmdWrapper.Command.CommandText += " WHERE "+whereExpression;
+				cmd.CommandText += " WHERE "+whereExpression;
 
-			return cmdWrapper;
+			return cmd;
 		}		
 		
 		
 		/// <summary>
 		/// Generates UPDATE statement by DataTable
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeUpdate(DataTable table) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeUpdate(DataTable table) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
 			// prepare fields Part
-			ArrayList updateFieldNames = new ArrayList();
-			ArrayList updateFieldValues = new ArrayList();
-			foreach (DataColumn col in table.Columns) if (!col.AutoIncrement) {
-				updateFieldNames.Add( col.ColumnName );
-				updateFieldValues.Add( dbSqlBuilder.BuildCommandParameter(
-					col, DataRowVersion.Current ) );
-			}
-			string updateExpression = dbSqlBuilder.BuildSetExpression(
-				(string[])updateFieldNames.ToArray(typeof(string)),
-				(string[])updateFieldValues.ToArray(typeof(string)) );
+			var updateFieldNames = new List<string>();
+			var updateFieldValues = new List<string>();
+			foreach (DataColumn col in table.Columns) 
+				if (!col.AutoIncrement) {
+					updateFieldNames.Add( col.ColumnName );
+					updateFieldValues.Add( 
+						dbSqlBuilder.BuildCommandParameter( col, DataRowVersion.Current ) );
+				}
+			string updateExpression = BuildSetExpression(dbSqlBuilder,
+				updateFieldNames.ToArray(), updateFieldValues.ToArray() );
 			
 			// prepare WHERE part
-			QueryGroupNode primaryKeyGroup = new QueryGroupNode(GroupType.And);
+			var primaryKeyGroup = new QueryGroupNode(GroupType.And);
 			foreach (DataColumn col in table.PrimaryKey) {
 				string valueParameterName = dbSqlBuilder.BuildCommandParameter(
 					col, DataRowVersion.Original);
@@ -164,15 +152,12 @@ namespace NI.Data
 			if (primaryKeyGroup.Nodes.Count==0)
 				throw new Exception("Cannot generate UPDATE command for table without primary key");
 			
-			string whereExpression = dbSqlBuilder.BuildExpression(primaryKeyGroup);
-			
-			cmdWrapper.Command.CommandText = String.Format(
+			var whereExpression = dbSqlBuilder.BuildExpression(primaryKeyGroup);
+			cmd.CommandText = String.Format(
 				"UPDATE {0} SET {1} WHERE {2}",
-				table.TableName,
-				updateExpression,
-				whereExpression );
+				table.TableName, updateExpression, whereExpression );
 				
-			return cmdWrapper;			
+			return cmd;			
 		}
 		
 		/// <summary>
@@ -181,15 +166,15 @@ namespace NI.Data
 		/// <param name="changesData"></param>
 		/// <param name="query"></param>
 		/// <returns></returns>
-		public virtual IDbCommandWrapper ComposeUpdate(IDictionary changesData, Query query) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeUpdate(IDictionary changesData, Query query) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare fields Part
-			ArrayList updateFieldNames = new ArrayList();
-			ArrayList updateFieldValues = new ArrayList();
+			var updateFieldNames = new List<string>();
+			var updateFieldValues = new List<string>();
 			foreach (object field in changesData.Keys) {
-				updateFieldNames.Add( field );
+				updateFieldNames.Add( Convert.ToString( field ) );
 				if (changesData[field] is QRawSql) {
 					// QRawConst can be used for specifying SQL-specific update
 					updateFieldValues.Add( ((QRawSql)changesData[field]).SqlText );
@@ -197,20 +182,19 @@ namespace NI.Data
 					updateFieldValues.Add( dbSqlBuilder.BuildCommandParameter( changesData[field] ) ); 
 				}
 			}
-			string setExpression = dbSqlBuilder.BuildSetExpression( 
-				(string[])updateFieldNames.ToArray(typeof(string)),
-				(string[])updateFieldValues.ToArray(typeof(string)) );
+			string setExpression = BuildSetExpression(dbSqlBuilder,
+				updateFieldNames.ToArray(), updateFieldValues.ToArray() );
 			
 			// prepare WHERE part
 			string whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
 			
-			cmdWrapper.Command.CommandText = String.Format(
+			cmd.CommandText = String.Format(
 				"UPDATE {0} SET {1}",
 				query.SourceName, setExpression);
 			if (whereExpression!=null)
-				cmdWrapper.Command.CommandText += " WHERE "+whereExpression;
+				cmd.CommandText += " WHERE "+whereExpression;
 			
-			return cmdWrapper;
+			return cmd;
 		}
 
 
@@ -218,25 +202,37 @@ namespace NI.Data
 		/// <summary>
 		/// Generates INSERT statement by row data
 		/// </summary>
-		public virtual IDbCommandWrapper ComposeInsert(IDictionary data, string sourceName) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		public virtual IDbCommand ComposeInsert(IDictionary data, string sourceName) {
+			var cmd = DbFactory.CreateCommand();
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
 			// Prepare fields part
-			ArrayList insertFields = new ArrayList();
-			ArrayList insertValues = new ArrayList();
+			var insertFields = new List<string>();
+			var insertValues = new List<string>();
 			foreach (object field in data.Keys) {
-				insertFields.Add( field );
+				insertFields.Add( Convert.ToString( field ) );
 				insertValues.Add( dbSqlBuilder.BuildCommandParameter( data[field] ) );
 			}
 			
-			cmdWrapper.Command.CommandText = String.Format(
+			cmd.CommandText = String.Format(
 				"INSERT INTO {0} ({1}) VALUES ({2})",
 				sourceName,
-				String.Join(",", (string[]) insertFields.ToArray(typeof(string))) ,
-				String.Join(",", (string[]) insertValues.ToArray(typeof(string))) );
+				String.Join(",", insertFields.ToArray()) ,
+				String.Join(",", insertValues.ToArray()) );
 			
-			return cmdWrapper;
+			return cmd;
+		}
+
+		protected virtual string BuildSetExpression(IDbSqlBuilder sqlBuilder, string[] fieldNames, string[] fieldValues) {
+			if (fieldNames.Length != fieldValues.Length)
+				throw new ArgumentException();
+			var parts = new List<string>();
+			for (int i = 0; i < fieldNames.Length; i++) {
+				string condition = String.Format("{0}={1}",
+					sqlBuilder.BuildValue(new QField(fieldNames[i])), fieldValues[i]);
+				parts.Add(condition);
+			}
+			return String.Join(",", parts.ToArray());
 		}
 
 		

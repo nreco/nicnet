@@ -85,13 +85,13 @@ namespace NI.Tests.Data.RelationalExpressions
 		public void test_Parse() {
 			RelExQueryParser relExParser = new RelExQueryParser();
 			// generate SQL by query
-			SqlFactory factory = new SqlFactory();
+			SqlClientDalcFactory factory = new SqlClientDalcFactory();
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
 
 			for (int i=0; i<oldRelExSamples.Length; i++) {
 				string relEx = oldRelExSamples[i];
 				Query q = relExParser.Parse(relEx);
-				IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;
+				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
 				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed (AllowDumpConstations=true): "+i.ToString() );
 			}
@@ -99,7 +99,7 @@ namespace NI.Tests.Data.RelationalExpressions
 			for (int i=0; i<relExSamples.Length; i++) {
 				string relEx = relExSamples[i];
 				Query q = relExParser.Parse(relEx);
-				IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;
+				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
 				Assert.AreEqual(cmd.CommandText, relExCommandTexts[i], "Parse failed (AllowDumpConstations=false): "+i.ToString() );
 			}

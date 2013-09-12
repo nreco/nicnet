@@ -66,8 +66,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MySqlAdapterWrapper.cs" />
-    <Compile Include="MySqlCommandWrapper.cs" />
     <Compile Include="MySqlFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

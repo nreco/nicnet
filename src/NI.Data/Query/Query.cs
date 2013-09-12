@@ -169,7 +169,7 @@ namespace NI.Data
 					fieldExpression, sortExpression, q.StartRecord, q.RecordCount);
 			}
 			
-			protected override string BuildValue(IQueryValue value) {
+			public override string BuildValue(IQueryValue value) {
 				if (value is Query) 
 					return BuildQueryString( (Query) value );
 				return base.BuildValue (value);

@@ -25,17 +25,6 @@ namespace NI.Data
 	public interface ISqlDalc : IDalc {
 
 		/// <summary>
-		/// Connection
-		/// </summary>
-		IDbConnection Connection { get; set; }
-
-		/// <summary>
-		/// Transaction
-		/// </summary>
-		IDbTransaction Transaction { get; set; }
-
-
-		/// <summary>
 		/// Execute SQL command
 		/// </summary>
 		/// <param name="sqlText">SQL command text</param>
@@ -46,7 +35,6 @@ namespace NI.Data
 		/// Execute given raw SQL and return data reader
 		/// </summary>
 		void ExecuteReader(string sqlText, Action<IDataReader> handler);
-
 
 		/// <summary>
 		/// Execute custom SQL command and store result in specified dataset

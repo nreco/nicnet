@@ -23,7 +23,7 @@ namespace NI.Data.Permissions
 	/// <summary>
 	/// DbDALC proxy
 	/// </summary>
-	public class DbDalcProxy : BaseDalcProxy, ISqlDalc
+	/*public class DbDalcProxy : BaseDalcProxy, ISqlDalc
 	{
 		ISqlDalc _UnderlyingDbDalc;
 		
@@ -67,5 +67,5 @@ namespace NI.Data.Permissions
 			UnderlyingDbDalc.Load(sqlText, ds);
 		}
 
-	}
+	}*/
 }

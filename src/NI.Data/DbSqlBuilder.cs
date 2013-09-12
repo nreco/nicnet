@@ -29,12 +29,13 @@ namespace NI.Data
 		protected const string SelectFromPartFormatStr = "SELECT {0} FROM {1}";
 		protected const string SelectWherePartFormatStr = " WHERE {0}";
 		protected const string SelectOrderPartFormatStr = " ORDER BY {0}";
-		
-		protected IDbCommandWrapper CmdWrapper;
-		
-	
-		public DbSqlBuilder(IDbCommandWrapper cmdWrapper) {
-			CmdWrapper = cmdWrapper;
+
+		protected IDbCommand Command;
+		protected IDbDalcFactory DalcFactory;
+
+		public DbSqlBuilder(IDbCommand cmd, IDbDalcFactory dalcFactory) {
+			Command = cmd;
+			DalcFactory = dalcFactory;
 		}
 		
 		protected virtual string GetTableName(string sourceName) {
@@ -91,7 +92,7 @@ namespace NI.Data
 			return String.Join(",", fields);
 		}
 
-		protected override string BuildValue(IQueryValue value) {
+		public override string BuildValue(IQueryValue value) {
 			if (value is Query)
 				return "("+BuildSelectInternal( (Query)value, true )+")";
 
@@ -110,43 +111,15 @@ namespace NI.Data
 		
 		protected override string BuildValue(string str) {
 			return BuildCommandParameter( str );
-		}	
-		
-		
+		}
 		
 		public string BuildCommandParameter(object value) {
 			if (value is DataColumn) return ((DataColumn)value).ColumnName;
-			
-			string paramName = String.Format("@p{0}", CmdWrapper.Command.Parameters.Count);
-			
-			IDbDataParameter param = CmdWrapper.CreateCmdParameter(value);
-			param.ParameterName = paramName;
-			CmdWrapper.Command.Parameters.Add(param);
-			
-			return CmdWrapper.GetCmdParameterPlaceholder(paramName);
+			return DalcFactory.AddCommandParameter(Command,value);
 		}
-		
-		public string BuildCommandParameter(DataColumn column, DataRowVersion sourceVersion) {
-			string paramName = String.Format("@p{0}", CmdWrapper.Command.Parameters.Count);
 
-			IDbDataParameter param = CmdWrapper.CreateCmdParameter(column);
-			param.ParameterName = paramName;
-			param.SourceVersion = sourceVersion;
-			
-			CmdWrapper.Command.Parameters.Add(param);
-			return CmdWrapper.GetCmdParameterPlaceholder(paramName);
-		}
-		
-		public string BuildSetExpression(string[] fieldNames, string[] fieldValues) {
-			if (fieldNames.Length!=fieldValues.Length)
-				throw new ArgumentException();
-			ArrayList parts = new ArrayList();
-			for (int i=0; i<fieldNames.Length; i++) {
-				string condition = String.Format("{0}={1}",
-					BuildValue( new QField(fieldNames[i]) ), fieldValues[i] );
-				parts.Add( condition );
-			}
-			return String.Join(",", (string[])parts.ToArray(typeof(string)));
+		public string BuildCommandParameter(DataColumn column, DataRowVersion sourceVersion) {
+			return DalcFactory.AddCommandParameter(Command, column, sourceVersion);
 		}
 
 	

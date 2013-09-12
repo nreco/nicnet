@@ -22,7 +22,9 @@ namespace NI.Data
 	public interface ISqlBuilder
 	{
 		Func<QField,string> QueryFieldValueFormatter { get; set; }
-		
+
+		string BuildValue(IQueryValue v);
+
 		string BuildExpression(QueryNode node);
 	}
 }

@@ -16,7 +16,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Collections;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
@@ -27,95 +27,77 @@ namespace NI.Data {
 	/// <summary>
 	/// Database Data Access Layer Component
 	/// </summary>
-	public class DbDalc : ISqlDalc {
-
-		IDbConnection _Connection;
-		IDbTransaction _Transaction;
-		IDbCommandGenerator _CommandGenerator;
-		IDbDataAdapterWrapperFactory _AdapterWrapperFactory;
-		IDbDalcEventsMediator _DbDalcEventsMediator;
-		
-		Hashtable adapterCache = new Hashtable();
+	public class DbDalc : ISqlDalc, IDisposable {
+		Dictionary<string, IDbDataAdapter> updateAdapterCache = new Dictionary<string, IDbDataAdapter>();
 		
 		/// <summary>
 		/// Get or set database commands generator
 		/// </summary>
-		public IDbCommandGenerator CommandGenerator {
-			get { return _CommandGenerator; }
-			set { _CommandGenerator = value; }
-		}
+		public IDbCommandGenerator CommandGenerator { get; set; }
 		
 		/// <summary>
 		/// Get or set adapter wrapper factory component
 		/// </summary>
-		public IDbDataAdapterWrapperFactory AdapterWrapperFactory {
-			get { return _AdapterWrapperFactory; }
-			set { _AdapterWrapperFactory = value;	}
-		}
+		public IDbDalcFactory DbFactory { get; set; }
 		
 		/// <summary>
 		/// Get or set database connection
 		/// </summary>
-		public virtual IDbConnection Connection {
-			get { return _Connection; }
-			set { _Connection = value; }
+		public virtual IDbConnection Connection { get; set; }
+
+		public IDbDalcEventsMediator DbDalcEventsMediator { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the DbDalc for specified factory and connection.
+		/// </summary>
+		public DbDalc(IDbDalcFactory factory, IDbConnection connection) {
+			DbFactory = factory;
+			Connection = connection;
+			CommandGenerator = new DbCommandGenerator(factory);
 		}
 
 		/// <summary>
-		/// Database transaction object
+		/// Initializes a new instance of the DbDalc for specified factory and connection.
 		/// </summary>
-		public virtual IDbTransaction Transaction {
-			get {
-				return _Transaction;
-			}
-			set { _Transaction = value; }
-		}
-		
-		public IDbDalcEventsMediator DbDalcEventsMediator {
-			get { return _DbDalcEventsMediator; }
-			set { _DbDalcEventsMediator = value; }
+		public DbDalc(IDbDalcFactory factory, string connectionStr) {
+			DbFactory = factory;
+			Connection = factory.CreateConnection();
+			Connection.ConnectionString = connectionStr;
+			CommandGenerator = new DbCommandGenerator(factory);			
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the DbDalc class.
-		/// Note: Connection and CommandGenerator should be initialized
-		/// before using this component.
-		/// </summary>
-		public DbDalc() {
-		}
 		
 		/// <summary>
 		/// Load data to dataset by query
 		/// </summary>
 		public virtual DataTable Load(Query query, DataSet ds) {
-			IDbCommandWrapper selectCmdWrapper = CommandGenerator.ComposeSelect( query );
-			QSourceName source = new QSourceName(query.SourceName);
+			using (var selectCmd = CommandGenerator.ComposeSelect(query)) {
+				QSourceName source = query.SourceName;
 
-			selectCmdWrapper.Command.Connection = Connection;
-			selectCmdWrapper.SetTransaction(Transaction);
+				selectCmd.Connection = Connection;
 
-			IDbDataAdapterWrapper adapterWrapper = AdapterWrapperFactory.CreateInstance();
-			adapterWrapper.RowUpdating += new DbRowUpdatingEventHandler(this.OnRowUpdating);
-			adapterWrapper.RowUpdated += new DbRowUpdatedEventHandler(this.OnRowUpdated);
+				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
+				adapter.SelectCommand = selectCmd;
 
-			adapterWrapper.SelectCommadWrapper = selectCmdWrapper;
+				OnCommandExecuting(source.Name, StatementType.Select, selectCmd);
+				if (adapter is DbDataAdapter) {
+					((DbDataAdapter)adapter).Fill(ds, query.StartRecord, query.RecordCount, source.Name);
+				} else {
+					adapter.Fill(ds);
+				}
+				OnCommandExecuted(source.Name, StatementType.Select, selectCmd);
+				return ds.Tables[source.Name];
+			}
 			
-			OnCommandExecuting(source.Name, StatementType.Select, selectCmdWrapper.Command);
-			if (adapterWrapper.Adapter is DbDataAdapter)
-				((DbDataAdapter)adapterWrapper.Adapter).Fill(ds, query.StartRecord, query.RecordCount, source.Name);
-			else
-				adapterWrapper.Adapter.Fill( ds );
-			OnCommandExecuted(source.Name, StatementType.Select, selectCmdWrapper.Command);
-
-			return ds.Tables[source.Name];
 		}
 
 		/// <summary>
 		/// Delete data by query
 		/// </summary>
 		public virtual int Delete(Query query) {
-			IDbCommandWrapper deleteCmd = CommandGenerator.ComposeDelete(query);
-			return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
+			using (var deleteCmd = CommandGenerator.ComposeDelete(query)) {
+				return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
+			}
 		}
 
 
@@ -126,30 +108,23 @@ namespace NI.Data {
 		public virtual void Update(DataTable t) {
 			var tableName = t.TableName;
 
-			IDbDataAdapterWrapper adapterWrapper = adapterCache[tableName] as IDbDataAdapterWrapper;
-			if (adapterWrapper==null) {
-				adapterWrapper = AdapterWrapperFactory.CreateInstance();
-				adapterWrapper.RowUpdating += new DbRowUpdatingEventHandler(this.OnRowUpdating);
-				adapterWrapper.RowUpdated += new DbRowUpdatedEventHandler(this.OnRowUpdated);
-				
-				GenerateAdapterCommands( adapterWrapper, t);
-				
-				adapterCache[tableName] = adapterWrapper;
+			IDbDataAdapter adapter;
+			if (!updateAdapterCache.ContainsKey(tableName)) {
+				adapter = DbFactory.CreateDataAdapter(OnRowUpdating,OnRowUpdated);
+				GenerateAdapterCommands(adapter, t);
+				updateAdapterCache[tableName] = adapter;
+			} else {
+				adapter = updateAdapterCache[tableName];
 			}
 			
-			adapterWrapper.Adapter.InsertCommand.Connection = Connection;
-			adapterWrapper.InsertCommandWrapper.SetTransaction( Transaction );
+			adapter.InsertCommand.Connection = Connection;
+			adapter.UpdateCommand.Connection = Connection;
+			adapter.DeleteCommand.Connection = Connection;
 			
-			adapterWrapper.Adapter.UpdateCommand.Connection = Connection;
-			adapterWrapper.UpdateCommandWrapper.SetTransaction( Transaction );
-			
-			adapterWrapper.Adapter.DeleteCommand.Connection = Connection;
-			adapterWrapper.DeleteCommandWrapper.SetTransaction( Transaction );
-			
-			if (adapterWrapper.Adapter is DbDataAdapter)
-				((DbDataAdapter)adapterWrapper.Adapter).Update(t.DataSet, tableName);
+			if (adapter is DbDataAdapter)
+				((DbDataAdapter)adapter).Update(t.DataSet, tableName);
 			else
-				adapterWrapper.Adapter.Update(t.DataSet);
+				adapter.Update(t.DataSet);
 		}
 		
 		/// <summary>
@@ -158,22 +133,20 @@ namespace NI.Data {
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
 		public virtual int Update(Query query, IDictionary data) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeUpdate(data, query);
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction( Transaction );
-			
-			return ExecuteInternal( cmdWrapper, query.SourceName, StatementType.Update );
+			using (var cmd = CommandGenerator.ComposeUpdate(data, query)) {
+				cmd.Connection = Connection;
+				return ExecuteInternal(cmd, query.SourceName, StatementType.Update);
+			}
 		}
 
 		/// <summary>
 		/// <see cref="IDalc.Insert"/>
 		/// </summary>
 		public virtual void Insert(string sourceName, IDictionary data) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeInsert(data, sourceName);
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction( Transaction );
-			
-			ExecuteInternal( cmdWrapper, sourceName, StatementType.Insert );
+			using (var cmd = CommandGenerator.ComposeInsert(data, sourceName)) {
+				cmd.Connection = Connection;
+				ExecuteInternal(cmd, sourceName, StatementType.Insert);
+			}
 		}
 		
 		
@@ -183,73 +156,64 @@ namespace NI.Data {
 		/// <param name="sqlText">SQL command text to execute</param>
 		/// <returns>number of rows affected</returns>
 		public virtual int ExecuteNonQuery(string sqlText) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction( Transaction );
-			cmdWrapper.Command.CommandText = sqlText;
-			return ExecuteInternal(cmdWrapper, null, StatementType.Update);
+			using (var cmd = DbFactory.CreateCommand()) {
+				cmd.Connection = Connection;
+				cmd.CommandText = sqlText;
+				return ExecuteInternal(cmd, null, StatementType.Update);
+			}
 		}
 
-        protected virtual void ExecuteReaderInternal(IDbCommandWrapper cmdWrapper, string sourceName, Action<IDataReader> callback) {
-            bool closeConnection = false;
-            if (Connection.State != ConnectionState.Open) {
-                Connection.Open();
-                closeConnection = true;
-            }
-            try {
-                OnCommandExecuting(sourceName, StatementType.Select, cmdWrapper.Command);
-                IDataReader rdr = cmdWrapper.Command.ExecuteReader();
-                OnCommandExecuted(sourceName, StatementType.Select, cmdWrapper.Command);
-
-                callback(rdr);
-
-                if (!rdr.IsClosed)
-                    rdr.Close();
-            } finally {
-                // close only if was opened
-                if (closeConnection)
-                    Connection.Close();
-            }
+        protected virtual void ExecuteReaderInternal(IDbCommand cmd, string sourceName, Action<IDataReader> callback) {
+			DataHelper.EnsureConnectionOpen(Connection, () => {
+				OnCommandExecuting(sourceName, StatementType.Select, cmd);
+				IDataReader rdr = cmd.ExecuteReader();
+				try {
+					OnCommandExecuted(sourceName, StatementType.Select, cmd);
+					callback(rdr);
+				} finally {
+					if (!rdr.IsClosed)
+						rdr.Close();
+				}
+			});
         }
 
         /// <summary>
         /// Load data into datareader by custom SQL
         /// </summary>
 		public virtual void ExecuteReader(string sqlText, Action<IDataReader> callback) {
-   			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction(Transaction);
-			cmdWrapper.Command.CommandText = sqlText;
+			using (var cmd = DbFactory.CreateCommand()) {
+				cmd.Connection = Connection;
+				cmd.CommandText = sqlText;
 
-            ExecuteReaderInternal(cmdWrapper, null, callback);
+				ExecuteReaderInternal(cmd, null, callback);
+			}
 		}
 
         /// <summary>
         /// Load data into datareader by query
         /// </summary>
         public virtual void ExecuteReader(Query q, Action<IDataReader> callback) {
-            IDbCommandWrapper cmdWrapper = CommandGenerator.ComposeSelect(q);
-            cmdWrapper.SetTransaction(Transaction);
-            cmdWrapper.Command.Connection = Connection;
-
-            ExecuteReaderInternal(cmdWrapper, q.SourceName, callback);
+			using (var cmd = CommandGenerator.ComposeSelect(q)) {
+				cmd.Connection = Connection;
+				ExecuteReaderInternal(cmd, q.SourceName, callback);
+			}
         }
 		
         /// <summary>
         /// Load data into dataset by custom SQL
         /// </summary>
         public virtual void Load(string sqlText, DataSet ds) {
-			IDbCommandWrapper cmdWrapper = CommandGenerator.CommandWrapperFactory.CreateInstance();
-			cmdWrapper.Command.Connection = Connection;
-			cmdWrapper.SetTransaction( Transaction );
-			cmdWrapper.Command.CommandText = sqlText;
-			
-			IDbDataAdapterWrapper adapterWrapper = AdapterWrapperFactory.CreateInstance();
-			adapterWrapper.SelectCommadWrapper = cmdWrapper;			
-			
-			OnCommandExecuting(null, StatementType.Select, cmdWrapper.Command);
-			adapterWrapper.Adapter.Fill( ds );
-			OnCommandExecuted(null, StatementType.Select, cmdWrapper.Command);
+			using (var cmd = DbFactory.CreateCommand()) {
+				cmd.Connection = Connection;
+				cmd.CommandText = sqlText;
+
+				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
+				adapter.SelectCommand = cmd;
+
+				OnCommandExecuting(null, StatementType.Select, cmd);
+				adapter.Fill(ds);
+				OnCommandExecuted(null, StatementType.Select, cmd);
+			}
 		}
 		
 		
@@ -282,7 +246,7 @@ namespace NI.Data {
 		protected virtual void OnRowUpdated(object sender, RowUpdatedEventArgs e) {
 			if (e.StatementType == StatementType.Insert) {
 				// extract insert id
-				object insertId = ((IDbDataAdapterWrapper)sender).InsertCommandWrapper.GetInsertId();
+				object insertId = DbFactory.GetInsertId(Connection);
 				
 				if (insertId!=null && insertId!=DBNull.Value)
 					foreach (DataColumn col in e.Row.Table.Columns)
@@ -306,78 +270,61 @@ namespace NI.Data {
 		/// <summary>
 		/// Automatically generates Insert/Update/Delete commands for Adapter
 		/// </summary>
-		protected virtual void GenerateAdapterCommands(IDbDataAdapterWrapper adapterWrapper, DataTable table) {
+		protected virtual void GenerateAdapterCommands(IDbDataAdapter adapter, DataTable table) {
 			// Init DataAdapter
-			adapterWrapper.UpdateCommandWrapper = CommandGenerator.ComposeUpdate(table);
-			adapterWrapper.InsertCommandWrapper = CommandGenerator.ComposeInsert(table);
-			adapterWrapper.DeleteCommandWrapper = CommandGenerator.ComposeDelete(table);
+			adapter.UpdateCommand = CommandGenerator.ComposeUpdate(table);
+			adapter.InsertCommand = CommandGenerator.ComposeInsert(table);
+			adapter.DeleteCommand = CommandGenerator.ComposeDelete(table);
 		}
-		
+
 		/// <summary>
 		/// Execute SQL command
 		/// </summary>
-		virtual protected int ExecuteInternal(IDbCommandWrapper cmdWrapper, string sourceName, StatementType commandType) {
-			cmdWrapper.SetTransaction( Transaction );
-			cmdWrapper.Command.Connection = Connection;
+		virtual protected int ExecuteInternal(IDbCommand cmd, string sourceName, StatementType commandType) {
+			cmd.Connection = Connection;
 			
 			//Trace.WriteLine( cmdWrapper.Command.CommandText, "SQL" );
-
-			bool closeConn = false;
-			if (cmdWrapper.Command.Connection.State!=ConnectionState.Open) {
-				cmdWrapper.Command.Connection.Open();
-				closeConn = true;
-			}
-			
 			int res = 0;
-			try {
-				OnCommandExecuting(sourceName, commandType, cmdWrapper.Command);
-				res = cmdWrapper.Command.ExecuteNonQuery();
-				OnCommandExecuted(sourceName, commandType, cmdWrapper.Command);
-			} finally {
-				if (closeConn) cmdWrapper.Command.Connection.Close();
-			}
+			DataHelper.EnsureConnectionOpen(cmd.Connection, () => {
+				OnCommandExecuting(sourceName, commandType, cmd);
+				res = cmd.ExecuteNonQuery();
+				OnCommandExecuted(sourceName, commandType, cmd);
+			});
 			
 			return res;
 		}		
 		
-		virtual protected bool LoadRecordInternal(IDictionary data, IDbCommandWrapper cmdWrapper, string sourceName) {
+#endregion				
+		
+		private bool disposed = false;
 
-            cmdWrapper.SetTransaction( Transaction );
-			cmdWrapper.Command.Connection = Connection;
-			
-			bool closeConn = false;
-			if (cmdWrapper.Command.Connection.State!=ConnectionState.Open) {
-				cmdWrapper.Command.Connection.Open();
-				closeConn = true;
-			}
+		public void Dispose() {
+			Dispose(true);
+		}
 
-			//Trace.WriteLine( cmdWrapper.Command.CommandText, "SQL" );
-			
-			IDataReader reader = null;
-			try {
-				OnCommandExecuting(sourceName, StatementType.Select, cmdWrapper.Command);
-				reader = cmdWrapper.Command.ExecuteReader( System.Data.CommandBehavior.SingleRow );
-				OnCommandExecuted(sourceName, StatementType.Select, cmdWrapper.Command);
-
-				if (reader.Read()) {
-					// fetch all fields & values in hashtable
-					for (int i=0; i<reader.FieldCount; i++)
-						data[ reader.GetName(i) ] = reader.GetValue(i);
-						
-					return true;
+		protected virtual void Dispose(bool disposing) {
+			if (!this.disposed) {
+				foreach (var adapter in updateAdapterCache.Values) {
+					if (adapter.SelectCommand != null) {
+						adapter.SelectCommand.Dispose();
+						adapter.SelectCommand = null;
+					}
+					if (adapter.UpdateCommand != null) {
+						adapter.UpdateCommand.Dispose();
+						adapter.UpdateCommand = null;
+					}
+					if (adapter.DeleteCommand != null) {
+						adapter.DeleteCommand.Dispose();
+						adapter.DeleteCommand = null;
+					}
+					if (adapter.InsertCommand != null) {
+						adapter.InsertCommand.Dispose();
+						adapter.InsertCommand = null;
+					}
 				}
-				
-				return false;
-			} finally {
-				if (reader != null) reader.Close();
-				if (closeConn) cmdWrapper.Command.Connection.Close();
+				updateAdapterCache.Clear();
 			}
 		}
-		
-	
-#endregion				
-	
-
 	}
 	
 	

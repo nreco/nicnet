@@ -25,17 +25,15 @@ namespace NI.Data
 	/// </summary>
 	public interface IDbCommandGenerator 
 	{
-		IDbCommandWrapperFactory CommandWrapperFactory { get; set; }
-	
-		IDbCommandWrapper ComposeSelect(Query query);
-		
-		IDbCommandWrapper ComposeInsert(DataTable table);
-		IDbCommandWrapper ComposeInsert(IDictionary data, string sourceName);
+		IDbCommand ComposeSelect(Query query);
 
-		IDbCommandWrapper ComposeDelete(DataTable table);
-		IDbCommandWrapper ComposeDelete(Query query);
+		IDbCommand ComposeInsert(DataTable table);
+		IDbCommand ComposeInsert(IDictionary data, string sourceName);
 
-		IDbCommandWrapper ComposeUpdate(DataTable table);
-		IDbCommandWrapper ComposeUpdate(IDictionary changesData, Query query);
+		IDbCommand ComposeDelete(DataTable table);
+		IDbCommand ComposeDelete(Query query);
+
+		IDbCommand ComposeUpdate(DataTable table);
+		IDbCommand ComposeUpdate(IDictionary changesData, Query query);
 	}
 }

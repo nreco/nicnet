@@ -130,7 +130,7 @@ namespace NI.Data
 			return res;
 		}
 		
-		protected virtual string BuildValue(IQueryValue value) {
+		public virtual string BuildValue(IQueryValue value) {
 			if (value==null) return null;
 			
 			if (value is QField)

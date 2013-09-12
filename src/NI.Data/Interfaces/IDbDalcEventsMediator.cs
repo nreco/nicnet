@@ -26,12 +26,12 @@ namespace NI.Data
 		/// <summary>
 		/// Occurs during an update operation before a command is executed against the data source.
 		/// </summary>
-		event DbRowUpdatingEventHandler RowUpdating;
+		event EventHandler<RowUpdatingEventArgs> RowUpdating;
 
 		/// <summary>
 		/// Occurs during an update operation after a command is executed against the data source.
 		/// </summary>
-		event DbRowUpdatedEventHandler RowUpdated;
+		event EventHandler<RowUpdatedEventArgs> RowUpdated;
 		
 		/// <summary>
 		/// Occurs before a DB command is executed

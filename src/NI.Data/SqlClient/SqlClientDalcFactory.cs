@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2013 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,21 +15,29 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SQLite;
+using System.Data.SqlClient;
 using System.ComponentModel;
 
-namespace NI.Data.SQLite
+namespace NI.Data.SqlClient
 {
 
-	public class SQLiteDalcFactory : DbDalcFactory
+	public class SqlClientDalcFactory : DbDalcFactory
 	{
-		public SQLiteDalcFactory()
-			: base(SQLiteFactory.Instance) {
-			ParamPlaceholderFormat = "?";
+
+		public bool TopOptimization { get; set; }
+
+		public bool ConstOptimization { get; set; }
+
+		public bool NameBrackets { get; set; }
+
+		public SqlClientDalcFactory() : base(SqlClientFactory.Instance) {
+			TopOptimization = false;
+			ConstOptimization = false;
+			NameBrackets = false;
 		}
 
-		public override object GetInsertId(IDbConnection connection) {
-			return ((SQLiteConnection)connection).LastInsertRowId;
+		public override IDbSqlBuilder CreateSqlBuilder(IDbCommand dbCommand) {
+			return new SqlClientDbSqlBuilder(dbCommand, this);
 		}
 
 	}

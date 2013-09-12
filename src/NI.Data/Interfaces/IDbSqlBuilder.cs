@@ -14,6 +14,7 @@
 
 using System;
 using System.Data;
+using System.Data.Common;
 
 namespace NI.Data
 {
@@ -25,7 +26,6 @@ namespace NI.Data
 		string BuildSelect(Query query);
 		string BuildSort(Query query);
 		string BuildFields(Query query);
-		string BuildSetExpression(string[] fieldNames, string[] fieldValues);
 		string BuildCommandParameter(object value);
 		string BuildCommandParameter(DataColumn col, DataRowVersion sourceVersion);
 	}

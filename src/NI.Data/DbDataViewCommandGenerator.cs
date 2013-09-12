@@ -14,7 +14,7 @@
 
 using System;
 using System.Collections;
-
+using System.Data;
 
 namespace NI.Data
 {
@@ -31,11 +31,11 @@ namespace NI.Data
 		}
 	
 	
-		public DbDataViewCommandGenerator()
+		public DbDataViewCommandGenerator(IDbDalcFactory factory) : base(factory)
 		{
 		}
 		
-		public override IDbCommandWrapper ComposeSelect(Query query) {
+		public override IDbCommand ComposeSelect(Query query) {
 			QSourceName qSourceName = (QSourceName)query.SourceName;
 			for (int i=0; i<DataViews.Length; i++)
 				if (DataViews[i].MatchSourceName(qSourceName.Name))
@@ -46,15 +46,13 @@ namespace NI.Data
 		
 		/// <summary>
 		/// </summary>
-		protected virtual IDbCommandWrapper ComposeDataViewSelect(IDbDataView dataView, Query query) {
-			IDbCommandWrapper cmdWrapper = CommandWrapperFactory.CreateInstance();
+		protected virtual IDbCommand ComposeDataViewSelect(IDbDataView dataView, Query query) {
+			var cmd = DbFactory.CreateCommand();
 			
-			IDictionary context = BuildSqlCommandContext(cmdWrapper, dataView, query);
-			cmdWrapper.Command.CommandText = dataView.FormatSqlCommandText(context);
+			IDictionary context = BuildSqlCommandContext(cmd, dataView, query);
+			cmd.CommandText = dataView.FormatSqlCommandText(context);
 			
-			//System.Diagnostics.Trace.WriteLine( cmdWrapper.Command.CommandText );
-			
-			return cmdWrapper;
+			return cmd;
 		}
 		
 		/*protected Func<QField,string> InsertFormatter(Func<QField,string> original, Func<QField,string> additional) {
@@ -71,8 +69,8 @@ namespace NI.Data
 				
 		}*/
 		
-		protected virtual IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, Query query) {
-			IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+		protected virtual IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDataView dataView, Query query) {
+			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
 			// add dataview field formatter in the formatting chain
 			var origFormatter =  dbSqlBuilder.QueryFieldValueFormatter;

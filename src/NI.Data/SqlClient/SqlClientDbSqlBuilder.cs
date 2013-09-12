@@ -16,6 +16,7 @@ using System;
 using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Data;
 
 namespace NI.Data.SqlClient {
 	
@@ -26,16 +27,13 @@ namespace NI.Data.SqlClient {
 
 		protected const string SelectTopFromPartFormatStr = "SELECT TOP {2} {0} FROM {1}";
 		protected const string AsciiConstFormatStr = "'{0}'";
-		bool TopOptimization = true;
-		bool ConstOptimization = true;
-		bool UseNameBrackets = false;
 		protected static Regex asciiConstRegex = new Regex("^[-_0-9A-Za-z ,.%]*$", RegexOptions.Singleline|RegexOptions.Compiled);
 		protected const string BracketFormatStr = "[{0}]";
 
-		public SqlClientDbSqlBuilder(IDbCommandWrapper cmdWrapper, bool enableTopOpt, bool enableConstOpt, bool enableNameBrackets) : base(cmdWrapper) {
-			TopOptimization = enableTopOpt;
-			ConstOptimization = enableConstOpt;
-			UseNameBrackets = enableNameBrackets;
+		protected SqlClientDalcFactory SqlClientFactory;
+
+		public SqlClientDbSqlBuilder(IDbCommand cmd, SqlClientDalcFactory factory) : base(cmd, factory) {
+			SqlClientFactory = factory;
 		}
 
 		protected string FormatInBrackets(string s) {
@@ -47,7 +45,7 @@ namespace NI.Data.SqlClient {
 		}
 
 		protected override string GetTableName(string sourceName) {
-			if (UseNameBrackets) {
+			if (SqlClientFactory.NameBrackets) {
 				QSourceName qSourceName = (QSourceName)sourceName;
 				if (!String.IsNullOrEmpty(qSourceName.Alias))
 					return FormatInBrackets(qSourceName.Name) + " " + qSourceName.Alias;
@@ -57,7 +55,7 @@ namespace NI.Data.SqlClient {
 		}		
 
 		protected override string BuildValue(QConst value) {
-			if (ConstOptimization) {
+			if (SqlClientFactory.ConstOptimization) {
 				if (value.Type==TypeCode.String && (value.Value is string) && IsAsciiConst( (string)value.Value ))
 					return String.Format(AsciiConstFormatStr, value.Value);
 			}
@@ -66,7 +64,7 @@ namespace NI.Data.SqlClient {
 
 		protected override string BuildValue(QField fieldValue) {
 			string fldName = base.BuildValue(fieldValue);
-			if (UseNameBrackets) {
+			if (SqlClientFactory.NameBrackets) {
 				// additional check: base method may return SQL code for "virtual" field names
 				if (fldName == fieldValue.Name && !IsSqlExpression(fldName))
 					return FormatInBrackets(fldName);
@@ -87,7 +85,7 @@ namespace NI.Data.SqlClient {
 		
 		
 		protected override string BuildSelectInternal(Query query, bool isNested) {
-			if (!TopOptimization)
+			if (!SqlClientFactory.TopOptimization)
 				return base.BuildSelectInternal(query, isNested);
 			
 			string fields = BuildFields(query);

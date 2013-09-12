@@ -43,8 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SQLiteAdapterWrapper.cs" />
-    <Compile Include="SQLiteCommandWrapper.cs" />
     <Compile Include="SQLiteDbFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

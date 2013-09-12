@@ -218,7 +218,7 @@ namespace NI.Data
 		}
 		
 		
-		protected override string BuildValue(IQueryValue value) {
+		public override string BuildValue(IQueryValue value) {
 			if (value is Query) {
 				Query q = (Query)value;
 				if (q.Fields==null || q.Fields.Length!=1)

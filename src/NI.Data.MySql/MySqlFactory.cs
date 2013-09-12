@@ -16,38 +16,28 @@ using System;
 using System.Data;
 using System.Data.Common;
 using MySql.Data.MySqlClient;
+using MySql.Data;
 using System.ComponentModel;
 
 namespace NI.Data.MySql
 {
 
-	public class MySqlFactory : IDbCommandWrapperFactory, IDbDataAdapterWrapperFactory
+	public class MySqlDalcFactory : DbDalcFactory
 	{
-		QueryFieldValueFormatter _QueryFieldValueFormatter = null;
 
-		public Func<string, string> CmdParameterPlaceholderProvider { get; set; }
-
-		/// <summary>
-		/// Get or set default query field value formatter
-		/// </summary>
-		public QueryFieldValueFormatter QueryFieldValueFormatter {
-			get { return _QueryFieldValueFormatter; }
-			set { _QueryFieldValueFormatter = value; }
-		}
-	
-		IDbCommandWrapper IDbCommandWrapperFactory.CreateInstance() {
-			MySqlCommandWrapper cmdWrapper = new MySqlCommandWrapper( new MySqlCommand() );
-            if (CmdParameterPlaceholderProvider != null)
-                cmdWrapper.CmdParameterPlaceholderProvider = CmdParameterPlaceholderProvider;
-			cmdWrapper.QueryFieldValueFormatter = QueryFieldValueFormatter;
-			return cmdWrapper;
+		public MySqlDalcFactory()
+			: base(MySqlClientFactory.Instance) {
 		}
 
-		IDbDataAdapterWrapper IDbDataAdapterWrapperFactory.CreateInstance() {
-			return new MySqlAdapterWrapper( new MySqlDataAdapter() );
-		}
-		
-		
+		public override object GetInsertId(IDbConnection connection) {
+			if (connection.State != ConnectionState.Open)
+				throw new InvalidOperationException("GetInsertId requires opened connection");
+			using (var cmd = CreateCommand()) {
+				cmd.CommandText = "SELECT LAST_INSERT_ID()";
+				cmd.Connection = connection;
+				return cmd.ExecuteScalar();
+			}
+		}		
 		
 		
 

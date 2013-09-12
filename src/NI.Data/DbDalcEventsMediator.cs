@@ -23,9 +23,9 @@ namespace NI.Data
 	/// </summary>
 	public class DbDalcEventsMediator : IDbDalcEventsMediator
 	{
-		public event DbRowUpdatingEventHandler RowUpdating;
+		public event EventHandler<RowUpdatingEventArgs> RowUpdating;
 
-		public event DbRowUpdatedEventHandler RowUpdated;
+		public event EventHandler<RowUpdatedEventArgs> RowUpdated;
 
 		public event EventHandler<DbCommandEventArgs> CommandExecuting;
 

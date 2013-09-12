@@ -20,7 +20,7 @@ namespace NI.Data {
 	/// <summary>
 	/// Incapsulates classic ADO.NET explicit transactions mechanism with Begin/Commit/Abort methods
 	/// </summary>
-	public class DbDalcTransactionManager {
+	/*public class DbDalcTransactionManager {
 		
 		ISqlDalc _Dalc;
 		IsolationLevel _IsolationLevel = IsolationLevel.Unspecified;
@@ -73,7 +73,7 @@ namespace NI.Data {
 		
 		
 	
-	}
+	}*/
 
 
 

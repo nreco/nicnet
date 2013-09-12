@@ -60,7 +60,7 @@ namespace NI.Tests.Data.Dalc {
 		
 		[Test]
 		public void test_CommandGenerator() {
-			SqlFactory factory = new SqlFactory();
+			SqlClientDalcFactory factory = new SqlClientDalcFactory();
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
 			
 			Query q = new Query( "test" );
@@ -68,7 +68,7 @@ namespace NI.Tests.Data.Dalc {
 			q.Fields = new QField[] { "name", "age" };
 
 			// SELECT TEST
-			IDbCommand cmd = cmdGenerator.ComposeSelect( q ).Command;	
+			IDbCommand cmd = cmdGenerator.ComposeSelect( q );	
 			string masterSQL = "SELECT name,age FROM test WHERE (((name LIKE @p0) Or (NOT(age>=@p1))) And ((weight=@p2) And (type IN (@p3,@p4)))) Or ((name<>@p5) And (type IS NOT NULL))";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Select command generation failed");
@@ -77,7 +77,7 @@ namespace NI.Tests.Data.Dalc {
 			cmd = cmdGenerator.ComposeSelect(
 					new Query("accounts.a",
 						new QueryConditionNode( (QField)"a.id", Conditions.In, 
-							new Query("dbo.accounts.b", (QField)"a.id"!=(QField)"b.id" ) ) ) ).Command;
+							new Query("dbo.accounts.b", (QField)"a.id"!=(QField)"b.id" ) ) ) );
 			masterSQL = "SELECT * FROM accounts a WHERE a.id IN ((SELECT * FROM dbo.accounts b WHERE a.id<>b.id))";
 			Assert.AreEqual( masterSQL, cmd.CommandText);
 
@@ -91,14 +91,14 @@ namespace NI.Tests.Data.Dalc {
 			
 
 			// INSERT TEST
-			cmd = cmdGenerator.ComposeInsert( ds.Tables["test"] ).Command;
+			cmd = cmdGenerator.ComposeInsert( ds.Tables["test"] );
 			masterSQL = "INSERT INTO test (name,age,weight,type) VALUES (@p0,@p1,@p2,@p3)";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Insert command generation failed");
 			Assert.AreEqual( cmd.Parameters.Count, 4, "Insert command generation failed");
 			
 			// UPDATE TEST
-			cmd = cmdGenerator.ComposeUpdate( ds.Tables["test"] ).Command;
+			cmd = cmdGenerator.ComposeUpdate( ds.Tables["test"] );
 			masterSQL = "UPDATE test SET name=@p0,age=@p1,weight=@p2,type=@p3 WHERE name=@p4";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Update command generation failed");
@@ -107,21 +107,21 @@ namespace NI.Tests.Data.Dalc {
 			// UPDATE TEST (by query)
 			IDictionary changes = new Hashtable() {
 				{ "age", 21 }, { "name", "Alexandra" } };
-			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) ).Command;
+			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) );
 			masterSQL = "UPDATE test SET age=@p0,name=@p1 WHERE id=@p2";
 
 			Assert.AreEqual(masterSQL, cmd.CommandText, "Update command generation failed");
 			Assert.AreEqual(3, cmd.Parameters.Count, "Update command generation failed");
 			
 			// DELETE TEST
-			cmd = cmdGenerator.ComposeDelete( ds.Tables["test"] ).Command;
+			cmd = cmdGenerator.ComposeDelete( ds.Tables["test"] );
 			masterSQL = "DELETE FROM test WHERE name=@p0";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Delete command generation failed");
 			Assert.AreEqual( cmd.Parameters.Count, 1, "Delete command generation failed");
 			
 			// DELETE BY QUERY TEST
-			cmd = cmdGenerator.ComposeDelete( new Query("test", (QField)"id"==(QConst)5 ) ).Command;
+			cmd = cmdGenerator.ComposeDelete( new Query("test", (QField)"id"==(QConst)5 ) );
 			masterSQL = "DELETE FROM test WHERE id=@p0";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Delete command (by query) generation failed" );

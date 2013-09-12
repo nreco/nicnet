@@ -13,5 +13,19 @@ namespace NI.Data {
 			ds.ReadXml(new StringReader(xml));
 			return ds;
 		}
+
+		public static void EnsureConnectionOpen(IDbConnection connection, Action a) {
+			bool closeConn = false;
+			if (connection.State != ConnectionState.Open) {
+				connection.Open();
+				closeConn = true;
+			}
+			try {
+				a();
+			} finally {
+				if (closeConn)
+					connection.Close();
+			}
+		}
 	}
 }

@@ -118,6 +118,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbCommandGenerator.cs" />
+    <Compile Include="DbDalcFactory.cs" />
     <Compile Include="DbDalcTraceLogger.cs" />
     <Compile Include="DbDalc.cs" />
     <Compile Include="DbDalcEventsMediator.cs">
@@ -137,6 +138,7 @@
     <Compile Include="DbTypeResolver.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Interfaces\IDbDalcFactory.cs" />
     <Compile Include="Interfaces\IDalc.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -146,19 +148,10 @@
     <Compile Include="Interfaces\IDbCommandWrapper.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IDbCommandWrapperFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\ISqlDalc.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbDalcEventsMediator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IDbDataAdapterWrapper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IDbDataAdapterWrapperFactory.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbDataView.cs">
@@ -181,12 +174,6 @@
     <Compile Include="Linq\QueryProvider.cs" />
     <Compile Include="ObjectPersister.cs" />
     <Compile Include="ObjectQueryConditionEvaluator.cs" />
-    <Compile Include="Odbc\OdbcAdapterWrapper.cs" />
-    <Compile Include="Odbc\OdbcCommandWrapper.cs" />
-    <Compile Include="Odbc\OdbcFactory.cs" />
-    <Compile Include="OleDb\OleDbAdapterWrapper.cs" />
-    <Compile Include="OleDb\OleDbCommandWrapper.cs" />
-    <Compile Include="OleDb\OleDbFactory.cs" />
     <Compile Include="Permissions\BaseDalcProxy.cs" />
     <Compile Include="Permissions\CompositeDalcConditionComposer.cs" />
     <Compile Include="Permissions\DalcConditionComposer.cs" />
@@ -246,22 +233,12 @@
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SqlClient\SqlAdapterWrapper.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SqlClient\SqlClientDbSqlBuilder.cs" />
-    <Compile Include="SqlClient\SqlCommandWrapper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SqlClient\SqlFactory.cs" />
+    <Compile Include="SqlClient\SqlClientDalcFactory.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />
     <Compile Include="Web\DalcCacheDependency.cs" />
     <Compile Include="Web\DalcCacheDependencyDataRowTrigger.cs" />
-    <EmbeddedResource Include="SqlClient\SqlFactory.resx">
-      <DependentUpon>SqlFactory.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -17,6 +17,7 @@ using System.Threading;
 using System.Security.Principal;
 using System.Collections;
 using System.Text.RegularExpressions;
+using System.Data;
 
 
 namespace NI.Data.Permissions
@@ -35,7 +36,7 @@ namespace NI.Data.Permissions
 			set { _DalcConditionComposer = value; }
 		}
 		
-		public DbDataViewCommandGenerator()
+		public DbDataViewCommandGenerator(IDbDalcFactory factory) : base(factory)
 		{
 		}
 		
@@ -45,8 +46,8 @@ namespace NI.Data.Permissions
 			}
 		}		
 		
-		protected override IDictionary BuildSqlCommandContext(IDbCommandWrapper cmdWrapper, IDbDataView dataView, Query query) {
-			IDictionary context = base.BuildSqlCommandContext (cmdWrapper, dataView, query);
+		protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDataView dataView, Query query) {
+			IDictionary context = base.BuildSqlCommandContext (cmd, dataView, query);
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.SourceNameOrigin==null)
 				return context;
@@ -59,7 +60,7 @@ namespace NI.Data.Permissions
 				string whereExpressionPrefix = alias.Length>0 ? alias : sourceName;
 
 				QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, sourceName);
-				IDbSqlBuilder dbSqlBuilder = cmdWrapper.CreateSqlBuilder();
+				IDbSqlBuilder dbSqlBuilder = DbFactory.CreateSqlBuilder( cmd );
 				if (alias.Length > 0) {
 					var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
 					dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
