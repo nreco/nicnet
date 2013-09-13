@@ -22,7 +22,7 @@ namespace NI.Tests.Data.Dalc
 		[TestFixtureSetUp]
 		public void SetUp() {
 			dbFileName = Path.GetTempFileName()+".db";
-			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=True;",dbFileName);
+			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=False;",dbFileName);
 
 			Dalc = new DbDalc(new SQLiteDalcFactory(), connStr);
 
@@ -41,8 +41,8 @@ namespace NI.Tests.Data.Dalc
 				)
 			");
 
-			Dalc.Insert("users", new Hashtable { { "name", "Vitalik" }, { "role", 1 } });
-			Dalc.Insert("users", new Hashtable { { "name", "Darina" }, { "role", 1 } });
+			Dalc.Insert("users", new Hashtable { { "name", "Mike" }, { "role", 1 } });
+			Dalc.Insert("users", new Hashtable { { "name", "Joe" }, { "role", 1 } });
 			Dalc.Insert("users", new Hashtable { { "name", "Stas" }, { "role", 2 } });
 			Dalc.Insert("users", new Hashtable { { "name", "WUserToDelete" }, { "role", 3 } });
 
@@ -53,7 +53,9 @@ namespace NI.Tests.Data.Dalc
 
 		[TestFixtureTearDown]
 		public void CleanUp() {
-			((SQLiteConnection)Dalc.Connection).Shutdown();
+			Dalc.Dispose();
+			((SQLiteConnection)Dalc.Connection).Dispose();
+			SQLiteConnection.ClearAllPools();
 			GC.Collect();
 			if (dbFileName != null && File.Exists(dbFileName))
 				File.Delete(dbFileName);
@@ -63,7 +65,7 @@ namespace NI.Tests.Data.Dalc
 		[Test]
 		public void test_LoadRecord() {
 			Query q = new Query("users");
-			q.Condition = (QField)"name" == (QConst)"Vitalik";
+			q.Condition = (QField)"name" == (QConst)"Mike";
 			var res = Dalc.LoadRecord(q);
 			Assert.NotNull(res,"LoadRecord failed");
 			Assert.AreEqual(1,  Convert.ToInt32( res["id"] ), "LoadRecord failed");
@@ -82,26 +84,25 @@ namespace NI.Tests.Data.Dalc
 			q.Sort = new QSortField[] { "name" };
 
 			Dalc.Load( q, ds );
-			if (ds.Tables["users"].Rows.Count!=2)
-				throw new Exception("Load failed");
-			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Darina" ||
-				ds.Tables["users"].Rows[1]["name"].ToString()!="Vitalik")
-				throw new Exception("Load failed");
+			Assert.AreEqual(2, ds.Tables["users"].Rows.Count, "Load failed: rows count");
+			
+			Assert.AreEqual("Joe", ds.Tables["users"].Rows[0]["name"].ToString(), "Load failed: ivalid order");
+			Assert.AreEqual("Mike", ds.Tables["users"].Rows[1]["name"].ToString(), "Load failed: ivalid order");
 			
 			q.Sort = new QSortField[] { "role", "name DESC" };
+			ds.Clear();
 			Dalc.Load( q, ds );
-			if (ds.Tables["users"].Rows.Count!=2)
-				throw new Exception("Load failed");
 
-			Console.Write(ds.GetXml());
-			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Vitalik" ||
-				ds.Tables["users"].Rows[1]["name"].ToString()!="Darina")
-				throw new Exception("Load failed");
+			Console.WriteLine(ds.GetXml());
+			Assert.AreEqual(2, ds.Tables["users"].Rows.Count, "Load failed: rows count");
+
+			Assert.AreEqual("Mike", ds.Tables["users"].Rows[0]["name"].ToString(), "Load failed: ivalid order");
+			Assert.AreEqual("Joe", ds.Tables["users"].Rows[1]["name"].ToString(), "Load failed: ivalid order");
 			
 			q.Condition = (QField)"role" == subQuery & (QField)"id">(QConst)5;
+			ds.Clear();
 			Dalc.Load( q, ds );
-			if (ds.Tables["users"].Rows.Count!=0)
-				throw new Exception("Load failed");
+			Assert.AreEqual(0, ds.Tables["users"].Rows.Count, "Load failed");
 		}
 		
 		[Test]

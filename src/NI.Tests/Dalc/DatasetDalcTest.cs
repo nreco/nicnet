@@ -26,8 +26,8 @@ namespace NI.Tests.Data.Dalc
 			ds.Tables["users"].Columns.Add("role", typeof(string));
 			ds.Tables["users"].PrimaryKey = new DataColumn[] { idColumn };
 			
-			ds.Tables["users"].Rows.Add( new object[] {1, "Vitalik", "1" } );
-			ds.Tables["users"].Rows.Add( new object[] {2, "Darina", "1" } );
+			ds.Tables["users"].Rows.Add( new object[] {1, "Mike", "1" } );
+			ds.Tables["users"].Rows.Add( new object[] {2, "Joe", "1" } );
 			ds.Tables["users"].Rows.Add( new object[] {3, "Stas", "2" } );
 			
 			ds.Tables.Add("roles");
@@ -49,7 +49,7 @@ namespace NI.Tests.Data.Dalc
 		public void test_LoadRecord() {
 			DatasetDalc dsDalc = createDsDalc();
 			Query q = new Query("users");
-			q.Condition = (QField)"name" == (QConst)"Vitalik";
+			q.Condition = (QField)"name" == (QConst)"Mike";
 			var res = dsDalc.LoadRecord(q);
 			Assert.NotNull(res,"LoadRecord failed");
 			Assert.AreEqual(1, (int)res["id"], "LoadRecord failed");
@@ -71,16 +71,16 @@ namespace NI.Tests.Data.Dalc
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
 				throw new Exception("Load failed");
-			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Darina" ||
-				ds.Tables["users"].Rows[1]["name"].ToString()!="Vitalik")
+			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Joe" ||
+				ds.Tables["users"].Rows[1]["name"].ToString()!="Mike")
 				throw new Exception("Load failed");
 			
 			q.Sort = new QSortField[] { "role", "name DESC" };
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
 				throw new Exception("Load failed");
-			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Vitalik" ||
-				ds.Tables["users"].Rows[1]["name"].ToString()!="Darina")
+			if (ds.Tables["users"].Rows[0]["name"].ToString()!="Mike" ||
+				ds.Tables["users"].Rows[1]["name"].ToString()!="Joe")
 				throw new Exception("Load failed");
 			
 			q.Condition = (QField)"role" == subQuery & (QField)"id">(QConst)5;

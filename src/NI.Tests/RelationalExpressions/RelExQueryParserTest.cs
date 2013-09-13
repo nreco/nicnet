@@ -36,7 +36,7 @@ namespace NI.Tests.Data.RelationalExpressions
 
 
 		string[] relExSamples = new string[] {
-			"accounts(login = \"vitalik\" or id<=parent_id)[*]",
+			"accounts(login = \"Mike\" or id<=parent_id)[*]",
 			"accounts(login = \"vit\"\"alik\" or id<=5)[*]",
 			"accounts(1=2)[max(id),min(id)]",
 			"users(id=\"\")[*]",

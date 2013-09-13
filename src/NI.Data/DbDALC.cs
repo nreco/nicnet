@@ -76,15 +76,22 @@ namespace NI.Data {
 
 				selectCmd.Connection = Connection;
 
-				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
-				adapter.SelectCommand = selectCmd;
-
 				OnCommandExecuting(source.Name, StatementType.Select, selectCmd);
-				if (adapter is DbDataAdapter) {
-					((DbDataAdapter)adapter).Fill(ds, query.StartRecord, query.RecordCount, source.Name);
-				} else {
-					adapter.Fill(ds);
+
+				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
+				try {
+					adapter.SelectCommand = selectCmd;
+					if (adapter is DbDataAdapter) {
+						((DbDataAdapter)adapter).Fill(ds, query.StartRecord, query.RecordCount, source.Name);
+					} else {
+						adapter.Fill(ds);
+					}
+				} finally {
+					// some implementations are sensitive to explicit dispose
+					if (adapter is IDisposable)
+						((IDisposable)adapter).Dispose();
 				}
+
 				OnCommandExecuted(source.Name, StatementType.Select, selectCmd);
 				return ds.Tables[source.Name];
 			}
@@ -166,13 +173,14 @@ namespace NI.Data {
         protected virtual void ExecuteReaderInternal(IDbCommand cmd, string sourceName, Action<IDataReader> callback) {
 			DataHelper.EnsureConnectionOpen(Connection, () => {
 				OnCommandExecuting(sourceName, StatementType.Select, cmd);
-				IDataReader rdr = cmd.ExecuteReader();
-				try {
-					OnCommandExecuted(sourceName, StatementType.Select, cmd);
-					callback(rdr);
-				} finally {
-					if (!rdr.IsClosed)
-						rdr.Close();
+				using (var rdr = cmd.ExecuteReader()) {
+					try {
+						OnCommandExecuted(sourceName, StatementType.Select, cmd);
+						callback(rdr);
+					} finally {
+						if (!rdr.IsClosed)
+							rdr.Close();
+					}
 				}
 			});
         }
@@ -207,16 +215,21 @@ namespace NI.Data {
 				cmd.Connection = Connection;
 				cmd.CommandText = sqlText;
 
-				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
-				adapter.SelectCommand = cmd;
-
 				OnCommandExecuting(null, StatementType.Select, cmd);
-				adapter.Fill(ds);
+
+				var adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
+				try {
+					adapter.SelectCommand = cmd;
+					adapter.Fill(ds);
+				} finally {
+					// some implementations are sensitive to explicit dispose
+					if (adapter is IDisposable)
+						((IDisposable)adapter).Dispose();
+				}
+
 				OnCommandExecuted(null, StatementType.Select, cmd);
 			}
 		}
-		
-		
 
 #region Internal methods
 
@@ -304,6 +317,7 @@ namespace NI.Data {
 
 		protected virtual void Dispose(bool disposing) {
 			if (!this.disposed) {
+				disposed = true;
 				foreach (var adapter in updateAdapterCache.Values) {
 					if (adapter.SelectCommand != null) {
 						adapter.SelectCommand.Dispose();
@@ -321,6 +335,9 @@ namespace NI.Data {
 						adapter.InsertCommand.Dispose();
 						adapter.InsertCommand = null;
 					}
+					// some implementations are sensitive to explicit dispose
+					if (adapter is IDisposable)
+						((IDisposable)adapter).Dispose();					
 				}
 				updateAdapterCache.Clear();
 			}
