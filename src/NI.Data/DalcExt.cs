@@ -73,6 +73,22 @@ namespace NI.Data {
 			return rs.ToArray();
 		}
 
+		internal static IDictionary<string, IQueryValue> GetDalcChangeset(IDictionary data) {
+			var updateFields = new Dictionary<string, IQueryValue>();
+			foreach (DictionaryEntry entry in data)
+				updateFields[Convert.ToString(entry.Key)] = entry.Value is IQueryValue ?
+					(IQueryValue)entry.Value : new QConst(entry.Value);
+			return updateFields;
+		}
+
+		public static int Update(this IDalc dalc, Query q, IDictionary data) {
+			return dalc.Update(q, GetDalcChangeset(data) );
+		}
+
+		public static void Insert(this IDalc dalc, string sourceName, IDictionary data) {
+			dalc.Insert(sourceName, GetDalcChangeset(data));
+		}
+
 		public static int RecordsCount(this IDalc dalc, Query q) {
 			var qCount = new Query(q);
 			qCount.Sort = null;

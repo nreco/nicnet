@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -17,6 +18,7 @@ using System.Threading;
 using System.Security.Principal;
 using System.Collections;
 using System.Text.RegularExpressions;
+using System.Linq;
 using System.Data;
 
 
@@ -49,11 +51,11 @@ namespace NI.Data.Permissions
 		protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDataView dataView, Query query) {
 			IDictionary context = base.BuildSqlCommandContext (cmd, dataView, query);
 			// if origin does not specified, skip permission-conditions generation
-			if (dataView.SourceNameOrigin==null)
+			if (dataView.OriginSourceNames==null)
 				return context;
 			
 			// if origin more than one, or alias specified - generate '<table-alias>-whereExpression' tokens
-			Match m = SourceNameOriginsRegex.Match(dataView.SourceNameOrigin);
+			Match m = SourceNameOriginsRegex.Match( String.Join(",",  dataView.OriginSourceNames.Select(s=>s.ToString() ) ) );
 			for (int i=0; i<m.Groups["sourceName"].Captures.Count; i++) {
 				string sourceName = m.Groups["sourceName"].Captures[i].Value;
 				string alias = m.Groups["alias"].Captures[i].Value;
@@ -84,11 +86,11 @@ namespace NI.Data.Permissions
 		
 		protected override string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, Query query) {
 			// if origin does not specified, skip permission-conditions generation
-			if (dataView.SourceNameOrigin==null)
+			if (dataView.OriginSourceNames==null)
 				return base.BuildWhereExpression(dbSqlBuilder, dataView, query);
 
 			// if origin more than one, or alias specified - skip permission-conditions generation
-			Match m = SourceNameOriginsRegex.Match(dataView.SourceNameOrigin);
+			Match m = SourceNameOriginsRegex.Match(String.Join(",", dataView.OriginSourceNames.Select(s => s.ToString())));
 			if (!m.Success || m.Groups["sourceName"].Captures.Count>1)
 				return base.BuildWhereExpression(dbSqlBuilder, dataView, query);
 

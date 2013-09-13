@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using System.IO;
@@ -114,8 +115,11 @@ namespace NI.Data {
 			throw new NotSupportedException("FileSystemDalc does not supports update operations.");
 		}
 
-		public int Update(Query query, IDictionary data) {
-			var newName = data["name"] as string;
+		public int Update(Query query, IDictionary<string,IQueryValue> data) {
+			if (!data.ContainsKey("name") || !(data["name"] is QConst) )
+				return 0;
+
+			var newName = ((QConst)data["name"]).Value as string;
 			if (String.IsNullOrEmpty(newName))
 				return 0;
 			IFileObject[] files = Select(query.SourceName, query.Condition);
@@ -127,7 +131,7 @@ namespace NI.Data {
 			return files.Length;
 		}
 
-		public void Insert(string sourceName, IDictionary data) {
+		public void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			throw new NotSupportedException("FileSystemDalc does not supports insert operations.");
 		}
 

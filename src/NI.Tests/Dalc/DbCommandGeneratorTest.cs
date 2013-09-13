@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.Collections;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 
 using NI.Data;
 using NI.Data.SqlClient;
@@ -36,26 +36,24 @@ namespace NI.Tests.Data.Dalc {
 					);		
 		}
 
-		/*public void test_CommandGeneratorSpeed() {
-			IDbFactory dbFactory = new SqlFactoryProvider();
-			CommandGenerator cmdGenerator = new CommandGenerator(dbFactory);
+		[Test]
+		public void test_CommandGeneratorSpeed() {
+			var cmdGenerator = new DbCommandGenerator(new NI.Data.SQLite.SQLiteDalcFactory() );
 			
 			Query q = new Query( "test" );
-			q.Root = createTestQuery();
-			q.Fields = new string[] { "name", "age" };
+			q.Condition = createTestQuery();
+			q.Fields = new QField[] { "name", "age" };
 
 			// SELECT TEST
+			var stopwatch = new System.Diagnostics.Stopwatch();
+			stopwatch.Start();
 			for (int i=0; i<10000; i++) {
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q );	
 			}
-		}*/
-		
+			stopwatch.Stop();
 
-		void Fail(string message, string received,string expected) {
-			Console.Out.WriteLine("Receive: "+received);
-			Console.Out.WriteLine("Expected: "+expected);
-			throw new Exception(message);
-		}		
+			Console.WriteLine("Speedtest for select command generation (10000 times): {0}", stopwatch.Elapsed); 
+		}	
 		
 		
 		[Test]
@@ -105,8 +103,8 @@ namespace NI.Tests.Data.Dalc {
 			Assert.AreEqual( cmd.Parameters.Count, 5, "Update command generation failed");
 			
 			// UPDATE TEST (by query)
-			IDictionary changes = new Hashtable() {
-				{ "age", 21 }, { "name", "Alexandra" } };
+			var changes = new Dictionary<string,IQueryValue>() {
+				{ "age", (QConst)21 }, { "name", (QConst)"Alexandra" } };
 			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) );
 			masterSQL = "UPDATE test SET age=@p0,name=@p1 WHERE id=@p2";
 

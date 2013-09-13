@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,6 +16,7 @@
 using System;
 using System.Data;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NI.Data
 {
@@ -47,14 +49,14 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="query">query</param>
 		/// <param name="data">Container with record changes</param>
-		int Update(Query query, IDictionary changeset);
+		int Update(Query query, IDictionary<string,IQueryValue> data);
 		
 		/// <summary>
 		/// Insert data from dictionary container to datasource
 		/// </summary>
-		/// <param name="data">Container with record data</param>
 		/// <param name="sourceName">Source name for data</param>
-		void Insert(string sourceName, IDictionary data);
+		/// <param name="data">Container with record data</param>
+		void Insert(string sourceName, IDictionary<string,IQueryValue> data);
 
 		/// <summary>
 		/// Delete data from dataset by query

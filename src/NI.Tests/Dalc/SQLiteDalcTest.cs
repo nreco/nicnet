@@ -25,6 +25,22 @@ namespace NI.Tests.Data.Dalc
 			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=False;",dbFileName);
 
 			Dalc = new DbDalc(new SQLiteDalcFactory(), connStr);
+			Dalc.CommandGenerator = new DbDataViewCommandGenerator(Dalc.DbFactory) {
+				DataViews = new[] {
+					new DbDataView() {
+						ExprResolver = new NI.Expressions.StringTemplate().Eval,
+						SourceNameAlias = "users_view",
+						SqlCountFields = "count(u.*)",
+						SqlFields = "u.*,r.role as role_name",
+						FieldsMapping = new Hashtable() { {"role_name", "r.role"} },
+						SqlCommandTextTemplate = @"
+							select {var:fields} from users u
+							left join roles r on (u.role=r.id)
+							where {var:whereExpression}
+						"
+					}
+				}
+			};
 
 			// create tables if not exist
 			Dalc.ExecuteNonQuery(@"
@@ -70,6 +86,14 @@ namespace NI.Tests.Data.Dalc
 			Assert.NotNull(res,"LoadRecord failed");
 			Assert.AreEqual(1,  Convert.ToInt32( res["id"] ), "LoadRecord failed");
 		}
+
+		[Test]
+		public void test_DataView() {
+			var rs = Dalc.LoadAllRecords(new Query("users_view", (QField)"role_name" == (QConst)"user"));
+
+			Assert.AreEqual(1, rs.Length, "Load data from data view failed");
+			Assert.AreEqual("user", rs[0]["role_name"].ToString(), "Load data from data view failed");
+		}
 		
 		[Test]
 		public void test_Load() {
@@ -93,7 +117,6 @@ namespace NI.Tests.Data.Dalc
 			ds.Clear();
 			Dalc.Load( q, ds );
 
-			Console.WriteLine(ds.GetXml());
 			Assert.AreEqual(2, ds.Tables["users"].Rows.Count, "Load failed: rows count");
 
 			Assert.AreEqual("Mike", ds.Tables["users"].Rows[0]["name"].ToString(), "Load failed: ivalid order");

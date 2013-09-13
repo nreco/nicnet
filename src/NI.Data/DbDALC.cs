@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -64,6 +65,12 @@ namespace NI.Data {
 			Connection = factory.CreateConnection();
 			Connection.ConnectionString = connectionStr;
 			CommandGenerator = new DbCommandGenerator(factory);			
+		}
+
+		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbCommandGenerator cmdGenerator) {
+			DbFactory = factory;
+			Connection = connection;
+			CommandGenerator = cmdGenerator;
 		}
 
 		
@@ -139,7 +146,7 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		public virtual int Update(Query query, IDictionary data) {
+		public virtual int Update(Query query, IDictionary<string,IQueryValue> data) {
 			using (var cmd = CommandGenerator.ComposeUpdate(data, query)) {
 				cmd.Connection = Connection;
 				return ExecuteInternal(cmd, query.SourceName, StatementType.Update);
@@ -149,7 +156,7 @@ namespace NI.Data {
 		/// <summary>
 		/// <see cref="IDalc.Insert"/>
 		/// </summary>
-		public virtual void Insert(string sourceName, IDictionary data) {
+		public virtual void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			using (var cmd = CommandGenerator.ComposeInsert(data, sourceName)) {
 				cmd.Connection = Connection;
 				ExecuteInternal(cmd, sourceName, StatementType.Insert);

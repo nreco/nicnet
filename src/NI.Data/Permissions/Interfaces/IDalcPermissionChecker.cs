@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software

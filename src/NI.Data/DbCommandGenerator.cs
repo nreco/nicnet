@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -166,21 +167,16 @@ namespace NI.Data
 		/// <param name="changesData"></param>
 		/// <param name="query"></param>
 		/// <returns></returns>
-		public virtual IDbCommand ComposeUpdate(IDictionary changesData, Query query) {
+		public virtual IDbCommand ComposeUpdate(IDictionary<string,IQueryValue> changesData, Query query) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare fields Part
 			var updateFieldNames = new List<string>();
 			var updateFieldValues = new List<string>();
-			foreach (object field in changesData.Keys) {
-				updateFieldNames.Add( Convert.ToString( field ) );
-				if (changesData[field] is QRawSql) {
-					// QRawConst can be used for specifying SQL-specific update
-					updateFieldValues.Add( ((QRawSql)changesData[field]).SqlText );
-				} else {
-					updateFieldValues.Add( dbSqlBuilder.BuildCommandParameter( changesData[field] ) ); 
-				}
+			foreach (var setField in changesData) {
+				updateFieldNames.Add(setField.Key);
+				updateFieldValues.Add(dbSqlBuilder.BuildValue(setField.Value)); 
 			}
 			string setExpression = BuildSetExpression(dbSqlBuilder,
 				updateFieldNames.ToArray(), updateFieldValues.ToArray() );
@@ -202,16 +198,16 @@ namespace NI.Data
 		/// <summary>
 		/// Generates INSERT statement by row data
 		/// </summary>
-		public virtual IDbCommand ComposeInsert(IDictionary data, string sourceName) {
+		public virtual IDbCommand ComposeInsert(IDictionary<string,IQueryValue> data, string sourceName) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
 			// Prepare fields part
 			var insertFields = new List<string>();
 			var insertValues = new List<string>();
-			foreach (object field in data.Keys) {
-				insertFields.Add( Convert.ToString( field ) );
-				insertValues.Add( dbSqlBuilder.BuildCommandParameter( data[field] ) );
+			foreach (var setField in data) {
+				insertFields.Add(setField.Key);
+				insertValues.Add(dbSqlBuilder.BuildValue(setField.Value));
 			}
 			
 			cmd.CommandText = String.Format(

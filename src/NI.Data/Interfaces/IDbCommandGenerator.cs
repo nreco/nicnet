@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,6 +17,7 @@ using System;
 using System.Data;
 using System.ComponentModel;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NI.Data
 {
@@ -28,12 +30,12 @@ namespace NI.Data
 		IDbCommand ComposeSelect(Query query);
 
 		IDbCommand ComposeInsert(DataTable table);
-		IDbCommand ComposeInsert(IDictionary data, string sourceName);
+		IDbCommand ComposeInsert(IDictionary<string,IQueryValue> data, string sourceName);
 
 		IDbCommand ComposeDelete(DataTable table);
 		IDbCommand ComposeDelete(Query query);
 
 		IDbCommand ComposeUpdate(DataTable table);
-		IDbCommand ComposeUpdate(IDictionary changesData, Query query);
+		IDbCommand ComposeUpdate(IDictionary<string, IQueryValue> data, Query query);
 	}
 }

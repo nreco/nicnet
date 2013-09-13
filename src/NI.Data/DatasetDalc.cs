@@ -161,15 +161,19 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
-		public int Update(Query query, IDictionary data) {
+		public int Update(Query query, IDictionary<string,IQueryValue> data) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
 			
 			string whereExpression = BuildExpression( query.Condition );
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
 			for (int i=0; i<result.Length; i++) {
-				foreach (object columnName in data.Keys)
-					result[i][ columnName.ToString() ] = data[columnName];
+				foreach (var fieldValue in data) {
+					if (fieldValue.Value!=null && !(fieldValue.Value is QConst))
+						throw new NotSupportedException(
+							String.Format("DatasetDalc doesn't support {0} as value for Update", fieldValue.Value.GetType() ) );
+					result[i][fieldValue.Key] = fieldValue.Value!=null ? ((QConst)fieldValue.Value).Value : DBNull.Value;
+				}
 			}
 			PersistedDS.AcceptChanges();
 			return result.Length;
@@ -181,13 +185,17 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="data">Container with record changes</param>
 		/// <param name="sourceName">source name</param>
-        public void Insert(string sourceName, IDictionary data) {
+        public void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			if (!PersistedDS.Tables.Contains(sourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+sourceName);
 			
 			DataRow row = PersistedDS.Tables[sourceName].NewRow();
-			foreach (object columnName in data.Keys)
-				row[ columnName.ToString() ] = data[columnName];
+			foreach (var fldVal in data) {
+				if (fldVal.Value != null && !(fldVal.Value is QConst))
+					throw new NotSupportedException(
+						String.Format("DatasetDalc doesn't support {0} as value for Insert", fldVal.Value.GetType()));
+				row[fldVal.Key] = fldVal.Value != null ? ((QConst)fldVal.Value).Value : DBNull.Value;
+			}
 			PersistedDS.Tables[sourceName].Rows.Add( row );
 			PersistedDS.AcceptChanges();
 			

@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,6 +16,7 @@
 using System;
 using System.Data;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
@@ -210,7 +212,7 @@ namespace NI.Data.Permissions {
 			Dalc.Update(t);
 		}
 
-        public virtual int Update(Query query, IDictionary data) {
+        public virtual int Update(Query query, IDictionary<string,IQueryValue> data) {
 			if (Enabled) {
 				Query modifiedQuery = AddPermissionCondition(DalcOperation.Update, query);
 				return Dalc.Update(modifiedQuery, data);		
@@ -219,15 +221,15 @@ namespace NI.Data.Permissions {
 			}
 		}
 
-        public virtual void Insert(string sourceName, IDictionary data) {
+        public virtual void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			if (Enabled) {
-				DalcPermission recordPermission = new DalcPermission(
+				/*DalcPermission recordPermission = new DalcPermission(
 					ContextUser, DalcOperation.Create, new DalcRecordInfo(sourceName, data, data) );
 				if (!PermissionChecker.Check(recordPermission))
 					throw new SecurityException(
 						String.Format("{0} operation is not allowed for {1}",
 						recordPermission.Operation.ToString(),
-						sourceName) );
+						sourceName) );*/
 			}
             Dalc.Insert(sourceName, data);
 		}

@@ -2,6 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,7 +25,6 @@ namespace NI.Data
 	public class DbDataView : IDbDataView
 	{
 		string _SourceNameAlias;
-		string _SourceNameOrigin;
 		string _SqlCommandTextTemplate;
 		string _SqlCountFields;
 		string _SqlFields;
@@ -35,10 +35,7 @@ namespace NI.Data
 			set { _SourceNameAlias = value; }
 		}
 
-		public string SourceNameOrigin {
-			get { return _SourceNameOrigin; }
-			set { _SourceNameOrigin = value; }
-		}
+		public QSourceName[] OriginSourceNames { get; set; }
 
 
 		public string SqlCountFields {

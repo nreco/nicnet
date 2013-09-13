@@ -93,7 +93,7 @@ namespace NI.Tests.Data.RelationalExpressions
 				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
-				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed (AllowDumpConstations=true): "+i.ToString() );
+				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed: "+i.ToString() );
 			}
 			
 			for (int i=0; i<relExSamples.Length; i++) {
@@ -101,7 +101,7 @@ namespace NI.Tests.Data.RelationalExpressions
 				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
-				Assert.AreEqual(cmd.CommandText, relExCommandTexts[i], "Parse failed (AllowDumpConstations=false): "+i.ToString() );
+				Assert.AreEqual(cmd.CommandText, relExCommandTexts[i], "Parse failed: "+i.ToString() );
 			}
 
 			// test for named nodes
@@ -114,6 +114,24 @@ namespace NI.Tests.Data.RelationalExpressions
 			// just a parse test for real complex relex
 			string sss = "sourcename( ( ((\"False\"=\"True\") or (\"False\"=\"True\")) and \"contact-of\" in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and (right_uid=agent_institutions.id) )[role_uid] ) or ( ((agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[client_institution_id]) or (agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[supplier_institution_id])) and (\"False\"=\"True\") ) or ( (agent_institutions.id in agent_to_agent_role( (left_uid in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and role_uid='contact-of' )[right_uid]) and role_uid='supplier-of')[right_uid] ) or (agent_institutions.id in events( events.supplier_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.client_institution_id]) or (agent_institutions.id in events( events.client_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.supplier_institution_id]) ) or (\"False\"=\"True\") or ( (\"False\"=\"True\") and (agent_institutions.id in agent_to_agent_role( role_uid='supplier-of' and right_uid = \"\" )[left_uid]) ) or (\"False\"=\"True\") )[*]";
 			relExParser.Parse(sss);
+		}
+
+		[Test]
+		public void test_RelexParseSpeed() {
+			var relExParser = new RelExQueryParser();
+
+			var stopwatch = new System.Diagnostics.Stopwatch();
+			stopwatch.Start();
+			var iterations = 1000;
+			for (int iter = 0; iter < iterations; iter++) {
+				for (int i = 0; i < relExSamples.Length; i++) {
+					string relEx = relExSamples[i];
+					Query q = relExParser.Parse(relEx);
+				}
+			}
+			stopwatch.Stop();
+			Console.WriteLine("Speedtest for relex parse ({1} times): {0}", stopwatch.Elapsed, iterations * relExSamples.Length); 
+
 		}
 
 		protected QueryNode FindNodeByName(QueryNode node, string name) {
