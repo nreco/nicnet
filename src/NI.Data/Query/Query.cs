@@ -28,11 +28,11 @@ namespace NI.Data
 	[Serializable]
 	public class Query : QueryNode, IQueryValue
 	{
-		private QSortField[] _Sort = null;
+		private QSort[] _Sort = null;
 		private QField[] _Fields = null;
 		private int _StartRecord = 0;
 		private int _RecordCount = Int32.MaxValue;
-		private QSourceName _SourceName = null;
+		private QSource _SourceName = null;
 		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
@@ -47,7 +47,7 @@ namespace NI.Data
 		/// <summary>
 		/// Sort fields list. Can be null.
 		/// </summary>
-		public QSortField[] Sort {
+		public QSort[] Sort {
 			get { return _Sort; } 
 			set { _Sort = value; }
 		}
@@ -76,7 +76,7 @@ namespace NI.Data
 			set { _RecordCount = value; }
 		}
 		
-		public QSourceName SourceName { 
+		public QSource SourceName { 
 			get { return _SourceName; }
 			set { _SourceName = value; }
 		}
@@ -91,7 +91,7 @@ namespace NI.Data
 		}
 
 		public Query(string sourceName) {
-			_SourceName = new QSourceName(sourceName);
+			_SourceName = new QSource(sourceName);
 		}
 
 		public Query(string sourceName, QueryNode condition) {
@@ -102,7 +102,7 @@ namespace NI.Data
 		public Query(string sourceName, QueryNode condition, string[] sort) {
 			_SourceName = sourceName;
 			Condition = condition;
-			_Sort = sort.Select(s => new QSortField(s) ).ToArray();
+			_Sort = sort.Select(s => new QSort(s) ).ToArray();
 		}
 		
 		public Query(string sourceName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
@@ -138,7 +138,7 @@ namespace NI.Data
 
 		public void SetSort(params string[] sortFields) {
 			if (sortFields != null && sortFields.Length > 0) {
-				_Sort = sortFields.Select(v => (QSortField)v).ToArray();
+				_Sort = sortFields.Select(v => (QSort)v).ToArray();
 			} else {
 				_Sort = null;
 			}

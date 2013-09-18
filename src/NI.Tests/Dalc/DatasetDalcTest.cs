@@ -66,7 +66,7 @@ namespace NI.Tests.Data.Dalc
 			
 			Query q = new Query("users");
 			q.Condition = (QField)"role" == subQuery;
-			q.Sort = new QSortField[] { "name" };
+			q.Sort = new QSort[] { "name" };
 
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
@@ -75,7 +75,7 @@ namespace NI.Tests.Data.Dalc
 				ds.Tables["users"].Rows[1]["name"].ToString()!="Mike")
 				throw new Exception("Load failed");
 			
-			q.Sort = new QSortField[] { "role", "name DESC" };
+			q.Sort = new QSort[] { "role", "name DESC" };
 			dsDalc.Load( q, ds );
 			if (ds.Tables["users"].Rows.Count!=2)
 				throw new Exception("Load failed");

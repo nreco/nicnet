@@ -25,10 +25,23 @@ namespace NI.Data
 	{
 
 		public string Name { get; private set; }
-	
+
+		public string Expression { get; private set; }
+
+		private static char[] ExpressionChars = new[] { '(', ')' };
+
 		public QField(string fieldName) {
+			if (fieldName.IndexOfAny(ExpressionChars) >= 0) {
+				Expression = fieldName;
+			}
 			Name = fieldName;
 		}
+
+		public QField(string fieldName, string expression) {
+			Name = fieldName;
+			Expression = expression;
+		}
+
 
 		public override string ToString() {
 			return Name;

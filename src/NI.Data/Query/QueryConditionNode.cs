@@ -63,7 +63,14 @@ namespace NI.Data {
 			this(lvalue, conditions, rvalue) {
 			Name = name;
 		}
-	
+
+		public QueryConditionNode(QueryConditionNode node) {
+			Name = node.Name;
+			LValue = node.LValue;
+			Condition = node.Condition;
+			RValue = node.RValue;
+		}
+
 	}
 
 	[Flags]

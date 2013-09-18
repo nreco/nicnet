@@ -33,13 +33,26 @@ namespace NI.Data
 		/// DB Factory instance
 		/// </summary>
 		protected IDbDalcFactory DbFactory {  get; set; }
-		
+
+		/// <summary>
+		/// Dalc views
+		/// </summary>
+		public IDbDalcView[] Views {
+			get; set;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the DbCommandGenerator class.
 		/// </summary>
 		public DbCommandGenerator(IDbDalcFactory dbFactory) {
 			DbFactory = dbFactory;
 		}
+
+		public DbCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) {
+			DbFactory = dbFactory;
+			Views = views;
+		}
+
 		
 		/// <summary>
 		/// Generate SELECT statement by query structure
@@ -47,6 +60,17 @@ namespace NI.Data
 		public virtual IDbCommand ComposeSelect(Query query) {
 			var cmd = DbFactory.CreateCommand();
 			var cmdSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
+
+			if (Views != null) {
+				for (int i = 0; i < Views.Length; i++) {
+					var view = Views[i];
+					if (view.MatchSourceName(query.SourceName)) {
+						cmd.CommandText = view.ComposeSelect(query, cmdSqlBuilder);
+						return cmd;
+					}
+				}
+			}
+			
 			cmd.CommandText = cmdSqlBuilder.BuildSelect(query);
 			return cmd;
 		}

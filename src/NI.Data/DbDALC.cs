@@ -73,13 +73,20 @@ namespace NI.Data {
 			CommandGenerator = cmdGenerator;
 		}
 
+		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbDalcView[] views) {
+			DbFactory = factory;
+			Connection = connection;
+			CommandGenerator = new DbCommandGenerator(factory, views);
+		}
+
+
 		
 		/// <summary>
 		/// Load data to dataset by query
 		/// </summary>
 		public virtual DataTable Load(Query query, DataSet ds) {
 			using (var selectCmd = CommandGenerator.ComposeSelect(query)) {
-				QSourceName source = query.SourceName;
+				QSource source = query.SourceName;
 
 				selectCmd.Connection = Connection;
 

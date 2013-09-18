@@ -15,11 +15,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace NI.Data
 {
 	/// <summary>
-	/// Sql expression builder.
+	/// Sql expression builder (default implementation).
 	/// </summary>
 	public class SqlBuilder : ISqlBuilder
 	{
@@ -41,7 +43,9 @@ namespace NI.Data
 		
 		public virtual string BuildExpression(QueryNode node) {
 			if (node==null) return null;
-			
+
+			if (node is QueryRawSqlNode)
+				return ((QueryRawSqlNode)node).SqlText;
 			if (node is QueryGroupNode)
 				return BuildGroup( (QueryGroupNode)node );
 			if (node is QueryConditionNode)
@@ -57,7 +61,7 @@ namespace NI.Data
 			if (node.Nodes==null) return null;
 			
 			// if group contains only one node ignore group node...
-			ArrayList subNodes = new ArrayList();
+			var subNodes = new List<string>();
 			foreach (QueryNode childNode in node.Nodes) {
 				string childNodeExpression = BuildExpression( childNode );
 				if (childNodeExpression!=null)
@@ -66,7 +70,7 @@ namespace NI.Data
 			
 			// if only one child node just ignore group node
 			if (subNodes.Count==1) {
-				string childNodeExpression = subNodes[0].ToString();
+				string childNodeExpression = subNodes[0];
 				return childNodeExpression.Substring(1, childNodeExpression.Length-2);
 			}
 			
@@ -75,7 +79,7 @@ namespace NI.Data
 			
 			return String.Join(
 				" "+node.Group.ToString()+" ",
-				(string[])subNodes.ToArray(typeof(string)) );
+				subNodes.ToArray() );
 		}
 		
 		protected virtual string BuildNegation(QueryNegationNode node) {
@@ -143,14 +147,14 @@ namespace NI.Data
 			if (value is QRawSql)
 				return ((QRawSql)value).SqlText;
 
-			if (value is QSortField) {
-				var fldName = BuildValue( ((QSortField)value).Field);
-				return new QSortField(fldName, ((QSortField)value).SortDirection).ToString();
-			}
-			
 			throw new ArgumentException("Invalid query value", value.GetType().ToString() );
 		}
-		
+
+		public virtual string BuildSort(QSort value) {
+			var sortFld = BuildValue( (IQueryValue) value.Field);
+			return value.SortDirection == ListSortDirection.Ascending ? sortFld :
+				String.Format("{0} {1}", sortFld, QSort.Desc);
+		}
 
 		protected virtual string BuildValue(QConst value) {
 			object constValue = value.Value;
@@ -161,7 +165,7 @@ namespace NI.Data
 			if (constValue is string)
 				return BuildValue( (string)constValue );
 									
-			return Convert.ToString(constValue);
+			return Convert.ToString(constValue, System.Globalization.CultureInfo.InvariantCulture);
 		}
 		
 		protected virtual string BuildValue(IList list) {

@@ -66,7 +66,7 @@ namespace NI.Data {
 		}
 
 		public DataRow Load(Query q) {
-			QSourceName source = new QSourceName(q.SourceName);
+			QSource source = new QSource(q.SourceName);
 			DataSet ds = GetDataSetForSourceName(source.Name);
 			if (ds == null)
 				ds = new DataSet();
@@ -75,7 +75,7 @@ namespace NI.Data {
 		}
 
 		public DataTable LoadAll(Query q) {
-			QSourceName source = new QSourceName(q.SourceName);
+			QSource source = new QSource(q.SourceName);
 			DataSet ds = GetDataSetForSourceName(source.Name);
 			if (ds == null)
 				ds = new DataSet();

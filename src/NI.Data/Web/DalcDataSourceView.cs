@@ -53,7 +53,7 @@ namespace NI.Data.Web {
 			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
 			q.Condition = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
-				q.Sort = arguments.SortExpression.Split(',').Select(v=>(QSortField)v).ToArray();
+				q.Sort = arguments.SortExpression.Split(',').Select(v=>(QSort)v).ToArray();
 			DataSet ds = GetDataSet();
 
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, arguments, ds);

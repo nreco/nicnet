@@ -15,23 +15,23 @@ namespace NI.Tests.Data.Dalc
 	{
 		[Test]
 		public void test_QSortField() {
-			QSortField fld = (QSortField)"name";
+			QSort fld = (QSort)"name";
 			Assert.AreEqual( fld.Field.Name, "name", "QSortField parse error");
 			Assert.AreEqual( fld.SortDirection, ListSortDirection.Ascending, "QSortField parse error");
 			
-			fld = (QSortField)"email desc ";
+			fld = (QSort)"email desc ";
 			Assert.AreEqual( fld.Field.Name, "email", "QSortField parse error");
 			Assert.AreEqual( fld.SortDirection, ListSortDirection.Descending, "QSortField parse error");
 			
-			fld = (QSortField)"email  desc ";
+			fld = (QSort)"email  desc ";
 			Assert.AreEqual( fld.Field.Name, "email", "QSortField parse error");
 			Assert.AreEqual( fld.SortDirection, ListSortDirection.Descending, "QSortField parse error");
 
-			fld = (QSortField)"  email  desc ";
+			fld = (QSort)"  email  desc ";
 			Assert.AreEqual( fld.Field.Name, "email", "QSortField parse error");
 			Assert.AreEqual( fld.SortDirection, ListSortDirection.Descending, "QSortField parse error");			
 			
-			fld = (QSortField)"position asc";
+			fld = (QSort)"position asc";
 			Assert.AreEqual( fld.Field.Name, "position", "QSortField parse error");
 			Assert.AreEqual( fld.SortDirection, ListSortDirection.Ascending, "QSortField parse error");
 		}

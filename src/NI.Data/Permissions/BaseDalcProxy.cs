@@ -68,7 +68,7 @@ namespace NI.Data.Permissions {
 		}
 		
 		protected Query AddPermissionCondition(DalcOperation operation, Query query) {
-			QSourceName qSourceName = (QSourceName)query.SourceName;
+			QSource qSourceName = (QSource)query.SourceName;
 			QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, operation, qSourceName.Name);
 			if (permissionCondition!=null) {
 				Query modifiedQuery = new Query(query);
@@ -81,13 +81,13 @@ namespace NI.Data.Permissions {
 			return query;
 		}
 
-		protected QueryNode PreparePermissionCondition(QueryNode permissionCondition, QSourceName qSourceName) {
+		protected QueryNode PreparePermissionCondition(QueryNode permissionCondition, QSource qSourceName) {
 			// check if alias is used
 			if (!String.IsNullOrEmpty(qSourceName.Alias))
 				FixConditionFieldNames(permissionCondition, qSourceName);
 			return permissionCondition;
 		}
-		protected void FixConditionFieldNames(QueryNode node, QSourceName qSourceName) {
+		protected void FixConditionFieldNames(QueryNode node, QSource qSourceName) {
 			if (node is QueryConditionNode) {
 				QueryConditionNode condNode = (QueryConditionNode)node;
 				condNode.LValue = FixConditionFieldNames(condNode.LValue, qSourceName);
@@ -98,7 +98,7 @@ namespace NI.Data.Permissions {
 					FixConditionFieldNames(grpChildNode, qSourceName);
 			}
 		}
-		protected IQueryValue FixConditionFieldNames(IQueryValue qValue, QSourceName qSourceName) {
+		protected IQueryValue FixConditionFieldNames(IQueryValue qValue, QSource qSourceName) {
 			if (qValue is QField) {
 				QField qFld = (QField)qValue;
 				int dotIdx = qFld.Name.IndexOf('.');

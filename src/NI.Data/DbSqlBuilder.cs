@@ -17,13 +17,14 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
 namespace NI.Data
 {
 	/// <summary>
-	/// Database sql builder.
+	/// Database sql builder (default implementation).
 	/// </summary>
 	public class DbSqlBuilder : SqlBuilder, IDbSqlBuilder
 	{
@@ -40,7 +41,7 @@ namespace NI.Data
 		}
 		
 		protected virtual string GetTableName(string sourceName) {
-			QSourceName qSourceName = (QSourceName)sourceName;
+			QSource qSourceName = (QSource)sourceName;
 			if (!String.IsNullOrEmpty(qSourceName.Alias))
 				return qSourceName.Name + " " + qSourceName.Alias;
 			return qSourceName.Name;
@@ -73,8 +74,8 @@ namespace NI.Data
 			if (query.Sort!=null && query.Sort.Length>0) {
 				string[] sortFields = new string[query.Sort.Length];
 				for (int i=0; i<sortFields.Length; i++) {
-					var sortFld = (QSortField)query.Sort[i];
-					sortFields[i] = BuildValue( (IQueryValue)sortFld );
+					var sortFld = (QSort)query.Sort[i];
+					sortFields[i] = BuildSort( sortFld );
 				}
 				
 				return String.Join(",", sortFields);
@@ -84,13 +85,13 @@ namespace NI.Data
 
 		public virtual string BuildFields(Query query) {
 			// Compose fields part
-			string[] fields = (query.Fields==null || query.Fields.Length==0) ?
-					new string[] {"*"} :
-					query.Fields.Select(v=>(string)v).ToArray();
-					
-			for (int i=0; i<fields.Length; i++)
-				fields[i] = this.BuildValue( new QField(fields[i]) );
-			return String.Join(",", fields);
+			if (query.Fields == null || query.Fields.Length == 0)
+				return "*";
+
+			var joinFields = new List<string>();
+			foreach (var f in query.Fields)
+				joinFields.Add( BuildValue( (IQueryValue) f ) );
+			return String.Join(",", joinFields.ToArray() );
 		}
 
 		public override string BuildValue(IQueryValue value) {

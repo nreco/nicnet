@@ -92,7 +92,7 @@ namespace NI.Data {
 			if (q.Sort!=null) {
 				if (q.Sort.Length>1)
 					throw new Exception("FileSystemDalc doesn't support sorting by multiple fields");
-				var qSortFld = new QSortField(q.Sort[0]);
+				var qSortFld = new QSort(q.Sort[0]);
 				files = files.OrderBy( f => GetFileObjectField( qSortFld.Field, f) ).ToArray();
 				if (qSortFld.SortDirection==System.ComponentModel.ListSortDirection.Descending)
 					Array.Reverse( files );

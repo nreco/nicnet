@@ -124,14 +124,10 @@
     <Compile Include="DbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDalcTransactionManager.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DbDalcDataRowTrigger.cs" />
-    <Compile Include="DbDataView.cs">
+    <Compile Include="DbDalcView.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDataViewCommandGenerator.cs" />
     <Compile Include="DbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -145,29 +141,23 @@
     <Compile Include="Interfaces\IDbCommandGenerator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IDbCommandWrapper.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Interfaces\IQueryValue.cs" />
     <Compile Include="Interfaces\ISqlDalc.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IDbDataView.cs">
+    <Compile Include="Interfaces\IDbDalcView.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IObjectMapper.cs" />
-    <Compile Include="Interfaces\IQueryValue.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Interfaces\ISqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbDalcProxy.cs" />
     <Compile Include="Linq\DalcData.cs" />
     <Compile Include="Linq\DalcLinqExtensions.cs" />
     <Compile Include="Linq\DalcRecord.cs" />
@@ -196,7 +186,8 @@
     <Compile Include="QueryFieldValueFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Query\QSourceName.cs" />
+    <Compile Include="Query\QueryRawSqlNode.cs" />
+    <Compile Include="Query\QSource.cs" />
     <Compile Include="Query\QConst.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -206,7 +197,7 @@
     <Compile Include="Query\QRawSql.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Query\QSortField.cs">
+    <Compile Include="Query\QSort.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Query\Query.cs">

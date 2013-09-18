@@ -28,9 +28,9 @@ namespace NI.Data
 
 		public string Name { get; set; }	
 	
-		public QueryNode() {
+		internal QueryNode() {
 		}
-		
+
 		/// <summary>
 		/// OR operator
 		/// </summary>

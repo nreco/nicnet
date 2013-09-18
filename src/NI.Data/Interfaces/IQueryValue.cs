@@ -18,7 +18,7 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// Interface for query left or right value
+	/// Interface for query value
 	/// </summary>
 	public interface IQueryValue
 	{

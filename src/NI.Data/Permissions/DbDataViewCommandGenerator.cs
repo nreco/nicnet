@@ -26,7 +26,7 @@ namespace NI.Data.Permissions
 {
 	/// <summary>
 	/// </summary>
-	public class DbDataViewCommandGenerator : NI.Data.DbDataViewCommandGenerator
+	/*public class DbDataViewCommandGenerator : NI.Data.DbDataViewCommandGenerator1
 	{
 		static string SourceNameOriginsRegexPattern = @"^(\s*(?<sourceName>[^\s,]+)(\s*(?<alias>[^\s,]*?))\s*(,|$))+";
 		static Regex SourceNameOriginsRegex = new Regex(SourceNameOriginsRegexPattern, RegexOptions.Compiled|RegexOptions.Singleline);
@@ -48,7 +48,7 @@ namespace NI.Data.Permissions
 			}
 		}		
 		
-		protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDataView dataView, Query query) {
+		protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDalcView dataView, Query query) {
 			IDictionary context = base.BuildSqlCommandContext (cmd, dataView, query);
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.OriginSourceNames==null)
@@ -64,16 +64,16 @@ namespace NI.Data.Permissions
 				QueryNode permissionCondition = DalcConditionComposer.Compose(ContextUser, DalcOperation.Retrieve, sourceName);
 				IDbSqlBuilder dbSqlBuilder = DbFactory.CreateSqlBuilder( cmd );
 				if (alias.Length > 0) {
-					var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
-					dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
-						var resFld = origFormatter != null ?
-							origFormatter(qFld) : qFld.Name;
+					//var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
+					//dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
+					///var resFld = origFormatter != null ?
+						//	origFormatter(qFld) : qFld.Name;
 
-						string[] parts = resFld.Split('.');
-						if (parts.Length > 1 && parts[0] == sourceName)
-							return alias + "." + parts[1];
-						return resFld;
-					};
+						//string[] parts = resFld.Split('.');
+						//if (parts.Length > 1 && parts[0] == sourceName)
+							//return alias + "." + parts[1];
+						//return resFld;
+					//};
 				}
 
 				context[whereExpressionPrefix+"-permissionWhereExpression"] = 
@@ -84,7 +84,7 @@ namespace NI.Data.Permissions
 		}
 
 		
-		protected override string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDataView dataView, Query query) {
+		protected override string BuildWhereExpression(IDbSqlBuilder dbSqlBuilder, IDbDalcView dataView, Query query) {
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.OriginSourceNames==null)
 				return base.BuildWhereExpression(dbSqlBuilder, dataView, query);
@@ -97,7 +97,7 @@ namespace NI.Data.Permissions
 			// add one more field-formatter to the formatters chain
 			// if source name alias specified
 			if (m.Groups["alias"].Captures[0].Length > 0) {
-				var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
+				/var origFormatter = dbSqlBuilder.QueryFieldValueFormatter;
 				dbSqlBuilder.QueryFieldValueFormatter = (qFld) => {
 					var resFld = origFormatter != null ?
 						origFormatter(qFld) : qFld.Name;
@@ -106,7 +106,7 @@ namespace NI.Data.Permissions
 					if (parts.Length > 1 && parts[0] == m.Groups["sourceName"].Captures[0].Value)
 						return m.Groups["alias"].Captures[0].Value + "." + parts[1];
 					return resFld;
-				};
+				};/
 
 			}
 			
@@ -125,5 +125,5 @@ namespace NI.Data.Permissions
 		
 		
 		
-	}
+	}*/
 }

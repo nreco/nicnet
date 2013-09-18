@@ -371,7 +371,6 @@ namespace NI.Data.RelationalExpressions
 						LexemType prevLexemType = nextLexemType;
 						nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 						nextLexem = GetLexem(input, endIdx, nextEndIdx, nextLexemType);
-						//Console.Write(nextLexemType.ToString() + ":'" + nextLexem + "' ");
 						endIdx = nextEndIdx;
                         if (nextLexemType==LexemType.Delimiter && nextLexem=="]")
 		                        break;

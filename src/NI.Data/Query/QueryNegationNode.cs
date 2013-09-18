@@ -22,15 +22,22 @@ namespace NI.Data {
 	[Serializable]
 	public class QueryNegationNode : QueryNode {
 		
-		private QueryNode _Node;
+		private QueryNode[] SingleNodeList;
 	
 		/// <summary>
 		/// Nodes collection
 		/// </summary>
-		public override IList<QueryNode> Nodes { get { return new QueryNode[] { _Node }; } }
+		public override IList<QueryNode> Nodes {
+			get { return SingleNodeList; } 
+		}
 		
 		public QueryNegationNode(QueryNode node) {
-			_Node = node;
+			SingleNodeList = new QueryNode[] { node };
+		}
+
+		public QueryNegationNode(QueryNegationNode copyNode) {
+			SingleNodeList = new QueryNode[] { copyNode.Nodes[0] };
+			Name = copyNode.Name;
 		}
 
 		

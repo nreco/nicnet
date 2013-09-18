@@ -47,7 +47,7 @@ namespace NI.Data.SqlClient {
 
 		protected override string GetTableName(string sourceName) {
 			if (SqlClientFactory.NameBrackets) {
-				QSourceName qSourceName = (QSourceName)sourceName;
+				QSource qSourceName = (QSource)sourceName;
 				if (!String.IsNullOrEmpty(qSourceName.Alias))
 					return FormatInBrackets(qSourceName.Name) + " " + qSourceName.Alias;
 				return FormatInBrackets(qSourceName.Name);

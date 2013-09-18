@@ -45,7 +45,7 @@ namespace NI.Data {
 			q.StartRecord = 0;
 			q.RecordCount = 1;
 			DbManager.Dalc.Load(recordQ, ds);
-			var srcName = new QSourceName(q.SourceName);
+			var srcName = new QSource(q.SourceName);
 			if (ds.Tables[srcName.Name].Rows.Count == 0)
 				return null;
 			var t = new T();
@@ -56,7 +56,7 @@ namespace NI.Data {
 		public IEnumerable<T> LoadAll(Query q) {
 			var ds = new DataSet();
 			DbManager.Dalc.Load(q, ds);
-			var srcName = new QSourceName(q.SourceName);
+			var srcName = new QSource(q.SourceName);
 			var rs = new List<T>();
 			foreach (DataRow r in ds.Tables[srcName.Name].Rows) {
 				var t = new T();

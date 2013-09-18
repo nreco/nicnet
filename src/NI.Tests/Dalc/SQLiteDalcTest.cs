@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using NI.Data;
 using NI.Data.SQLite;
@@ -25,19 +26,17 @@ namespace NI.Tests.Data.Dalc
 			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=False;",dbFileName);
 
 			Dalc = new DbDalc(new SQLiteDalcFactory(), connStr);
-			Dalc.CommandGenerator = new DbDataViewCommandGenerator(Dalc.DbFactory) {
-				DataViews = new[] {
-					new DbDataView() {
-						ExprResolver = new NI.Expressions.StringTemplate().Eval,
-						SourceNameAlias = "users_view",
-						SqlCountFields = "count(u.*)",
-						SqlFields = "u.*,r.role as role_name",
-						FieldsMapping = new Hashtable() { {"role_name", "r.role"} },
-						SqlCommandTextTemplate = @"
-							select {var:fields} from users u
-							left join roles r on (u.role=r.id)
-							where {var:whereExpression}
-						"
+			var usersViewSql = @"
+select @SqlFields from users u
+left join roles r on (u.role=r.id)
+@SqlWhere[where {0}]
+@SqlOrderBy[order by {0};order by u.id desc]
+			".Trim();
+
+			Dalc.CommandGenerator = new DbCommandGenerator(Dalc.DbFactory) {
+				Views = new[] {
+					new DbDalcView("users_view", usersViewSql, "u.*,r.role as role_name","count(u.id)") {
+						FieldMapping = new Dictionary<string,string>() { {"role_name", "r.role"} }
 					}
 				}
 			};
@@ -93,6 +92,35 @@ namespace NI.Tests.Data.Dalc
 
 			Assert.AreEqual(1, rs.Length, "Load data from data view failed");
 			Assert.AreEqual("user", rs[0]["role_name"].ToString(), "Load data from data view failed");
+
+			// check order by
+			Assert.AreEqual(4, Dalc.RecordsCount(new Query("users_view")), "Invalid record count for dalc view");
+			
+
+			var testSet = new Dictionary<Query,string>() {
+				{new Query("users_view") { Fields = new QField[] { "id" } }, @"
+select u.*,r.role as role_name from users u
+left join roles r on (u.role=r.id)
+
+order by u.id desc".Trim()},
+
+				{new Query("users_view") { Sort = new QSort[] { "role_name desc" } }, @"
+select u.*,r.role as role_name from users u
+left join roles r on (u.role=r.id)
+
+order by r.role desc".Trim()},
+
+
+			};
+
+			foreach (var testCase in testSet) {
+				var testView = ((DbCommandGenerator)Dalc.CommandGenerator).Views[0];
+				using (var testCmd = Dalc.DbFactory.CreateCommand()) {
+					var sqlFactory = Dalc.DbFactory.CreateSqlBuilder(testCmd);
+					var s = testView.ComposeSelect(testCase.Key, sqlFactory);
+					Assert.AreEqual( testCase.Value, s );
+				}
+			}
 		}
 		
 		[Test]
@@ -105,7 +133,7 @@ namespace NI.Tests.Data.Dalc
 			
 			Query q = new Query("users");
 			q.Condition = (QField)"role" == subQuery;
-			q.Sort = new QSortField[] { "name" };
+			q.Sort = new QSort[] { "name" };
 
 			Dalc.Load( q, ds );
 			Assert.AreEqual(2, ds.Tables["users"].Rows.Count, "Load failed: rows count");
@@ -113,7 +141,7 @@ namespace NI.Tests.Data.Dalc
 			Assert.AreEqual("Joe", ds.Tables["users"].Rows[0]["name"].ToString(), "Load failed: ivalid order");
 			Assert.AreEqual("Mike", ds.Tables["users"].Rows[1]["name"].ToString(), "Load failed: ivalid order");
 			
-			q.Sort = new QSortField[] { "role", "name DESC" };
+			q.Sort = new QSort[] { "role", "name DESC" };
 			ds.Clear();
 			Dalc.Load( q, ds );
 

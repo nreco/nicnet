@@ -47,7 +47,7 @@ namespace NI.Data
 		}
 		
 		public QueryGroupNode(QueryGroupNode likeGroup)
-			: this(likeGroup.Group) {
+			: this(likeGroup.Group) { 
 			Name = likeGroup.Name;
 			_Nodes.AddRange(likeGroup.Nodes);
 		}
