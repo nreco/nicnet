@@ -27,5 +27,6 @@ namespace NI.Data {
 					connection.Close();
 			}
 		}
+
 	}
 }

@@ -16,13 +16,18 @@
 using System;
 using System.Collections;
 using System.Text;
- 
 
 namespace NI.Data.Permissions {
 	
-	public interface IDalcConditionDescriptor {
-		DalcOperation Operation { get; }
-		string SourceName { get; }
-		Func<object,QueryNode> ConditionProvider { get; }
+	/// <summary>
+	/// Generic query rule
+	/// </summary>
+	public interface IDalcQueryRule {
+
+		bool IsMatch(PermissionContext context);
+
+		QueryNode ComposeCondition(PermissionContext context);
+
 	}
+		
 }

@@ -29,7 +29,7 @@ namespace NI.Data {
 	
 	public class FileSystemDalc : IDalc {
 		IFileSystem _FileSystem;
-		ObjectQueryConditionEvaluator ConditionEvaluator;
+		EvalQueryCondition ConditionEvaluator;
 		
 		public IFileSystem FileSystem {
 			get { return _FileSystem; }
@@ -37,7 +37,7 @@ namespace NI.Data {
 		}
 		
 		public FileSystemDalc() {
-			ConditionEvaluator = new ObjectQueryConditionEvaluator();
+			ConditionEvaluator = new EvalQueryCondition();
 			ConditionEvaluator.QFieldResolver = GetFileObjectFieldValue;
 		}
 
@@ -201,18 +201,18 @@ namespace NI.Data {
 			throw new ArgumentException("Unknown field name: "+name);
 		}
 
-		protected object GetFileObjectFieldValue(ObjectQueryConditionEvaluator.ResolveNodeContext resolveContext) {
+		protected object GetFileObjectFieldValue(EvalQueryCondition.ResolveNodeContext resolveContext) {
 			QField fldValue = (QField)resolveContext.Node;
 			return GetFileObjectField(fldValue.Name, (IFileObject)resolveContext.Context["file"]);
 		}
 			
 		internal class QueryFileSelector : IFileSelector {
 			bool FindAll = false;
-			ObjectQueryConditionEvaluator Evaluator;
+			EvalQueryCondition Evaluator;
 			QueryNode CondNode;
 			IDictionary Context;
 			
-			internal QueryFileSelector(bool findAll,ObjectQueryConditionEvaluator evaluator,QueryNode condNode) {
+			internal QueryFileSelector(bool findAll,EvalQueryCondition evaluator,QueryNode condNode) {
 				FindAll = findAll;
 				Evaluator = evaluator;
 				CondNode = condNode;

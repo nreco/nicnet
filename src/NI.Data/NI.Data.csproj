@@ -163,29 +163,12 @@
     <Compile Include="Linq\DalcRecord.cs" />
     <Compile Include="Linq\QueryProvider.cs" />
     <Compile Include="ObjectPersister.cs" />
-    <Compile Include="ObjectQueryConditionEvaluator.cs" />
-    <Compile Include="Permissions\BaseDalcProxy.cs" />
-    <Compile Include="Permissions\CompositeDalcConditionComposer.cs" />
-    <Compile Include="Permissions\DalcConditionComposer.cs" />
-    <Compile Include="Permissions\DalcConditionDescriptor.cs" />
-    <Compile Include="Permissions\DalcOperation.cs" />
-    <Compile Include="Permissions\DalcPermission.cs" />
-    <Compile Include="Permissions\DalcPermissionAclEntry.cs" />
-    <Compile Include="Permissions\DalcPermissionChecker.cs" />
-    <Compile Include="Permissions\DalcProxy.cs" />
-    <Compile Include="Permissions\DalcRecordFieldInfo.cs" />
-    <Compile Include="Permissions\DalcRecordInfo.cs" />
-    <Compile Include="Permissions\DbDalcProxy.cs" />
-    <Compile Include="Permissions\DbDataViewCommandGenerator.cs" />
-    <Compile Include="Permissions\FieldDalcPermissionAclEntry.cs" />
-    <Compile Include="Permissions\Interfaces\IDalcConditionComposer.cs" />
-    <Compile Include="Permissions\Interfaces\IDalcConditionDescriptor.cs" />
-    <Compile Include="Permissions\Interfaces\IDalcPermissionChecker.cs" />
-    <Compile Include="Permissions\Interfaces\IPermissionAclEntry.cs" />
+    <Compile Include="EvalQueryCondition.cs" />
+    <Compile Include="Permissions\RelexRule.cs" />
+    <Compile Include="Permissions\IDalcQueryRule.cs" />
+    <Compile Include="Permissions\PermissionContext.cs" />
+    <Compile Include="Permissions\DbPermissionCommandGenerator.cs" />
     <Compile Include="PropertyObjectMapper.cs" />
-    <Compile Include="QueryFieldValueFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Query\QueryRawSqlNode.cs" />
     <Compile Include="Query\QSource.cs" />
     <Compile Include="Query\QConst.cs">
@@ -221,6 +204,7 @@
     <Compile Include="RelationalExpressions\RelExQueryNodeProvider.cs" />
     <Compile Include="RelationalExpressions\RelExQueryParser.cs" />
     <Compile Include="RelationalExpressions\RelExQueryProvider.cs" />
+    <Compile Include="SimpleStringTemplate.cs" />
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>

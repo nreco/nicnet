@@ -26,29 +26,65 @@ namespace NI.Data.Permissions
 {
 	/// <summary>
 	/// </summary>
-	/*public class DbDataViewCommandGenerator : NI.Data.DbDataViewCommandGenerator1
+	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
-		static string SourceNameOriginsRegexPattern = @"^(\s*(?<sourceName>[^\s,]+)(\s*(?<alias>[^\s,]*?))\s*(,|$))+";
-		static Regex SourceNameOriginsRegex = new Regex(SourceNameOriginsRegexPattern, RegexOptions.Compiled|RegexOptions.Singleline);
+
+		public IDalcQueryRule[] Rules { get; set; }
 		
-		IDalcConditionComposer _DalcConditionComposer;
-		
-		public IDalcConditionComposer DalcConditionComposer {
-			get { return _DalcConditionComposer; }
-			set { _DalcConditionComposer = value; }
+		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
+
 		}
-		
-		public DbDataViewCommandGenerator(IDbDalcFactory factory) : base(factory)
-		{
+
+		protected virtual PermissionContext CreatePermissionContext(string sourceName, DalcOperation op) {
+			return new PermissionContext(sourceName, op);
 		}
-		
-		protected IPrincipal ContextUser {
-			get {
-				return Thread.CurrentPrincipal;
+
+		protected QueryNode ApplyRuleConditions(QueryNode node, string sourceName, DalcOperation operation) {
+			var resNode = new QueryGroupNode(GroupType.And);
+			resNode.Nodes.Add(node);
+			var context = CreatePermissionContext(sourceName, operation);
+			for (int i = 0; i < Rules.Length; i++) {
+				var r = Rules[i];
+				if (r.IsMatch(context)) {
+					var extraCondition = r.ComposeCondition(context);
+					if (extraCondition != null)
+						resNode.Nodes.Add(extraCondition);
+				}
 			}
-		}		
+			return resNode.Nodes.Count > 1 ? resNode : node;
+		}
+
+		protected virtual Query PrepareSelectQuery(Query q) {
+			var withExtraConditions = ApplyRuleConditions(q.Condition, q.SourceName.Name, DalcOperation.Select);
+			if (withExtraConditions != q.Condition) {
+				var qClone = new Query(q);
+				qClone.Condition = withExtraConditions;
+				return qClone;
+			}
+			return q;
+		}
+
+		protected override QueryNode ComposeDeleteCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
+			var baseDelete = base.ComposeDeleteCondition(table, dbSqlBuilder);
+			return ApplyRuleConditions(baseDelete, table.TableName, DalcOperation.Delete);
+		}
+
+		protected override QueryNode ComposeDeleteCondition(Query query) {
+			var baseDelete = base.ComposeDeleteCondition(query);
+			return ApplyRuleConditions(baseDelete, query.SourceName.Name, DalcOperation.Delete);
+		}
+
+		protected override QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
+			var baseUpdate = base.ComposeUpdateCondition(table, dbSqlBuilder);
+			return ApplyRuleConditions(baseUpdate, table.TableName, DalcOperation.Update);
+		}
+
+		protected override QueryNode ComposeUpdateCondition(Query query) {
+			var baseUpdate = base.ComposeUpdateCondition(query);
+			return ApplyRuleConditions( baseUpdate, query.SourceName.Name, DalcOperation.Update );
+		}
 		
-		protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDalcView dataView, Query query) {
+		/*protected override IDictionary BuildSqlCommandContext(IDbCommand cmd, IDbDalcView dataView, Query query) {
 			IDictionary context = base.BuildSqlCommandContext (cmd, dataView, query);
 			// if origin does not specified, skip permission-conditions generation
 			if (dataView.OriginSourceNames==null)
@@ -120,10 +156,10 @@ namespace NI.Data.Permissions
 				groupAnd.Nodes.Add( permissionCondition );
 			
 			return dbSqlBuilder.BuildExpression( groupAnd );
-		}
+		}*/
 		
 		
 		
 		
-	}*/
+	}
 }

@@ -93,7 +93,7 @@ namespace NI.Tests.Data.RelationalExpressions
 				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
-				Assert.AreEqual(cmd.CommandText, oldRelExCommandTexts[i], "Parse failed: "+i.ToString() );
+				Assert.AreEqual(oldRelExCommandTexts[i], cmd.CommandText, "Parse failed: "+i.ToString() );
 			}
 			
 			for (int i=0; i<relExSamples.Length; i++) {
@@ -101,7 +101,7 @@ namespace NI.Tests.Data.RelationalExpressions
 				Query q = relExParser.Parse(relEx);
 				IDbCommand cmd = cmdGenerator.ComposeSelect( q );
 				
-				Assert.AreEqual(cmd.CommandText, relExCommandTexts[i], "Parse failed: "+i.ToString() );
+				Assert.AreEqual( relExCommandTexts[i], cmd.CommandText, "Parse failed: "+i.ToString() );
 			}
 
 			// test for named nodes

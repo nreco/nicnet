@@ -53,6 +53,9 @@ namespace NI.Data
 			Views = views;
 		}
 
+		protected virtual Query PrepareSelectQuery(Query q) {
+			return q;
+		}
 		
 		/// <summary>
 		/// Generate SELECT statement by query structure
@@ -65,13 +68,13 @@ namespace NI.Data
 				for (int i = 0; i < Views.Length; i++) {
 					var view = Views[i];
 					if (view.MatchSourceName(query.SourceName)) {
-						cmd.CommandText = view.ComposeSelect(query, cmdSqlBuilder);
+						cmd.CommandText = view.ComposeSelect(PrepareSelectQuery(query), cmdSqlBuilder);
 						return cmd;
 					}
 				}
 			}
 			
-			cmd.CommandText = cmdSqlBuilder.BuildSelect(query);
+			cmd.CommandText = cmdSqlBuilder.BuildSelect(PrepareSelectQuery( query ) );
 			return cmd;
 		}
 		
@@ -104,28 +107,39 @@ namespace NI.Data
 		/// Generates DELETE statement by DataTable
 		/// </summary>
 		public virtual IDbCommand ComposeDelete(DataTable table) {
+			if (table.PrimaryKey.Length == 0)
+				throw new Exception("Cannot generate DELETE command for table without primary key");			
+			
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare WHERE part
-			var primaryKeys = new List<string>();
-			foreach (DataColumn col in table.PrimaryKey) {
-				string condition = String.Format(
-						"{0}={1}",
-						col.ColumnName,
-						dbSqlBuilder.BuildCommandParameter( col, DataRowVersion.Current ) );
-				primaryKeys.Add( condition );
-			}
-
-			if (primaryKeys.Count==0)
-				throw new Exception("Cannot generate DELETE command for table without primary key");
+			var pkCondition = ComposeDeleteCondition(table, dbSqlBuilder);
+			var whereSql = dbSqlBuilder.BuildExpression(pkCondition);
 
 			cmd.CommandText = String.Format(
 				"DELETE FROM {0} WHERE {1}",
 				table.TableName,
-				String.Join(" AND ", primaryKeys.ToArray()) );
+				whereSql);
 
 			return cmd;
+		}
+
+		protected QueryNode ComposePkCondition(DataTable table, IDbSqlBuilder dbSqlBuilder, DataRowVersion rowValueVersion) {
+			var pkCondition = new QueryGroupNode(GroupType.And);
+			foreach (DataColumn col in table.PrimaryKey) {
+				pkCondition.Nodes.Add(
+					(QField)col.ColumnName == new QRawSql(dbSqlBuilder.BuildCommandParameter(col, rowValueVersion)) );
+			}
+			return pkCondition;
+		}
+
+		protected virtual QueryNode ComposeDeleteCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
+			return ComposePkCondition(table, dbSqlBuilder, DataRowVersion.Current);
+		}
+
+		protected virtual QueryNode ComposeDeleteCondition(Query query) {
+			return query.Condition;
 		}
 		
 		/// <summary>
@@ -136,16 +150,19 @@ namespace NI.Data
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
 			// prepare WHERE part
-			var whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
+			var whereExpression = dbSqlBuilder.BuildExpression( ComposeDeleteCondition( query ) );
 			
 			cmd.CommandText = String.Format("DELETE FROM {0}",query.SourceName);
 			if (whereExpression!=null && whereExpression.Length>0)
 				cmd.CommandText += " WHERE "+whereExpression;
 
 			return cmd;
+		}
+
+		protected virtual QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
+			return ComposePkCondition(table, dbSqlBuilder, DataRowVersion.Original);
 		}		
-		
-		
+
 		/// <summary>
 		/// Generates UPDATE statement by DataTable
 		/// </summary>
@@ -166,13 +183,7 @@ namespace NI.Data
 				updateFieldNames.ToArray(), updateFieldValues.ToArray() );
 			
 			// prepare WHERE part
-			var primaryKeyGroup = new QueryGroupNode(GroupType.And);
-			foreach (DataColumn col in table.PrimaryKey) {
-				string valueParameterName = dbSqlBuilder.BuildCommandParameter(
-					col, DataRowVersion.Original);
-				primaryKeyGroup.Nodes.Add(
-					(QField)col.ColumnName==new QRawSql(valueParameterName) );
-			}
+			var primaryKeyGroup = ComposeUpdateCondition(table, dbSqlBuilder);
 			
 			if (primaryKeyGroup.Nodes.Count==0)
 				throw new Exception("Cannot generate UPDATE command for table without primary key");
@@ -183,6 +194,10 @@ namespace NI.Data
 				table.TableName, updateExpression, whereExpression );
 				
 			return cmd;			
+		}
+
+		protected virtual QueryNode ComposeUpdateCondition(Query query) {
+			return query.Condition;
 		}
 		
 		/// <summary>
@@ -206,7 +221,7 @@ namespace NI.Data
 				updateFieldNames.ToArray(), updateFieldValues.ToArray() );
 			
 			// prepare WHERE part
-			string whereExpression = dbSqlBuilder.BuildExpression( query.Condition );
+			string whereExpression = dbSqlBuilder.BuildExpression( ComposeUpdateCondition( query ) );
 			
 			cmd.CommandText = String.Format(
 				"UPDATE {0} SET {1}",

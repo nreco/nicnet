@@ -14,29 +14,36 @@
 #endregion
 
 using System;
+using System.Security;
 using System.Security.Principal;
-using NI.Data;
+using System.Threading;
 
 namespace NI.Data.Permissions
 {
 	/// <summary>
-	/// Composite IDalcConditionComposer implementation.
+	/// Dalc permission context
 	/// </summary>
-	public class CompositeDalcConditionComposer : IDalcConditionComposer
+	public class PermissionContext
 	{
-		IDalcConditionComposer[] _ConditionComposers;
+		public string SourceName { get; private set; }
 
-		public IDalcConditionComposer[] ConditionComposers { get; set; }
-	
-		public CompositeDalcConditionComposer() {
+		public DalcOperation Operation { get; private set; }
+
+		public IPrincipal Principal { get; private set; }
+
+		public PermissionContext(string sourceName, DalcOperation operation) {
+			SourceName = sourceName;
+			Principal = Thread.CurrentPrincipal;
+			Operation = operation;
 		}
+	}
 
-		public QueryNode Compose(IPrincipal user, DalcOperation operation, string sourceName) {
-			QueryGroupNode groupAnd = new QueryGroupNode(GroupType.And);
-			for (int i=0; i<ConditionComposers.Length; i++)
-				groupAnd.Nodes.Add( ConditionComposers[i].Compose(user, operation, sourceName) );
-			return groupAnd;
-		}
-
+	[Flags]
+	public enum DalcOperation {
+		Select = 1,
+		Update = 2,
+		Delete = 4,
+		Change = 2+4,
+		Any = 1+2+4
 	}
 }

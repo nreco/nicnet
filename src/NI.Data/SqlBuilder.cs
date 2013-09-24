@@ -152,8 +152,7 @@ namespace NI.Data
 
 		public virtual string BuildSort(QSort value) {
 			var sortFld = BuildValue( (IQueryValue) value.Field);
-			return value.SortDirection == ListSortDirection.Ascending ? sortFld :
-				String.Format("{0} {1}", sortFld, QSort.Desc);
+			return String.Format("{0} {1}", sortFld, value.SortDirection == ListSortDirection.Ascending ? QSort.Asc : QSort.Desc);
 		}
 
 		protected virtual string BuildValue(QConst value) {

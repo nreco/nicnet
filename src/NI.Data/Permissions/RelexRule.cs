@@ -14,36 +14,31 @@
 #endregion
 
 using System;
-using System.Data;
 using System.Collections;
-using System.Security;
-using System.Threading;
+using System.Text;
 
-
-namespace NI.Data.Permissions
-{
+namespace NI.Data.Permissions {
+	
 	/// <summary>
-	/// Permission-checking DALC proxy.
+	/// Generic query rule
 	/// </summary>
-	public class DalcProxy : BaseDalcProxy
-	{
-		IDalc _UnderlyingDalc;
-		
-		protected override IDalc Dalc {
-			get { return _UnderlyingDalc; }
+	public class RelexRule : IDalcQueryRule {
+
+		public string SourceName { get; set; }
+
+		public DalcOperation Operation { get; set; }
+
+		public bool IsMatch(PermissionContext context) {
+			if ( (Operation & context.Operation)!=context.Operation )
+				return false;
+
+			return true;
 		}
-		
-		/// <summary>
-		/// Get or set underlying DALC component
-		/// </summary>
-		public IDalc UnderlyingDalc {
-			get { return _UnderlyingDalc; }
-			set { _UnderlyingDalc = value; }
+
+		public QueryNode ComposeCondition(PermissionContext context) {
+			return null;
 		}
-		
-		public DalcProxy()
-		{
-		}
-		
+
 	}
+		
 }
