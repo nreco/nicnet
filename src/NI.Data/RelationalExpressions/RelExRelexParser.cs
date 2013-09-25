@@ -31,7 +31,7 @@ namespace NI.Data.RelationalExpressions
 		public RelExParseException(string message, Exception innerException) : base(message, innerException) {}
 	}
 	
-	public class RelExQueryParser
+	public class RelExParser
 	{
 		static readonly string[] nameGroups = new string[] { "and", "or"};
 		static readonly string[] delimiterGroups = new string[] { "&&", "||"};
@@ -80,14 +80,14 @@ namespace NI.Data.RelationalExpressions
 			Stop
 		}
 		
-		bool _AllowLazyConstType = false;
+		bool _StrictConstType = true;
 		
-		public bool AllowLazyConstType {
-			get { return _AllowLazyConstType; }
-			set { _AllowLazyConstType = value; }
+		public bool StrictConstType {
+			get { return _StrictConstType; }
+			set { _StrictConstType = value; }
 		}
 		
-		static RelExQueryParser() {
+		static RelExParser() {
 			typeNames = Enum.GetNames(typeof(TypeCode));
 			arrayTypeNames = new string[typeNames.Length+1];
 			for (int i=0; i<typeNames.Length; i++) {
@@ -98,7 +98,7 @@ namespace NI.Data.RelationalExpressions
 
 		}
 		
-		public RelExQueryParser() {
+		public RelExParser() {
 		}
 		
 		protected LexemType GetLexemType(string s, int startIdx, out int endIdx) {
@@ -266,7 +266,7 @@ namespace NI.Data.RelationalExpressions
 					object typedConstant = Convert.ChangeType(constant, typeCode);
 					return new QConst(typedConstant);
 				} catch (Exception ex) {
-					if (AllowLazyConstType)
+					if (!StrictConstType)
 						return new QConst(constant, typeCode);
 					throw new InvalidCastException(
 						 String.Format("Cannot parse typed constant \"{0}\":{1}",constant, typeCodeString),ex);

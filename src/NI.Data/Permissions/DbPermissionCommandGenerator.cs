@@ -29,7 +29,7 @@ namespace NI.Data.Permissions
 	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
 
-		public IDalcQueryRule[] Rules { get; set; }
+		public Func<PermissionContext,QueryNode>[] Rules { get; set; }
 		
 		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
 
@@ -45,11 +45,9 @@ namespace NI.Data.Permissions
 			var context = CreatePermissionContext(sourceName, operation);
 			for (int i = 0; i < Rules.Length; i++) {
 				var r = Rules[i];
-				if (r.IsMatch(context)) {
-					var extraCondition = r.ComposeCondition(context);
-					if (extraCondition != null)
-						resNode.Nodes.Add(extraCondition);
-				}
+				var extraCondition = r(context);
+				if (extraCondition != null)
+					resNode.Nodes.Add(extraCondition);
 			}
 			return resNode.Nodes.Count > 1 ? resNode : node;
 		}

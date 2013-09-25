@@ -36,6 +36,12 @@ namespace NI.Data.Permissions
 			Principal = Thread.CurrentPrincipal;
 			Operation = operation;
 		}
+
+		public string IdentityName {
+			get {
+				return Principal != null && Principal.Identity != null ? Principal.Identity.Name : null;
+			}
+		}
 	}
 
 	[Flags]

@@ -83,7 +83,7 @@ namespace NI.Tests.Data.RelationalExpressions
 		
 		[Test]
 		public void test_Parse() {
-			RelExQueryParser relExParser = new RelExQueryParser();
+			RelExParser relExParser = new RelExParser();
 			// generate SQL by query
 			SqlClientDalcFactory factory = new SqlClientDalcFactory();
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
@@ -118,7 +118,7 @@ namespace NI.Tests.Data.RelationalExpressions
 
 		[Test]
 		public void test_RelexParseSpeed() {
-			var relExParser = new RelExQueryParser();
+			var relExParser = new RelExParser();
 
 			var stopwatch = new System.Diagnostics.Stopwatch();
 			stopwatch.Start();
@@ -154,8 +154,8 @@ namespace NI.Tests.Data.RelationalExpressions
 			string expression = relExSamples[0];
 			int startIdx = 0;
 			int endIdx = 0;
-			RelExQueryParser.LexemType lexemType;
-			while ( (lexemType=relExParser.TestGetLexemType(expression,startIdx, out endIdx))!=RelExQueryParser.LexemType.Stop) {
+			RelExParser.LexemType lexemType;
+			while ( (lexemType=relExParser.TestGetLexemType(expression,startIdx, out endIdx))!=RelExParser.LexemType.Stop) {
 				Console.WriteLine("{0}: {1}", lexemType.ToString(), expression.Substring(startIdx, endIdx-startIdx) );
 				startIdx = endIdx;
 			}
@@ -163,9 +163,9 @@ namespace NI.Tests.Data.RelationalExpressions
 		}
 		
 		
-		public class TestRelExQueryParser : RelExQueryParser {
+		public class TestRelExQueryParser : RelExParser {
 			
-			public RelExQueryParser.LexemType TestGetLexemType(string s, int startIdx, out int endIdx) {
+			public RelExParser.LexemType TestGetLexemType(string s, int startIdx, out int endIdx) {
 				return GetLexemType(s, startIdx, out endIdx);
 			}
 		

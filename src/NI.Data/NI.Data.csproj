@@ -164,8 +164,7 @@
     <Compile Include="Linq\QueryProvider.cs" />
     <Compile Include="ObjectPersister.cs" />
     <Compile Include="EvalQueryCondition.cs" />
-    <Compile Include="Permissions\RelexRule.cs" />
-    <Compile Include="Permissions\IDalcQueryRule.cs" />
+    <Compile Include="Permissions\QueryRule.cs" />
     <Compile Include="Permissions\PermissionContext.cs" />
     <Compile Include="Permissions\DbPermissionCommandGenerator.cs" />
     <Compile Include="PropertyObjectMapper.cs" />
@@ -198,12 +197,8 @@
     <Compile Include="Query\QueryNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RelationalExpressions\RelationalExprResolver.cs" />
     <Compile Include="RelationalExpressions\RelexBuilder.cs" />
-    <Compile Include="RelationalExpressions\RelExQueryNodeParser.cs" />
-    <Compile Include="RelationalExpressions\RelExQueryNodeProvider.cs" />
-    <Compile Include="RelationalExpressions\RelExQueryParser.cs" />
-    <Compile Include="RelationalExpressions\RelExQueryProvider.cs" />
+    <Compile Include="RelationalExpressions\RelExRelexParser.cs" />
     <Compile Include="SimpleStringTemplate.cs" />
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>
