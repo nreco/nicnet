@@ -25,8 +25,8 @@ namespace NI.Data {
 		object _Value;
 		TypeCode _Type;
 		
-		public object Value {
-			get { return _Value; } 
+		public virtual object Value {
+			get { return _Value; }
 		}
 	
 		public TypeCode Type { 
@@ -49,7 +49,15 @@ namespace NI.Data {
 			return new QConst(value);
 		}
 
+		public static explicit operator QConst(float value) {
+			return new QConst(value);
+		}
+
 		public static explicit operator QConst(string value) {
+			return new QConst(value);
+		}
+
+		public static explicit operator QConst(decimal value) {
 			return new QConst(value);
 		}
 

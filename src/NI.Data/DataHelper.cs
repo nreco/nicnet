@@ -28,5 +28,18 @@ namespace NI.Data {
 			}
 		}
 
+		public static void SetQueryVariables(QueryNode node, Action<QVar> setVar) {
+			if (node is QueryConditionNode) {
+				var cndNode = (QueryConditionNode)node;
+				if (cndNode.LValue is QVar)
+					setVar( (QVar) cndNode.LValue);
+				if (cndNode.RValue is QVar)
+					setVar( (QVar) cndNode.RValue);
+			}
+			if (node != null)
+				foreach (var cNode in node.Nodes)
+					SetQueryVariables(cNode, setVar);
+		}
+
 	}
 }

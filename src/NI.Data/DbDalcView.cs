@@ -176,9 +176,11 @@ namespace NI.Data
 					return group;
 				}
 				if (qNode is QueryConditionNode) {
-					var cndNode = new QueryConditionNode((QueryConditionNode)qNode);
-					cndNode.LValue = ApplyFieldMapping(cndNode.LValue);
-					cndNode.RValue = ApplyFieldMapping(cndNode.RValue);
+					var origCndNode = (QueryConditionNode)qNode;
+					var cndNode = new QueryConditionNode(origCndNode.Name, 
+							ApplyFieldMapping(origCndNode.LValue),
+							origCndNode.Condition,
+							ApplyFieldMapping(origCndNode.RValue));
 					return cndNode;
 				}
 				if (qNode is QueryNegationNode) {

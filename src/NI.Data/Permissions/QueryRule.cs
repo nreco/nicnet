@@ -54,8 +54,6 @@ namespace NI.Data.Permissions {
 			return null;
 		}
 
-
-
 		public virtual QueryNode ComposeCondition(PermissionContext context) {
 			if ((Operation & context.Operation) != context.Operation)
 				return null;
@@ -63,7 +61,20 @@ namespace NI.Data.Permissions {
 			if (matchedSourceName==null)
 				return null;
 
+			DataHelper.SetQueryVariables(RuleCondition, (v) => {
+				SetVariable(v,context);
+			});
+
 			return RuleCondition;
+		}
+
+
+		protected virtual void SetVariable(QVar var, PermissionContext context) {
+			var p = context.GetType().GetProperty(var.Name);
+			var.Unset();
+			if (p!=null) {
+				var.Set( p.GetValue(context, null) );
+			}
 		}
 
 	}

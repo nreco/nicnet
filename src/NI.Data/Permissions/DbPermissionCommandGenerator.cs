@@ -25,6 +25,7 @@ using System.Data;
 namespace NI.Data.Permissions
 {
 	/// <summary>
+	/// Extends DbCommandGenerator with permission rules
 	/// </summary>
 	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
@@ -32,7 +33,12 @@ namespace NI.Data.Permissions
 		public Func<PermissionContext,QueryNode>[] Rules { get; set; }
 		
 		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
+			Rules = new Func<PermissionContext, QueryNode>[0];
+		}
 
+		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views, Func<PermissionContext, QueryNode>[] rules)
+			: base(dbFactory, views) {
+			Rules = rules;
 		}
 
 		protected virtual PermissionContext CreatePermissionContext(string sourceName, DalcOperation op) {
@@ -52,7 +58,7 @@ namespace NI.Data.Permissions
 			return resNode.Nodes.Count > 1 ? resNode : node;
 		}
 
-		protected virtual Query PrepareSelectQuery(Query q) {
+		protected override Query PrepareSelectQuery(Query q) {
 			var withExtraConditions = ApplyRuleConditions(q.Condition, q.SourceName.Name, DalcOperation.Select);
 			if (withExtraConditions != q.Condition) {
 				var qClone = new Query(q);

@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dalc\PermissionTest.cs" />
     <Compile Include="Dalc\SQLiteDalcTest.cs" />
     <Compile Include="Dalc\DatasetDalcTest.cs" />
     <Compile Include="Dalc\DbCommandGeneratorTest.cs" />

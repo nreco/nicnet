@@ -18,7 +18,7 @@ namespace NI.Tests.Data.Dalc
 	public class SQLiteDalcTest
 	{
 		string dbFileName;
-		DbDalc Dalc;
+		public DbDalc Dalc;
 
 		[TestFixtureSetUp]
 		public void SetUp() {
@@ -204,8 +204,7 @@ order by r.role desc".Trim()},
 			
 			
 		}
-		
-		
+	
 			
 		
 	}

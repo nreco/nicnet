@@ -168,6 +168,7 @@
     <Compile Include="Permissions\PermissionContext.cs" />
     <Compile Include="Permissions\DbPermissionCommandGenerator.cs" />
     <Compile Include="PropertyObjectMapper.cs" />
+    <Compile Include="Query\QVar.cs" />
     <Compile Include="Query\QueryRawSqlNode.cs" />
     <Compile Include="Query\QSource.cs" />
     <Compile Include="Query\QConst.cs">
@@ -198,7 +199,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RelationalExpressions\RelexBuilder.cs" />
-    <Compile Include="RelationalExpressions\RelExRelexParser.cs" />
+    <Compile Include="RelationalExpressions\RelExParser.cs" />
     <Compile Include="SimpleStringTemplate.cs" />
     <Compile Include="SqlBuilder.cs">
       <SubType>Code</SubType>

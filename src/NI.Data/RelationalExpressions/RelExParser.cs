@@ -89,12 +89,11 @@ namespace NI.Data.RelationalExpressions
 		
 		static RelExParser() {
 			typeNames = Enum.GetNames(typeof(TypeCode));
-			arrayTypeNames = new string[typeNames.Length+1];
+			arrayTypeNames = new string[typeNames.Length];
 			for (int i=0; i<typeNames.Length; i++) {
 				typeNames[i] = typeNames[i].ToLower();
 				arrayTypeNames[i] = typeNames[i] + "[]";
 			}
-			arrayTypeNames[arrayTypeNames.Length-1] = "sql";
 
 		}
 		
@@ -256,8 +255,12 @@ namespace NI.Data.RelationalExpressions
 		protected virtual IQueryValue ParseTypedConstant(string typeCodeString, string constant) {
 			typeCodeString = typeCodeString.ToLower();
 			// sql type
-			if (typeCodeString=="sql")
+			if (typeCodeString == "sql")
 				return new QRawSql(constant);
+			// var type
+			if (typeCodeString == "var")
+				return new QVar(constant);
+
 			// simple type
 			int typeNameIdx = Array.IndexOf(typeNames, typeCodeString);
 			if (typeNameIdx>=0) {
