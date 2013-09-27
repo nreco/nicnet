@@ -258,6 +258,12 @@ namespace NI.Data
 			return cmd;
 		}
 
+		public void ComposeAdapterUpdateCommands(IDbDataAdapter adapter, DataTable table) {
+			adapter.UpdateCommand = ComposeUpdate(table);
+			adapter.InsertCommand = ComposeInsert(table);
+			adapter.DeleteCommand = ComposeDelete(table);
+		}
+
 		protected virtual string BuildSetExpression(IDbSqlBuilder sqlBuilder, string[] fieldNames, string[] fieldValues) {
 			if (fieldNames.Length != fieldValues.Length)
 				throw new ArgumentException();

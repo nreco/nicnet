@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Data.Common;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using NI.Data;
 using NI.Data.SqlClient;
 
@@ -37,7 +37,7 @@ namespace NI.Tests.Data.Dalc {
 		}
 
 		[Test]
-		public void test_CommandGeneratorSpeed() {
+		public void test_Select_Speed() {
 			var cmdGenerator = new DbCommandGenerator(new NI.Data.SQLite.SQLiteDalcFactory() );
 			
 			Query q = new Query( "test" );
@@ -53,7 +53,35 @@ namespace NI.Tests.Data.Dalc {
 			stopwatch.Stop();
 
 			Console.WriteLine("Speedtest for select command generation (10000 times): {0}", stopwatch.Elapsed); 
-		}	
+		}
+
+
+		[Test]
+		public void test_InsertUpdateDelete_Speed() {
+			var cmdGenerator = new DbCommandGenerator(new NI.Data.SQLite.SQLiteDalcFactory());
+			var ds = new DataSet();
+			var t = ds.Tables.Add("users");
+			t.Columns.Add("id", typeof(int)).AutoIncrement = true;
+			t.Columns.Add("name", typeof(string));
+			t.Columns.Add("userpic", typeof(string));
+			t.Columns.Add("create_date", typeof(DateTime));
+			t.Columns.Add("update_date", typeof(DateTime));
+			t.Columns.Add("age", typeof(int));
+			t.PrimaryKey = new[] { t.Columns["id"] };
+
+			var stopwatch = new Stopwatch();
+
+			int iterations = 0;
+			stopwatch.Start();
+			while (iterations < 500) {
+				iterations++;
+
+				cmdGenerator.ComposeAdapterUpdateCommands( new System.Data.SQLite.SQLiteDataAdapter(), t);
+			}
+
+			stopwatch.Stop();
+			Console.WriteLine("Speedtest for DbCommandGenerator Update commands ({1} times): {0}", stopwatch.Elapsed, iterations);
+		}
 		
 		
 		[Test]

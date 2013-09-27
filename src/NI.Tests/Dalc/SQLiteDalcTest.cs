@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using NI.Data;
 using NI.Data.SQLite;
@@ -68,7 +69,7 @@ left join roles r on (u.role=r.id)
 
 		[TestFixtureTearDown]
 		public void CleanUp() {
-			Dalc.Dispose();
+			
 			((SQLiteConnection)Dalc.Connection).Dispose();
 			SQLiteConnection.ClearAllPools();
 			GC.Collect();
@@ -155,7 +156,41 @@ order by r.role desc".Trim()},
 			Dalc.Load( q, ds );
 			Assert.AreEqual(0, ds.Tables["users"].Rows.Count, "Load failed");
 		}
-		
+
+		[Test]
+		public void test_CRUD_Speed() {
+			var stopwatch = new Stopwatch();
+
+			int iterations = 0;
+			stopwatch.Start();
+			while (iterations < 100) {
+				iterations++;
+
+				var ds = new DataSet();
+				Dalc.Load( new Query("users", new QField("1")==new QConst(2) ), ds);
+				var usersTbl = ds.Tables["users"];
+
+				usersTbl.PrimaryKey = new[] { usersTbl.Columns["id"] };
+				usersTbl.Columns["id"].AutoIncrement = true;
+
+				var r = usersTbl.NewRow();
+				r["name"] = "TEST";
+				usersTbl.Rows.Add(r);
+
+				Dalc.Update(usersTbl);
+
+				r["name"] = "TEST1";
+				Dalc.Update(usersTbl);
+
+				r.Delete();
+				Dalc.Update(usersTbl);
+			}
+
+			stopwatch.Stop();
+			Console.WriteLine("Speedtest for SQLite CRUD datarow operations ({1} times): {0}", stopwatch.Elapsed, iterations); 
+		}
+
+
 		[Test]
 		public void test_Delete() {
 			Query subQuery = new Query("roles");

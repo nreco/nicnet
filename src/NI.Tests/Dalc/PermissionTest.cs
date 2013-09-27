@@ -56,13 +56,15 @@ namespace NI.Tests.Data.Dalc
 
 					Assert.AreEqual(4, dalc.RecordsCount(new Query("users")), "Select rule failed");
 
+					Assert.AreEqual(1, dalc.Update(new Query("users"), new Dictionary<string, IQueryValue> {
+						{"role", (QConst)1 }
+					}), "Change rule failed");
+
 					Assert.DoesNotThrow(() => {
 						dalc.Update(ds.Tables["users"]);
 					}, "Change rule failed");
 
-					Assert.AreEqual(1, dalc.Update(new Query("users"), new Dictionary<string, IQueryValue> {
-						{"role", (QConst)1 }
-					}), "Change rule failed");
+
 				} finally {
 					Thread.CurrentPrincipal = oldPrincipal;
 				}

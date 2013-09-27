@@ -29,13 +29,12 @@ namespace NI.Data
 	{
 		IDbCommand ComposeSelect(Query query);
 
-		IDbCommand ComposeInsert(DataTable table);
+		void ComposeAdapterUpdateCommands(IDbDataAdapter adapter, DataTable table);
+
 		IDbCommand ComposeInsert(IDictionary<string,IQueryValue> data, string sourceName);
 
-		IDbCommand ComposeDelete(DataTable table);
 		IDbCommand ComposeDelete(Query query);
 
-		IDbCommand ComposeUpdate(DataTable table);
 		IDbCommand ComposeUpdate(IDictionary<string, IQueryValue> data, Query query);
 	}
 }

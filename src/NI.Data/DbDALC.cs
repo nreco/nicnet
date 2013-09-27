@@ -28,8 +28,7 @@ namespace NI.Data {
 	/// <summary>
 	/// Database Data Access Layer Component
 	/// </summary>
-	public class DbDalc : ISqlDalc, IDisposable {
-		Dictionary<string, IDbDataAdapter> updateAdapterCache = new Dictionary<string, IDbDataAdapter>();
+	public class DbDalc : ISqlDalc {
 		
 		/// <summary>
 		/// Get or set database commands generator
@@ -120,8 +119,6 @@ namespace NI.Data {
 				return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
 			}
 		}
-
-
 		
 		/// <summary>
 		/// Update one table in DataSet
@@ -129,23 +126,43 @@ namespace NI.Data {
 		public virtual void Update(DataTable t) {
 			var tableName = t.TableName;
 
-			IDbDataAdapter adapter;
-			if (!updateAdapterCache.ContainsKey(tableName)) {
-				adapter = DbFactory.CreateDataAdapter(OnRowUpdating,OnRowUpdated);
-				GenerateAdapterCommands(adapter, t);
-				updateAdapterCache[tableName] = adapter;
-			} else {
-				adapter = updateAdapterCache[tableName];
-			}
+			IDbDataAdapter adapter = DbFactory.CreateDataAdapter(OnRowUpdating, OnRowUpdated);
+			CommandGenerator.ComposeAdapterUpdateCommands(adapter, t);
 			
 			adapter.InsertCommand.Connection = Connection;
 			adapter.UpdateCommand.Connection = Connection;
 			adapter.DeleteCommand.Connection = Connection;
-			
-			if (adapter is DbDataAdapter)
-				((DbDataAdapter)adapter).Update(t.DataSet, tableName);
-			else
-				adapter.Update(t.DataSet);
+
+			try {
+				if (adapter is DbDataAdapter)
+					((DbDataAdapter)adapter).Update(t.DataSet, tableName);
+				else
+					adapter.Update(t.DataSet);
+			} finally {
+				DisposeAdapter(adapter);
+			}
+		}
+
+		protected void DisposeAdapter(IDbDataAdapter adapter) {
+			if (adapter.SelectCommand != null) {
+				adapter.SelectCommand.Dispose();
+				adapter.SelectCommand = null;
+			}
+			if (adapter.UpdateCommand != null) {
+				adapter.UpdateCommand.Dispose();
+				adapter.UpdateCommand = null;
+			}
+			if (adapter.DeleteCommand != null) {
+				adapter.DeleteCommand.Dispose();
+				adapter.DeleteCommand = null;
+			}
+			if (adapter.InsertCommand != null) {
+				adapter.InsertCommand.Dispose();
+				adapter.InsertCommand = null;
+			}
+			// some implementations are sensitive to explicit dispose
+			if (adapter is IDisposable)
+				((IDisposable)adapter).Dispose();
 		}
 		
 		/// <summary>
@@ -294,15 +311,6 @@ namespace NI.Data {
 			OnCommandExecuted(e.Row.Table.TableName, StatementType.Update, e.Command);
 		}
 
-		/// <summary>
-		/// Automatically generates Insert/Update/Delete commands for Adapter
-		/// </summary>
-		protected virtual void GenerateAdapterCommands(IDbDataAdapter adapter, DataTable table) {
-			// Init DataAdapter
-			adapter.UpdateCommand = CommandGenerator.ComposeUpdate(table);
-			adapter.InsertCommand = CommandGenerator.ComposeInsert(table);
-			adapter.DeleteCommand = CommandGenerator.ComposeDelete(table);
-		}
 
 		/// <summary>
 		/// Execute SQL command
@@ -323,39 +331,7 @@ namespace NI.Data {
 		
 #endregion				
 		
-		private bool disposed = false;
 
-		public void Dispose() {
-			Dispose(true);
-		}
-
-		protected virtual void Dispose(bool disposing) {
-			if (!this.disposed) {
-				disposed = true;
-				foreach (var adapter in updateAdapterCache.Values) {
-					if (adapter.SelectCommand != null) {
-						adapter.SelectCommand.Dispose();
-						adapter.SelectCommand = null;
-					}
-					if (adapter.UpdateCommand != null) {
-						adapter.UpdateCommand.Dispose();
-						adapter.UpdateCommand = null;
-					}
-					if (adapter.DeleteCommand != null) {
-						adapter.DeleteCommand.Dispose();
-						adapter.DeleteCommand = null;
-					}
-					if (adapter.InsertCommand != null) {
-						adapter.InsertCommand.Dispose();
-						adapter.InsertCommand = null;
-					}
-					// some implementations are sensitive to explicit dispose
-					if (adapter is IDisposable)
-						((IDisposable)adapter).Dispose();					
-				}
-				updateAdapterCache.Clear();
-			}
-		}
 	}
 	
 	
