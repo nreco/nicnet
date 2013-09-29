@@ -112,7 +112,7 @@ left join roles r on (u.role=r.id)
 
 order by r.role desc".Trim()},
 
-
+				
 			};
 
 			foreach (var testCase in testSet) {

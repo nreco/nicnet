@@ -61,11 +61,30 @@ namespace NI.Data.Permissions {
 			if (matchedSourceName==null)
 				return null;
 
-			DataHelper.SetQueryVariables(RuleCondition, (v) => {
+			var ruleCondition = RuleCondition;
+			if (!String.IsNullOrEmpty( matchedSourceName.Alias )) {
+				Func<IQueryValue,IQueryValue> alignFieldPrefix = null;
+				alignFieldPrefix = (n) => {
+					if (n is QField) {
+						var fld = (QField)n;
+						if (fld.Prefix == SourceName)
+							return new QField(matchedSourceName.Alias, fld.Name, fld.Expression);
+					}
+					if (n is Query) {
+						var q = (Query)n;
+						var qCopy = new Query(q);
+						qCopy.Condition = DataHelper.MapQValue(qCopy.Condition, alignFieldPrefix);
+					}
+					return n;
+				};
+				ruleCondition = DataHelper.MapQValue(ruleCondition, alignFieldPrefix);
+			}
+
+			DataHelper.SetQueryVariables(ruleCondition, (v) => {
 				SetVariable(v,context);
 			});
 
-			return RuleCondition;
+			return ruleCondition;
 		}
 
 

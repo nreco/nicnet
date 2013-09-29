@@ -28,6 +28,30 @@ namespace NI.Data {
 			}
 		}
 
+		public static QueryNode MapQValue(QueryNode qNode, Func<IQueryValue,IQueryValue> mapFunc) {
+			if (qNode is QueryGroupNode) {
+				var group = new QueryGroupNode((QueryGroupNode)qNode);
+				for (int i = 0; i < group.Nodes.Count; i++)
+					group.Nodes[i] = MapQValue(group.Nodes[i], mapFunc);
+				return group;
+			}
+			if (qNode is QueryConditionNode) {
+				var origCndNode = (QueryConditionNode)qNode;
+				var cndNode = new QueryConditionNode(origCndNode.Name,
+						mapFunc(origCndNode.LValue),
+						origCndNode.Condition,
+						mapFunc(origCndNode.RValue));
+				return cndNode;
+			}
+			if (qNode is QueryNegationNode) {
+				var negNode = new QueryNegationNode((QueryNegationNode)qNode);
+				for (int i = 0; i < negNode.Nodes.Count; i++)
+					negNode.Nodes[i] = MapQValue(negNode.Nodes[i], mapFunc);
+				return negNode;
+			}
+			return qNode;
+		}
+
 		public static void SetQueryVariables(QueryNode node, Action<QVar> setVar) {
 			if (node is QueryConditionNode) {
 				var cndNode = (QueryConditionNode)node;

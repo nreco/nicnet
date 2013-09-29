@@ -28,7 +28,9 @@ namespace NI.Tests.Data.Dalc
 
 				var oldCmdGen = (DbCommandGenerator)dalc.CommandGenerator;
 				dalc.CommandGenerator = new DbPermissionCommandGenerator(dalc.DbFactory, oldCmdGen.Views, new Func<PermissionContext, QueryNode>[] {
-					new QueryRule("users", DalcOperation.Select, "role!=\"3\":int32 or \"IdentityName\":var=\"Mike\"" ).ComposeCondition,
+					(new QueryRule("users", DalcOperation.Select, "users.role!=\"3\":int32 or \"IdentityName\":var=\"Mike\"" ) {
+						ViewNames = new[] { new QSource("users_view","u") }
+					}).ComposeCondition,
 					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name " ).ComposeCondition
 				});
 
@@ -67,6 +69,15 @@ namespace NI.Tests.Data.Dalc
 
 				} finally {
 					Thread.CurrentPrincipal = oldPrincipal;
+				}
+
+				// direct command generation asserts
+				using (var cmd1 = dalc.CommandGenerator.ComposeSelect(new Query("users_view", (QField)"id" == new QConst(1)))) {
+					var cmd1Sql = @"select u.*,r.role as role_name from users u
+left join roles r on (u.role=r.id)
+where ((id=?) And ((u.role<>?) Or (?=?)))
+order by u.id desc";
+					Assert.AreEqual(cmd1Sql, cmd1.CommandText, "Permissions for dataview failed");
 				}
 
 			} finally {

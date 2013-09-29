@@ -163,39 +163,16 @@ namespace NI.Data
 			}
 
 			protected string BuildWhere() {
-				var condition = ApplyFieldMapping(Query.Condition);
+				var condition = DataHelper.MapQValue(Query.Condition, ApplyFieldMapping);
 				return IsolateWhereExpression(
 						SqlBuilder.BuildExpression(condition));
 			}
 
-			protected QueryNode ApplyFieldMapping(QueryNode qNode) {
-				if (qNode is QueryGroupNode) {
-					var group = new QueryGroupNode((QueryGroupNode)qNode);
-					for (int i = 0; i < group.Nodes.Count; i++)
-						group.Nodes[i] = ApplyFieldMapping(group.Nodes[i]);
-					return group;
-				}
-				if (qNode is QueryConditionNode) {
-					var origCndNode = (QueryConditionNode)qNode;
-					var cndNode = new QueryConditionNode(origCndNode.Name, 
-							ApplyFieldMapping(origCndNode.LValue),
-							origCndNode.Condition,
-							ApplyFieldMapping(origCndNode.RValue));
-					return cndNode;
-				}
-				if (qNode is QueryNegationNode) {
-					var negNode = new QueryNegationNode((QueryNegationNode)qNode);
-					for (int i = 0; i < negNode.Nodes.Count; i++)
-						negNode.Nodes[i] = ApplyFieldMapping(negNode.Nodes[i]);
-					return negNode;
-				}
-				return qNode;
-			}
 			protected virtual IQueryValue ApplyFieldMapping(IQueryValue qValue) {
 				if (qValue is QField) {
 					var qFld = (QField)qValue;
 					if (View.FieldMapping.ContainsKey(qFld.Name)) {
-						return new QRawSql(View.FieldMapping[qFld.Name]);
+						return new QField(qFld.Name, View.FieldMapping[qFld.Name]);
 					}
 				}
 				return qValue;
