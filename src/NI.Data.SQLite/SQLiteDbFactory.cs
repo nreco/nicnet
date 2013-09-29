@@ -26,9 +26,12 @@ namespace NI.Data.SQLite
 		public SQLiteDalcFactory()
 			: base(SQLiteFactory.Instance) {
 			ParamPlaceholderFormat = "?";
+			
 		}
 
 		public override object GetInsertId(IDbConnection connection) {
+			if (connection.State != ConnectionState.Open)
+				throw new InvalidOperationException("GetInsertId requires opened connection");
 			return ((SQLiteConnection)connection).LastInsertRowId;
 		}
 

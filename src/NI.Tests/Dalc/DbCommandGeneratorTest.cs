@@ -89,13 +89,13 @@ namespace NI.Tests.Data.Dalc {
 			SqlClientDalcFactory factory = new SqlClientDalcFactory();
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
 			
-			Query q = new Query( "test" );
+			Query q = new Query( new QSource("test","t") );
 			q.Condition = createTestQuery();
-			q.Fields = new QField[] { "name", "age" };
+			q.Fields = new QField[] { "name", "t.age", new QField("age_months", "t.age*12") };
 
-			// SELECT TEST
+			// SELECT TEST with prefixes and expressions
 			IDbCommand cmd = cmdGenerator.ComposeSelect( q );	
-			string masterSQL = "SELECT name,age FROM test WHERE (((name LIKE @p0) Or (NOT(age>=@p1))) And ((weight=@p2) And (type IN (@p3,@p4)))) Or ((name<>@p5) And (type IS NOT NULL))";
+			string masterSQL = "SELECT name,t.age as age,t.age*12 as age_months FROM test t WHERE (((name LIKE @p0) Or (NOT(age>=@p1))) And ((weight=@p2) And (type IN (@p3,@p4)))) Or ((name<>@p5) And (type IS NOT NULL))";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Select command generation failed");
 

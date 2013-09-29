@@ -26,16 +26,6 @@ namespace NI.Data
 	public class SqlBuilder : ISqlBuilder
 	{
 		
-		Func<QField,string> _QueryFieldValueFormatter = null;
-		
-		/// <summary>
-		/// Get or set query field value formatter
-		/// </summary>
-		public Func<QField,string> QueryFieldValueFormatter {
-			get { return _QueryFieldValueFormatter; }
-			set { _QueryFieldValueFormatter = value; }
-		}
-		
 		public SqlBuilder()
 		{
 		}
@@ -177,13 +167,11 @@ namespace NI.Data
 		protected virtual string BuildValue(string str) {
 			return "'"+str.Replace(@"'", @"\'")+"'";
 		}
-				
-		
 		
 		protected virtual string BuildValue(QField fieldValue) {
-			if (QueryFieldValueFormatter!=null)
-				return QueryFieldValueFormatter(fieldValue);
-			return fieldValue.Name;
+			if (!String.IsNullOrEmpty(fieldValue.Expression))
+				return fieldValue.Expression;
+			return String.IsNullOrEmpty(fieldValue.Prefix) ? fieldValue.Name : fieldValue.Prefix + "." + fieldValue.Name;
 		}
 
 		

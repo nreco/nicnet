@@ -3,6 +3,7 @@ using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Transactions;
 using System.IO;
 using NI.Data;
 using NI.Data.SQLite;
@@ -134,7 +135,7 @@ order by r.role desc".Trim()},
 			
 			Query q = new Query("users");
 			q.Condition = (QField)"role" == subQuery;
-			q.Sort = new QSort[] { "name" };
+			q.SetSort( "name" );
 
 			Dalc.Load( q, ds );
 			Assert.AreEqual(2, ds.Tables["users"].Rows.Count, "Load failed: rows count");
@@ -155,6 +156,9 @@ order by r.role desc".Trim()},
 			ds.Clear();
 			Dalc.Load( q, ds );
 			Assert.AreEqual(0, ds.Tables["users"].Rows.Count, "Load failed");
+
+			// test sql expr
+			Assert.AreEqual(1, Dalc.LoadValue(new Query("users", (QField)"id"==(QConst)1) { Fields = new[] { new QField("sumIds", "sum(id)") } }) );
 		}
 
 		[Test]
@@ -163,27 +167,33 @@ order by r.role desc".Trim()},
 
 			int iterations = 0;
 			stopwatch.Start();
-			while (iterations < 100) {
-				iterations++;
 
-				var ds = new DataSet();
-				Dalc.Load( new Query("users", new QField("1")==new QConst(2) ), ds);
-				var usersTbl = ds.Tables["users"];
+			using (var t = new TransactionScope()) {
+				DataHelper.EnsureConnectionOpen(Dalc.Connection, () => {
+					while (iterations < 100) {
+						iterations++;
 
-				usersTbl.PrimaryKey = new[] { usersTbl.Columns["id"] };
-				usersTbl.Columns["id"].AutoIncrement = true;
+						var ds = new DataSet();
+						Dalc.Load(new Query("users", new QField("1") == new QConst(2)), ds);
+						var usersTbl = ds.Tables["users"];
 
-				var r = usersTbl.NewRow();
-				r["name"] = "TEST";
-				usersTbl.Rows.Add(r);
+						usersTbl.PrimaryKey = new[] { usersTbl.Columns["id"] };
+						usersTbl.Columns["id"].AutoIncrement = true;
 
-				Dalc.Update(usersTbl);
+						var r = usersTbl.NewRow();
+						r["name"] = "TEST";
+						usersTbl.Rows.Add(r);
 
-				r["name"] = "TEST1";
-				Dalc.Update(usersTbl);
+						Dalc.Update(usersTbl);
 
-				r.Delete();
-				Dalc.Update(usersTbl);
+						r["name"] = "TEST1";
+						Dalc.Update(usersTbl);
+
+						r.Delete();
+						Dalc.Update(usersTbl);
+
+					}
+				});
 			}
 
 			stopwatch.Stop();

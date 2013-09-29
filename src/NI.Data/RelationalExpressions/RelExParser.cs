@@ -16,6 +16,7 @@
 using System;
 using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text;
 
@@ -366,36 +367,53 @@ namespace NI.Data.RelationalExpressions
 					nextLexem = GetLexem(input, nextEndIdx, endIdx, nextLexemType);
 					nextEndIdx = endIdx;
 					
-					StringBuilder fieldsBuilder = new StringBuilder();
-                    StringBuilder sortBuilder = new StringBuilder();
-                    fieldsBuilder.Append(nextLexem);
+					var fieldsList = new List<string>();
+                    var sortList = new List<string>();
+					var curFldBuilder = new StringBuilder();
+					curFldBuilder.Append(nextLexem);
                     bool sortPart = false;
+					Action pushFld = () => {
+						if (curFldBuilder.Length > 0) {
+							if (sortPart) {
+								sortList.Add(curFldBuilder.ToString());
+							} else {
+								fieldsList.Add(curFldBuilder.ToString());
+							}
+							curFldBuilder.Clear();
+						}
+					};
                     do {
 						LexemType prevLexemType = nextLexemType;
 						nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);
 						nextLexem = GetLexem(input, endIdx, nextEndIdx, nextLexemType);
 						endIdx = nextEndIdx;
-                        if (nextLexemType==LexemType.Delimiter && nextLexem=="]")
-		                        break;
-                        if (nextLexemType==LexemType.Stop)
-		                        break;
+						if (nextLexemType == LexemType.Delimiter && nextLexem == "]") {
+							pushFld();
+							break;
+						}
+						if (nextLexemType == LexemType.Stop) {
+							throw new RelExParseException(
+								String.Format("Invalid syntax - unclosed brackets (position: {0}, expression: {1})", endIdx, input));
+						}
                         // handle sort separator
                         if (nextLexemType == LexemType.Delimiter && nextLexem == ";") {
-		                        sortPart = true;
-                        } else {
-							if (sortPart) {
-								if (prevLexemType != LexemType.Delimiter)
-									sortBuilder.Append(' '); // default delimiter for asc/desc
-								sortBuilder.Append(nextLexem);
-							} else
-								fieldsBuilder.Append(nextLexem);
+							pushFld();
+							sortPart = true;
+						} else if (nextLexemType == LexemType.Delimiter && nextLexem == ",") {
+							pushFld();
+						} else {
+							if (prevLexemType != LexemType.Delimiter && 
+									(nextLexem.Equals(QSort.Asc,StringComparison.InvariantCultureIgnoreCase) ||
+									 nextLexem.Equals(QSort.Desc, StringComparison.InvariantCultureIgnoreCase))) {
+								curFldBuilder.Append(' ');
+							}
+							curFldBuilder.Append(nextLexem);
                         }
                     } while (true);
-                    string fieldsStr = fieldsBuilder.ToString();
-                    if (fieldsStr!="*")
-	                        fields = fieldsStr.Split(',');
-                    if (sortBuilder.Length > 0)
-	                        sort = sortBuilder.ToString().Split(',');
+					if (fieldsList.Count != 1 || fieldsList[0] != "*")
+						fields = fieldsList.ToArray();
+					if (sortList.Count > 0)
+						sort = sortList.ToArray();
 				} else {
 					return (QField)lexem;
 				}

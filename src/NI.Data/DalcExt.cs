@@ -92,7 +92,7 @@ namespace NI.Data {
 		public static int RecordsCount(this IDalc dalc, Query q) {
 			var qCount = new Query(q);
 			qCount.Sort = null;
-			qCount.Fields = new QField[] { "count(*)" };
+			qCount.Fields = new QField[] { new QField("cnt", "count(*)") };
             qCount.StartRecord = 0;
             qCount.RecordCount = 1;
 			return Convert.ToInt32( LoadValue(dalc, qCount ) );

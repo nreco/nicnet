@@ -26,25 +26,42 @@ namespace NI.Data
 
 		public string Name { get; private set; }
 
+		public string Prefix { get; private set; }
+
 		public string Expression { get; private set; }
 
-		private static char[] ExpressionChars = new[] { '(', ')' };
+		private static char[] ExpressionChars = new[] { '(', ')','+','-','*','/' };
 
 		public QField(string fieldName) {
 			if (fieldName.IndexOfAny(ExpressionChars) >= 0) {
 				Expression = fieldName;
 			}
-			Name = fieldName;
+			SetName(fieldName);
 		}
 
 		public QField(string fieldName, string expression) {
+			SetName(fieldName);
+			Expression = expression;
+		}
+
+		public QField(string prefix, string fieldName, string expression) {
+			Prefix = prefix;
 			Name = fieldName;
 			Expression = expression;
 		}
 
+		private void SetName(string nameStr) {
+			var dotIdx = nameStr!=null ? nameStr.IndexOf('.') : -1;
+			if (dotIdx > 0) {
+				Prefix = nameStr.Substring(0, dotIdx);
+				Name = nameStr.Substring(dotIdx + 1);
+			} else {
+				Name = nameStr;
+			}
+		}
 
 		public override string ToString() {
-			return Name;
+			return String.IsNullOrEmpty(Prefix) ? Name : Prefix+"."+Name;
 		}
 
 		public static implicit operator QField(string fld) {

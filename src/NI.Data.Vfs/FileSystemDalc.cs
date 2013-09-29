@@ -48,7 +48,7 @@ namespace NI.Data {
 
 			IFileObject[] files = Select(query.SourceName, query.Condition);
 
-			if (query.Fields.Length == 1 && query.Fields[0] == "count(*)") {
+			if (query.Fields.Length == 1 && query.Fields[0].Expression == "count(*)") {
 				tbl.Columns.Add("count", typeof(int));
 				var cntRow = tbl.NewRow();
 				cntRow["count"] = files.Length;
@@ -151,7 +151,7 @@ namespace NI.Data {
 		}
 
 		public bool LoadRecord(IDictionary data, Query query) {
-			if (query.Fields.Length==1 && query.Fields[0]=="count(*)") {
+			if (query.Fields.Length==1 && query.Fields[0].Expression=="count(*)") {
 				data["count(*)"] = RecordsCount( query.SourceName, query.Condition );
 				return true;
 			}

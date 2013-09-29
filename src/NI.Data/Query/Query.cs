@@ -143,9 +143,24 @@ namespace NI.Data
 				_Sort = null;
 			}
 		}
+		public void SetSort(params QSort[] sortFields) {
+			if (sortFields != null && sortFields.Length > 0) {
+				_Sort = sortFields;
+			} else {
+				_Sort = null;
+			}
+		}
+
 		public void SetFields(params string[] fields) {
 			if (fields != null && fields.Length > 0) {
 				_Fields = fields.Select(v => (QField)v).ToArray();
+			} else {
+				_Fields = null;
+			}
+		}
+		public void SetFields(params QField[] fields) {
+			if (fields != null && fields.Length > 0) {
+				_Fields = fields;
 			} else {
 				_Fields = null;
 			}

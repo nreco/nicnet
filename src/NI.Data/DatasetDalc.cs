@@ -54,7 +54,7 @@ namespace NI.Data
 				ds.Tables[query.SourceName].Rows.Clear();
 			
 			if (query.Fields != null && query.Fields.Length != 0) {
-				if (query.Fields.Length == 1 && query.Fields[0].Name == "count(*)") {
+				if (query.Fields.Length == 1 && query.Fields[0].Expression.ToLower() == "count(*)") {
 					ds.Tables.Remove(query.SourceName);
 					var t = ds.Tables.Add(query.SourceName);
 					t.Columns.Add("count", typeof(int));

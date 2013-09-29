@@ -78,7 +78,7 @@ namespace NI.Tests.Data.RelationalExpressions
 			@"SELECT name FROM users WHERE ((id<>@p0) And (id<>@p1)) Or (id<>@p2)",
 			@"SELECT name FROM users WHERE @p0=@p1 ORDER BY name asc,login asc",
 			@"SELECT name FROM users WHERE @p0=@p1 ORDER BY name desc",
-			@"SELECT name FROM users WHERE @p0=@p1 ORDER BY name desc,id asc,time asc"
+			@"SELECT name FROM users WHERE @p0=@p1 ORDER BY name desc,id asc,time asc",
 	};
 		
 		[Test]
@@ -114,6 +114,16 @@ namespace NI.Tests.Data.RelationalExpressions
 			// just a parse test for real complex relex
 			string sss = "sourcename( ( ((\"False\"=\"True\") or (\"False\"=\"True\")) and \"contact-of\" in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and (right_uid=agent_institutions.id) )[role_uid] ) or ( ((agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[client_institution_id]) or (agent_institutions.id in events( events.id in event_assignments( person_id in agent_accounts (agent_accounts.id=\"\")[agent_id] )[event_id] )[supplier_institution_id])) and (\"False\"=\"True\") ) or ( (agent_institutions.id in agent_to_agent_role( (left_uid in agent_to_agent_role( left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id] and role_uid='contact-of' )[right_uid]) and role_uid='supplier-of')[right_uid] ) or (agent_institutions.id in events( events.supplier_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.client_institution_id]) or (agent_institutions.id in events( events.client_institution_id in agent_to_agent_role( (agent_to_agent_role.role_uid='contact-of') and (agent_to_agent_role.left_uid in agent_accounts(agent_accounts.id=\"\")[agent_id]) )[agent_to_agent_role.right_uid] )[events.supplier_institution_id]) ) or (\"False\"=\"True\") or ( (\"False\"=\"True\") and (agent_institutions.id in agent_to_agent_role( role_uid='supplier-of' and right_uid = \"\" )[left_uid]) ) or (\"False\"=\"True\") )[*]";
 			relExParser.Parse(sss);
+
+
+			var complexSortAndFields = "users.u( u.id=1 )[\"name+','\";id asc,id desc,\"sum(id)\"]";
+			var complexQ = relExParser.Parse(complexSortAndFields);
+			Assert.AreEqual(1, complexQ.Fields.Length);
+			Assert.AreEqual(3, complexQ.Sort.Length);
+
+			Assert.Catch<RelExParseException>(() => {
+				relExParser.Parse("users[id");
+			});
 		}
 
 		[Test]

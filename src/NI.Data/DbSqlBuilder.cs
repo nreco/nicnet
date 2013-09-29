@@ -89,8 +89,13 @@ namespace NI.Data
 				return "*";
 
 			var joinFields = new List<string>();
-			foreach (var f in query.Fields)
-				joinFields.Add( BuildValue( (IQueryValue) f ) );
+			foreach (var f in query.Fields) {
+				var fld = BuildValue((IQueryValue)f);
+				if (fld != f.Name) { //skip "as" for usual fields
+					fld = fld + " as " + f.Name;
+				}
+				joinFields.Add(fld);
+			}
 			return String.Join(",", joinFields.ToArray() );
 		}
 
