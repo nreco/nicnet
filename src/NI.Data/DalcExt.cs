@@ -6,11 +6,17 @@ using System.Text;
 
 namespace NI.Data {
 	
+	/// <summary>
+	/// Extension methods for IDalc
+	/// </summary>
 	public static class DalcExt {
 		
 		/// <summary>
 		/// Load first record by query
 		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <returns>IDictionary with record data or null if no records matched</returns>
 		public static IDictionary LoadRecord(this IDalc dalc, Query q) {
 			IDictionary data = null;
             var oneRecordQuery = new Query(q);
@@ -26,6 +32,12 @@ namespace NI.Data {
 			return data;
 		}
 
+		/// <summary>
+		/// Load first value of first record returned by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <returns>object or null if no records matched</returns>
 		public static object LoadValue(this IDalc dalc, Query q) {
 			object val = null;
 			dalc.ExecuteReader(q, (reader) => {
@@ -47,6 +59,12 @@ namespace NI.Data {
 			return val;
 		}
 
+		/// <summary>
+		/// Load all records data returned by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <returns>IDictionary[] with records data</returns>
 		public static IDictionary[] LoadAllRecords(this IDalc dalc, Query q) {
 			var rs = new List<IDictionary>();
 			dalc.ExecuteReader(q, (reader) => {
@@ -61,6 +79,12 @@ namespace NI.Data {
 			return rs.ToArray();
 		}
 
+		/// <summary>
+		/// Load list of first values of records returned by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <returns>object[] with first values</returns>
 		public static object[] LoadAllValues(this IDalc dalc, Query q) {
 			var rs = new List<object>();
 			if (q.Fields.Length != 1)
@@ -81,14 +105,33 @@ namespace NI.Data {
 			return updateFields;
 		}
 
+		/// <summary>
+		/// Update records matched by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <param name="data">changeset dictionary (field name -> set value)</param>
+		/// <returns>number of updated records</returns>
 		public static int Update(this IDalc dalc, Query q, IDictionary data) {
 			return dalc.Update(q, GetDalcChangeset(data) );
 		}
 
+		/// <summary>
+		/// Insert new record
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="sourceName">source name (table)</param>
+		/// <param name="data">record data (field name -> set value)</param>
 		public static void Insert(this IDalc dalc, string sourceName, IDictionary data) {
 			dalc.Insert(sourceName, GetDalcChangeset(data));
 		}
 
+		/// <summary>
+		/// Get records count matched by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q"></param>
+		/// <returns>number of matched records</returns>
 		public static int RecordsCount(this IDalc dalc, Query q) {
 			var qCount = new Query(q);
 			qCount.Sort = null;

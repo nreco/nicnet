@@ -23,18 +23,33 @@ namespace NI.Data
 {
 
 	/// <summary>
-	/// DB Command generator interface
+	/// DbCommand Generator interface
 	/// </summary>
 	public interface IDbCommandGenerator 
 	{
+		/// <summary>
+		/// Compose IDbCommand instance with SELECT by query
+		/// </summary>
 		IDbCommand ComposeSelect(Query query);
 
+		/// <summary>
+		/// Compose DB adapter update commands (insert,update,delete) for specified DataTable
+		/// </summary>
 		void ComposeAdapterUpdateCommands(IDbDataAdapter adapter, DataTable table);
 
-		IDbCommand ComposeInsert(IDictionary<string,IQueryValue> data, string sourceName);
+		/// <summary>
+		/// Compose IDbCommand with SQL insert for specified table name and column name -> value map
+		/// </summary>
+		IDbCommand ComposeInsert(string tableName, IDictionary<string, IQueryValue> data);
 
+		/// <summary>
+		/// Compose IDbCommand with SQL delete by query 
+		/// </summary>
 		IDbCommand ComposeDelete(Query query);
 
-		IDbCommand ComposeUpdate(IDictionary<string, IQueryValue> data, Query query);
+		/// <summary>
+		/// Compose IDbCommand with SQL update by query and specified column name -> value map
+		/// </summary>
+		IDbCommand ComposeUpdate(Query query, IDictionary<string, IQueryValue> data);
 	}
 }

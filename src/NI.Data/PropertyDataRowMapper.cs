@@ -7,11 +7,14 @@ using System.Data;
 
 namespace NI.Data {
 
-	public class PropertyObjectMapper : IObjectMapper {
+	/// <summary>
+	/// Maps object properties to DataRow column values 
+	/// </summary>
+	public class PropertyDataRowMapper : IObjectDataRowMapper {
 
 		public IDictionary<string, string> FieldToProperty { get; private set; }
 
-		public PropertyObjectMapper(IDictionary<string, string> fieldToProperty) {
+		public PropertyDataRowMapper(IDictionary<string, string> fieldToProperty) {
 			FieldToProperty = fieldToProperty;
 		}
 

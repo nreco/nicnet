@@ -22,12 +22,32 @@ namespace NI.Data
 	/// <summary>
 	/// DB Sql builder interface.
 	/// </summary>
+	/// <inherit>NI.Data.ISqlBuilder</inherit>
 	public interface IDbSqlBuilder : ISqlBuilder
 	{
+		/// <summary>
+		/// Build SQL select command text by query
+		/// </summary>
 		string BuildSelect(Query query);
+
+		/// <summary>
+		/// Build ORDER BY part of SQL command by query
+		/// </summary>
 		string BuildSort(Query query);
+
+		/// <summary>
+		/// Build SQL list of fields to select by
+		/// </summary>
 		string BuildFields(Query query);
+
+		/// <summary>
+		/// Build command parameter by value and return SQL placeholder text
+		/// </summary>
 		string BuildCommandParameter(object value);
+
+		/// <summary>
+		/// Build command parameter by DataColumn and return SQL placeholder text
+		/// </summary>
 		string BuildCommandParameter(DataColumn col, DataRowVersion sourceVersion);
 	}
 }

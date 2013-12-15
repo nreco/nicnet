@@ -24,7 +24,7 @@ namespace NI.Data
 	/// <summary>
 	/// DataSetFactory used for creating DataSet objects with schema.
 	/// </summary>
-	public class DataSetFactory
+	public class DataSetFactory : IDataSetFactory
 	{
 		SchemaDescriptor[] _Schemas;
 

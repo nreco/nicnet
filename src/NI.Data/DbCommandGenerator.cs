@@ -206,7 +206,7 @@ namespace NI.Data
 		/// <param name="changesData"></param>
 		/// <param name="query"></param>
 		/// <returns></returns>
-		public virtual IDbCommand ComposeUpdate(IDictionary<string,IQueryValue> changesData, Query query) {
+		public virtual IDbCommand ComposeUpdate(Query query, IDictionary<string, IQueryValue> changesData) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 
@@ -237,7 +237,7 @@ namespace NI.Data
 		/// <summary>
 		/// Generates INSERT statement by row data
 		/// </summary>
-		public virtual IDbCommand ComposeInsert(IDictionary<string,IQueryValue> data, string sourceName) {
+		public virtual IDbCommand ComposeInsert(string tableName, IDictionary<string, IQueryValue> data) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
 			
@@ -251,7 +251,7 @@ namespace NI.Data
 			
 			cmd.CommandText = String.Format(
 				"INSERT INTO {0} ({1}) VALUES ({2})",
-				sourceName,
+				tableName,
 				String.Join(",", insertFields.ToArray()) ,
 				String.Join(",", insertValues.ToArray()) );
 			

@@ -6,7 +6,7 @@ using System.Data;
 
 namespace NI.Data {
 	
-	public interface IObjectMapper {
+	public interface IObjectDataRowMapper {
 		void MapTo(DataRow r, object o);
 		void MapFrom(object o, DataRow r, bool skipPk);
 		object GetFieldValue(object o, DataColumn c);

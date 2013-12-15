@@ -61,6 +61,7 @@
     </Compile>
     <Compile Include="DalcFileSystemHelper.cs" />
     <Compile Include="DalcFileSystem.cs" />
+    <Compile Include="DataRowDictionary.cs" />
     <Compile Include="FileSystemDalc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

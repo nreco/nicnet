@@ -14,27 +14,14 @@
 #endregion
 
 using System;
-using System.Collections;
+using System.Data;
 
 namespace NI.Data
 {
-	/// <summary>
-	/// DALC data view interface.
-	/// </summary>
-	public interface IDbDalcView
-	{
-	
-		/// <summary>
-		/// Determines whether this dataview matches given sourcename
-		/// </summary>
-		bool MatchSourceName(QSource sourceName);
-		
-		/// <summary>
-		/// Source name of data view origin (optional; can be null)
-		/// </summary>
-		QSource[] OriginSourceNames { get; }
-		
-		string ComposeSelect(Query q, IDbSqlBuilder sqlBuilder);
-		
+
+	public interface IDataSetFactory {
+		DataSet GetDataSet(string tableName);
 	}
+
+	
 }

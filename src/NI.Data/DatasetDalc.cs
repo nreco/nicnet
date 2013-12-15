@@ -24,6 +24,7 @@ namespace NI.Data
 	/// <summary>
 	/// Dataset-based (in-memory) DALC implementation.
 	/// </summary>
+	/// <sort>2</sort>
 	public class DatasetDalc : SqlBuilder, IDalc
 	{
 		DataSet _PersistedDS;

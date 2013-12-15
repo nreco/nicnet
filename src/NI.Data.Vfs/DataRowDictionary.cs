@@ -17,7 +17,7 @@ using System;
 using System.Data;
 using System.Collections;
 
-namespace NI.Data
+namespace NI.Data.Vfs
 {
 	/// <summary>
 	/// Dictionary proxy for DataRow.

@@ -26,8 +26,9 @@ using System.ComponentModel;
 namespace NI.Data {
 
 	/// <summary>
-	/// Database Data Access Layer Component
+	/// Data Access Layer Component based on ADO.NET database provider
 	/// </summary>
+	/// <sort>1</sort>
 	public class DbDalc : ISqlDalc {
 		
 		/// <summary>
@@ -48,7 +49,7 @@ namespace NI.Data {
 		public IDbDalcEventsMediator DbDalcEventsMediator { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the DbDalc for specified factory and connection.
+		/// Initializes a new instance of the DbDalc with specified factory and connection.
 		/// </summary>
 		public DbDalc(IDbDalcFactory factory, IDbConnection connection) {
 			DbFactory = factory;
@@ -57,7 +58,7 @@ namespace NI.Data {
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the DbDalc for specified factory and connection.
+		/// Initializes a new instance of the DbDalc for specified factory and connection string.
 		/// </summary>
 		public DbDalc(IDbDalcFactory factory, string connectionStr) {
 			DbFactory = factory;
@@ -171,7 +172,7 @@ namespace NI.Data {
 		/// <param name="data">Container with record changes</param>
 		/// <param name="query">query</param>
 		public virtual int Update(Query query, IDictionary<string,IQueryValue> data) {
-			using (var cmd = CommandGenerator.ComposeUpdate(data, query)) {
+			using (var cmd = CommandGenerator.ComposeUpdate(query, data)) {
 				cmd.Connection = Connection;
 				return ExecuteInternal(cmd, query.SourceName, StatementType.Update);
 			}
@@ -181,7 +182,7 @@ namespace NI.Data {
 		/// <see cref="IDalc.Insert"/>
 		/// </summary>
 		public virtual void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
-			using (var cmd = CommandGenerator.ComposeInsert(data, sourceName)) {
+			using (var cmd = CommandGenerator.ComposeInsert(sourceName, data)) {
 				cmd.Connection = Connection;
 				ExecuteInternal(cmd, sourceName, StatementType.Insert);
 			}

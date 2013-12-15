@@ -107,9 +107,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DalcExt.cs" />
-    <Compile Include="DalcManager.cs" />
+    <Compile Include="DataRowDalcMapper.cs" />
     <Compile Include="DataHelper.cs" />
-    <Compile Include="DataRowDictionary.cs" />
     <Compile Include="DataSetFactory.cs" />
     <Compile Include="DatasetDalc.cs">
       <SubType>Code</SubType>
@@ -134,6 +133,7 @@
     <Compile Include="DbTypeResolver.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Interfaces\IDataSetFactory.cs" />
     <Compile Include="Interfaces\IDbDalcFactory.cs" />
     <Compile Include="Interfaces\IDalc.cs">
       <SubType>Code</SubType>
@@ -154,7 +154,7 @@
     <Compile Include="Interfaces\IDbSqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IObjectMapper.cs" />
+    <Compile Include="Interfaces\IObjectDataRowMapper.cs" />
     <Compile Include="Interfaces\ISqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -162,12 +162,12 @@
     <Compile Include="Linq\DalcLinqExtensions.cs" />
     <Compile Include="Linq\DalcRecord.cs" />
     <Compile Include="Linq\QueryProvider.cs" />
-    <Compile Include="ObjectPersister.cs" />
+    <Compile Include="ObjectDalcMapper.cs" />
     <Compile Include="EvalQueryCondition.cs" />
     <Compile Include="Permissions\QueryRule.cs" />
     <Compile Include="Permissions\PermissionContext.cs" />
     <Compile Include="Permissions\DbPermissionCommandGenerator.cs" />
-    <Compile Include="PropertyObjectMapper.cs" />
+    <Compile Include="PropertyDataRowMapper.cs" />
     <Compile Include="Query\QVar.cs" />
     <Compile Include="Query\QueryRawSqlNode.cs" />
     <Compile Include="Query\QSource.cs" />
