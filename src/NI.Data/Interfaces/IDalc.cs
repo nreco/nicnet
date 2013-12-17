@@ -24,31 +24,37 @@ namespace NI.Data
 	/// <summary>
 	/// Data access layer component interface
 	/// </summary>
+	/// <remarks>Represents set of methods for accessing and updating tabular data source.</remarks>
 	public interface IDalc
 	{
 
 		/// <summary>
 		/// Execute given query and passes data reader to handler
 		/// </summary>
+		/// <param name="q">query to execute</param>
+		/// <param name="handler">execution result callback</param>
 		void ExecuteReader(Query q, Action<IDataReader> handler);		
 	
 		/// <summary>
 		/// Load data into dataset by query
 		/// </summary>
-		DataTable Load(Query query, DataSet ds);
+		/// <param name="q">query to load</param>
+		/// <param name="ds">DataSet for results data</param>
+		/// <returns>DataTable loaded with query data</returns>
+		DataTable Load(Query q, DataSet ds);
 		
 		/// <summary>
-		/// Update data from dataset to datasource
+		/// Update data in datasource according to changes of specified DataTable
 		/// </summary>
-		/// <param name="ds">DataSet</param>
-		/// <param name="sourceName"></param>
+		/// <param name="t">DataTable with changed rows</param>
 		void Update(DataTable t);
 
 		/// <summary>
-		/// Update data from dictionary container to datasource by query
+		/// Update records in data source matched by query with specified changeset
 		/// </summary>
 		/// <param name="query">query</param>
 		/// <param name="data">Container with record changes</param>
+		/// <returns>number of updated records</returns>
 		int Update(Query query, IDictionary<string,IQueryValue> data);
 		
 		/// <summary>

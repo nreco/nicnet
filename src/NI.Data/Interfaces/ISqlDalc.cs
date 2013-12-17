@@ -21,7 +21,7 @@ namespace NI.Data
 {
 
 	/// <summary>
-	/// Database DALC
+	/// Represents SQL-specified DALC component
 	/// </summary>
 	public interface ISqlDalc : IDalc {
 
@@ -29,7 +29,7 @@ namespace NI.Data
 		/// Execute SQL command
 		/// </summary>
 		/// <param name="sqlText">SQL command text</param>
-		/// <returns>Records affected</returns>
+		/// <returns>number of affected records</returns>
 		int ExecuteNonQuery(string sqlText);
 
 		/// <summary>

@@ -19,7 +19,7 @@ using System.Collections;
 namespace NI.Data
 {
 	/// <summary>
-	/// DALC data view interface.
+	/// Represents DALC data view methods and properties
 	/// </summary>
 	public interface IDbDalcView
 	{
@@ -30,10 +30,16 @@ namespace NI.Data
 		bool MatchSourceName(QSource sourceName);
 		
 		/// <summary>
-		/// Source name of data view origin (optional; can be null)
+		/// List of origin sources names used in data view (optional; can be null)
 		/// </summary>
 		QSource[] OriginSourceNames { get; }
 		
+		/// <summary>
+		/// Compose dataview SQL select text by specified query
+		/// </summary>
+		/// <param name="q">query to this dataview</param>
+		/// <param name="sqlBuilder">SQL builder</param>
+		/// <returns>dataview SQL select text</returns>
 		string ComposeSelect(Query q, IDbSqlBuilder sqlBuilder);
 		
 	}

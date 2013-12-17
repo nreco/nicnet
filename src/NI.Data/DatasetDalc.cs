@@ -27,20 +27,28 @@ namespace NI.Data
 	/// <sort>2</sort>
 	public class DatasetDalc : SqlBuilder, IDalc
 	{
-		DataSet _PersistedDS;
-		
+		/// <summary>
+		/// Get or set underlying DataSet with persisted data
+		/// </summary>
 		public DataSet PersistedDS {
-			get { return _PersistedDS; }
-			set { _PersistedDS = value; }
+			get; set;
 		}
-	
-		public DatasetDalc()
-		{
+		
+		/// <summary>
+		/// Initialize new instance of DataSetDalc (property PersistedDS should be initialized before component usage)
+		/// </summary>
+		public DatasetDalc() {
 		}
 
 		/// <summary>
-		/// Load data from data source to dataset
+		/// Initialize new instance of DataSetDalc with underlying DataSet
 		/// </summary>
+		public DatasetDalc(DataSet ds) {
+			PersistedDS = ds;
+		}
+
+
+		/// <see cref="NI.Data.IDalc.Load(NI.Data.Query,System.Data.DataSet)"/>
 		public virtual DataTable Load(Query query, DataSet ds) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
@@ -87,12 +95,8 @@ namespace NI.Data
 
 			return ds.Tables[query.SourceName];
 		}
-		
-		/// <summary>
-		/// Update data from dataset to datasource
-		/// </summary>
-		/// <param name="ds">DataSet</param>
-		/// <param name="tableName"></param>
+
+		/// <see cref="NI.Data.IDalc.Update(System.Data.DataTable)"/>
 		public void Update(DataTable t) {
 			if (!PersistedDS.Tables.Contains(t.TableName))
 				throw new Exception("Persisted dataset does not contain table with name "+t.TableName);
@@ -157,11 +161,7 @@ namespace NI.Data
 			t.AcceptChanges();
 		}
 
-		/// <summary>
-		/// Update data from dictionary container to datasource by query
-		/// </summary>
-		/// <param name="data">Container with record changes</param>
-		/// <param name="query">query</param>
+		/// <see cref="NI.Data.IDalc.Update(NI.Data.Query,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public int Update(Query query, IDictionary<string,IQueryValue> data) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
@@ -181,11 +181,7 @@ namespace NI.Data
 		}
 
 
-		/// <summary>
-		/// Insert data from dictionary container to datasource
-		/// </summary>
-		/// <param name="data">Container with record changes</param>
-		/// <param name="sourceName">source name</param>
+		/// <see cref="NI.Data.IDalc.Insert(System.String,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
         public void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			if (!PersistedDS.Tables.Contains(sourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+sourceName);
@@ -202,11 +198,7 @@ namespace NI.Data
 			
 		}
 
-		
-		/// <summary>
-		/// Delete data from dataset by query
-		/// </summary>
-		/// <param name="query"></param>
+		/// <see cref="NI.Data.IDalc.Delete(NI.Data.Query)"/>
 		public int Delete(Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
@@ -218,7 +210,8 @@ namespace NI.Data
 			PersistedDS.AcceptChanges();
 			return result.Length;
 		}
-		
+
+		/// <see cref="NI.Data.IDalc.ExecuteReader(NI.Data.Query,System.Action<System.Data.IDataReader>)"/>
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
 			var ds = new DataSet();
 			var tbl = Load(q, ds);
@@ -256,9 +249,6 @@ namespace NI.Data
 			return null;
 		}
 
-		/// <summary>
-		/// Special implementation for dataset constants
-		/// </summary>
 		protected override string BuildValue(QConst value) {
 			object constValue = value.Value;
 				

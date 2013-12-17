@@ -18,15 +18,23 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// Sql builder interface.
+	/// Represents abstract SQL builder interface.
 	/// </summary>
 	public interface ISqlBuilder
 	{
-
+		/// <summary>
+		/// Build string representation of specified IQueryValue
+		/// </summary>
 		string BuildValue(IQueryValue v);
 
+		/// <summary>
+		/// Build string representation of specified sort field
+		/// </summary>
 		string BuildSort(QSort sortFld);
 
+		/// <summary>
+		/// Build string representation of specified QueryNode (condition)
+		/// </summary>
 		string BuildExpression(QueryNode node);
 	}
 }

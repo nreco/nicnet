@@ -20,6 +20,12 @@ namespace NI.Data
 {
 
 	public interface IDataSetFactory {
+		
+		/// <summary>
+		/// Get empty DataSet instance with schema for specified table name
+		/// </summary>
+		/// <param name="tableName">name of table</param>
+		/// <returns>DataSet with schema</returns>
 		DataSet GetDataSet(string tableName);
 	}
 

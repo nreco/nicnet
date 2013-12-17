@@ -21,7 +21,7 @@ namespace NI.Data
 {
 
 	/// <summary>
-	/// Database command wrapper factory interface
+	/// Factory for creating database-specific ADO.NET implementations required by DALC components
 	/// </summary>
 	public interface IDbDalcFactory {
 
@@ -58,7 +58,7 @@ namespace NI.Data
 		IDbSqlBuilder CreateSqlBuilder(IDbCommand dbCommand);
 
 		/// <summary>
-		/// Get last insert ID
+		/// Get ID of last inserted record
 		/// </summary>
 		object GetInsertId(IDbConnection connection);
 	}

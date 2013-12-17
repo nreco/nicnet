@@ -67,23 +67,25 @@ namespace NI.Data {
 			CommandGenerator = new DbCommandGenerator(factory);			
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the DbDalc with specified DALC factory, DB connection and command generator
+		/// </summary>
 		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbCommandGenerator cmdGenerator) {
 			DbFactory = factory;
 			Connection = connection;
 			CommandGenerator = cmdGenerator;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the DbDalc with specified DALC factory, DB connection and list of DALC data views
+		/// </summary>
 		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbDalcView[] views) {
 			DbFactory = factory;
 			Connection = connection;
 			CommandGenerator = new DbCommandGenerator(factory, views);
 		}
 
-
-		
-		/// <summary>
-		/// Load data to dataset by query
-		/// </summary>
+		/// <see cref="NI.Data.IDalc.Load(NI.Data.Query,System.Data.DataSet)"/>
 		public virtual DataTable Load(Query query, DataSet ds) {
 			using (var selectCmd = CommandGenerator.ComposeSelect(query)) {
 				QSource source = query.SourceName;
@@ -112,18 +114,14 @@ namespace NI.Data {
 			
 		}
 
-		/// <summary>
-		/// Delete data by query
-		/// </summary>
+		/// <see cref="NI.Data.IDalc.Delete(NI.Data.Query)"/>
 		public virtual int Delete(Query query) {
 			using (var deleteCmd = CommandGenerator.ComposeDelete(query)) {
 				return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
 			}
 		}
-		
-		/// <summary>
-		/// Update one table in DataSet
-		/// </summary>
+
+		/// <see cref="NI.Data.IDalc.Update(System.Data.DataTable)"/>
 		public virtual void Update(DataTable t) {
 			var tableName = t.TableName;
 
@@ -165,12 +163,8 @@ namespace NI.Data {
 			if (adapter is IDisposable)
 				((IDisposable)adapter).Dispose();
 		}
-		
-		/// <summary>
-		/// Update data from dictionary container to datasource by query
-		/// </summary>
-		/// <param name="data">Container with record changes</param>
-		/// <param name="query">query</param>
+
+		/// <see cref="NI.Data.IDalc.Update(NI.Data.Query,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public virtual int Update(Query query, IDictionary<string,IQueryValue> data) {
 			using (var cmd = CommandGenerator.ComposeUpdate(query, data)) {
 				cmd.Connection = Connection;
@@ -178,22 +172,15 @@ namespace NI.Data {
 			}
 		}
 
-		/// <summary>
-		/// <see cref="IDalc.Insert"/>
-		/// </summary>
+		/// <see cref="NI.Data.IDalc.Insert(System.String,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public virtual void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
 			using (var cmd = CommandGenerator.ComposeInsert(sourceName, data)) {
 				cmd.Connection = Connection;
 				ExecuteInternal(cmd, sourceName, StatementType.Insert);
 			}
 		}
-		
-		
-		/// <summary>
-		/// Execute SQL command
-		/// </summary>
-		/// <param name="sqlText">SQL command text to execute</param>
-		/// <returns>number of rows affected</returns>
+
+		/// <see cref="NI.Data.ISqlDalc.ExecuteNonQuery(System.String)"/>
 		public virtual int ExecuteNonQuery(string sqlText) {
 			using (var cmd = DbFactory.CreateCommand()) {
 				cmd.Connection = Connection;
@@ -217,9 +204,7 @@ namespace NI.Data {
 			});
         }
 
-        /// <summary>
-        /// Load data into datareader by custom SQL
-        /// </summary>
+		/// <see cref="NI.Data.ISqlDalc.ExecuteReader(System.String,System.Action<System.Data.IDataReader>)"/>
 		public virtual void ExecuteReader(string sqlText, Action<IDataReader> callback) {
 			using (var cmd = DbFactory.CreateCommand()) {
 				cmd.Connection = Connection;
@@ -229,19 +214,15 @@ namespace NI.Data {
 			}
 		}
 
-        /// <summary>
-        /// Load data into datareader by query
-        /// </summary>
+		/// <see cref="NI.Data.IDalc.ExecuteReader(System.String,System.Action<System.Data.IDataReader>)"/>
         public virtual void ExecuteReader(Query q, Action<IDataReader> callback) {
 			using (var cmd = CommandGenerator.ComposeSelect(q)) {
 				cmd.Connection = Connection;
 				ExecuteReaderInternal(cmd, q.SourceName, callback);
 			}
         }
-		
-        /// <summary>
-        /// Load data into dataset by custom SQL
-        /// </summary>
+
+		/// <see cref="NI.Data.ISqlDalc.Load(System.String,System.Data.DataSet)"/>
         public virtual void Load(string sqlText, DataSet ds) {
 			using (var cmd = DbFactory.CreateCommand()) {
 				cmd.Connection = Connection;
@@ -275,9 +256,6 @@ namespace NI.Data {
 				DbDalcEventsMediator.OnCommandExecuted(this, new DbCommandEventArgs(sourceName, type, cmd) );
 		}
 
-		/// <summary>
-		/// This method should be called before row updating
-		/// </summary>
 		protected virtual void OnRowUpdating(object sender, RowUpdatingEventArgs e) {
 			//Trace.WriteLine( e.Command.CommandText, "SQL" );
 			OnCommandExecuting(e.Row.Table.TableName, StatementType.Update, e.Command);
@@ -285,9 +263,6 @@ namespace NI.Data {
 				DbDalcEventsMediator.OnRowUpdating(this, e);
 		}
 		
-		/// <summary>
-		/// This method should be called after row updated
-		/// </summary>
 		protected virtual void OnRowUpdated(object sender, RowUpdatedEventArgs e) {
 			if (e.StatementType == StatementType.Insert) {
 				// extract insert id

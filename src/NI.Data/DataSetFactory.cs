@@ -22,14 +22,15 @@ using System.IO;
 namespace NI.Data
 {
 	/// <summary>
-	/// DataSetFactory used for creating DataSet objects with schema.
+	/// DataSetFactory creates DataSet with schema for specified table name.
 	/// </summary>
+	/// <remarks>This component is used by <see cref="NI.Data.DataRowDalcMapper"/>.</remarks>
 	public class DataSetFactory : IDataSetFactory
 	{
 		SchemaDescriptor[] _Schemas;
 
 		/// <summary>
-		/// Get or set schemas list for this factory.
+		/// Get or set list of SchemaDescriptor for this factory.
 		/// </summary>
 		public SchemaDescriptor[] Schemas {
 			get { return _Schemas; }
@@ -44,8 +45,19 @@ namespace NI.Data
 
 		IDictionary<string, SchemaDescriptor> SourceNameDescrHash = null;
 
+		/// <summary>
+		/// Initializes new instance of DataSetFactory (Schemas property should be set before calling this component)
+		/// </summary>
 		public DataSetFactory() {
 
+		}
+
+		/// <summary>
+		/// Initializes new instance of DataSetFactory with specified list of known table schemas
+		/// </summary>
+		/// <param name="schemas"></param>
+		public DataSetFactory(SchemaDescriptor[] schemas) {
+			Schemas = schemas;
 		}
 
 		protected SchemaDescriptor FindDescriptor(string sourcename) {
@@ -78,6 +90,7 @@ namespace NI.Data
 			return ds.Clone();
 		}
 
+		/// <see cref="NI.Data.IDataSetFactory.GetDataSet"/>
 		public DataSet GetDataSet(string sourceName) {
 			if (sourceName==null)
 				throw new ArgumentNullException("Source name cannot be null");

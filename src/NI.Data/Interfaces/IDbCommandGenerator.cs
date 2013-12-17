@@ -23,7 +23,7 @@ namespace NI.Data
 {
 
 	/// <summary>
-	/// DbCommand Generator interface
+	/// Represents set of methods for constructing IDbCommand with appropriate SQL command
 	/// </summary>
 	public interface IDbCommandGenerator 
 	{

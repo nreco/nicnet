@@ -44,7 +44,10 @@ namespace NI.Data {
 			_Value = value;
 			_Type = type;
 		}
-	
+		
+		/// <summary>
+		/// Construct QConst by int value
+		/// </summary>
 		public static explicit operator QConst(int value) {
 			return new QConst(value);
 		}

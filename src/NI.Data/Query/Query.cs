@@ -23,7 +23,7 @@ namespace NI.Data
 {
 
 	/// <summary>
-	/// Abstract data query structure
+	/// Represents DALC data query
 	/// </summary>
 	[Serializable]
 	public class Query : QueryNode, IQueryValue
@@ -36,16 +36,19 @@ namespace NI.Data
 		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
-		/// Query condition. Can be null
+		/// Query condition represented by QueryNode. Can be null.
 		/// </summary>
 		public QueryNode Condition { get; set; }
 
+		/// <summary>
+		/// List of child nodes
+		/// </summary>
 		public override IList<QueryNode> Nodes {
 			get { return new QueryNode[] { Condition }; }
 		}
 
 		/// <summary>
-		/// Sort fields list. Can be null.
+		/// List of sort fields. Can be null.
 		/// </summary>
 		public QSort[] Sort {
 			get { return _Sort; } 
@@ -53,7 +56,7 @@ namespace NI.Data
 		}
 		
 		/// <summary>
-		/// Fields to load. Null means all available fields.
+		/// List of fields to load. Null means all available fields.
 		/// </summary>
 		public QField[] Fields {
 			get { return _Fields; }
@@ -61,7 +64,7 @@ namespace NI.Data
 		}
 		
 		/// <summary>
-		/// Start record
+		/// Get or set starting record to load
 		/// </summary>
 		public int StartRecord {
 			get { return _StartRecord; }
@@ -69,18 +72,25 @@ namespace NI.Data
 		}
 		
 		/// <summary>
-		/// Max records count
+		/// Get or set max records count to load
 		/// </summary>
 		public int RecordCount {
 			get { return _RecordCount; }
 			set { _RecordCount = value; }
 		}
 		
+		/// <summary>
+		/// Get or set target source name of this query
+		/// </summary>
 		public QSource SourceName { 
 			get { return _SourceName; }
 			set { _SourceName = value; }
 		}
 		
+		/// <summary>
+		/// Get or set query extended properties. 
+		/// </summary>
+		/// <remarks>Extended properties may be used by concrete implementations of DALC</remarks>
 		public IDictionary ExtendedProperties {
 			get {
 				if (_ExtendedProperties==null)
@@ -90,21 +100,44 @@ namespace NI.Data
 			set { _ExtendedProperties = value; }
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
 		public Query(string sourceName) {
 			_SourceName = new QSource(sourceName);
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name and condition node
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
+		/// <param name="condition">condition represented by QueryNode</param>
 		public Query(string sourceName, QueryNode condition) {
 			_SourceName = sourceName;
 			Condition = condition;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name, condition and sort options
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
+		/// <param name="condition">condition represented by QueryNode</param>
+		/// <param name="sort">list of sort fields</param>
 		public Query(string sourceName, QueryNode condition, string[] sort) {
 			_SourceName = sourceName;
 			Condition = condition;
 			_Sort = sort.Select(s => new QSort(s) ).ToArray();
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name, condition, sort options and result limits
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
+		/// <param name="condition">condition represented by QueryNode</param>
+		/// <param name="sort">list of sort fields</param>
+		/// <param name="startRecord">The zero-based record number to start with</param>
+		/// <param name="recordCount">The maximum number of records to retrieve</param>
 		public Query(string sourceName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
 			_SourceName = sourceName;
 			SetSort(sort);
@@ -112,13 +145,26 @@ namespace NI.Data
 			_RecordCount = recordCount;
 			Condition = condition;
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name and result limits
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
+		/// <param name="startRecord">The zero-based record number to start with</param>
+		/// <param name="recordCount">The maximum number of records to retrieve</param>
 		public Query(string sourceName, int startRecord, int recordCount) {
 			_SourceName = sourceName;
 			_StartRecord = startRecord;
 			_RecordCount = recordCount;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the Query with specified source name, sort options and result limits
+		/// </summary>
+		/// <param name="sourceName">target source name</param>
+		/// <param name="sort">list of sort fields</param>
+		/// <param name="startRecord">The zero-based record number to start with</param>
+		/// <param name="recordCount">The maximum number of records to retrieve</param>
 		public Query(string sourceName, string[] sort, int startRecord, int recordCount) {
 			_SourceName = sourceName;
 			SetSort(sort);
@@ -126,6 +172,10 @@ namespace NI.Data
 			_RecordCount = recordCount;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the Query with identical options of specified query
+		/// </summary>
+		/// <param name="q">query with options to copy</param>
 		public Query(Query q) {
 			_SourceName = q.SourceName;
 			_Sort = q.Sort;

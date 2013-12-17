@@ -20,7 +20,7 @@ using System.Data.Common;
 namespace NI.Data
 {
 	/// <summary>
-	/// DB Sql builder interface.
+	/// Represents database-specific SQL builder interface.
 	/// </summary>
 	/// <inherit>NI.Data.ISqlBuilder</inherit>
 	public interface IDbSqlBuilder : ISqlBuilder

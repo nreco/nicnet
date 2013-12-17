@@ -18,7 +18,7 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// Interface for query value
+	/// Marker interface for query value object
 	/// </summary>
 	public interface IQueryValue
 	{
