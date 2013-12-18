@@ -132,7 +132,7 @@ namespace NI.Data {
 		}
 
 		protected QueryNode ComposePkCondition(T t) {
-			var qcnd = new QueryGroupNode(GroupType.And);
+			var qcnd = new QueryGroupNode(QueryGroupNodeType.And);
 			var ds = DbManager.CreateDataSet(SourceName);
 			foreach (DataColumn c in ds.Tables[SourceName].PrimaryKey) {
 				var pVal = ObjectMapper.GetFieldValue(t, c);

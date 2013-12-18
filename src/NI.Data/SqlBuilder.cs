@@ -68,7 +68,7 @@ namespace NI.Data
 			if (subNodes.Count==0) return null;
 			
 			return String.Join(
-				" "+node.Group.ToString()+" ",
+				" "+node.GroupType.ToString()+" ",
 				subNodes.ToArray() );
 		}
 		

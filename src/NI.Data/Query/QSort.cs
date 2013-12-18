@@ -20,7 +20,7 @@ using System.ComponentModel;
 namespace NI.Data
 {
 	/// <summary>
-	/// QSortField
+	/// Represents query sort option 
 	/// </summary>
 	public class QSort
 	{
@@ -28,15 +28,19 @@ namespace NI.Data
 		public const string Desc = "desc";
 
 		/// <summary>
-		/// Sort field
+		/// Get QField sort target
 		/// </summary>
 		public QField Field { get; private set; }
 		
 		/// <summary>
-		/// Sort direction
+		/// Get sort direction (asc or desc)
 		/// </summary>
 		public ListSortDirection SortDirection { get; private set; }
-				
+		
+		/// <summary>
+		/// Initializes a new instance of the QSoft with specified field name
+		/// </summary>
+		/// <param name="sortFld">field name with optional direction suffix like "id desc"</param>
 		public QSort(string sortFld) {
 			SortDirection = ListSortDirection.Ascending;
 
@@ -56,11 +60,21 @@ namespace NI.Data
 			if (Field.Name == String.Empty)
 				throw new ArgumentException("Invalid sort field");
 		}
-		public QSort(string sortFldName, ListSortDirection direction) {
-			Field = (QField)sortFldName;
+
+		/// <summary>
+		/// Initializes a new instance of the QSoft with specified field name and sort direction
+		/// </summary>
+		/// <param name="fld">field name</param>
+		/// <param name="direction">sort direction</param>
+		public QSort(string fld, ListSortDirection direction) {
+			Field = (QField)fld;
 			SortDirection = direction;
 		}
 		
+		/// <summary>
+		/// Returns a string representation of QSort
+		/// </summary>
+		/// <returns>string in [field name] [asc|desc] format</returns>
 		public override string ToString() {
 			return String.Format("{0} {1}", Field.ToString(), SortDirection==ListSortDirection.Ascending ? Asc : Desc );
 		}

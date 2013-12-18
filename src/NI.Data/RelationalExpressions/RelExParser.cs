@@ -36,7 +36,7 @@ namespace NI.Data.RelationalExpressions
 	{
 		static readonly string[] nameGroups = new string[] { "and", "or"};
 		static readonly string[] delimiterGroups = new string[] { "&&", "||"};
-		static readonly GroupType[] enumGroups = new GroupType[] { GroupType.And, GroupType.Or };
+		static readonly QueryGroupNodeType[] enumGroups = new QueryGroupNodeType[] { QueryGroupNodeType.And, QueryGroupNodeType.Or };
 		
 		static readonly string[] delimiterConds = new string[] {
 			"==", "=",
@@ -178,7 +178,7 @@ namespace NI.Data.RelationalExpressions
 				endIdx++;
 		}
 		
-		protected bool GetGroupType(LexemType lexemType, string s, int startIdx, ref int endIdx, ref GroupType groupType) {
+		protected bool GetGroupType(LexemType lexemType, string s, int startIdx, ref int endIdx, ref QueryGroupNodeType groupType) {
 			string lexem = GetLexem(s, startIdx, endIdx).ToLower();
 			if (lexemType==LexemType.Name) {
 				int idx = Array.IndexOf(nameGroups, lexem);
@@ -518,7 +518,7 @@ namespace NI.Data.RelationalExpressions
 
 				if (nodeName!=null) {
 					if (node==null)
-						node = new QueryGroupNode(GroupType.And);
+						node = new QueryGroupNode(QueryGroupNodeType.And);
 					if (node is QueryNode)
 						((QueryNode)node).Name = nodeName;
 					// for some reason QueryGroupNode is not derived from QueryNode...
@@ -539,18 +539,18 @@ namespace NI.Data.RelationalExpressions
 			
 			// check for group
 			lexemType = GetLexemType(input, endIdx, out nextEndIdx);
-			GroupType groupType = GroupType.And;
+			QueryGroupNodeType groupType = QueryGroupNodeType.And;
 			if (GetGroupType(lexemType, input, endIdx, ref nextEndIdx, ref groupType))
 				return ComposeGroupNode(node, ParseConditionGroup(input, nextEndIdx, out endIdx), groupType);
 
 			return node;		
 		}
 
-		protected QueryGroupNode ComposeGroupNode(QueryNode node1, QueryNode node2, GroupType groupType) {
+		protected QueryGroupNode ComposeGroupNode(QueryNode node1, QueryNode node2, QueryGroupNodeType groupType) {
 			QueryGroupNode group1 = node1 as QueryGroupNode, group2 = node2 as QueryGroupNode;
-			if (group1 != null && group1.Group != groupType)
+			if (group1 != null && group1.GroupType != groupType)
 				group1 = null;
-			if (group2 != null && group2.Group != groupType)
+			if (group2 != null && group2.GroupType != groupType)
 				group2 = null;
 
 			// don't corrupt named groups

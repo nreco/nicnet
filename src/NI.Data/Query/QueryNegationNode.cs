@@ -19,18 +19,22 @@ using System.Runtime.Serialization;
 
 namespace NI.Data {
 	
+	/// <summary>
+	/// Represents logical negation operator
+	/// </summary>
 	[Serializable]
 	public class QueryNegationNode : QueryNode {
 		
 		private QueryNode[] SingleNodeList;
 	
-		/// <summary>
-		/// Nodes collection
-		/// </summary>
 		public override IList<QueryNode> Nodes {
 			get { return SingleNodeList; } 
 		}
 		
+		/// <summary>
+		/// Initializes a new instance of the QueryNegationNode that wraps specified node  
+		/// </summary>
+		/// <param name="node">condition node to negate</param>
 		public QueryNegationNode(QueryNode node) {
 			SingleNodeList = new QueryNode[] { node };
 		}

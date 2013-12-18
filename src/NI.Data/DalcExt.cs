@@ -7,7 +7,7 @@ using System.Text;
 namespace NI.Data {
 	
 	/// <summary>
-	/// Extension methods for IDalc
+	/// Extension methods for <see cref="NI.Data.IDalc"/> interface
 	/// </summary>
 	public static class DalcExt {
 		

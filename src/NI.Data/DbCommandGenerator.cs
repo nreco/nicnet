@@ -24,7 +24,7 @@ using System.ComponentModel;
 namespace NI.Data
 {
 	/// <summary>
-	/// Database Command Generator
+	/// Database Command Generator that supports data views
 	/// </summary>
 	public class DbCommandGenerator : IDbCommandGenerator
 	{
@@ -42,12 +42,18 @@ namespace NI.Data
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the DbCommandGenerator class.
+		/// Initializes a new instance of the DbCommandGenerator class with specified IDbDalcFactory component.
 		/// </summary>
+		/// <param name="dbFactory">IDbDalcFactory implementation</param>
 		public DbCommandGenerator(IDbDalcFactory dbFactory) {
 			DbFactory = dbFactory;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the DbCommandGenerator class with specified IDbDalcFactory component and list of data views.
+		/// </summary>
+		/// <param name="dbFactory">IDbDalcFactory implementation</param>
+		/// <param name="views">list of data views</param>
 		public DbCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) {
 			DbFactory = dbFactory;
 			Views = views;
@@ -56,10 +62,8 @@ namespace NI.Data
 		protected virtual Query PrepareSelectQuery(Query q) {
 			return q;
 		}
-		
-		/// <summary>
-		/// Generate SELECT statement by query structure
-		/// </summary>
+
+		/// <see cref="NI.Data.IDbCommandGenerator.ComposeSelect(NI.Data.Query)"/>
 		public virtual IDbCommand ComposeSelect(Query query) {
 			var cmd = DbFactory.CreateCommand();
 			var cmdSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -77,10 +81,7 @@ namespace NI.Data
 			cmd.CommandText = cmdSqlBuilder.BuildSelect(PrepareSelectQuery( query ) );
 			return cmd;
 		}
-		
-		/// <summary>
-		/// Generates INSERT statement by DataTable
-		/// </summary>
+
 		public virtual IDbCommand ComposeInsert(DataTable table) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -102,10 +103,7 @@ namespace NI.Data
 			
 			return cmd;
 		}
-		
-		/// <summary>
-		/// Generates DELETE statement by DataTable
-		/// </summary>
+
 		public virtual IDbCommand ComposeDelete(DataTable table) {
 			if (table.PrimaryKey.Length == 0)
 				throw new Exception("Cannot generate DELETE command for table without primary key");			
@@ -126,7 +124,7 @@ namespace NI.Data
 		}
 
 		protected QueryNode ComposePkCondition(DataTable table, IDbSqlBuilder dbSqlBuilder, DataRowVersion rowValueVersion) {
-			var pkCondition = new QueryGroupNode(GroupType.And);
+			var pkCondition = new QueryGroupNode(QueryGroupNodeType.And);
 			foreach (DataColumn col in table.PrimaryKey) {
 				pkCondition.Nodes.Add(
 					(QField)col.ColumnName == new QRawSql(dbSqlBuilder.BuildCommandParameter(col, rowValueVersion)) );
@@ -141,10 +139,8 @@ namespace NI.Data
 		protected virtual QueryNode ComposeDeleteCondition(Query query) {
 			return query.Condition;
 		}
-		
-		/// <summary>
-		/// Generates DELETE statement by query
-		/// </summary>
+
+		/// <see cref="NI.Data.IDbCommandGenerator.ComposeDelete(NI.Data.Query)"/>
 		public virtual IDbCommand ComposeDelete(Query query) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -161,11 +157,8 @@ namespace NI.Data
 
 		protected virtual QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
 			return ComposePkCondition(table, dbSqlBuilder, DataRowVersion.Original);
-		}		
+		}
 
-		/// <summary>
-		/// Generates UPDATE statement by DataTable
-		/// </summary>
 		public virtual IDbCommand ComposeUpdate(DataTable table) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -199,13 +192,8 @@ namespace NI.Data
 		protected virtual QueryNode ComposeUpdateCondition(Query query) {
 			return query.Condition;
 		}
-		
-		/// <summary>
-		/// Create UPDATE command by changes data and query
-		/// </summary>
-		/// <param name="changesData"></param>
-		/// <param name="query"></param>
-		/// <returns></returns>
+
+		/// <see cref="NI.Data.IDbCommandGenerator.ComposeUpdate(NI.Data.Query,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public virtual IDbCommand ComposeUpdate(Query query, IDictionary<string, IQueryValue> changesData) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -232,11 +220,7 @@ namespace NI.Data
 			return cmd;
 		}
 
-
-
-		/// <summary>
-		/// Generates INSERT statement by row data
-		/// </summary>
+		/// <see cref="NI.Data.IDbCommandGenerator.ComposeInsert(System.String,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public virtual IDbCommand ComposeInsert(string tableName, IDictionary<string, IQueryValue> data) {
 			var cmd = DbFactory.CreateCommand();
 			var dbSqlBuilder = DbFactory.CreateSqlBuilder(cmd);
@@ -258,6 +242,7 @@ namespace NI.Data
 			return cmd;
 		}
 
+		/// <see cref="NI.Data.IDbCommandGenerator.ComposeAdapterUpdateCommands(System.Data.IDbDataAdapter,System.Data.DataTable)"/>
 		public void ComposeAdapterUpdateCommands(IDbDataAdapter adapter, DataTable table) {
 			adapter.UpdateCommand = ComposeUpdate(table);
 			adapter.InsertCommand = ComposeInsert(table);

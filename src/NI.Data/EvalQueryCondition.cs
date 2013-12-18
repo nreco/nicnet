@@ -120,12 +120,12 @@ namespace NI.Data {
 			}
 			if (node is QueryGroupNode) {
 				var groupNode = (QueryGroupNode)node;
-				bool groupResult = groupNode.Group == GroupType.And ? true : false;
+				bool groupResult = groupNode.GroupType == QueryGroupNodeType.And ? true : false;
 				foreach (QueryNode groupChildNode in groupNode.Nodes) {
 					bool childResult = EvaluateInternal(context, groupChildNode);
-					if (groupNode.Group==GroupType.And)
+					if (groupNode.GroupType==QueryGroupNodeType.And)
 						groupResult = groupResult && childResult;
-					if (groupNode.Group == GroupType.Or)
+					if (groupNode.GroupType == QueryGroupNodeType.Or)
 						groupResult = groupResult || childResult;
 				}
 				return groupResult;

@@ -20,16 +20,26 @@ using System.Text.RegularExpressions;
 namespace NI.Data
 {
 	/// <summary>
-	/// Query source name structure
+	/// Represents query source name identifier
 	/// </summary>
 	[Serializable]
 	public class QSource
 	{
 
+		/// <summary>
+		/// Get source name (string identifier)
+		/// </summary>
 		public string Name { get; private set; }
 
+		/// <summary>
+		/// Get source name alias used in query nodes
+		/// </summary>
 		public string Alias { get; private set; }
 
+		/// <summary>
+		/// Initializes a new instance of the QSource with the specified source name
+		/// </summary>
+		/// <param name="sourceName">source name string</param>
 		public QSource(string sourceName) {
 			int dotIdx = sourceName.LastIndexOf('.'); // allow dot in table name (alias for this case is required), like dbo.users.u
 			if (dotIdx >= 0) {
@@ -43,11 +53,20 @@ namespace NI.Data
 
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the QSource with the specified source name and alias
+		/// </summary>
+		/// <param name="sourceName">source name string</param>
+		/// <param name="alias">alias string</param>
 		public QSource(string sourceName, string alias) {
 			Name = sourceName;
 			Alias = alias;
 		}
 		
+		/// <summary>
+		/// Returns a string representation of this QSource
+		/// </summary>
+		/// <returns>string that represents QSource in [name].[alias] format</returns>
 		public override string ToString() {
 			return String.IsNullOrEmpty(Alias) ? Name : Name+"."+Alias;
 		}

@@ -185,7 +185,11 @@ namespace NI.Data
 			_Fields = q.Fields;
 			_ExtendedProperties = new Hashtable( q.ExtendedProperties );
 		}
-
+		
+		/// <summary>
+		/// Set query sort by specified fields
+		/// </summary>
+		/// <param name="sortFields">list of sort fields</param>
 		public void SetSort(params string[] sortFields) {
 			if (sortFields != null && sortFields.Length > 0) {
 				_Sort = sortFields.Select(v => (QSort)v).ToArray();
@@ -193,6 +197,11 @@ namespace NI.Data
 				_Sort = null;
 			}
 		}
+
+		/// <summary>
+		/// Set query sort by specified list of QSort
+		/// </summary>
+		/// <param name="sortFields"></param>
 		public void SetSort(params QSort[] sortFields) {
 			if (sortFields != null && sortFields.Length > 0) {
 				_Sort = sortFields;
@@ -201,6 +210,10 @@ namespace NI.Data
 			}
 		}
 
+		/// <summary>
+		/// Set query fields by specified list of field names
+		/// </summary>
+		/// <param name="fields">list of field names</param>
 		public void SetFields(params string[] fields) {
 			if (fields != null && fields.Length > 0) {
 				_Fields = fields.Select(v => (QField)v).ToArray();
@@ -208,6 +221,11 @@ namespace NI.Data
 				_Fields = null;
 			}
 		}
+
+		/// <summary>
+		/// Set query fields by specified list of QField
+		/// </summary>
+		/// <param name="fields"></param>
 		public void SetFields(params QField[] fields) {
 			if (fields != null && fields.Length > 0) {
 				_Fields = fields;
@@ -216,34 +234,13 @@ namespace NI.Data
 			}
 		}
 
-		
+		/// <summary>
+		/// Returns a string that represents current query in relex format
+		/// </summary>
+		/// <returns>relex string</returns>
 		public override string ToString() {
-			return (new QueryStringBuilder()).BuildQueryString(this);
+			return (new NI.Data.RelationalExpressions.RelexBuilder()).BuildRelex(this);
 		}
-		
-		class QueryStringBuilder : SqlBuilder {
-
-			public string BuildQueryString(Query q) {
-				string rootExpression = BuildExpression( q.Condition );
-				if (rootExpression!=null && rootExpression.Length>0)
-					rootExpression = String.Format("({0})", rootExpression);
-			
-				string sortExpression = q.Sort!=null ? "; "+String.Join(",", q.Sort.Select(v=>v.ToString()).ToArray() ) : null;
-				string fieldExpression = q.Fields!=null ? String.Join(",", q.Fields.Select(v=>v.ToString()).ToArray() ) : "*";
-			
-				return String.Format("{0}{1}[{2}{3}]{{{4},{5}}}", q.SourceName, rootExpression,
-					fieldExpression, sortExpression, q.StartRecord, q.RecordCount);
-			}
-			
-			public override string BuildValue(IQueryValue value) {
-				if (value is Query) 
-					return BuildQueryString( (Query) value );
-				return base.BuildValue (value);
-			}
-
-		}
-
-		
 	
 	}
 }

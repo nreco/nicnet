@@ -19,7 +19,7 @@ using System.Collections.Generic;
 namespace NI.Data
 {
 	/// <summary>
-	/// Base class for query nodes.
+	/// Represents abstract query node that contains child nodes.
 	/// </summary>
 	[Serializable]
 	public abstract class QueryNode
@@ -35,7 +35,7 @@ namespace NI.Data
 		/// OR operator
 		/// </summary>
 		public static QueryGroupNode operator | (QueryNode node1, QueryNode node2) {
-			QueryGroupNode res = new QueryGroupNode(GroupType.Or);
+			QueryGroupNode res = new QueryGroupNode(QueryGroupNodeType.Or);
 			res.Nodes.Add(node1);
 			res.Nodes.Add(node2);
 			return res;
@@ -45,7 +45,7 @@ namespace NI.Data
 		/// AND operator
 		/// </summary>
 		public static QueryGroupNode operator & (QueryNode node1, QueryNode node2) {
-			QueryGroupNode res = new QueryGroupNode(GroupType.And);
+			QueryGroupNode res = new QueryGroupNode(QueryGroupNodeType.And);
 			res.Nodes.Add(node1);
 			res.Nodes.Add(node2);
 			return res;

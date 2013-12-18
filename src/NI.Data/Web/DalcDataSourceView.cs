@@ -83,7 +83,7 @@ namespace NI.Data.Web {
 			if (keys.Count == 0)
 				throw new MissingPrimaryKeyException();
 			// compose UID condition
-			QueryGroupNode uidGroup = new QueryGroupNode(GroupType.And);
+			QueryGroupNode uidGroup = new QueryGroupNode(QueryGroupNodeType.And);
 			foreach (DictionaryEntry key in keys)
 				uidGroup.Nodes.Add(new QField(key.Key.ToString()) == new QConst(key.Value));
 			return uidGroup;

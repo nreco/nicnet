@@ -18,15 +18,23 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// Query variable
+	/// Represents query variable
 	/// </summary>
+	/// <remarks>All query variables should be set before processing the query. 
+	/// Accessing undefined variable will cause InvalidOperationException.</remarks>
 	[Serializable]
 	public class QVar : QConst, IQueryValue {
 
+		/// <summary>
+		/// Get variable name
+		/// </summary>
 		public string Name {
 			get; private set;
 		}
 
+		/// <summary>
+		/// Get actual value represented by this variable
+		/// </summary>
 		public override object Value {
 			get {
 				if (!_isDefined)
@@ -38,15 +46,27 @@ namespace NI.Data
 		private object _VarValue;
 		private bool _isDefined = false;
 
+		/// <summary>
+		/// Initializes a new instance of the QVar with specified variable name
+		/// </summary>
+		/// <param name="varName"></param>
 		public QVar(string varName) : base(null) {
 			Name = varName;
 		}
 
+		/// <summary>
+		/// Assigns a value for this variable
+		/// </summary>
+		/// <remarks>Assigned QVar can be used as QConst</remarks>
+		/// <param name="varValue">variable value</param>
 		public void Set(object varValue) {
 			_VarValue = varValue;
 			_isDefined = true;
 		}
 
+		/// <summary>
+		/// Makes this variable undefined. 
+		/// </summary>
 		public void Unset() {
 			_isDefined = false;
 		}

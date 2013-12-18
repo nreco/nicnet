@@ -198,7 +198,7 @@ namespace NI.Data.Linq
 			if (expression is BinaryExpression) {
 				BinaryExpression binExpr = (BinaryExpression)expression;
 				if (binExpr.NodeType == ExpressionType.AndAlso || binExpr.NodeType == ExpressionType.OrElse) {
-					QueryGroupNode qGroup = new QueryGroupNode(binExpr.NodeType == ExpressionType.AndAlso ? GroupType.And : GroupType.Or);
+					QueryGroupNode qGroup = new QueryGroupNode(binExpr.NodeType == ExpressionType.AndAlso ? QueryGroupNodeType.And : QueryGroupNodeType.Or);
 					qGroup.Nodes.Add(ComposeCondition(binExpr.Left));
 					qGroup.Nodes.Add(ComposeCondition(binExpr.Right));
 					return qGroup;

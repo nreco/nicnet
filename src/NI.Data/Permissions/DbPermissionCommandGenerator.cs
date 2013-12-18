@@ -46,7 +46,7 @@ namespace NI.Data.Permissions
 		}
 
 		protected QueryNode ApplyRuleConditions(QueryNode node, string sourceName, DalcOperation operation) {
-			var resNode = new QueryGroupNode(GroupType.And);
+			var resNode = new QueryGroupNode(QueryGroupNodeType.And);
 			resNode.Nodes.Add(node);
 			var context = CreatePermissionContext(sourceName, operation);
 			for (int i = 0; i < Rules.Length; i++) {

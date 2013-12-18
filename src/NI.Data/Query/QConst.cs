@@ -18,36 +18,47 @@ using System;
 namespace NI.Data {
 	
 	/// <summary>
-	/// Query constant
+	/// Represents query constant value
 	/// </summary>
 	[Serializable]
 	public class QConst : IQueryValue {
 		object _Value;
 		TypeCode _Type;
 		
+		/// <summary>
+		/// Get constant value object
+		/// </summary>
 		public virtual object Value {
 			get { return _Value; }
 		}
-	
+		
+		/// <summary>
+		/// Get TypeCode of constant value
+		/// </summary>
 		public TypeCode Type { 
 			get {
 				return _Type!=TypeCode.Empty ? _Type : Convert.GetTypeCode(Value);
 			} 
 		}
-	
+		
+		/// <summary>
+		/// Initializes a new instance of the QConst with specified value object
+		/// </summary>
+		/// <param name="value">object of constant value</param>
 		public QConst(object value) {
 			_Value = value;
 			_Type = TypeCode.Empty;
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the QConst with specified value object and explicit type
+		/// </summary>
+		/// <param name="value">object of constant value</param>
 		public QConst(object value, TypeCode type) {
 			_Value = value;
 			_Type = type;
 		}
 		
-		/// <summary>
-		/// Construct QConst by int value
-		/// </summary>
 		public static explicit operator QConst(int value) {
 			return new QConst(value);
 		}

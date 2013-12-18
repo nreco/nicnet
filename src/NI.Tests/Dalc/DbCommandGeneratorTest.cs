@@ -133,7 +133,7 @@ namespace NI.Tests.Data.Dalc {
 			// UPDATE TEST (by query)
 			var changes = new Dictionary<string,IQueryValue>() {
 				{ "age", (QConst)21 }, { "name", (QConst)"Alexandra" } };
-			cmd = cmdGenerator.ComposeUpdate( changes, new Query("test", (QField)"id" == (QConst)1) );
+			cmd = cmdGenerator.ComposeUpdate(new Query("test", (QField)"id" == (QConst)1), changes);
 			masterSQL = "UPDATE test SET age=@p0,name=@p1 WHERE id=@p2";
 
 			Assert.AreEqual(masterSQL, cmd.CommandText, "Update command generation failed");

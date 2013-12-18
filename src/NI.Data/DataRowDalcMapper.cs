@@ -234,7 +234,7 @@ namespace NI.Data {
 
 
 		protected QueryNode ComposePkCondition(DataTable tbl, params object[] pk) {
-			QueryGroupNode grp = new QueryGroupNode(GroupType.And);
+			QueryGroupNode grp = new QueryGroupNode(QueryGroupNodeType.And);
 			if (tbl.PrimaryKey.Length != pk.Length)
 				throw new Exception("Invalid primary key");
 			for (int i=0; i<tbl.PrimaryKey.Length; i++) {

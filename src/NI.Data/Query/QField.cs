@@ -18,35 +18,59 @@ using System;
 namespace NI.Data
 {
 	/// <summary>
-	/// QField implementation
+	/// Represents query field value
 	/// </summary>
 	[Serializable]
 	public class QField : IQueryValue
 	{
-
+		/// <summary>
+		/// Get field name
+		/// </summary>
 		public string Name { get; private set; }
 
+		/// <summary>
+		/// Get field prefix (usually matches query source name alias)
+		/// </summary>
 		public string Prefix { get; private set; }
 
+		/// <summary>
+		/// Get optional expression string that represents calculated field
+		/// </summary>
 		public string Expression { get; private set; }
 
 		private static char[] ExpressionChars = new[] { '(', ')','+','-','*','/' };
 
-		public QField(string fieldName) {
-			if (fieldName.IndexOfAny(ExpressionChars) >= 0) {
-				Expression = fieldName;
+		/// <summary>
+		/// Initializes a new instance of QField with specified field name
+		/// </summary>
+		/// <remarks>If field name contains expression specific characters (like '(',')','*') it is treated as calculated field expression</remarks>
+		/// <param name="fld">field name</param>
+		public QField(string fld) {
+			if (fld.IndexOfAny(ExpressionChars) >= 0) {
+				Expression = fld;
 			}
-			SetName(fieldName);
+			SetName(fld);
 		}
 
-		public QField(string fieldName, string expression) {
-			SetName(fieldName);
+		/// <summary>
+		/// Initializes a new instance of QField with specified field name and expression
+		/// </summary>
+		/// <param name="fld">field name</param>
+		/// <param name="expression">expression string</param>
+		public QField(string fld, string expression) {
+			SetName(fld);
 			Expression = expression;
 		}
 
-		public QField(string prefix, string fieldName, string expression) {
+		/// <summary>
+		/// Initializes a new instance of QField with specified field prefix, name and expression
+		/// </summary>
+		/// <param name="prefix">field prefix</param>
+		/// <param name="fld">field name</param>
+		/// <param name="expression">expression string</param>
+		public QField(string prefix, string fld, string expression) {
 			Prefix = prefix;
-			Name = fieldName;
+			Name = fld;
 			Expression = expression;
 		}
 
@@ -60,6 +84,10 @@ namespace NI.Data
 			}
 		}
 
+		/// <summary>
+		/// Returns a string representation of QField
+		/// </summary>
+		/// <returns>string in [prefix].[field name] format</returns>
 		public override string ToString() {
 			return String.IsNullOrEmpty(Prefix) ? Name : Prefix+"."+Name;
 		}
