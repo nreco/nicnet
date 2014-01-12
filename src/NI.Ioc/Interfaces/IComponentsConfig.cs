@@ -18,22 +18,27 @@ using System.Collections;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// IComponents config
+	/// Represents components graph configuration
 	/// </summary>
 	public interface IComponentsConfig : IEnumerable
 	{
 		/// <summary>
 		/// Default value of lazy init flag for components in this collection
-		/// False by default
 		/// </summary>
+		/// <remarks>False by default</remarks>
 		bool DefaultLazyInit { get; }
 		
 		/// <summary>
-		/// Components collection description
-		/// Null by default
+		/// Components collection description text
 		/// </summary>
+		/// <remarks>Null by default</remarks>
 		string Description { get; }
-		
+
+		/// <summary>
+		/// Get number of components definitions
+		/// </summary>
+		int Count { get; }
+
 		/// <summary>
 		/// Get component definition by name (alias)
 		/// </summary>
@@ -45,5 +50,6 @@ namespace NI.Ioc
 		/// </summary>
 		/// <value>ICompanyInitInfo object or null</value>
 		IComponentInitInfo this[Type type] { get; }
+
 	}
 }

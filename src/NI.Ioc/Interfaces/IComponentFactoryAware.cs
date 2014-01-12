@@ -14,16 +14,19 @@
 
 using System;
 
+
+
 namespace NI.Ioc
 {
+
 	/// <summary>
-	/// Defines a mechanism for retrieving a named service object
+	/// Interface to be implemented by components that wish to be aware of their owning IComponentFactory. 
 	/// </summary>
-	public interface INamedServiceProvider
+	public interface IComponentFactoryAware
 	{
 		/// <summary>
-		/// Get the service object by name
+		/// Set owning service factory to component instance
 		/// </summary>
-		object GetService(string name);
+		IComponentFactory ComponentFactory { set; }
 	}
 }

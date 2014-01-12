@@ -21,7 +21,7 @@ namespace NI.Ioc {
 			ArrKeys = keys;
 			ArrValues = values;
 			if (ArrKeys.Length!=ArrValues.Length)
-				throw new InvalidOperationException("Amount of keys and values should be identical");
+				throw new ArgumentException("Amount of keys and values should be identical");
 			if (ArrKeys.Length>32) { // good enough suggestion?
 				isOrdered = true;
 				orderedKeys = new object[ArrKeys.Length];

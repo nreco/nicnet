@@ -21,9 +21,7 @@ using System.Reflection;
 namespace NI.Ioc
 {
 
-	/// <summary>
 	/// Proxy-class that can be used for accessing indexer of an object
-	/// </summary>
 	internal class IndexerProxy {
 		object IndexedObj;
 

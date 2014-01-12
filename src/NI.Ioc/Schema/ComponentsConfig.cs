@@ -17,13 +17,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using System.ComponentModel;
+using System.Threading;
 
 namespace NI.Ioc
 {
 	/// <summary>
 	/// IComponentsConfig implementation based on XML.
 	/// </summary>
-	public class ComponentsConfig : Component, IComponentsConfig
+	public class ComponentsConfig : IComponent, IComponentsConfig
 	{
 		ComponentInitInfo[] Components;
 		IDictionary<string,ComponentInitInfo> ComponentsByName;
@@ -51,11 +52,65 @@ namespace NI.Ioc
 		/// Null by default
 		/// </summary>
 		public string Description { get { return _Description; } }
-		
+
+		/// <summary>
+		/// Get number of top-level component definitions
+		/// </summary>
+		public int Count {
+			get {
+				return Components.Length;
+			}
+		}
+
+		ISite site;
+
+		public virtual ISite Site {
+			get { return site; }
+			set {
+				site = value;
+			}
+		}
+
+		public event EventHandler Disposed;
+
 		public ComponentsConfig()
 		{
 			
 		}
+
+		public void Dispose() {
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing) {
+			if (disposing) {
+				var flag = false;
+				try {
+					Monitor.Enter(this, ref flag);
+
+					if (this.site != null && this.site.Container != null) {
+						this.site.Container.Remove(this);
+					}
+
+					// lets remove references
+					if (ComponentsByName != null)
+						ComponentsByName.Clear();
+					ComponentsByName = null;
+					Components = null;
+
+					if (Disposed != null)
+						Disposed(this, EventArgs.Empty);
+
+				} finally {
+					if (flag) {
+						Monitor.Exit(this);
+					}
+				}
+			}
+		}
+
+
 		
 		public void Load(XmlNode componentsNode) {
 			// extract default lazy init value

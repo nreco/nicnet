@@ -21,6 +21,7 @@ namespace NI.Ioc
 	/// </summary>
 	public interface IValueFactory
 	{
-		object CreateInstance(IValueInitInfo valueInfo, Type conversionType);
+		object GetInstance(object value, Type requiredType);
+		object GetInstance(IComponentInitInfo componentInfo, Type requiredType);
 	}
 }

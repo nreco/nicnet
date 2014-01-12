@@ -28,8 +28,8 @@ namespace NI.Ioc
 			Value = value;
 		}
 		
-		public object GetInstance(IValueFactory factory, Type conversionType) {
-			return factory.CreateInstance(this, conversionType);
+		public object GetValue(IValueFactory factory, Type conversionType) {
+			return factory.GetInstance(Value, conversionType);
 		}
 		
 	}

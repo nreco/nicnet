@@ -17,11 +17,20 @@ using System;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Factory component interface
+	/// Represents container factory component (component that implements custom object initialization logic)
 	/// </summary>
 	public interface IFactoryComponent
 	{
+		/// <summary>
+		/// Returns an instance of the object this factory creates.
+		/// </summary>
+		/// <returns>constructed object instance</returns>
 		object GetObject();
+		
+		/// <summary>
+		/// Returns the object type returned by the GetObject() method
+		/// </summary>
+		/// <returns>Type</returns>
 		Type GetObjectType();	
 	}
 }

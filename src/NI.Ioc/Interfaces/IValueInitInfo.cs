@@ -21,6 +21,6 @@ namespace NI.Ioc
 	/// </summary>
 	public interface IValueInitInfo
 	{
-		object GetInstance(IValueFactory factory, Type conversionType);
+		object GetValue(IValueFactory factory, Type conversionType);
 	}
 }

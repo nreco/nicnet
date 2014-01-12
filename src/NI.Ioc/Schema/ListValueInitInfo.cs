@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NI.Ioc
 {
@@ -24,7 +25,7 @@ namespace NI.Ioc
 	{
 		public IValueInitInfo[] Values;
 		bool isOnlyConstValues = false;
-		IDictionary cachedTypedArrays = null;
+		IDictionary<Type,Array> cachedTypedArrays = null;
 		
 		public ListValueInitInfo(IValueInitInfo[] values)
 		{
@@ -35,11 +36,11 @@ namespace NI.Ioc
 					isOnlyConstValues = false;
 		}
 		
-		public object GetInstance(IValueFactory factory, Type conversionType) {
+		public object GetValue(IValueFactory factory, Type conversionType) {
 			// try to find in consts cache
 			if (isOnlyConstValues && cachedTypedArrays != null &&
-				conversionType.IsArray && cachedTypedArrays.Contains(conversionType.GetElementType())) {
-				return ((Array)cachedTypedArrays[conversionType.GetElementType()]).Clone();
+				conversionType.IsArray && cachedTypedArrays.ContainsKey(conversionType.GetElementType())) {
+				return cachedTypedArrays[conversionType.GetElementType()].Clone();
 			}
 			
 			// try to create instance of desired type
@@ -50,17 +51,17 @@ namespace NI.Ioc
 			
 			for (int i=0; i<Values.Length; i++) {
 				IValueInitInfo value = Values[i];
-				listArray.SetValue( value.GetInstance( factory, elemType), i );
+				listArray.SetValue( value.GetValue( factory, elemType), i );
 			}
 			
 			// store in consts cache
 			if (isOnlyConstValues && conversionType.IsArray) {
-				if (cachedTypedArrays==null) cachedTypedArrays = new Hashtable();
-				cachedTypedArrays[elemType] = listArray.Clone();
+				if (cachedTypedArrays==null) cachedTypedArrays = new Dictionary<Type,Array>();
+				cachedTypedArrays[elemType] = (Array)listArray.Clone();
 			}
 			if (conversionType.IsArray)
 				return listArray; // nothing to convert
-			return factory.CreateInstance(new ValueInitInfo(listArray), conversionType);
+			return factory.GetInstance(listArray, conversionType);
 		}
 		
 	}

@@ -18,23 +18,23 @@ using System.Collections;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Component init definition interface.
+	/// Represents initialization information about component
 	/// </summary>
 	public interface IComponentInitInfo
 	{
 
 		/// <summary>
-		/// Singleton flag.
+		/// Is this component a "singleton" (one shared instance).
 		/// </summary>
 		bool Singleton { get; }
 
 		/// <summary>
-		/// Lazy init flag.
+		/// Is this object to be lazily initialized
 		/// </summary>
 		bool LazyInit { get; }
 	
 		/// <summary>
-		/// Component name (alias).
+		/// Component name (ID).
 		/// </summary>
 		string Name { get; }
 
@@ -44,7 +44,7 @@ namespace NI.Ioc
 		Type ComponentType { get; }
 		
 		/// <summary>
-		/// Component description. Null by default.
+		/// Component description text. Null by default.
 		/// </summary>
 		string Description { get; }
 	

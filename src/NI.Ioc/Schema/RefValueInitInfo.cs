@@ -27,9 +27,9 @@ namespace NI.Ioc
 			ComponentRef = componentRef;
 		}
 		
-		public object GetInstance(IValueFactory factory, Type conversionType)
+		public object GetValue(IValueFactory factory, Type conversionType)
 		{
-			return factory.CreateInstance(this, conversionType);
+			return factory.GetInstance(ComponentRef, conversionType);
 		}
 	}
 }

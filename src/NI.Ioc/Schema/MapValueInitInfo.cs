@@ -34,7 +34,7 @@ namespace NI.Ioc {
 			
 		}
 		
-		public object GetInstance(IValueFactory factory, Type conversionType) {
+		public object GetValue(IValueFactory factory, Type conversionType) {
 			// try to find in cache
 			if (isOnlyConstValues && cachedConstDictionary!=null) {
 				return CastMap( new ConstDictionary(cachedConstDictionary,false), factory, conversionType);
@@ -45,7 +45,7 @@ namespace NI.Ioc {
 			object[] values = new object[Values.Length];
 			for (int i=0; i<Values.Length; i++) {
 				keys[i] = Values[i].Key;
-				values[i] = Values[i].Value.GetInstance(factory, typeof(object) );
+				values[i] = Values[i].Value.GetValue(factory, typeof(object) );
 			}
 			ConstDictionary result = new ConstDictionary(keys,values,false);
 			// cache
@@ -60,7 +60,7 @@ namespace NI.Ioc {
 			if (conversionType==typeof(IDictionary))
 				return map;
 			// finally try to use value typecast mechanizm
-			return factory.CreateInstance( new ValueInitInfo(map), conversionType );
+			return factory.GetInstance( map, conversionType );
 		}
 		
 	}

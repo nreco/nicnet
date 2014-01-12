@@ -18,10 +18,10 @@ using System.ComponentModel;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Service provider aware component interface
+	/// Interface to be implemented by components that wish to be aware of their owning IServiceProvider. 
 	/// </summary>
 	public interface IServiceProviderAware
 	{
-		IServiceProvider ServiceProvider { get; set; }
+		IServiceProvider ServiceProvider { set; }
 	}
 }

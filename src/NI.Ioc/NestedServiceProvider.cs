@@ -19,10 +19,10 @@ namespace NI.Ioc
 	/// <summary>
 	/// NestedServiceProvider implementation used for defining composite ServiceProviders.
 	/// </summary>
-	public class NestedServiceProvider : ServiceProvider
+	public class NestedComponentFactory : ComponentFactory
 	{
 		IServiceProvider _ParentServiceProvider;
-		INamedServiceProvider _ParentNamedServiceProvider;
+		IComponentFactory _ParentNamedServiceProvider;
 		
 		/// <summary>
 		/// Get or set parent service provider
@@ -35,13 +35,13 @@ namespace NI.Ioc
 		/// <summary>
 		/// Get or set 
 		/// </summary>
-		public INamedServiceProvider ParentNamedServiceProvider {
+		public IComponentFactory ParentNamedServiceProvider {
 			get { return _ParentNamedServiceProvider; }
 			set { _ParentNamedServiceProvider = value; }
 		}
 		
 	
-		public NestedServiceProvider()
+		public NestedComponentFactory(IComponentsConfig config) : base(config)
 		{
 		}
 		
@@ -49,17 +49,17 @@ namespace NI.Ioc
 		/// Nested service provider logic: if component not fount in this provider,
 		/// try to find it in parent provider.
 		/// </summary>
-		protected override object GetServiceInternal(Type serviceType) {
-			object service = base.GetServiceInternal(serviceType);
+		public override object GetService(Type serviceType) {
+			object service = base.GetService(serviceType);
 			if (service==null)
 				service = ParentServiceProvider.GetService(serviceType);
 			return service; 
 		}
-		
-		protected override object GetServiceInternal(string name) {
-			object service = base.GetServiceInternal(name);
+
+		public override object GetComponent(string name, Type requiredType) {
+			object service = base.GetComponent(name, requiredType);
 			if (service==null)
-				service = ParentNamedServiceProvider.GetService(name);
+				service = ParentNamedServiceProvider.GetComponent(name);
 			return service;
 		}
 		

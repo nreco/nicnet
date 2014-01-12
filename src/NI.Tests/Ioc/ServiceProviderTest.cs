@@ -14,7 +14,7 @@ namespace NI.Tests.Ioc
 	public class ServiceProviderTest
 	{
 		ComponentsConfig config;
-		ServiceProvider serviceProvider;
+		ComponentFactory serviceProvider;
 		ApplicationContainer appContainer;
 
 		public ServiceProviderTest()
@@ -24,7 +24,7 @@ namespace NI.Tests.Ioc
 		[SetUp]
 		public void InitContainer() {
 			config = createConfig();
-			serviceProvider = new ServiceProvider(config);
+			serviceProvider = new ComponentFactory(config);
 
 			appContainer = new ApplicationContainer();
 			appContainer.Add(serviceProvider);
@@ -42,17 +42,17 @@ namespace NI.Tests.Ioc
 			// analyse: since only service provider itself is derived from Component, container contains only 1 instance
 			Assert.AreEqual(1, appContainer.Components.Count, "Invalid component instances count");
 			
-			Component2 simple = serviceProvider.GetService("simple") as Component2;
+			Component2 simple = serviceProvider.GetComponent("simple") as Component2;
 			
 			Assert.AreEqual( simple.Hehe.Length, 2, "Invalid initialization for 'simple.Hehe'");
 			Assert.AreEqual( simple.Hehe[0], 1, "Invalid initialization for 'simple.Hehe[0]'");
 			Assert.AreEqual( simple.Hehe[1], 2, "Invalid initialization for 'simple.Hehe[1]'");
-			
-			Component1 child = serviceProvider.GetService("child") as Component1;
+
+			Component1 child = serviceProvider.GetComponent("child") as Component1;
 			if (child.Dependency1==null || !(child.Dependency1 is Component2))
 				throw new Exception("Invalid initialization for compontent 'child'");
-			
-			Component1 parent = serviceProvider.GetService("parent") as Component1;
+
+			Component1 parent = serviceProvider.GetComponent("parent") as Component1;
 			
 			Assert.AreEqual( parent.Dependency1, child, "Invalid initialization for 'parent.Dependency1'");
 			Assert.AreEqual( parent.PropInt, 6, "Invalid initialization for 'parent.PropInt'");
@@ -67,17 +67,17 @@ namespace NI.Tests.Ioc
 
 		[Test]
 		public void test_NamedConstructorArgs() {
-			var c3 = serviceProvider.GetService("testNamedConstructor") as Component3;
+			var c3 = serviceProvider.GetComponent("testNamedConstructor") as Component3;
 			Assert.AreEqual("John", c3.Name);
 			Assert.AreEqual(5, c3.Age);
 		}
 
 		[Test]
 		public void test_DelegateInjection() {
-			var c4 = serviceProvider.GetService("testDelegateInjection") as Component4;
+			var c4 = serviceProvider.GetComponent("testDelegateInjection") as Component4;
 			Assert.AreEqual("1", c4.GetValStr());
 
-			var c4suggested = serviceProvider.GetService("testDelegateSuggestedInjection") as Component4;
+			var c4suggested = serviceProvider.GetComponent("testDelegateSuggestedInjection") as Component4;
 			Assert.AreEqual("1", c4suggested.GetValStr());
 
 			c4suggested.InitValue();

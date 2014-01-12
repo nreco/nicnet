@@ -28,7 +28,7 @@ namespace NI.Ioc
 			Value = value;
 		}
 		
-		public object GetInstance(IValueFactory factory, Type conversionType) {
+		public object GetValue(IValueFactory factory, Type conversionType) {
 			return Value;
 		}
 		

@@ -34,32 +34,18 @@ namespace NI.Ioc
 	/// </example>
 	public class ApplicationContainer : Container
 	{
-		IServiceProvider _ServiceProvider = null;
-		INamedServiceProvider _NamedServiceProvider = null;
+		IComponentFactory _ComponentFactory = null;
 		
 		/// <summary>
-		/// Service provider implementation
-		/// If not set, Container will try to find it in components collection
-		/// </summary>
-		public IServiceProvider ServiceProvider {
-			get { return _ServiceProvider; }
-			set { 
-				_ServiceProvider = value; 
-				if (value is IComponent && ((IComponent)value).Site==null)
-					Add( value as IComponent );
-			}
-		}
-		
-		/// <summary>
-		/// Named service provider associated with this container.
+		/// Component factory associated with this container.
 		/// </summary>
 		/// <remarks>
 		/// This property is not used actually by container and can be used as 'entry point' to service provider from objects outside container.
 		/// </remarks>
-		public INamedServiceProvider NamedServiceProvider {
-			get { return _NamedServiceProvider; }
+		public IComponentFactory ComponentFactory {
+			get { return _ComponentFactory; }
 			set {
-				_NamedServiceProvider = value; 
+				_ComponentFactory = value; 
 				if (value is IComponent && ((IComponent)value).Site==null)
 					Add( value as IComponent );
 			}
@@ -74,8 +60,8 @@ namespace NI.Ioc
 		protected override object GetService(Type serviceType) {
 			object res = null;
 			res = base.GetService(serviceType);
-			if (res==null && ServiceProvider!=null)
-				res = ServiceProvider.GetService(serviceType);
+			if (res == null && ComponentFactory is IServiceProvider)
+				res = ((IServiceProvider)ComponentFactory).GetService(serviceType);
 			return res;
 		}
 		
@@ -84,10 +70,8 @@ namespace NI.Ioc
 		/// </summary>
 		protected override ISite CreateSite(IComponent component, string name) {
 			// explicit initialization
-			if (ServiceProvider==null && (component is IServiceProvider))
-				_ServiceProvider = (IServiceProvider)component;
-			if (NamedServiceProvider==null && (component is INamedServiceProvider))
-				_NamedServiceProvider = (INamedServiceProvider)component;
+			if (ComponentFactory==null && (component is IComponentFactory))
+				_ComponentFactory = (IComponentFactory)component;
 
 			return new ApplicationContainer.ApplicationContainerSite(component, this, name);
 		}
