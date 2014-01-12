@@ -118,6 +118,7 @@
     <Compile Include="DelegateFactory.cs" />
     <Compile Include="IndexerProxy.cs" />
     <Compile Include="Interfaces\IComponentFactory.cs" />
+    <Compile Include="Schema\ComponentConfiguration.cs" />
     <Compile Include="StringFormatFactory.cs">
     </Compile>
     <Compile Include="StaticFieldInvokingFactory.cs" />
@@ -126,7 +127,7 @@
     <Compile Include="Interfaces\IComponentInitInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IComponentsConfig.cs">
+    <Compile Include="Interfaces\IComponentFactoryConfiguration.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IFactoryComponent.cs">
@@ -154,7 +155,8 @@
     <Compile Include="Schema\ComponentInitInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Schema\ComponentsConfig.cs" />
+    <Compile Include="TypeResolver.cs" />
+    <Compile Include="XmlComponentConfiguration.cs" />
     <Compile Include="Schema\ListValueInitInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -182,7 +184,7 @@
     </Compile>
     <Compile Include="StaticMethodInvokingFactory.cs" />
     <Compile Include="StaticPropertyInvokingFactory.cs" />
-    <Compile Include="XmlComponentsConfig.cs" />
+    <Compile Include="XmlComponentConfigurationSectionHandler.cs" />
     <EmbeddedResource Include="ComponentsConfigSchema.xsd" />
     <None Include="ComponentsConfigSchema.xsx">
       <DependentUpon>ComponentsConfigSchema.xsd</DependentUpon>

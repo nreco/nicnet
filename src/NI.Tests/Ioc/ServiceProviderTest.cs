@@ -13,7 +13,7 @@ namespace NI.Tests.Ioc
 	[NUnit.Framework.Category("NI.Ioc")]
 	public class ServiceProviderTest
 	{
-		ComponentsConfig config;
+		XmlComponentConfiguration config;
 		ComponentFactory serviceProvider;
 		ApplicationContainer appContainer;
 
@@ -116,7 +116,7 @@ namespace NI.Tests.Ioc
 
 		}
 		
-		ComponentsConfig createConfig() {
+		XmlComponentConfiguration createConfig() {
 
 			string xml_config = @"
 				<components>
@@ -211,7 +211,7 @@ namespace NI.Tests.Ioc
 				</components>
 			";
 			
-			XmlComponentsConfig config = new XmlComponentsConfig(xml_config);
+			var config = new XmlComponentConfiguration(xml_config);
 
 			return config;
 		}

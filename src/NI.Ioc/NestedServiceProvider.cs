@@ -41,7 +41,7 @@ namespace NI.Ioc
 		}
 		
 	
-		public NestedComponentFactory(IComponentsConfig config) : base(config)
+		public NestedComponentFactory(IComponentFactoryConfiguration config) : base(config)
 		{
 		}
 		

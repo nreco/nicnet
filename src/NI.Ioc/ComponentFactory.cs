@@ -40,7 +40,7 @@ namespace NI.Ioc
 	/// </code></example>
 	public class ComponentFactory : IComponent, IServiceProvider, IComponentFactory, IValueFactory
 	{
-		IComponentsConfig _Config = null;
+		IComponentFactoryConfiguration _Config = null;
 
 		ISite site;
 		List<object> components;
@@ -58,16 +58,18 @@ namespace NI.Ioc
 			set { _CountersEnabled = value; }
 		}
 
+		/// <summary>
+		/// Enables reflection cache using Reflection.Emit.DynamicMethod (increases components creation performance)
+		/// </summary>
 		public bool ReflectionCacheEnabled {
 			get { return _ReflectionCacheEnabled; }
 			set { _ReflectionCacheEnabled = value; }
 		}
 
 		/// <summary>
-		/// Config for factory
-		/// If not set, component will try to find it using GetService
+		/// Get or set components configuration for this factory
 		/// </summary>
-		public IComponentsConfig Config {
+		public IComponentFactoryConfiguration Configuration {
 			get { return _Config; }  
 			set {
 				_Config = value;
@@ -75,13 +77,16 @@ namespace NI.Ioc
 			}
 		}
 
+		/// <summary>
+		/// Represents the method that handles the Disposed event of this ComponentFactory.
+		/// </summary>
 		public event EventHandler Disposed;
 		
-		public ComponentFactory(IComponentsConfig config) : this(config,false) {
+		public ComponentFactory(IComponentFactoryConfiguration config) : this(config,false) {
 		}
-		public ComponentFactory(IComponentsConfig config, bool countersEnabled) {
+		public ComponentFactory(IComponentFactoryConfiguration config, bool countersEnabled) {
 			CountersEnabled = countersEnabled;
-			Config = config;
+			Configuration = config;
 		}
 
 		public void Dispose() {
@@ -140,8 +145,8 @@ namespace NI.Ioc
 				site = value;
 				if (value==null) return;
 				
-				if (Config==null)
-					Config = (ComponentsConfig)site.GetService(typeof(IComponentsConfig));
+				if (Configuration==null)
+					Configuration = (XmlComponentConfiguration)site.GetService(typeof(IComponentFactoryConfiguration));
 			}
 		}		
 		
@@ -149,7 +154,7 @@ namespace NI.Ioc
 		/// Create services
 		/// </summary>
 		public virtual void Init() {
-			var estimatedComponentsCount = Config!=null ? Config.Count : 5;
+			var estimatedComponentsCount = Configuration!=null ? Configuration.Count : 5;
 
 			componentInstanceByName = new Dictionary<string,object>(estimatedComponentsCount);
 			componentInstanceByType = new Dictionary<Type,object>(estimatedComponentsCount);
@@ -157,8 +162,8 @@ namespace NI.Ioc
 			counters.Reset();
 	
 			// initialize non-lazy components
-			if (Config != null) {
-				foreach (IComponentInitInfo cInfo in Config)
+			if (Configuration != null) {
+				foreach (IComponentInitInfo cInfo in Configuration)
 					if (!cInfo.LazyInit)
 						GetInstance(cInfo);
 			}
@@ -174,7 +179,7 @@ namespace NI.Ioc
 				return this;
 
 			// find IComponentInitInfo for requested type
-			IComponentInitInfo cInfo = Config[serviceType];
+			IComponentInitInfo cInfo = Configuration[serviceType];
 			if (cInfo == null)
 				return null;
 
@@ -189,7 +194,7 @@ namespace NI.Ioc
 		}
 
 		public virtual object GetComponent(string name, Type requiredType) {
-			IComponentInitInfo cInfo = Config[name];
+			IComponentInitInfo cInfo = Configuration[name];
 			if (cInfo == null)
 				return null;
 			return ConvertTo( GetInstance(cInfo), requiredType);
@@ -252,9 +257,11 @@ namespace NI.Ioc
 			
 			// is named singleton ?
 			if (componentInfo.Name!=null && componentInfo.Singleton) {
-				object serviceInstance = componentInstanceByName[componentInfo.Name];
-				if (serviceInstance!=null && componentInfo.ComponentType.IsInstanceOfType(serviceInstance))
-					return ResolveInstance( serviceInstance );
+				if (componentInstanceByName.ContainsKey(componentInfo.Name)) {
+					object serviceInstance = componentInstanceByName[componentInfo.Name];
+					if (serviceInstance!=null && componentInfo.ComponentType.IsInstanceOfType(serviceInstance))
+						return ResolveInstance( serviceInstance );
+				}
 			}
 
 			// create instance
