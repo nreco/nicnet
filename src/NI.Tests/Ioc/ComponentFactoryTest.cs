@@ -11,23 +11,23 @@ namespace NI.Tests.Ioc
 	/// </summary>
 	[TestFixture]
 	[NUnit.Framework.Category("NI.Ioc")]
-	public class ServiceProviderTest
+	public class ComponentFactoryTest
 	{
 		XmlComponentConfiguration config;
-		ComponentFactory serviceProvider;
+		ComponentFactory componentFactory;
 		ApplicationContainer appContainer;
 
-		public ServiceProviderTest()
+		public ComponentFactoryTest()
 		{
 		}
 
 		[SetUp]
 		public void InitContainer() {
 			config = createConfig();
-			serviceProvider = new ComponentFactory(config);
+			componentFactory = new ComponentFactory(config);
 
 			appContainer = new ApplicationContainer();
-			appContainer.Add(serviceProvider);
+			appContainer.Add(componentFactory);
 		}
 		
 		/// <summary>
@@ -37,47 +37,47 @@ namespace NI.Tests.Ioc
 		/// 3) Get service
 		/// </summary>
 		[Test]
-		public void test_ServiceProvider() {
+		public void GetComponent() {
 			
 			// analyse: since only service provider itself is derived from Component, container contains only 1 instance
 			Assert.AreEqual(1, appContainer.Components.Count, "Invalid component instances count");
 			
-			Component2 simple = serviceProvider.GetComponent("simple") as Component2;
+			Component2 simple = componentFactory.GetComponent("simple") as Component2;
 			
 			Assert.AreEqual( simple.Hehe.Length, 2, "Invalid initialization for 'simple.Hehe'");
 			Assert.AreEqual( simple.Hehe[0], 1, "Invalid initialization for 'simple.Hehe[0]'");
 			Assert.AreEqual( simple.Hehe[1], 2, "Invalid initialization for 'simple.Hehe[1]'");
 
-			Component1 child = serviceProvider.GetComponent("child") as Component1;
+			Component1 child = componentFactory.GetComponent("child") as Component1;
 			if (child.Dependency1==null || !(child.Dependency1 is Component2))
 				throw new Exception("Invalid initialization for compontent 'child'");
 
-			Component1 parent = serviceProvider.GetComponent("parent") as Component1;
+			Component1 parent = componentFactory.GetComponent("parent") as Component1;
 			
-			Assert.AreEqual( parent.Dependency1, child, "Invalid initialization for 'parent.Dependency1'");
-			Assert.AreEqual( parent.PropInt, 6, "Invalid initialization for 'parent.PropInt'");
-			Assert.AreEqual( parent.initCalled, true, "parent init not called");
+			Assert.AreEqual( child, parent.Dependency1, "Invalid initialization for 'parent.Dependency1'");
+			Assert.AreEqual( 6, parent.PropInt, "Invalid initialization for 'parent.PropInt'");
+			Assert.AreEqual( true, parent.initCalled, "parent init not called");
 			
 			// get service
-			simple = (serviceProvider as IServiceProvider).GetService( typeof(Component2) ) as Component2;
+			simple = (componentFactory as IServiceProvider).GetService( typeof(Component2) ) as Component2;
 			if (simple==null)
 				throw new Exception("Get Service fails");
 			
 		}
 
 		[Test]
-		public void test_NamedConstructorArgs() {
-			var c3 = serviceProvider.GetComponent("testNamedConstructor") as Component3;
+		public void NamedConstructorArgs() {
+			var c3 = componentFactory.GetComponent("testNamedConstructor") as Component3;
 			Assert.AreEqual("John", c3.Name);
 			Assert.AreEqual(5, c3.Age);
 		}
 
 		[Test]
-		public void test_DelegateInjection() {
-			var c4 = serviceProvider.GetComponent("testDelegateInjection") as Component4;
+		public void DelegateInjection() {
+			var c4 = componentFactory.GetComponent("testDelegateInjection") as Component4;
 			Assert.AreEqual("1", c4.GetValStr());
 
-			var c4suggested = serviceProvider.GetComponent("testDelegateSuggestedInjection") as Component4;
+			var c4suggested = componentFactory.GetComponent("testDelegateSuggestedInjection") as Component4;
 			Assert.AreEqual("1", c4suggested.GetValStr());
 
 			c4suggested.InitValue();
@@ -85,7 +85,13 @@ namespace NI.Tests.Ioc
 		}
 
 		[Test]
-		public void test_ConfigState() {
+		public void ComponentFactoryContext() {
+			var componentFactoryContext = componentFactory.GetComponent<IComponentFactory>("componentFactoryContext");
+			Assert.AreEqual(componentFactoryContext, componentFactory);
+		}
+
+		[Test]
+		public void ConfigState() {
 			// check
 			int i = 0;
 			foreach (IComponentInitInfo cInfo in config) {
@@ -119,7 +125,7 @@ namespace NI.Tests.Ioc
 		XmlComponentConfiguration createConfig() {
 
 			string xml_config = @"
-				<components>
+				<components xmlns='urn:schemas-nicnet:ioc:v1'>
 					<component name='simple_template_template'>
 						<constructor-arg index='1'>
 							<map>
@@ -207,6 +213,8 @@ namespace NI.Tests.Ioc
 							</component>
 						</property>
 					</component>
+
+					<component name='componentFactoryContext' type='NI.Ioc.ComponentFactoryContext'/>
 
 				</components>
 			";

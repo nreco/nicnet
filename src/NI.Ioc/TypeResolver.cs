@@ -58,10 +58,10 @@ namespace NI.Ioc {
 				try {
 					assembly = Assembly.LoadWithPartialName(parts[1]);
 				} catch (Exception ex) {
-					throw new Exception("Cannot load assembly " + parts[1], ex);
+					throw new TypeLoadException("Cannot load assembly " + parts[1], ex);
 				}
 				if (assembly == null)
-					throw new Exception("Cannot load assembly " + parts[1]);
+					throw new TypeLoadException("Cannot load assembly " + parts[1]);
 
 				try {
 					Type t = assembly.GetType(parts[0], true, false);
@@ -84,7 +84,7 @@ namespace NI.Ioc {
 					}
 					return t;
 				} catch (Exception ex) {
-					throw new Exception("Cannot resolve type " + type_description, ex);
+					throw new TypeLoadException("Cannot resolve type " + type_description, ex);
 				}
 			} else {
 				int lastDotIndex = type_description.LastIndexOf('.');
@@ -105,7 +105,7 @@ namespace NI.Ioc {
 
 			}
 
-			throw new Exception("Cannot resolve type " + type_description);
+			throw new TypeLoadException("Cannot resolve type " + type_description);
 		}
 
 	}

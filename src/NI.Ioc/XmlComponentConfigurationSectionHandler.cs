@@ -16,6 +16,7 @@ using System;
 using System.Xml;
 using System.IO;
 using System.Xml.Schema;
+using System.Xml.XPath;
 using System.Configuration;
 using System.Reflection;
 using System.ComponentModel;
@@ -44,27 +45,13 @@ namespace NI.Ioc
 		
 		public virtual object Create(object parent, object input, XmlNode section) {
 			try {
-				var xmlDoc = LoadXmlDocument(section.OuterXml);
-
-				var config = new XmlComponentConfiguration(xmlDoc); 
+				var config = new XmlComponentConfiguration(section.InnerXml); 
 				return config;
 			} catch (Exception ex) {
 				throw new ConfigurationException( ex.Message, ex);
 			}
 			
 		}
-
-		protected virtual XmlDocument LoadXmlDocument(string xml) {
-			// load XML into XmlDocument
-			XmlDocument xmlDoc = new XmlDocument();
-			xmlDoc.PreserveWhitespace = true; // whitespaces are significant
-			xmlDoc.LoadXml(xml);
-			return xmlDoc;
-		}
-
-
-
-		
 		
 	}
 

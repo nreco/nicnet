@@ -53,13 +53,14 @@
     <Compile Include="Dalc\DbCommandGeneratorTest.cs" />
     <Compile Include="Dalc\QueryTest.cs" />
     <Compile Include="Expressions\EvalTest.cs" />
+    <Compile Include="Ioc\XmlComponentConfigurationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelationalExpressions\RelExQueryParserTest.cs" />
     <Compile Include="Vfs\VfsTest.cs" />
     <Compile Include="Ioc\ArrayFactoryTest.cs" />
     <Compile Include="Ioc\EventBinderTest.cs" />
     <Compile Include="Ioc\MethodInvokingFactoryTest.cs" />
-    <Compile Include="Ioc\ServiceProviderTest.cs" />
+    <Compile Include="Ioc\ComponentFactoryTest.cs" />
     <Compile Include="Ioc\StaticMethodInvokingFactoryTest.cs" />
     <Compile Include="Ioc\StaticPropertyInvokingFactoryTest.cs" />
   </ItemGroup>
