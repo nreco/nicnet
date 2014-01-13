@@ -86,9 +86,16 @@ namespace NI.Winter
 			schemaValidator.Xsd = (new StringLoader(GetXsdStream()) ).Result;
 			schemaValidator.Validate();
 			#else
-			XmlSchema schema = XmlSchema.Read( GetXsdStream(), null);
-			xmlDoc.Schemas.Add( schema );
-			xmlDoc.Validate(new ValidationEventHandler(ValidationCallBack));
+			// option to disable validation
+			var validationEnabled = true;
+			if (xmlDoc.DocumentElement.Attributes["schema-validation-enabled"]!=null)
+				Boolean.TryParse( xmlDoc.DocumentElement.Attributes["schema-validation-enabled"].Value, out validationEnabled );
+
+			if (validationEnabled) {
+				XmlSchema schema = XmlSchema.Read( GetXsdStream(), null);
+				xmlDoc.Schemas.Add( schema );
+				xmlDoc.Validate(new ValidationEventHandler(ValidationCallBack));
+			}
 			#endif
 			
 			this.Load( xmlDoc.DocumentElement );
