@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,35 +15,22 @@
 using System;
 using System.Reflection;
 
-
-
 namespace NI.Ioc {
 
 	/// <summary>
-	/// Indexer invoking factory used for defining instance by indexer of another object.
+	/// Factory component which returns a value represented by specified object's indexer property.
 	/// </summary>
 	public class IndexerInvokingFactory : IFactoryComponent {
-		object _TargetObject;
-		object[] _IndexerArgs;
-	
 		/// <summary>
 		/// Get or set target object
 		/// </summary>
-		public object TargetObject {
-			get { return _TargetObject; }
-			set { _TargetObject = value; }
-		}
+		public object TargetObject { get; set; }
 		
 		/// <summary>
 		/// Get or set indexer arguments
 		/// </summary>
-		public object[] IndexerArgs {
-			get { return _IndexerArgs; }
-			set { _IndexerArgs = value; }
-		}
+		public object[] IndexerArgs { get; set; }
 
-		
-		
 		public IndexerInvokingFactory() {
 		}
 		

@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -20,7 +20,7 @@ using System.Reflection;
 namespace NI.Ioc {
 
 	/// <summary>
-	/// EventBinder is a helper component that gives ability to bind events and events handlers inside Winter configuration.
+	/// EventBinder is a helper component that gives ability to bind events and events handlers inside IoC-configuration.
 	/// </summary>
 	public class EventBinder {
 		object _SenderObject;

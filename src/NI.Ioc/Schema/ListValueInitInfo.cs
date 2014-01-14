@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,7 +19,7 @@ using System.Collections.Generic;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Value Info for list
+	/// List value initialization info
 	/// </summary>
 	public class ListValueInitInfo : IValueInitInfo
 	{

@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,7 +19,7 @@ using System.Reflection;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// ReplacingFactory factory component
+	/// Factory component which returns a value which is the result of a static or instance method invocation.
 	/// </summary>
 	/// <example><code>
 	/// &lt;component name="testEnabled" type="NI.Ioc.ReplacingFactory,NI.Ioc" singleton="true"&gt;

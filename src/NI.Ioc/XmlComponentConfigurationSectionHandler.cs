@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -27,16 +27,16 @@ namespace NI.Ioc
 {
 	
 	/// <summary>
-	/// Extension of ComponentsConfig that supports configuration section handler
+	/// Configuration section handler for XmlComponentConfiguration
 	/// (so you may place configuration in the app.config or web.config)
 	/// </summary>
 	/// <example><code>
 	/// &lt;configSections&gt;
-	///		&lt;section name="components" type="NI.Ioc.XmlComponentsConfig, NI.Ioc" /&gt;
+	///		&lt;section name="ioc" type="NI.Ioc.XmlComponentConfigurationSectionHandler, NI.Ioc" /&gt;
 	///	&lt;/configSections&gt;
-	///	&lt;components&gt;
+	///	&lt;ioc&gt;
 	///		&lt;!-- components definitions --&gt;
-	///	&lt;/components&gt;
+	///	&lt;/ioc&gt;
 	/// </code></example>
 	public class XmlComponentConfigurationSectionHandler : IConfigurationSectionHandler {
 

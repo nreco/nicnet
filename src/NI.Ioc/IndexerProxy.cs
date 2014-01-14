@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -21,14 +21,10 @@ using System.Reflection;
 namespace NI.Ioc
 {
 
-	/// Proxy-class that can be used for accessing indexer of an object
+	// Proxy-class that can be used for accessing indexer of an object
 	internal class IndexerProxy {
 		object IndexedObj;
 
-		/// <summary>
-		/// Initializes a new instance of the IndexerProxy class.
-		/// </summary>
-		/// <param name="indexed_obj"></param>
 		public IndexerProxy(object indexed_obj) {
 			IndexedObj = indexed_obj;
 		}
@@ -41,11 +37,6 @@ namespace NI.Ioc
 			return new IndexerProxy(o);
 		}
 
-		/// <summary>
-		/// Get or set underlying object 
-		/// </summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
 		public object this[params object[] i] {
 			get {
 				//special handling of arrays

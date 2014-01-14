@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -22,7 +22,7 @@ using System.Reflection;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Component Info
+	/// Represents component initialization information
 	/// </summary>
 	public class ComponentInitInfo : IComponentInitInfo
 	{

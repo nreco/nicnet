@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -15,12 +15,10 @@
 using System;
 using System.Reflection;
 
-
-
 namespace NI.Ioc {
 
 	/// <summary>
-	/// Property invoking factory component
+	/// Factory component which returns a value represented by specified object's property.
 	/// </summary>
 	public class PropertyInvokingFactory : IFactoryComponent {
 		object _TargetObject;
@@ -29,21 +27,13 @@ namespace NI.Ioc {
 		/// <summary>
 		/// Get or set target object
 		/// </summary>
-		public object TargetObject {
-			get { return _TargetObject; }
-			set { _TargetObject = value; }
-		}
+		public object TargetObject { get; set; }
 		
 		/// <summary>
 		/// Get or set static target property name
 		/// </summary>
-		public string TargetProperty {
-			get { return _TargetProperty; }
-			set { _TargetProperty = value; }
-		}
+		public string TargetProperty { get; set; }
 
-		
-		
 		public PropertyInvokingFactory() {
 		}
 		

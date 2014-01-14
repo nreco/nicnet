@@ -75,19 +75,20 @@
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <DocumentationFile>NI.Ioc.xml</DocumentationFile>
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>false</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
     <NoWarn>
     </NoWarn>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
-    <DebugType>full</DebugType>
+    <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
@@ -120,8 +121,6 @@
     <Compile Include="IndexerProxy.cs" />
     <Compile Include="Interfaces\IComponentFactory.cs" />
     <Compile Include="Schema\ComponentConfiguration.cs" />
-    <Compile Include="StringFormatFactory.cs">
-    </Compile>
     <Compile Include="StaticFieldInvokingFactory.cs" />
     <Compile Include="EventBinder.cs" />
     <Compile Include="IndexerInvokingFactory.cs" />
@@ -150,7 +149,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MethodInvokingFactory.cs" />
-    <Compile Include="NestedServiceProvider.cs" />
     <Compile Include="PropertyInvokingFactory.cs" />
     <Compile Include="ReplacingFactory.cs" />
     <Compile Include="Schema\ComponentInitInfo.cs">

@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -20,18 +20,8 @@ using System.ComponentModel;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Simple application container based on IServiceProvider implementation.
+	/// Application components container that can use IComponentFactory as service provider
 	/// </summary>
-	/// <example><code>
-	/// IComponentsConfig cfg;
-	/// IComponent someDotNetComponent;
-	/// 
-	/// ApplicationContainer appContainer = new ApplicationContainer();
-	/// /*inject service provider*/
-	///	appContainer.ServiceProvider = new NI.Ioc.ServiceProvider( cfg  );
-	/// appContainer.Add(someDotNetComponent);
-	/// /* now someDotNetComponent 'sited' and can use interface ISite to obtain services */</code>
-	/// </example>
 	public class ApplicationContainer : Container
 	{
 		IComponentFactory _ComponentFactory = null;
@@ -39,9 +29,6 @@ namespace NI.Ioc
 		/// <summary>
 		/// Component factory associated with this container.
 		/// </summary>
-		/// <remarks>
-		/// This property is not used actually by container and can be used as 'entry point' to service provider from objects outside container.
-		/// </remarks>
 		public IComponentFactory ComponentFactory {
 			get { return _ComponentFactory; }
 			set {

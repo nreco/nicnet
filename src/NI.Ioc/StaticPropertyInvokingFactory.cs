@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -20,7 +20,7 @@ using System.Reflection;
 namespace NI.Ioc {
 
 	/// <summary>
-	/// StaticPropertyInvokingFactory used for defining instance as static property of some class.
+	/// Factory component which returns a value represented by specified static property.
 	/// </summary>
 	/// <example><code>
 	/// &lt;component name="datetimenow" type="NI.Ioc.StaticPropertyInvokingFactory,NI.Ioc" singleton="false" lazy-init="true"&gt;

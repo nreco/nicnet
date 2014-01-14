@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,29 +16,18 @@ using System;
 
 namespace NI.Ioc
 {
-	/// <summary>
-	/// Base class for method invoking factories
-	/// </summary>
+
 	public abstract class BaseMethodInvokingFactory
 	{
-		object[] _TargetMethodArgs;
-		Type[] _TargetMethodArgTypes;	
-		
 		/// <summary>
 		/// Get or set target method args values
 		/// </summary>
-		public object[] TargetMethodArgs {
-			get { return _TargetMethodArgs; }
-			set { _TargetMethodArgs = value; }
-		}
+		public object[] TargetMethodArgs { get; set; }
 		
 		/// <summary>
 		/// Get or set target method args types
 		/// </summary>
-		public Type[] TargetMethodArgTypes {
-			get { return _TargetMethodArgTypes; }
-			set { _TargetMethodArgTypes = value; }
-		}		
+		public Type[] TargetMethodArgTypes { get; set; }		
 			
 		public BaseMethodInvokingFactory()
 		{

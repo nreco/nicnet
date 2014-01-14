@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -34,7 +34,7 @@ namespace NI.Ioc
 		bool LazyInit { get; }
 	
 		/// <summary>
-		/// Component name (ID).
+		/// Component name (string identifier).
 		/// </summary>
 		string Name { get; }
 
@@ -49,7 +49,7 @@ namespace NI.Ioc
 		string Description { get; }
 	
 		/// <summary>
-		/// Constructor arguments.
+		/// Constructor arguments
 		/// </summary>
 		IValueInitInfo[] ConstructorArgs { get; }
 	

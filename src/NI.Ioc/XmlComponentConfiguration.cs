@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -29,15 +29,23 @@ using NI.Ioc.Exceptions;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// IComponentsConfig implementation based on XML.
+	/// Component configuration implementation based on XML.
 	/// </summary>
 	public class XmlComponentConfiguration : ComponentConfiguration
 	{
 
+		/// <summary>
+		/// Initializes a new instance of the XmlComponentConfiguration class with specified XML string
+		/// </summary>
+		/// <param name="xml">XML string</param>
 		public XmlComponentConfiguration(string xml)
 			: this( new XmlTextReader( new StringReader(xml))) {
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the XmlComponentConfiguration class with specified XmlReader
+		/// </summary>
+		/// <param name="configXmlReader">XmlReader for XML configuration</param>
 		public XmlComponentConfiguration(XmlReader configXmlReader)
 			: this( LoadXPathDoc(configXmlReader) ) {
 		}
@@ -195,11 +203,6 @@ namespace NI.Ioc
 				return componentInit;
 			}
 
-
-
-			/// <summary>
-			/// Initialize component values (constructor arguments / properties )
-			/// </summary>
 			protected void InitValues(ComponentInitInfo componentInit, XPathNavigator componentNode, IXmlNamespaceResolver xmlNs, IDictionary<string,ComponentInitInfo> componentInfoByName) {
 				Dictionary<int, IValueInitInfo> constructorArgs = new Dictionary<int, IValueInitInfo>();
 				List<IPropertyInitInfo> propsList = new List<IPropertyInitInfo>();
@@ -303,9 +306,6 @@ namespace NI.Ioc
 			}
 
 
-			/// <summary>
-			/// Resolve object instance by its definition in config
-			/// </summary>
 			protected IValueInitInfo ResolveValueInfo(XPathNavigator objectDefinition, IXmlNamespaceResolver xmlNs, IDictionary<string, ComponentInitInfo> components) {
 
 				// component definition ?

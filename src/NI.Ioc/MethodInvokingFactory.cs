@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,12 +16,10 @@ using System;
 using System.ComponentModel;
 using System.Reflection;
 
-
-
 namespace NI.Ioc
 {
 	/// <summary>
-	/// MethodInvokingFactory can be used for defining instance as result of another object's method invoking.
+	/// Factory component which returns a value which is the result of instance method invocation.
 	/// </summary>
 	/// <example><code>
 	/// &lt;component name="datetimenow-3days" type="NI.Ioc.MethodInvokingFactory,NI.Ioc" singleton="false" lazy-init="true"&gt;
@@ -31,6 +29,7 @@ namespace NI.Ioc
 	///		&lt;property name="TargetMethodArgs"&gt;&lt;list&gt;&lt;entry&gt;&lt;value&gt;-3&lt;/value&gt;&lt;/entry&gt;&lt;/list&gt;&lt;/property&gt;
 	///	&lt;/component&gt; 
 	/// </code></example>
+	/// <inherit>NI.Ioc.BaseMethodInvokingFactory</inherit>
 	public class MethodInvokingFactory : BaseMethodInvokingFactory, IFactoryComponent
 	{
 		object _TargetObject;

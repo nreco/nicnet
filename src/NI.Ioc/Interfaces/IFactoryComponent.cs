@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,6 +19,7 @@ namespace NI.Ioc
 	/// <summary>
 	/// Represents container factory component (component that implements custom object initialization logic)
 	/// </summary>
+	/// <remarks>The root interface for accessing a inversion-of-control container.</remarks>
 	public interface IFactoryComponent
 	{
 		/// <summary>

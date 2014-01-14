@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -20,7 +20,7 @@ using System.Reflection;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// StaticMethodInvokingFactory used for defining instance as result of invoking static method
+	/// Factory component which returns a value which is the result of a static method invocation.
 	/// </summary>
 	/// <example><code>
 	/// &lt;component name="falseInstance" type="NI.Ioc.StaticMethodInvokingFactory,NI.Ioc" singleton="false" lazy-init="true"&gt;
@@ -38,6 +38,7 @@ namespace NI.Ioc
 	///		&lt;/property&gt;
 	///	&lt;/component&gt;
 	/// </code></example>
+	/// <inherit>NI.Ioc.BaseMethodInvokingFactory</inherit>
 	public class StaticMethodInvokingFactory : BaseMethodInvokingFactory, IFactoryComponent
 	{
 		Type _TargetType;

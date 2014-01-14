@@ -29,6 +29,7 @@ namespace NI.Data {
 	/// Data Access Layer Component based on ADO.NET database provider
 	/// </summary>
 	/// <sort>1</sort>
+	/// <assemblyLink>https://code.google.com/p/nicnet/source/browse/src/NI.Data?name=nicnet2</assemblyLink>
 	public class DbDalc : ISqlDalc {
 		
 		/// <summary>

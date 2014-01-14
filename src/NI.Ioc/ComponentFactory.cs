@@ -1,7 +1,7 @@
 #region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2004-2012 NewtonIdeas
+ * Copyright 2004-2012 NewtonIdeas,  Vitalii Fedorchenko (v.2 changes)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,20 +24,10 @@ using System.Reflection.Emit;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Service provider based on Spring-like configuration.
+	/// Component factory implementation based on abstract IComponentConfiguration structure.
 	/// </summary>
-	/// <remarks>
-	/// This component takes care about objects initialization, creation, referencing etc. Fully integrated with System.ComponentModel: 
-	/// <list type="bullet">
-	/// <description>if Config property is not initialized and ServiceProvider added to Container, it will try to found it using ISite interface</description>
-	/// <description>if Container is available, all 'singleton' IComponent objects created with ServiceProvider are added to the Container</description>
-	/// </list>
-	/// </remarks>
-	/// <example><code>
-	/// IComponentsConfig cfg;
-	/// ServiceProvider srvProv = new ServiceProvider(cfg);
-	/// object someService = srvProv.GetObject("someServiceName");
-	/// </code></example>
+	/// <remarks>This class provides basic functionality of IoC-container: singleton cache, IFactoryComponent handling, components disposing.</remarks>
+	/// <assemblyLink>https://code.google.com/p/nicnet/source/browse/src/NI.Ioc?name=nicnet2</assemblyLink>
 	public class ComponentFactory : IComponent, IServiceProvider, IComponentFactory, IValueFactory
 	{
 		IComponentFactoryConfiguration _Config = null;
@@ -71,10 +61,7 @@ namespace NI.Ioc
 		/// </summary>
 		public IComponentFactoryConfiguration Configuration {
 			get { return _Config; }  
-			set {
-				_Config = value;
-				Init();
-			}
+			private set { _Config = value; }
 		}
 
 		/// <summary>
@@ -82,11 +69,22 @@ namespace NI.Ioc
 		/// </summary>
 		public event EventHandler Disposed;
 		
+		/// <summary>
+		/// Initializes a new instance of the ComponentFactory class with specified componet configuration.
+		/// </summary>
+		/// <param name="config">IComponentFactoryConfiguration component</param>
 		public ComponentFactory(IComponentFactoryConfiguration config) : this(config,false) {
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the ComponentFactory class with specified componet configuration and counters option.
+		/// </summary>
+		/// <param name="config">IComponentFactoryConfiguration component</param>
+		/// <param name="countersEnabled">enables stats counters (component creation / retrieving)</param>
 		public ComponentFactory(IComponentFactoryConfiguration config, bool countersEnabled) {
 			CountersEnabled = countersEnabled;
 			Configuration = config;
+			Init();
 		}
 
 		public void Dispose() {
@@ -109,8 +107,14 @@ namespace NI.Ioc
 						componentInstanceByName.Clear();
 					if (componentInstanceByType != null)
 						componentInstanceByType.Clear();
-					if (components != null)
+					if (components != null) {
+						// dispose components
+						foreach (var c in components)
+							if (c is IDisposable) {
+								((IDisposable)c).Dispose();
+							}
 						components.Clear();
+					}
 					componentInstanceByName = null;
 					components = null;
 					
@@ -127,6 +131,9 @@ namespace NI.Ioc
 			}
 		}
 		
+		/// <summary>
+		/// Get stats counters (available only if CountersEnabled=true)
+		/// </summary>
 		public CountersData Counters {
 			get {
 				if (!CountersEnabled)
@@ -144,16 +151,15 @@ namespace NI.Ioc
 			set {
 				site = value;
 				if (value==null) return;
-				
-				if (Configuration==null)
+
+				if (Configuration == null) {
 					Configuration = (XmlComponentConfiguration)site.GetService(typeof(IComponentFactoryConfiguration));
+					Init();
+				}
 			}
 		}		
 		
-		/// <summary>
-		/// Create services
-		/// </summary>
-		public virtual void Init() {
+		protected virtual void Init() {
 			var estimatedComponentsCount = Configuration!=null ? Configuration.Count : 5;
 
 			componentInstanceByName = new Dictionary<string,object>(estimatedComponentsCount);
@@ -170,7 +176,7 @@ namespace NI.Ioc
 		}
 
 		/// <summary>
-		/// Service provider: get requested service by type.
+		/// Get requested service by type.
 		/// </summary>
 		public virtual object GetService(Type serviceType) {
 			// a request for service provider ?
@@ -187,12 +193,15 @@ namespace NI.Ioc
 		}
 		
 		/// <summary>
-		/// Service provider: get requested service by name.
+		/// <see cref="NI.Ioc.IComponentFactory(string)"/>
 		/// </summary>
 		public virtual object GetComponent(string name) {
 			return GetComponent(name,null);
 		}
 
+		/// <summary>
+		/// <see cref="NI.Ioc.IComponentFactory(string,System.Type)"/>
+		/// </summary>
 		public virtual object GetComponent(string name, Type requiredType) {
 			IComponentInitInfo cInfo = Configuration[name];
 			if (cInfo == null)
@@ -279,12 +288,7 @@ namespace NI.Ioc
 			return instance;
 		}
 		
-		
-		/// <summary>
-		/// Create instance by component initialization info
-		/// </summary>
-		/// <param name="componentInfo">component initialization info</param>
-		/// <returns>initialized component instance</returns>
+		// Create instance by component initialization info
 		protected virtual object CreateInstance(IComponentInitInfo componentInfo) {
 			try {
 				// counters
@@ -380,9 +384,8 @@ namespace NI.Ioc
 		}
 		
 		protected virtual void SaveServiceInLookups(object instance, IComponentInitInfo componentInfo) {
-			// remember service reference only if it named or singleton
-			// should we remember only singletons ?
-			if ( /*componentInfo.Name!=null ||*/ componentInfo.Singleton)
+			// save component reference only if singleton
+			if (componentInfo.Singleton)
 				components.Add( instance );
 			
 			// if named service, also remember reference by name
