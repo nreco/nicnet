@@ -23,47 +23,49 @@ namespace NI.Data
 	/// </summary>
 	public class DbCommandEventArgs : EventArgs
 	{
-        string sourceName;
-        StatementType type;
-
-		IDbCommand _Command;
 
 		/// <summary>
 		/// Get or set affected source name.
 		/// </summary>
-		public string SourceName {
-			get { return sourceName; }
-			set { sourceName = value; }
-		}
+		public string TableName { get; private set; }
 
 		/// <summary>
 		/// Get or set DB command type.
 		/// </summary>
-		public StatementType CommandType {
-			get { return type; }
-			set { type = value; }
-		}	
+		public StatementType CommandType { get; private set; }	
 
 		/// <summary>
 		/// Get or set event argument 
 		/// </summary>
-		public IDbCommand Command {
-			get { return _Command; }
-			set { _Command = value; }
-		}	
+		public IDbCommand Command { get; private set; }	
 		
-		public DbCommandEventArgs(StatementType commandType, IDbCommand command)
-		{
-			Command = command;
-		}
 		
-		public DbCommandEventArgs(string dbSourceName, StatementType commandType, IDbCommand command)
+		public DbCommandEventArgs(string tableName, StatementType commandType, IDbCommand command)
 		{
-            SourceName = dbSourceName;
+			TableName = tableName;
             CommandType = commandType;
 			Command = command;
 		}
 	}
+
+	/// <summary>
+	/// Represents database command executing event data
+	/// </summary>
+	public class DbCommandExecutingEventArgs : DbCommandEventArgs {
+
+		public DbCommandExecutingEventArgs(string tableName, StatementType commandType, IDbCommand command) :
+			base(tableName, commandType, command) { }
+	}
+
+	/// <summary>
+	/// Represents database command executed event data
+	/// </summary>
+	public class DbCommandExecutedEventArgs : DbCommandEventArgs {
+
+		public DbCommandExecutedEventArgs(string tableName, StatementType commandType, IDbCommand command) :
+			base(tableName, commandType, command) { }
+	}
+
 	
 	
 }

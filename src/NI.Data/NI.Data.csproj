@@ -117,10 +117,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbCommandGenerator.cs" />
-    <Compile Include="DbDalcFactory.cs" />
+    <Compile Include="GenericDbProviderFactory.cs" />
     <Compile Include="DbDalcTraceLogger.cs" />
     <Compile Include="DbDalc.cs" />
-    <Compile Include="DbDalcEventsMediator.cs">
+    <Compile Include="DataEventStream.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbDalcDataRowTrigger.cs" />
@@ -133,8 +133,9 @@
     <Compile Include="DbTypeResolver.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Interfaces\IEventStream.cs" />
     <Compile Include="Interfaces\IDataSetFactory.cs" />
-    <Compile Include="Interfaces\IDbDalcFactory.cs" />
+    <Compile Include="Interfaces\IDbProviderFactory.cs" />
     <Compile Include="Interfaces\IDalc.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -143,9 +144,6 @@
     </Compile>
     <Compile Include="Interfaces\IQueryValue.cs" />
     <Compile Include="Interfaces\ISqlDalc.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interfaces\IDbDalcEventsMediator.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Interfaces\IDbDalcView.cs">

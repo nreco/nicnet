@@ -26,7 +26,6 @@ namespace NI.Data {
 	/// </summary>
 	public class DbDalcTraceLogger {
 
-		IDbDalcEventsMediator _DbDalcEventsMediator = null;
 		bool _ReplaceParamPlaceholders = true;
 		string _LogMsgPrefix = "[SQL]";
 		bool _Enabled = true;
@@ -62,24 +61,6 @@ namespace NI.Data {
 			set { _ReplaceParamPlaceholders = value; }
 		}
 
-		/// <summary>
-		/// Get or set DALC events mediator
-		/// </summary>
-		public IDbDalcEventsMediator DbDalcEventsMediator {
-			get { return _DbDalcEventsMediator; }
-			set { 
-				if (_DbDalcEventsMediator!=null) {
-					_DbDalcEventsMediator.CommandExecuting -= new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuting);
-					_DbDalcEventsMediator.CommandExecuted -= new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuted);
-				}
-				_DbDalcEventsMediator = value;
-				if (_DbDalcEventsMediator!=null) {
-					_DbDalcEventsMediator.CommandExecuting += new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuting);
-					_DbDalcEventsMediator.CommandExecuted += new EventHandler<DbCommandEventArgs>(DbDalcCommandExecuted);
-				
-				}
-			}
-		}
 
 		IDictionary _LastLogTime = new Hashtable();
 

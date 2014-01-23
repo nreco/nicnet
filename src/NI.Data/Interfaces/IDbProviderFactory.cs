@@ -23,7 +23,7 @@ namespace NI.Data
 	/// <summary>
 	/// Factory for creating database-specific ADO.NET implementations required by DALC components
 	/// </summary>
-	public interface IDbDalcFactory {
+	public interface IDbProviderFactory {
 
 		/// <summary>
 		/// Create data adapter and bind row updating/updated event handlers

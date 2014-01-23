@@ -22,7 +22,7 @@ using System.ComponentModel;
 namespace NI.Data.MySql
 {
 
-	public class MySqlDalcFactory : DbDalcFactory
+	public class MySqlDalcFactory : GenericDbProviderFactory
 	{
 
 		public MySqlDalcFactory()

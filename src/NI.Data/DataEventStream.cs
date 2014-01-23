@@ -16,29 +16,26 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
-using System.ComponentModel;
 
-namespace NI.Data.SqlClient
+namespace NI.Data
 {
-
-	public class SqlClientDalcFactory : GenericDbProviderFactory
+	/// <summary>
+	/// Generic implementation of data event stream.
+	/// </summary>
+	public class DataEventStream : IEventStream
 	{
 
-		public bool TopOptimization { get; set; }
+		/// <summary>
+		/// Occurs for every data event
+		/// </summary>
+		public event EventHandler<EventArgs> DataEvent;
 
-		public bool ConstOptimization { get; set; }
-
-		public bool NameBrackets { get; set; }
-
-		public SqlClientDalcFactory() : base(SqlClientFactory.Instance) {
-			TopOptimization = false;
-			ConstOptimization = false;
-			NameBrackets = false;
+		public DataEventStream() {
 		}
 
-		public override IDbSqlBuilder CreateSqlBuilder(IDbCommand dbCommand) {
-			return new SqlClientDbSqlBuilder(dbCommand, this);
+
+		public void Push(object sender, object eventData) {
+			
 		}
 
 	}

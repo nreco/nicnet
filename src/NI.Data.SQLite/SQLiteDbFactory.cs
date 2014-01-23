@@ -21,7 +21,7 @@ using System.ComponentModel;
 namespace NI.Data.SQLite
 {
 
-	public class SQLiteDalcFactory : DbDalcFactory
+	public class SQLiteDalcFactory : GenericDbProviderFactory
 	{
 		public SQLiteDalcFactory()
 			: base(SQLiteFactory.Instance) {

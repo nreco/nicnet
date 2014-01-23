@@ -32,7 +32,7 @@ namespace NI.Data
 		/// <summary>
 		/// DB Factory instance
 		/// </summary>
-		protected IDbDalcFactory DbFactory {  get; set; }
+		protected IDbProviderFactory DbFactory {  get; set; }
 
 		/// <summary>
 		/// Dalc views
@@ -45,7 +45,7 @@ namespace NI.Data
 		/// Initializes a new instance of the DbCommandGenerator class with specified IDbDalcFactory component.
 		/// </summary>
 		/// <param name="dbFactory">IDbDalcFactory implementation</param>
-		public DbCommandGenerator(IDbDalcFactory dbFactory) {
+		public DbCommandGenerator(IDbProviderFactory dbFactory) {
 			DbFactory = dbFactory;
 		}
 
@@ -54,7 +54,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="dbFactory">IDbDalcFactory implementation</param>
 		/// <param name="views">list of data views</param>
-		public DbCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) {
+		public DbCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views) {
 			DbFactory = dbFactory;
 			Views = views;
 		}

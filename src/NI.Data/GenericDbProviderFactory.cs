@@ -6,8 +6,8 @@ using System.Data;
 using System.Data.Common;
 
 namespace NI.Data {
-	
-	public class DbDalcFactory : IDbDalcFactory {
+
+	public class GenericDbProviderFactory : IDbProviderFactory {
 
 		protected DbProviderFactory DbPrvFactory;
 
@@ -15,7 +15,7 @@ namespace NI.Data {
 
 		public int CommandTimeout { get; set; }
 
-		public DbDalcFactory(DbProviderFactory dbProviderFactory) {
+		public GenericDbProviderFactory(DbProviderFactory dbProviderFactory) {
 			DbPrvFactory = dbProviderFactory;
 			CommandTimeout = -1;
 		}
@@ -116,17 +116,17 @@ namespace NI.Data {
 		}
 
 
-		public static DbDalcFactory OleDb {
+		public static GenericDbProviderFactory OleDb {
 			get {
-				return new DbDalcFactory(System.Data.OleDb.OleDbFactory.Instance) {
+				return new GenericDbProviderFactory(System.Data.OleDb.OleDbFactory.Instance) {
 					ParamPlaceholderFormat = "?"
 				};
 			}
 		}
 
-		public static DbDalcFactory Odbc {
+		public static GenericDbProviderFactory Odbc {
 			get {
-				return new DbDalcFactory(System.Data.Odbc.OdbcFactory.Instance);
+				return new GenericDbProviderFactory(System.Data.Odbc.OdbcFactory.Instance);
 			}
 		}
 

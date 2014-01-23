@@ -32,11 +32,11 @@ namespace NI.Data.Permissions
 
 		public Func<PermissionContext,QueryNode>[] Rules { get; set; }
 		
-		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
+		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
 			Rules = new Func<PermissionContext, QueryNode>[0];
 		}
 
-		public DbPermissionCommandGenerator(IDbDalcFactory dbFactory, IDbDalcView[] views, Func<PermissionContext, QueryNode>[] rules)
+		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views, Func<PermissionContext, QueryNode>[] rules)
 			: base(dbFactory, views) {
 			Rules = rules;
 		}

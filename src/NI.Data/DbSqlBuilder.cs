@@ -33,9 +33,9 @@ namespace NI.Data
 		protected const string SelectOrderPartFormatStr = " ORDER BY {0}";
 
 		protected IDbCommand Command;
-		protected IDbDalcFactory DalcFactory;
+		protected IDbProviderFactory DalcFactory;
 
-		public DbSqlBuilder(IDbCommand cmd, IDbDalcFactory dalcFactory) {
+		public DbSqlBuilder(IDbCommand cmd, IDbProviderFactory dalcFactory) {
 			Command = cmd;
 			DalcFactory = dalcFactory;
 		}

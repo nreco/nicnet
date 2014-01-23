@@ -40,19 +40,22 @@ namespace NI.Data {
 		/// <summary>
 		/// Get or set adapter wrapper factory component
 		/// </summary>
-		public IDbDalcFactory DbFactory { get; set; }
+		public IDbProviderFactory DbFactory { get; set; }
 		
 		/// <summary>
 		/// Get or set database connection
 		/// </summary>
 		public virtual IDbConnection Connection { get; set; }
 
-		public IDbDalcEventsMediator DbDalcEventsMediator { get; set; }
+		/// <summary>
+		/// Get or set event stream component
+		/// </summary>
+		public IEventStream EventStream { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the DbDalc with specified factory and connection.
 		/// </summary>
-		public DbDalc(IDbDalcFactory factory, IDbConnection connection) {
+		public DbDalc(IDbProviderFactory factory, IDbConnection connection) {
 			DbFactory = factory;
 			Connection = connection;
 			CommandGenerator = new DbCommandGenerator(factory);
@@ -61,7 +64,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Initializes a new instance of the DbDalc for specified factory and connection string.
 		/// </summary>
-		public DbDalc(IDbDalcFactory factory, string connectionStr) {
+		public DbDalc(IDbProviderFactory factory, string connectionStr) {
 			DbFactory = factory;
 			Connection = factory.CreateConnection();
 			Connection.ConnectionString = connectionStr;
@@ -71,7 +74,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Initializes a new instance of the DbDalc with specified DALC factory, DB connection and command generator
 		/// </summary>
-		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbCommandGenerator cmdGenerator) {
+		public DbDalc(IDbProviderFactory factory, IDbConnection connection, IDbCommandGenerator cmdGenerator) {
 			DbFactory = factory;
 			Connection = connection;
 			CommandGenerator = cmdGenerator;
@@ -80,7 +83,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Initializes a new instance of the DbDalc with specified DALC factory, DB connection and list of DALC data views
 		/// </summary>
-		public DbDalc(IDbDalcFactory factory, IDbConnection connection, IDbDalcView[] views) {
+		public DbDalc(IDbProviderFactory factory, IDbConnection connection, IDbDalcView[] views) {
 			DbFactory = factory;
 			Connection = connection;
 			CommandGenerator = new DbCommandGenerator(factory, views);
@@ -248,20 +251,19 @@ namespace NI.Data {
 #region Internal methods
 
 		protected virtual void OnCommandExecuting(string sourceName, StatementType type, IDbCommand cmd) {
-			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnCommandExecuting(this, new DbCommandEventArgs(sourceName, type, cmd) );
+			if (EventStream != null)
+				EventStream.Push(this, new DbCommandExecutingEventArgs(sourceName, type, cmd));
 		}
 		
 		protected virtual void OnCommandExecuted(string sourceName, StatementType type, IDbCommand cmd) {
-			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnCommandExecuted(this, new DbCommandEventArgs(sourceName, type, cmd) );
+			if (EventStream != null)
+				EventStream.Push(this, new DbCommandExecutedEventArgs(sourceName, type, cmd));
 		}
 
 		protected virtual void OnRowUpdating(object sender, RowUpdatingEventArgs e) {
-			//Trace.WriteLine( e.Command.CommandText, "SQL" );
 			OnCommandExecuting(e.Row.Table.TableName, StatementType.Update, e.Command);
-			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnRowUpdating(this, e);
+			if (EventStream != null)
+				EventStream.Push(this, e);
 		}
 		
 		protected virtual void OnRowUpdated(object sender, RowUpdatedEventArgs e) {
@@ -282,9 +284,10 @@ namespace NI.Data {
 							break;
 						}
 			}
-			
-			if (DbDalcEventsMediator!=null)
-				DbDalcEventsMediator.OnRowUpdated(this, e);
+
+			if (EventStream != null)
+				EventStream.Push(this, e);
+
 			OnCommandExecuted(e.Row.Table.TableName, StatementType.Update, e.Command);
 		}
 
