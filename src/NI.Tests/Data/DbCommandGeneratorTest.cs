@@ -11,7 +11,7 @@ using NI.Data.SqlClient;
 
 using NUnit.Framework;
 
-namespace NI.Tests.Data.Dalc {
+namespace NI.Tests.Data {
 
 	[TestFixture]
 	[Category("NI.Data")]

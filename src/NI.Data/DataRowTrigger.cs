@@ -24,9 +24,9 @@ using System.Data.Common;
 namespace NI.Data {
 	
 	/// <summary>
-	/// Base class for DB DALC datarow events trigger.
+	/// Generic DataRow trigger that consumes data events and triggers an action on certain conditions.
 	/// </summary>
-	public class DbDalcDataRowTrigger {
+	public class DataRowTrigger {
 
 		[Flags]
 		public enum EventType {
@@ -94,10 +94,10 @@ namespace NI.Data {
 
 		public Action<DataRowTriggerEventArgs> Operation { get; set; }
 
-		public DbDalcDataRowTrigger() {
+		public DataRowTrigger() {
 		}
 
-		public DbDalcDataRowTrigger(string sourceName) {
+		public DataRowTrigger(string sourceName) {
 			MatchSourceName = sourceName;
 		}
 
@@ -163,21 +163,22 @@ namespace NI.Data {
 		}
 
 
-		public class DataRowTriggerEventArgs : EventArgs {
-			public EventType Event { get; private set; }
-			public DataRow Row { get; private set; }
-			public object Sender { get; private set; }
-			public EventArgs Args { get; private set; }
 
-			public DataRowTriggerEventArgs(EventType eventType, DataRow r, object sender, EventArgs args) {
-				Event = eventType;
-				Row = r;
-				Sender = sender;
-				Args = args;
-			}
+	}
+
+
+	public class DataRowTriggerEventArgs : EventArgs {
+		public DataRowTrigger.EventType Event { get; private set; }
+		public DataRow Row { get; private set; }
+		public object Sender { get; private set; }
+		public EventArgs Args { get; private set; }
+
+		public DataRowTriggerEventArgs(DataRowTrigger.EventType eventType, DataRow r, object sender, EventArgs args) {
+			Event = eventType;
+			Row = r;
+			Sender = sender;
+			Args = args;
 		}
-
-
 	}
 
 

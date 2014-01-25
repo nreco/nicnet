@@ -11,7 +11,7 @@ using System.Data.SQLite;
 
 using NUnit.Framework;
 
-namespace NI.Tests.Data.Dalc
+namespace NI.Tests.Data
 {
 
 	//TODO: revise test, cover more cases

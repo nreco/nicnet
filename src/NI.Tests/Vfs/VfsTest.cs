@@ -114,7 +114,7 @@ namespace NI.Tests.Vfs
             fsHelper.FileContentMap = fileContentMap;
 
             //DataSet Dalc definition
-            NI.Data.DatasetDalc dsDalc = new NI.Data.DatasetDalc();
+            NI.Data.DataSetDalc dsDalc = new NI.Data.DataSetDalc();
             System.Data.DataSet ds = new System.Data.DataSet();
             ds.Tables.Add("resources");
             DataColumn idColumn = ds.Tables["resources"].Columns.Add("name", typeof(string));

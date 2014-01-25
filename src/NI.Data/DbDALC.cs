@@ -48,9 +48,25 @@ namespace NI.Data {
 		public virtual IDbConnection Connection { get; set; }
 
 		/// <summary>
-		/// Get or set event stream component
+		/// Occurs when Dalc executes DB command, but before a command is executed against the data source.
 		/// </summary>
-		public IEventStream EventStream { get; set; }
+		public event EventHandler<DbCommandExecutingEventArgs> DbCommandExecuting;
+
+		/// <summary>
+		/// Occurs when Dalc executes DB command, but after a command is executed against the data source.
+		/// </summary>
+		public event EventHandler<DbCommandExecutedEventArgs> DbCommandExecuted;
+
+		/// <summary>
+		/// Occurs during Update before a command is executed against the data source.
+		/// </summary>
+		public event EventHandler<RowUpdatingEventArgs> RowUpdating;
+
+		/// <summary>
+		/// Occurs during Update after a command is executed against the data source.
+		/// </summary>
+		public event EventHandler<RowUpdatedEventArgs> RowUpdated;
+
 
 		/// <summary>
 		/// Initializes a new instance of the DbDalc with specified factory and connection.
@@ -251,19 +267,19 @@ namespace NI.Data {
 #region Internal methods
 
 		protected virtual void OnCommandExecuting(string sourceName, StatementType type, IDbCommand cmd) {
-			if (EventStream != null)
-				EventStream.Push(this, new DbCommandExecutingEventArgs(sourceName, type, cmd));
+			if (DbCommandExecuting != null)
+				DbCommandExecuting(this, new DbCommandExecutingEventArgs(sourceName, type, cmd));
 		}
 		
 		protected virtual void OnCommandExecuted(string sourceName, StatementType type, IDbCommand cmd) {
-			if (EventStream != null)
-				EventStream.Push(this, new DbCommandExecutedEventArgs(sourceName, type, cmd));
+			if (DbCommandExecuted != null)
+				DbCommandExecuted(this, new DbCommandExecutedEventArgs(sourceName, type, cmd));
 		}
 
 		protected virtual void OnRowUpdating(object sender, RowUpdatingEventArgs e) {
 			OnCommandExecuting(e.Row.Table.TableName, StatementType.Update, e.Command);
-			if (EventStream != null)
-				EventStream.Push(this, e);
+			if (RowUpdating != null)
+				RowUpdating(this, e);
 		}
 		
 		protected virtual void OnRowUpdated(object sender, RowUpdatedEventArgs e) {
@@ -285,8 +301,8 @@ namespace NI.Data {
 						}
 			}
 
-			if (EventStream != null)
-				EventStream.Push(this, e);
+			if (RowUpdated != null)
+				RowUpdated(this, e);
 
 			OnCommandExecuted(e.Row.Table.TableName, StatementType.Update, e.Command);
 		}

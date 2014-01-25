@@ -25,26 +25,27 @@ namespace NI.Data
 	/// Dataset-based (in-memory) DALC implementation.
 	/// </summary>
 	/// <sort>2</sort>
-	public class DatasetDalc : SqlBuilder, IDalc
+	public class DataSetDalc : IDalc
 	{
 		/// <summary>
 		/// Get or set underlying DataSet with persisted data
 		/// </summary>
-		public DataSet PersistedDS {
-			get; set;
-		}
+		public DataSet PersistedDS { get; set; }
 		
+		protected ISqlBuilder SqlBuilder { get; private set; }
+
 		/// <summary>
 		/// Initialize new instance of DataSetDalc (property PersistedDS should be initialized before component usage)
 		/// </summary>
-		public DatasetDalc() {
+		public DataSetDalc() : this (new DataSet()) {
 		}
 
 		/// <summary>
 		/// Initialize new instance of DataSetDalc with underlying DataSet
 		/// </summary>
-		public DatasetDalc(DataSet ds) {
+		public DataSetDalc(DataSet ds) {
 			PersistedDS = ds;
+			SqlBuilder = new DataSetSqlBuilder(this);
 		}
 
 
@@ -52,8 +53,8 @@ namespace NI.Data
 		public virtual DataTable Load(Query query, DataSet ds) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
-			
-			string whereExpression = BuildExpression( query.Condition );
+
+			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			string sortExpression = BuildSort( query );
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
 
@@ -165,8 +166,8 @@ namespace NI.Data
 		public int Update(Query query, IDictionary<string,IQueryValue> data) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
-			
-			string whereExpression = BuildExpression( query.Condition );
+
+			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
 			for (int i=0; i<result.Length; i++) {
 				foreach (var fieldValue in data) {
@@ -202,8 +203,8 @@ namespace NI.Data
 		public int Delete(Query query) {
 			if (!PersistedDS.Tables.Contains(query.SourceName))
 				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
-			
-			string whereExpression = BuildExpression( query.Condition );
+
+			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
 			for (int i=0; i<result.Length; i++)
 				result[i].Delete();
@@ -220,56 +221,67 @@ namespace NI.Data
 		}
 		
 		
-		public override string BuildValue(IQueryValue value) {
-			if (value is Query) {
-				Query q = (Query)value;
-				if (q.Fields==null || q.Fields.Length!=1)
-					throw new Exception("Invalid nested query");
-				string whereExpression = BuildExpression( q.Condition );
-				string sortExpression = BuildSort( q );
-				DataRow[] result = PersistedDS.Tables[q.SourceName].Select( whereExpression, sortExpression );
-				if (result.Length==1)
-					return base.BuildValue( new QConst(result[0][q.Fields[0].Name]) );
-				if (result.Length>1) {
-					// build array
-					object[] resValues = new object[result.Length];
-					for (int i=0; i<resValues.Length; i++)
-						resValues[i] = result[i][q.Fields[0].Name];
-					return base.BuildValue( new QConst(resValues) );
-				}
-				
-				return "NULL";
-			}
-			return base.BuildValue( value );
-		}
-		
 		protected virtual string BuildSort(Query q) {
 			if (q.Sort!=null && q.Sort.Length>0)
 				return string.Join(",", q.Sort.Select(v=>(string)v).ToArray() );
 			return null;
 		}
 
-		protected override string BuildValue(QConst value) {
-			object constValue = value.Value;
-				
-			// special processing for arrays
-			if (constValue is IList)
-				return BuildValue( (IList)constValue );
-			
-			if (constValue is DateTime) {
-				// Date values should be enclosed within pound signs (#). (MSDN)
-				return "#"+constValue.ToString()+"#";
+
+		
+		internal class DataSetSqlBuilder : SqlBuilder {
+
+			DataSetDalc dsDalc;
+
+			internal DataSetSqlBuilder(DataSetDalc dalc) {
+				dsDalc = dalc;
 			}
 
-			if (constValue is string)
-				return "'"+constValue.ToString().Replace("'", "''")+"'";
+			public override string BuildValue(IQueryValue value) {
+				if (value is Query) {
+					Query q = (Query)value;
+					if (q.Fields == null || q.Fields.Length != 1)
+						throw new Exception("Invalid nested query");
+					string whereExpression = BuildExpression(q.Condition);
+					string sortExpression = dsDalc.BuildSort(q);
+					DataRow[] result = dsDalc.PersistedDS.Tables[q.SourceName].Select(whereExpression, sortExpression);
+					if (result.Length == 1)
+						return base.BuildValue(new QConst(result[0][q.Fields[0].Name]));
+					if (result.Length > 1) {
+						// build array
+						object[] resValues = new object[result.Length];
+						for (int i = 0; i < resValues.Length; i++)
+							resValues[i] = result[i][q.Fields[0].Name];
+						return base.BuildValue(new QConst(resValues));
+					}
 
-			if (constValue == DBNull.Value)
-				return "NULL";
-									
-			return constValue.ToString();
+					return "NULL";
+				}
+				return base.BuildValue(value);
+			}
+
+			protected override string BuildValue(QConst value) {
+				object constValue = value.Value;
+
+				// special processing for arrays
+				if (constValue is IList)
+					return BuildValue((IList)constValue);
+
+				if (constValue is DateTime) {
+					// Date values should be enclosed within pound signs (#). (MSDN)
+					return "#" + constValue.ToString() + "#";
+				}
+
+				if (constValue is string)
+					return "'" + constValue.ToString().Replace("'", "''") + "'";
+
+				if (constValue == DBNull.Value)
+					return "NULL";
+
+				return constValue.ToString();
+			}
+
 		}
-		
 
 		
 		

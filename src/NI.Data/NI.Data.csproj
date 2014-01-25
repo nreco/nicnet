@@ -107,10 +107,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DalcExt.cs" />
+    <Compile Include="DataEventBroker.cs" />
     <Compile Include="DataRowDalcMapper.cs" />
     <Compile Include="DataHelper.cs" />
     <Compile Include="DataSetFactory.cs" />
-    <Compile Include="DatasetDalc.cs">
+    <Compile Include="DataSetDalc.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbCommandEventArgs.cs">
@@ -118,12 +119,10 @@
     </Compile>
     <Compile Include="DbCommandGenerator.cs" />
     <Compile Include="GenericDbProviderFactory.cs" />
-    <Compile Include="DbDalcTraceLogger.cs" />
     <Compile Include="DbDalc.cs" />
-    <Compile Include="DataEventStream.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DbDalcDataRowTrigger.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Triggers\DataRowActionType.cs" />
+    <Compile Include="Triggers\DataRowTrigger.cs" />
     <Compile Include="DbDalcView.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -133,7 +132,6 @@
     <Compile Include="DbTypeResolver.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Interfaces\IEventStream.cs" />
     <Compile Include="Interfaces\IDataSetFactory.cs" />
     <Compile Include="Interfaces\IDbProviderFactory.cs" />
     <Compile Include="Interfaces\IDalc.cs">
@@ -204,10 +202,11 @@
     </Compile>
     <Compile Include="SqlClient\SqlClientDbSqlBuilder.cs" />
     <Compile Include="SqlClient\SqlClientDalcFactory.cs" />
+    <Compile Include="Triggers\SqlCommandTraceTrigger.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />
-    <Compile Include="Web\DalcCacheDependency.cs" />
-    <Compile Include="Web\DalcCacheDependencyDataRowTrigger.cs" />
+    <Compile Include="Web\DataCacheDependency.cs" />
+    <Compile Include="Triggers\InvalidateDataDependencyTrigger.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

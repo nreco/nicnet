@@ -47,11 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dalc\PermissionTest.cs" />
-    <Compile Include="Dalc\SQLiteDalcTest.cs" />
-    <Compile Include="Dalc\DatasetDalcTest.cs" />
-    <Compile Include="Dalc\DbCommandGeneratorTest.cs" />
-    <Compile Include="Dalc\QueryTest.cs" />
+    <Compile Include="Data\DataEventBrokerTest.cs" />
+    <Compile Include="Data\PermissionTest.cs" />
+    <Compile Include="Data\SQLiteDalcTest.cs" />
+    <Compile Include="Data\DataSetDalcTest.cs" />
+    <Compile Include="Data\DbCommandGeneratorTest.cs" />
+    <Compile Include="Data\QueryTest.cs" />
     <Compile Include="Expressions\EvalTest.cs" />
     <Compile Include="Ioc\XmlComponentConfigurationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

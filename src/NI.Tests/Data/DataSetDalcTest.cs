@@ -5,17 +5,17 @@ using NI.Data;
 
 using NUnit.Framework;
 
-namespace NI.Tests.Data.Dalc
+namespace NI.Tests.Data
 {
 
 	//TODO: revise test, cover more cases
 	[TestFixture]
 	[Category("NI.Data")]
-	public class DatasetDalcTest
+	public class DataSetDalcTest
 	{
 
-		public static DatasetDalc createDsDalc() {
-			DatasetDalc dsDalc = new DatasetDalc();
+		public static DataSetDalc createDsDalc() {
+			DataSetDalc dsDalc = new DataSetDalc();
 			
 			DataSet ds = new DataSet();
 
@@ -47,7 +47,7 @@ namespace NI.Tests.Data.Dalc
 
 		[Test]
 		public void test_LoadRecord() {
-			DatasetDalc dsDalc = createDsDalc();
+			DataSetDalc dsDalc = createDsDalc();
 			Query q = new Query("users");
 			q.Condition = (QField)"name" == (QConst)"Mike";
 			var res = dsDalc.LoadRecord(q);
@@ -57,7 +57,7 @@ namespace NI.Tests.Data.Dalc
 		
 		[Test]
 		public void test_Load() {
-			DatasetDalc dsDalc = createDsDalc();
+			DataSetDalc dsDalc = createDsDalc();
 			DataSet ds = new DataSet();
 			
 			Query subQuery = new Query("roles");
@@ -91,7 +91,7 @@ namespace NI.Tests.Data.Dalc
 		
 		[Test]
 		public void test_Delete() {
-			DatasetDalc dsDalc = createDsDalc();
+			DataSetDalc dsDalc = createDsDalc();
 
 			Query subQuery = new Query("roles");
 			subQuery.Condition = (QField)"role"==(QConst)"user";
@@ -108,7 +108,7 @@ namespace NI.Tests.Data.Dalc
 		
 		[Test]
 		public void test_Update() {
-			DatasetDalc dsDalc = createDsDalc();
+			DataSetDalc dsDalc = createDsDalc();
 			DataSet ds = new DataSet();
 			Query q = new Query("users");
 			q.Condition = (QField)"id" == (QConst)1;

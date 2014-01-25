@@ -10,7 +10,7 @@ using NI.Data.Permissions;
 
 using NUnit.Framework;
 
-namespace NI.Tests.Data.Dalc
+namespace NI.Tests.Data
 {
 	/// <summary>
 	/// </summary>
