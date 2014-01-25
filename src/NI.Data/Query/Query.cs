@@ -32,7 +32,7 @@ namespace NI.Data
 		private QField[] _Fields = null;
 		private int _StartRecord = 0;
 		private int _RecordCount = Int32.MaxValue;
-		private QSource _SourceName = null;
+		private QTable _Table = null;
 		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
@@ -82,9 +82,9 @@ namespace NI.Data
 		/// <summary>
 		/// Get or set target source name of this query
 		/// </summary>
-		public QSource SourceName { 
-			get { return _SourceName; }
-			set { _SourceName = value; }
+		public QTable Table { 
+			get { return _Table; }
+			set { _Table = value; }
 		}
 		
 		/// <summary>
@@ -101,45 +101,45 @@ namespace NI.Data
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name
+		/// Initializes a new instance of the Query with specified table name
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
-		public Query(string sourceName) {
-			_SourceName = new QSource(sourceName);
+		/// <param name="tableName">target table name</param>
+		public Query(string tableName) {
+			_Table = new QTable(tableName);
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name and condition node
+		/// Initializes a new instance of the Query with specified table name and condition node
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
+		/// <param name="tableName">target table name</param>
 		/// <param name="condition">condition represented by QueryNode</param>
-		public Query(string sourceName, QueryNode condition) {
-			_SourceName = sourceName;
+		public Query(string tableName, QueryNode condition) {
+			_Table = tableName;
 			Condition = condition;
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name, condition and sort options
+		/// Initializes a new instance of the Query with specified table name, condition and sort options
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
+		/// <param name="tableName">target table name</param>
 		/// <param name="condition">condition represented by QueryNode</param>
 		/// <param name="sort">list of sort fields</param>
-		public Query(string sourceName, QueryNode condition, string[] sort) {
-			_SourceName = sourceName;
+		public Query(string tableName, QueryNode condition, string[] sort) {
+			_Table = tableName;
 			Condition = condition;
 			_Sort = sort.Select(s => new QSort(s) ).ToArray();
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name, condition, sort options and result limits
+		/// Initializes a new instance of the Query with specified table name, condition, sort options and result limits
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
+		/// <param name="tableName">target table name</param>
 		/// <param name="condition">condition represented by QueryNode</param>
 		/// <param name="sort">list of sort fields</param>
 		/// <param name="startRecord">The zero-based record number to start with</param>
 		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string sourceName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
-			_SourceName = sourceName;
+		public Query(string tableName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
+			_Table = tableName;
 			SetSort(sort);
 			_StartRecord = startRecord;
 			_RecordCount = recordCount;
@@ -147,26 +147,26 @@ namespace NI.Data
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name and result limits
+		/// Initializes a new instance of the Query with specified table name and result limits
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
+		/// <param name="tableName">target table name</param>
 		/// <param name="startRecord">The zero-based record number to start with</param>
 		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string sourceName, int startRecord, int recordCount) {
-			_SourceName = sourceName;
+		public Query(string tableName, int startRecord, int recordCount) {
+			_Table = tableName;
 			_StartRecord = startRecord;
 			_RecordCount = recordCount;
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified source name, sort options and result limits
+		/// Initializes a new instance of the Query with specified table name, sort options and result limits
 		/// </summary>
-		/// <param name="sourceName">target source name</param>
+		/// <param name="tableName">target table name</param>
 		/// <param name="sort">list of sort fields</param>
 		/// <param name="startRecord">The zero-based record number to start with</param>
 		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string sourceName, string[] sort, int startRecord, int recordCount) {
-			_SourceName = sourceName;
+		public Query(string tableName, string[] sort, int startRecord, int recordCount) {
+			_Table = tableName;
 			SetSort(sort);
 			_StartRecord = startRecord;
 			_RecordCount = recordCount;
@@ -177,7 +177,7 @@ namespace NI.Data
 		/// </summary>
 		/// <param name="q">query with options to copy</param>
 		public Query(Query q) {
-			_SourceName = q.SourceName;
+			_Table = q.Table;
 			_Sort = q.Sort;
 			_StartRecord = q.StartRecord;
 			_RecordCount = q.RecordCount;

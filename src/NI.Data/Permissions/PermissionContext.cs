@@ -25,14 +25,14 @@ namespace NI.Data.Permissions
 	/// </summary>
 	public class PermissionContext
 	{
-		public string SourceName { get; private set; }
+		public string TableName { get; private set; }
 
 		public DalcOperation Operation { get; private set; }
 
 		public IPrincipal Principal { get; private set; }
 
-		public PermissionContext(string sourceName, DalcOperation operation) {
-			SourceName = sourceName;
+		public PermissionContext(string tableName, DalcOperation operation) {
+			TableName = tableName;
 			Principal = Thread.CurrentPrincipal;
 			Operation = operation;
 		}

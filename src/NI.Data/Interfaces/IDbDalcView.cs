@@ -25,14 +25,14 @@ namespace NI.Data
 	{
 	
 		/// <summary>
-		/// Determines whether this dataview matches given sourcename
+		/// Determines whether this dataview matches given table
 		/// </summary>
-		bool MatchSourceName(QSource sourceName);
+		bool IsMatchTable(QTable table);
 		
 		/// <summary>
 		/// List of origin sources names used in data view (optional; can be null)
 		/// </summary>
-		QSource[] OriginSourceNames { get; }
+		QTable[] OriginTables { get; }
 		
 		/// <summary>
 		/// Compose dataview SQL select text by specified query

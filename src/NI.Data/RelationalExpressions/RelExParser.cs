@@ -340,7 +340,7 @@ namespace NI.Data.RelationalExpressions
 				int nextEndIdx;
 				
 				// query
-				string sourceName = lexem;
+				string tableName = lexem;
 				QueryNode rootCondition = null;
 				string[] fields = null;
                 string[] sort = null;
@@ -419,7 +419,7 @@ namespace NI.Data.RelationalExpressions
 				}
 				endIdx = nextEndIdx;
 
-				Query q = new Query( sourceName, rootCondition);
+				Query q = new Query( tableName, rootCondition);
 				
 				// limits?
 				nextLexemType = GetLexemType(input, endIdx, out nextEndIdx);

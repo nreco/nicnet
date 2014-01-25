@@ -26,34 +26,28 @@ namespace NI.Data.Triggers {
 	/// </summary>
 	public class SqlCommandTraceTrigger {
 
+		static Logger log = new Logger(typeof(SqlCommandTraceTrigger));
+
 		/// <summary>
 		/// Get or set flag that indicates whether logger is enabled
 		/// </summary>		
 		public bool Enabled { get; set; }
 
-		/// <summary>
-		/// Get or set write to log method (by default Debug
-		/// </summary>
-		public Action<string> LogWrite { get; set; }
-
 		IDictionary<int, DateTime> cmdExecutingTime = new Dictionary<int, DateTime>();
 
-		public SqlCommandTraceTrigger() : this( new Action<string>(TraceWrite) ) {
-		}
-
-		public SqlCommandTraceTrigger(Action<string> logWrite) {
+		/// <summary>
+		/// Initializes a new instance of SqlCommandTraceTrigger
+		/// </summary>
+		public SqlCommandTraceTrigger() {
 			Enabled = true;
-			LogWrite = logWrite;
 		}
 
-		public SqlCommandTraceTrigger(DataEventBroker eventBroker, Action<string> logWrite) : this(logWrite) {
+		/// <summary>
+		/// Initializes a new instance of SqlCommandTraceTrigger and subscribes it to data events
+		/// </summary>
+		public SqlCommandTraceTrigger(DataEventBroker eventBroker) : this() {
 			eventBroker.Subscribe(new EventHandler<DbCommandExecutingEventArgs>(DbCommandExecuting) );
 			eventBroker.Subscribe(new EventHandler<DbCommandExecutedEventArgs>(DbCommandExecuted));
-		}
-
-
-		static void TraceWrite(string s) {
-			System.Diagnostics.Trace.Write(s);
 		}
 
 		public virtual void DbCommandExecuting(object sender, DbCommandExecutingEventArgs args) {
@@ -84,8 +78,7 @@ namespace NI.Data.Triggers {
 
 		protected virtual void Write(IDbCommand cmd, string message) {
 			string msg = String.Format("[SQL][{1}] {2}", cmd.GetHashCode(), message );
-			if (LogWrite != null)
-				LogWrite(msg);
+			log.Info(msg);
 		}
 
 

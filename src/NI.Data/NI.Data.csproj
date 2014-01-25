@@ -166,7 +166,7 @@
     <Compile Include="PropertyDataRowMapper.cs" />
     <Compile Include="Query\QVar.cs" />
     <Compile Include="Query\QueryRawSqlNode.cs" />
-    <Compile Include="Query\QSource.cs" />
+    <Compile Include="Query\QTable.cs" />
     <Compile Include="Query\QConst.cs">
       <SubType>Code</SubType>
     </Compile>

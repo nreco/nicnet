@@ -42,11 +42,11 @@ namespace NI.Data {
 		}
 
 		public DataTable Load(Query query, DataSet ds) {
-			if (ds.Tables.Contains(query.SourceName))
-				ds.Tables.Remove(query.SourceName);
-			DataTable tbl = ds.Tables.Add(query.SourceName);
+			if (ds.Tables.Contains(query.Table))
+				ds.Tables.Remove(query.Table);
+			DataTable tbl = ds.Tables.Add(query.Table);
 
-			IFileObject[] files = Select(query.SourceName, query.Condition);
+			IFileObject[] files = Select(query.Table, query.Condition);
 
 			if (query.Fields.Length == 1 && query.Fields[0].Expression == "count(*)") {
 				tbl.Columns.Add("count", typeof(int));
@@ -122,7 +122,7 @@ namespace NI.Data {
 			var newName = ((QConst)data["name"]).Value as string;
 			if (String.IsNullOrEmpty(newName))
 				return 0;
-			IFileObject[] files = Select(query.SourceName, query.Condition);
+			IFileObject[] files = Select(query.Table, query.Condition);
 			
 			foreach (var f in files) {
 				var newFileName = Path.Combine( Path.GetDirectoryName( f.Name ), newName );
@@ -131,12 +131,12 @@ namespace NI.Data {
 			return files.Length;
 		}
 
-		public void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
+		public void Insert(string tableName, IDictionary<string,IQueryValue> data) {
 			throw new NotSupportedException("FileSystemDalc does not supports insert operations.");
 		}
 
 		public int Delete(Query query) {
-			IFileObject[] files = Select(query.SourceName, query.Condition);
+			IFileObject[] files = Select(query.Table, query.Condition);
 			foreach (var f in files) {
 				f.Delete();
 			}
@@ -152,11 +152,11 @@ namespace NI.Data {
 
 		public bool LoadRecord(IDictionary data, Query query) {
 			if (query.Fields.Length==1 && query.Fields[0].Expression=="count(*)") {
-				data["count(*)"] = RecordsCount( query.SourceName, query.Condition );
+				data["count(*)"] = RecordsCount( query.Table, query.Condition );
 				return true;
 			}
 			
-			var res = Select( query.SourceName, query.Condition );
+			var res = Select( query.Table, query.Condition );
 			if (res.Length>0) {
 				var firstRow = res[0];
 				data["is_file"] = GetFileObjectField("is_file", firstRow);
@@ -172,16 +172,16 @@ namespace NI.Data {
 			return false;
 		}
 
-		public int RecordsCount(string sourceName, QueryNode condition) {
-			return Select(sourceName, condition).Length;
+		public int RecordsCount(string tableName, QueryNode condition) {
+			return Select(tableName, condition).Length;
 		}
 		
-		protected IFileObject[] Select(string sourceName, QueryNode condition) {
-			if (sourceName=="." || sourceName==Path.AltDirectorySeparatorChar.ToString() || sourceName==Path.DirectorySeparatorChar.ToString())
-				sourceName = "";
-			IFileObject fileObj = FileSystem.ResolveFile(sourceName);
+		protected IFileObject[] Select(string tableName, QueryNode condition) {
+			if (tableName=="." || tableName==Path.AltDirectorySeparatorChar.ToString() || tableName==Path.DirectorySeparatorChar.ToString())
+				tableName = "";
+			IFileObject fileObj = FileSystem.ResolveFile(tableName);
 			if (fileObj==null)
-				throw new ArgumentException(String.Format("File {0} does not exist",sourceName));
+				throw new ArgumentException(String.Format("File {0} does not exist",tableName));
 			QueryFileSelector qFileSelector = new QueryFileSelector(false, ConditionEvaluator, condition);
 			IFileObject[] foundFiles = fileObj.Type==FileType.Folder ? fileObj.FindFiles(qFileSelector) : new IFileObject[0];
 			return foundFiles;

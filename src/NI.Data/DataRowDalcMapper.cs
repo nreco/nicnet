@@ -57,10 +57,10 @@ namespace NI.Data {
 		/// <summary>
 		/// Create new DataRow
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
-		public DataRow Create(string sourceName) {
-			DataSet ds = CreateDataSet(sourceName);
-			return ds.Tables[sourceName].NewRow();
+		/// <param name="tableName">data table name</param>
+		public DataRow Create(string tableName) {
+			DataSet ds = CreateDataSet(tableName);
+			return ds.Tables[tableName].NewRow();
 		}
 
 		protected object PrepareValue(object o) {
@@ -70,11 +70,11 @@ namespace NI.Data {
 		/// <summary>
 		/// Create new DataRow with specified data and insert it immediately.
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="data">column -> value data</param>
 		/// <returns>DataRow</returns>
-		public DataRow Insert(string sourceName, IDictionary<string, object> data) {
-			DataRow r = Create(sourceName);
+		public DataRow Insert(string tableName, IDictionary<string, object> data) {
+			DataRow r = Create(tableName);
 			foreach (KeyValuePair<string, object> entry in data)
 				r[entry.Key] = PrepareValue(entry.Value);
 			Update(r);
@@ -84,26 +84,26 @@ namespace NI.Data {
 		/// <summary>
 		/// Load DataRow from specifed data source by single-value primary key
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="pk"></param>
 		/// <returns>DataRow or null</returns>
-		public DataRow Load(string sourceName, object pk) {
-			return Load(sourceName, new object[]{pk});
+		public DataRow Load(string tableName, object pk) {
+			return Load(tableName, new object[]{pk});
 		}
 
 		/// <summary>
 		/// Load DataRow from specifed data source by primary key
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="pk">primary key values</param>
 		/// <returns>DataRow or null</returns>
-		public DataRow Load(string sourceName, params object[] pk) {
-			DataSet ds = CreateDataSet(sourceName);
+		public DataRow Load(string tableName, params object[] pk) {
+			DataSet ds = CreateDataSet(tableName);
 			if (ds == null)
 				throw new Exception("Unknown source name");
-			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk));
+			Query q = new Query(tableName, ComposePkCondition(ds.Tables[tableName], pk));
 			Dalc.Load(q, ds);
-			return ds.Tables[q.SourceName].Rows.Count > 0 ? ds.Tables[q.SourceName].Rows[0] : null;
+			return ds.Tables[q.Table].Rows.Count > 0 ? ds.Tables[q.Table].Rows[0] : null;
 		}
 
 		/// <summary>
@@ -112,8 +112,8 @@ namespace NI.Data {
 		/// <param name="q">query</param>
 		/// <returns>DataRow or null if no records matched</returns>
 		public DataRow Load(Query q) {
-			QSource source = new QSource(q.SourceName);
-			DataSet ds = CreateDataSet(source.Name);
+			QTable table = new QTable(q.Table);
+			DataSet ds = CreateDataSet(table.Name);
 			if (ds == null)
 				ds = new DataSet();
 			var tbl = Dalc.Load(q, ds);
@@ -126,7 +126,7 @@ namespace NI.Data {
 		/// <param name="q">query</param>
 		/// <returns></returns>
 		public DataTable LoadAll(Query q) {
-			QSource source = new QSource(q.SourceName);
+			QTable source = new QTable(q.Table);
 			DataSet ds = CreateDataSet(source.Name);
 			if (ds == null)
 				ds = new DataSet();
@@ -137,19 +137,19 @@ namespace NI.Data {
 		/// <summary>
 		/// Delete record from data source by single-value primary key
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="pk">primary key value</param>
-		public void Delete(string sourceName, object pk) {
-			Delete(sourceName, new object[] { pk });
+		public void Delete(string tableName, object pk) {
+			Delete(tableName, new object[] { pk });
 		}
 
 		/// <summary>
 		/// Delete record from data source by primary key values
 		/// </summary>
-		/// <param name="sourceName"></param>
-		/// <param name="pk"></param>
-		public void Delete(string sourceName, params object[] pk) {
-			DataRow r = Load(sourceName, pk);
+		/// <param name="tableName">data table name</param>
+		/// <param name="pk">primary key values</param>
+		public void Delete(string tableName, params object[] pk) {
+			DataRow r = Load(tableName, pk);
             if (r != null) {
                 Delete(r);
             }
@@ -203,24 +203,24 @@ namespace NI.Data {
 		/// <summary>
 		/// Update record in data source by single-value primary key
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="pk">primary key value</param>
 		/// <param name="changeset">column name -> value</param>
-		public void Update(string sourceName, object pk, IDictionary<string, object> changeset) {
-			Update(sourceName, new object[] { pk }, changeset);
+		public void Update(string tableName, object pk, IDictionary<string, object> changeset) {
+			Update(tableName, new object[] { pk }, changeset);
 		}
 
 		/// <summary>
 		/// Update record in data source by primary key
 		/// </summary>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data source identifier</param>
 		/// <param name="pk">primary key values</param>
 		/// <param name="changeset">column name -> value</param>
-		public void Update(string sourceName, object[] pk, IDictionary<string, object> changeset) {
-			DataSet ds = CreateDataSet(sourceName);
+		public void Update(string tableName, object[] pk, IDictionary<string, object> changeset) {
+			DataSet ds = CreateDataSet(tableName);
 			if (ds == null)
 				throw new Exception("Unknown source name");
-			Query q = new Query(sourceName, ComposePkCondition(ds.Tables[sourceName], pk) );
+			Query q = new Query(tableName, ComposePkCondition(ds.Tables[tableName], pk) );
 			var t = Dalc.Load(q, ds);
 			if (t.Rows.Count==0)
 				throw new Exception("Record does not exist");
@@ -234,8 +234,8 @@ namespace NI.Data {
 		/// <summary>
 		/// Update records matched by query
 		/// </summary>
-		/// <param name="q"></param>
-		/// <param name="changeset"></param>
+		/// <param name="q">query for matching records to update</param>
+		/// <param name="changeset">changeset data</param>
 		/// <returns></returns>
 		public int Update(Query q, IDictionary<string, object> changeset) {
 			var tbl = LoadAll(q);

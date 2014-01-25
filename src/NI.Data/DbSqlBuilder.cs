@@ -40,11 +40,11 @@ namespace NI.Data
 			DalcFactory = dalcFactory;
 		}
 		
-		protected virtual string GetTableName(string sourceName) {
-			QSource qSourceName = (QSource)sourceName;
-			if (!String.IsNullOrEmpty(qSourceName.Alias))
-				return qSourceName.Name + " " + qSourceName.Alias;
-			return qSourceName.Name;
+		protected virtual string GetTableName(string tableName) {
+			QTable table = (QTable)tableName;
+			if (!String.IsNullOrEmpty(table.Alias))
+				return table.Name + " " + table.Alias;
+			return table.Name;
 		}
 
 		protected virtual string BuildSelectInternal(Query query, bool isNested) {
@@ -55,7 +55,7 @@ namespace NI.Data
 			// compose select sql
 			StringBuilder cmdTextBuilder = new StringBuilder();
 			cmdTextBuilder.AppendFormat(
-				SelectFromPartFormatStr, fields, GetTableName(query.SourceName) );
+				SelectFromPartFormatStr, fields, GetTableName(query.Table) );
 			if (whereExpression!=null && whereExpression.Length>0)
 				cmdTextBuilder.AppendFormat(SelectWherePartFormatStr, whereExpression);
 			if (sort!=null)

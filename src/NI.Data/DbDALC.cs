@@ -108,7 +108,7 @@ namespace NI.Data {
 		/// <see cref="NI.Data.IDalc.Load(NI.Data.Query,System.Data.DataSet)"/>
 		public virtual DataTable Load(Query query, DataSet ds) {
 			using (var selectCmd = CommandGenerator.ComposeSelect(query)) {
-				QSource source = query.SourceName;
+				QTable source = query.Table;
 
 				selectCmd.Connection = Connection;
 
@@ -137,7 +137,7 @@ namespace NI.Data {
 		/// <see cref="NI.Data.IDalc.Delete(NI.Data.Query)"/>
 		public virtual int Delete(Query query) {
 			using (var deleteCmd = CommandGenerator.ComposeDelete(query)) {
-				return ExecuteInternal(deleteCmd, query.SourceName, StatementType.Delete);
+				return ExecuteInternal(deleteCmd, query.Table.Name, StatementType.Delete);
 			}
 		}
 
@@ -188,15 +188,15 @@ namespace NI.Data {
 		public virtual int Update(Query query, IDictionary<string,IQueryValue> data) {
 			using (var cmd = CommandGenerator.ComposeUpdate(query, data)) {
 				cmd.Connection = Connection;
-				return ExecuteInternal(cmd, query.SourceName, StatementType.Update);
+				return ExecuteInternal(cmd, query.Table.Name, StatementType.Update);
 			}
 		}
 
 		/// <see cref="NI.Data.IDalc.Insert(System.String,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
-		public virtual void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
-			using (var cmd = CommandGenerator.ComposeInsert(sourceName, data)) {
+		public virtual void Insert(string tableName, IDictionary<string,IQueryValue> data) {
+			using (var cmd = CommandGenerator.ComposeInsert(tableName, data)) {
 				cmd.Connection = Connection;
-				ExecuteInternal(cmd, sourceName, StatementType.Insert);
+				ExecuteInternal(cmd, tableName, StatementType.Insert);
 			}
 		}
 
@@ -209,12 +209,12 @@ namespace NI.Data {
 			}
 		}
 
-        protected virtual void ExecuteReaderInternal(IDbCommand cmd, string sourceName, Action<IDataReader> callback) {
+        protected virtual void ExecuteReaderInternal(IDbCommand cmd, string tableName, Action<IDataReader> callback) {
 			DataHelper.EnsureConnectionOpen(Connection, () => {
-				OnCommandExecuting(sourceName, StatementType.Select, cmd);
+				OnCommandExecuting(tableName, StatementType.Select, cmd);
 				using (var rdr = cmd.ExecuteReader()) {
 					try {
-						OnCommandExecuted(sourceName, StatementType.Select, cmd);
+						OnCommandExecuted(tableName, StatementType.Select, cmd);
 						callback(rdr);
 					} finally {
 						if (!rdr.IsClosed)
@@ -238,7 +238,7 @@ namespace NI.Data {
         public virtual void ExecuteReader(Query q, Action<IDataReader> callback) {
 			using (var cmd = CommandGenerator.ComposeSelect(q)) {
 				cmd.Connection = Connection;
-				ExecuteReaderInternal(cmd, q.SourceName, callback);
+				ExecuteReaderInternal(cmd, q.Table, callback);
 			}
         }
 
@@ -266,14 +266,14 @@ namespace NI.Data {
 
 #region Internal methods
 
-		protected virtual void OnCommandExecuting(string sourceName, StatementType type, IDbCommand cmd) {
+		protected virtual void OnCommandExecuting(string tableName, StatementType type, IDbCommand cmd) {
 			if (DbCommandExecuting != null)
-				DbCommandExecuting(this, new DbCommandExecutingEventArgs(sourceName, type, cmd));
+				DbCommandExecuting(this, new DbCommandExecutingEventArgs(tableName, type, cmd));
 		}
 		
-		protected virtual void OnCommandExecuted(string sourceName, StatementType type, IDbCommand cmd) {
+		protected virtual void OnCommandExecuted(string tableName, StatementType type, IDbCommand cmd) {
 			if (DbCommandExecuted != null)
-				DbCommandExecuted(this, new DbCommandExecutedEventArgs(sourceName, type, cmd));
+				DbCommandExecuted(this, new DbCommandExecutedEventArgs(tableName, type, cmd));
 		}
 
 		protected virtual void OnRowUpdating(object sender, RowUpdatingEventArgs e) {
@@ -311,15 +311,15 @@ namespace NI.Data {
 		/// <summary>
 		/// Execute SQL command
 		/// </summary>
-		virtual protected int ExecuteInternal(IDbCommand cmd, string sourceName, StatementType commandType) {
+		virtual protected int ExecuteInternal(IDbCommand cmd, string tableName, StatementType commandType) {
 			cmd.Connection = Connection;
 			
 			//Trace.WriteLine( cmdWrapper.Command.CommandText, "SQL" );
 			int res = 0;
 			DataHelper.EnsureConnectionOpen(cmd.Connection, () => {
-				OnCommandExecuting(sourceName, commandType, cmd);
+				OnCommandExecuting(tableName, commandType, cmd);
 				res = cmd.ExecuteNonQuery();
-				OnCommandExecuted(sourceName, commandType, cmd);
+				OnCommandExecuted(tableName, commandType, cmd);
 			});
 			
 			return res;

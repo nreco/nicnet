@@ -36,14 +36,14 @@ namespace NI.Data
 			get { return _Schemas; }
 			set { 
 				_Schemas = value;
-				SourceNameDescrHash = null;
+				TableNameDescrHash = null;
 			}
 		}
 
 		static IDictionary<string, DataSet> DataSetCache = new Dictionary<string,DataSet>();
 		static int MaxDataSetCacheSize = 200;
 
-		IDictionary<string, SchemaDescriptor> SourceNameDescrHash = null;
+		IDictionary<string, SchemaDescriptor> TableNameDescrHash = null;
 
 		/// <summary>
 		/// Initializes new instance of DataSetFactory (Schemas property should be set before calling this component)
@@ -60,15 +60,15 @@ namespace NI.Data
 			Schemas = schemas;
 		}
 
-		protected SchemaDescriptor FindDescriptor(string sourcename) {
-			if (SourceNameDescrHash == null) {
-				SourceNameDescrHash = new Dictionary<string, SchemaDescriptor>();
+		protected SchemaDescriptor FindDescriptor(string tableName) {
+			if (TableNameDescrHash == null) {
+				TableNameDescrHash = new Dictionary<string, SchemaDescriptor>();
 				foreach (SchemaDescriptor descr in Schemas)
-					foreach (string sn in descr.SourceNames)
-						if (!SourceNameDescrHash.ContainsKey(sn))
-							SourceNameDescrHash[sn] = descr;
+					foreach (string sn in descr.TableNames)
+						if (!TableNameDescrHash.ContainsKey(sn))
+							TableNameDescrHash[sn] = descr;
 			}
-			return SourceNameDescrHash.ContainsKey(sourcename) ? SourceNameDescrHash[sourcename] : null;
+			return TableNameDescrHash.ContainsKey(tableName) ? TableNameDescrHash[tableName] : null;
 		}
 
 		protected DataSet GetDataSetWithSchema(string xmlSchema) {
@@ -91,29 +91,21 @@ namespace NI.Data
 		}
 
 		/// <see cref="NI.Data.IDataSetFactory.GetDataSet"/>
-		public DataSet GetDataSet(string sourceName) {
-			if (sourceName==null)
+		public DataSet GetDataSet(string tableName) {
+			if (tableName==null)
 				throw new ArgumentNullException("Source name cannot be null");
-			SchemaDescriptor schemaDescr = FindDescriptor(sourceName);
+			SchemaDescriptor schemaDescr = FindDescriptor(tableName);
 			if (schemaDescr == null)
-				return null; // unknown sourcename
+				return null; // unknown table
 			DataSet ds = GetDataSetWithSchema(schemaDescr.XmlSchema);
 			return ds;
 		}
 
 		public class SchemaDescriptor {
-			string[] _SourceNames;
-			string _XmlSchema;
 
-			public string[] SourceNames {
-				get { return _SourceNames; }
-				set { _SourceNames = value; }
-			}
+			public string[] TableNames { get; set; }
 
-			public string XmlSchema {
-				get { return _XmlSchema; }
-				set { _XmlSchema = value; }
-			}
+			public string XmlSchema { get; set; }
 
 		}
 	}

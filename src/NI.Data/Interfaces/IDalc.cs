@@ -60,9 +60,9 @@ namespace NI.Data
 		/// <summary>
 		/// Insert data from dictionary container to datasource
 		/// </summary>
-		/// <param name="sourceName">Source name for data</param>
+		/// <param name="tableName">Source name for data</param>
 		/// <param name="data">Container with record data</param>
-		void Insert(string sourceName, IDictionary<string,IQueryValue> data);
+		void Insert(string tableName, IDictionary<string,IQueryValue> data);
 
 		/// <summary>
 		/// Delete data from dataset by query

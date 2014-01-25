@@ -28,9 +28,9 @@ namespace NI.Data
 	/// </summary>
 	public class DbDalcView : IDbDalcView
 	{
-		public string SourceName { get; set; }
+		public string TableName { get; set; }
 
-		public QSource[] OriginSourceNames { get; set; }
+		public QTable[] OriginTables { get; set; }
 
 		public IDictionary<string,string> FieldMapping { get; set; }
 
@@ -40,25 +40,25 @@ namespace NI.Data
 		protected string SqlCommandTextTemplate { get; set; }
 		protected Func<ViewContext, string> GetSqlCommandText { get; set; }
 
-		public DbDalcView(string sourceName, Func<ViewContext, string> getSqlCommandText) {
-			SourceName = sourceName;
+		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText) {
+			TableName = tableName;
 			GetSqlCommandText = getSqlCommandText;
 		}
 
-		public DbDalcView(string sourceName, string sqlCommandTextTemplate) {
-			SourceName = sourceName;
+		public DbDalcView(string tableName, string sqlCommandTextTemplate) {
+			TableName = tableName;
 			SqlCommandTextTemplate = sqlCommandTextTemplate;
 		}
 
-		public DbDalcView(string sourceName, Func<ViewContext, string> getSqlCommandText, string sqlFields, string sqlCountFields) {
-			SourceName = sourceName;
+		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText, string sqlFields, string sqlCountFields) {
+			TableName = tableName;
 			GetSqlCommandText = getSqlCommandText;
 			SelectFields = sqlFields;
 			CountFields = sqlCountFields;
 		}
 
-		public DbDalcView(string sourceName, string sqlCommandTextTemplate, string sqlFields, string sqlCountFields) {
-			SourceName = sourceName;
+		public DbDalcView(string tableName, string sqlCommandTextTemplate, string sqlFields, string sqlCountFields) {
+			TableName = tableName;
 			SqlCommandTextTemplate = sqlCommandTextTemplate;
 			SelectFields = sqlFields;
 			CountFields = sqlCountFields;
@@ -66,8 +66,8 @@ namespace NI.Data
 
 
 
-		public virtual bool MatchSourceName(QSource source) {
-			return SourceName==source.Name;
+		public virtual bool IsMatchTable(QTable table) {
+			return TableName==table.Name;
 		}
 
 		public string ComposeSelect(Query q, IDbSqlBuilder sqlBuilder) {

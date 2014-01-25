@@ -12,7 +12,7 @@ namespace NI.Data {
 	/// </summary>
 	public class ObjectDalcMapper<T> where T : class, new() {
 
-		protected string SourceName { get; set; }
+		protected string TableName { get; set; }
 
 		protected IObjectDataRowMapper ObjectMapper { get; set; }
 
@@ -22,10 +22,10 @@ namespace NI.Data {
 		/// Initializes a new instance of ObjectDalcMapper
 		/// </summary>
 		/// <param name="dbMgr">DataRowManager</param>
-		/// <param name="sourceName">data source identifier</param>
+		/// <param name="tableName">data table name</param>
 		/// <param name="colNameToProperty">column name -> object property map</param>
-		public ObjectDalcMapper(DataRowDalcMapper dbMgr, string sourceName, IDictionary<string, string> colNameToProperty) {
-			SourceName = sourceName;
+		public ObjectDalcMapper(DataRowDalcMapper dbMgr, string tableName, IDictionary<string, string> colNameToProperty) {
+			TableName = tableName;
 			ObjectMapper = new PropertyDataRowMapper(colNameToProperty);
 			DbManager = dbMgr;
 		}
@@ -34,10 +34,10 @@ namespace NI.Data {
 		/// Initializes a new instance of ObjectDalcMapper with custom object properties mapper
 		/// </summary>
 		/// <param name="dbMgr"></param>
-		/// <param name="sourceName"></param>
+		/// <param name="tableName"></param>
 		/// <param name="customObjectMapper"></param>
-		public ObjectDalcMapper(DataRowDalcMapper dbMgr, string sourceName, IObjectDataRowMapper customObjectMapper) {
-			SourceName = sourceName;
+		public ObjectDalcMapper(DataRowDalcMapper dbMgr, string tableName, IObjectDataRowMapper customObjectMapper) {
+			TableName = tableName;
 			ObjectMapper = customObjectMapper;
 			DbManager = dbMgr;
 		}
@@ -48,7 +48,7 @@ namespace NI.Data {
 		/// <param name="pk"></param>
 		/// <returns>persisted object or null</returns>
 		public T Load(params object[] pk) {
-			var r = DbManager.Load(SourceName, pk);
+			var r = DbManager.Load(TableName, pk);
 			if (r==null) return null;
 			var t = new T();
 			CopyDataRowToObject(r, t);
@@ -81,7 +81,7 @@ namespace NI.Data {
 		public IEnumerable<T> LoadAll(Query q) {
 			var ds = new DataSet();
 			DbManager.Dalc.Load(q, ds);
-			var srcName = new QSource(q.SourceName);
+			var srcName = new QTable(q.Table);
 			var rs = new List<T>();
 			foreach (DataRow r in ds.Tables[srcName.Name].Rows) {
 				var t = new T();
@@ -96,10 +96,10 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="o">object to add</param>
 		public void Add(T o) {
-			var ds = DbManager.CreateDataSet(SourceName);
-			var r = ds.Tables[SourceName].NewRow();
+			var ds = DbManager.CreateDataSet(TableName);
+			var r = ds.Tables[TableName].NewRow();
 			CopyObjectToDataRow(o, r, false);
-			ds.Tables[SourceName].Rows.Add(r);
+			ds.Tables[TableName].Rows.Add(r);
 			DbManager.Update(r);
 			CopyDataRowToObject(r, o);
 		}
@@ -110,10 +110,10 @@ namespace NI.Data {
 		/// <param name="o">object to update</param>
 		/// <param name="createNew">create a new record if no associated records with specified object</param>
 		public void Update(T o, bool createNew = false) {
-			var r = DbManager.Load(new Query(SourceName, ComposePkCondition(o)));
+			var r = DbManager.Load(new Query(TableName, ComposePkCondition(o)));
 			if (r == null) {
 				if (createNew) {
-					r = DbManager.Create(SourceName);
+					r = DbManager.Create(TableName);
 				} else {
 					throw new DBConcurrencyException();
 				}
@@ -128,13 +128,13 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="o"></param>
 		public void Delete(T o) {
-			DbManager.Delete(new Query(SourceName, ComposePkCondition(o)));
+			DbManager.Delete(new Query(TableName, ComposePkCondition(o)));
 		}
 
 		protected QueryNode ComposePkCondition(T t) {
 			var qcnd = new QueryGroupNode(QueryGroupNodeType.And);
-			var ds = DbManager.CreateDataSet(SourceName);
-			foreach (DataColumn c in ds.Tables[SourceName].PrimaryKey) {
+			var ds = DbManager.CreateDataSet(TableName);
+			foreach (DataColumn c in ds.Tables[TableName].PrimaryKey) {
 				var pVal = ObjectMapper.GetFieldValue(t, c);
 				qcnd.Nodes.Add(new QueryConditionNode((QField)c.ColumnName, Conditions.Equal, new QConst( pVal )));
 			}

@@ -20,10 +20,10 @@ using System.Text.RegularExpressions;
 namespace NI.Data
 {
 	/// <summary>
-	/// Represents query source name identifier
+	/// Represents query table information
 	/// </summary>
 	[Serializable]
-	public class QSource
+	public class QTable
 	{
 
 		/// <summary>
@@ -39,15 +39,15 @@ namespace NI.Data
 		/// <summary>
 		/// Initializes a new instance of the QSource with the specified source name
 		/// </summary>
-		/// <param name="sourceName">source name string</param>
-		public QSource(string sourceName) {
-			int dotIdx = sourceName.LastIndexOf('.'); // allow dot in table name (alias for this case is required), like dbo.users.u
+		/// <param name="tableName">source name string</param>
+		public QTable(string tableName) {
+			int dotIdx = tableName.LastIndexOf('.'); // allow dot in table name (alias for this case is required), like dbo.users.u
 			if (dotIdx >= 0) {
-				Name = sourceName.Substring(0, dotIdx);
-				Alias = sourceName.Substring(dotIdx+1);
+				Name = tableName.Substring(0, dotIdx);
+				Alias = tableName.Substring(dotIdx+1);
 			}
 			else {
-				Name = sourceName;
+				Name = tableName;
 				Alias = null;
 			}
 
@@ -56,10 +56,10 @@ namespace NI.Data
 		/// <summary>
 		/// Initializes a new instance of the QSource with the specified source name and alias
 		/// </summary>
-		/// <param name="sourceName">source name string</param>
+		/// <param name="tableName">source name string</param>
 		/// <param name="alias">alias string</param>
-		public QSource(string sourceName, string alias) {
-			Name = sourceName;
+		public QTable(string tableName, string alias) {
+			Name = tableName;
 			Alias = alias;
 		}
 		
@@ -71,10 +71,10 @@ namespace NI.Data
 			return String.IsNullOrEmpty(Alias) ? Name : Name+"."+Alias;
 		}
 
-		public static implicit operator QSource(string value) {
-			return new QSource(value);
+		public static implicit operator QTable(string value) {
+			return new QTable(value);
 		}
-		public static implicit operator string(QSource value) {
+		public static implicit operator string(QTable value) {
 			return value.ToString();
 		}
 		

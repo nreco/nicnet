@@ -36,7 +36,7 @@ namespace NI.Data.Web {
 			set { _DataSource = value; }
 		}
 
-		public DalcDataSourceView(DalcDataSource owner, string sourceName) : base(owner, sourceName) {
+		public DalcDataSourceView(DalcDataSource owner, string tableName) : base(owner, tableName) {
 			DataSource = owner;
 		}
 
@@ -50,7 +50,7 @@ namespace NI.Data.Web {
 		}
 
 		protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments) {
-			Query q = new Query( Name==DataSource.SourceName ? DataSource.SelectSourceName : Name );
+			Query q = new Query( Name==DataSource.TableName ? DataSource.SelectTableName : Name );
 			q.Condition = DataSource.Condition;
 			if (!String.IsNullOrEmpty(arguments.SortExpression))
 				q.Sort = arguments.SortExpression.Split(',').Select(v=>(QSort)v).ToArray();
@@ -73,10 +73,10 @@ namespace NI.Data.Web {
 			// raise event
 			DataSource.OnSelected(DataSource, eArgs);
 
-			if (ds.Tables[q.SourceName].Rows.Count == 0 && DataSource.InsertMode)
-				ds.Tables[q.SourceName].Rows.Add(ds.Tables[q.SourceName].NewRow());
+			if (ds.Tables[q.Table].Rows.Count == 0 && DataSource.InsertMode)
+				ds.Tables[q.Table].Rows.Add(ds.Tables[q.Table].NewRow());
 			
-			return ds.Tables[q.SourceName].DefaultView;
+			return ds.Tables[q.Table].DefaultView;
 		}
 
 		protected QueryNode ComposeUidCondition(IDictionary keys) {
@@ -98,9 +98,9 @@ namespace NI.Data.Web {
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
 				// if schema is unknown, lets try to load from datasource
-				if (!ds.Tables.Contains(eArgs.SourceName))
-					DataSource.Dalc.Load(new Query(eArgs.SourceName, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)), ds);
-				DataTable tbl = ds.Tables[eArgs.SourceName];
+				if (!ds.Tables.Contains(eArgs.TableName))
+					DataSource.Dalc.Load(new Query(eArgs.TableName, new QueryConditionNode((QConst)1, Conditions.Equal, (QConst)2)), ds);
+				DataTable tbl = ds.Tables[eArgs.TableName];
 				EnsureDataSchema(tbl);
 				
 				DataRow r = tbl.NewRow();
@@ -114,7 +114,7 @@ namespace NI.Data.Web {
 					values[c.ColumnName] = r[c];
 				
 			} else {
-				DataSource.Dalc.Insert(eArgs.SourceName, values);
+				DataSource.Dalc.Insert(eArgs.TableName, values);
 			}
 			DataSource.OnInserted(DataSource, eArgs);
 			return 1;
@@ -145,7 +145,7 @@ namespace NI.Data.Web {
 			QueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				var tbl = DataSource.Dalc.Load(new Query(eArgs.SourceName, uidCondition), ds);
+				var tbl = DataSource.Dalc.Load(new Query(eArgs.TableName, uidCondition), ds);
 				EnsureDataSchema(tbl);
 
 				eArgs.AffectedCount = tbl.Rows.Count;
@@ -159,7 +159,7 @@ namespace NI.Data.Web {
 					foreach (DataColumn c in tbl.Columns)
 						values[c.ColumnName] = tbl.Rows[0][c];
 			} else {
-				eArgs.AffectedCount = DataSource.Dalc.Update(new Query(eArgs.SourceName, uidCondition), values);
+				eArgs.AffectedCount = DataSource.Dalc.Update(new Query(eArgs.TableName, uidCondition), values);
 			}
 			// raise event
 			DataSource.OnUpdated(DataSource, eArgs);
@@ -174,7 +174,7 @@ namespace NI.Data.Web {
 			QueryNode uidCondition = ComposeUidCondition(keys);
 			if (DataSource.DataSetMode) {
 				DataSet ds = GetDataSet();
-				var tbl = DataSource.Dalc.Load(new Query(eArgs.SourceName, uidCondition), ds);
+				var tbl = DataSource.Dalc.Load(new Query(eArgs.TableName, uidCondition), ds);
 				EnsureDataSchema(tbl);
 				eArgs.AffectedCount = tbl.Rows.Count;
 				foreach (DataRow r in tbl.Rows)
@@ -182,7 +182,7 @@ namespace NI.Data.Web {
 				DataSource.Dalc.Update(tbl);
 
 			} else {
-				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(eArgs.SourceName, uidCondition));
+				eArgs.AffectedCount = DataSource.Dalc.Delete(new Query(eArgs.TableName, uidCondition));
 			}
 
 			// raise event

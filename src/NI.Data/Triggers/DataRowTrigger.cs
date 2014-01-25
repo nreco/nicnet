@@ -105,7 +105,7 @@ namespace NI.Data.Triggers {
 			// event 
 			if ((Action & eventType) != eventType)
 				return false;
-			// sourcename
+			// table name
 			if (TableName != null && TableName != r.Table.TableName)
 				return false;
 			return true;

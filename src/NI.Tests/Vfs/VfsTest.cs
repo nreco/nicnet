@@ -132,8 +132,8 @@ namespace NI.Tests.Vfs
 
             //DalcFileSystem definition
             NI.Data.Vfs.DalcFileSystem fileSystem = new NI.Data.Vfs.DalcFileSystem();
-            fileSystem.SourceName = "resources";
-            fileSystem.ContentSourceName = "resource_data";
+            fileSystem.TableName = "resources";
+            fileSystem.ContentTableName = "resource_data";
             fileSystem.KeyFieldName = "name";
             fileSystem.ParentFieldName = "directory";
             fileSystem.FileSystemHelper = fsHelper;

@@ -120,10 +120,10 @@ namespace NI.Data {
 		/// Insert new record
 		/// </summary>
 		/// <param name="dalc">IDalc instance</param>
-		/// <param name="sourceName">source name (table)</param>
+		/// <param name="tableName">table name</param>
 		/// <param name="data">record data (field name -> set value)</param>
-		public static void Insert(this IDalc dalc, string sourceName, IDictionary data) {
-			dalc.Insert(sourceName, GetDalcChangeset(data));
+		public static void Insert(this IDalc dalc, string tableName, IDictionary data) {
+			dalc.Insert(tableName, GetDalcChangeset(data));
 		}
 
 		/// <summary>

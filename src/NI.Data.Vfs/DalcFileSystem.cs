@@ -27,8 +27,8 @@ namespace NI.Data.Vfs {
 
         private IDalc _Dalc;              
         private DalcFileSystemHelper _FileSystemHelper;
-        private string _SourceName;
-        private string _ContentSourceName;
+        private string _TableName;
+        private string _ContentTableName;
         private string _KeyFieldName;
         private string _ParentFieldName;
         private char _DirectorySeparatorChar = '/';
@@ -52,17 +52,17 @@ namespace NI.Data.Vfs {
         /// <summary>
         /// File storage source name
         /// </summary>
-        public string SourceName {
-            get { return _SourceName; }
-            set { _SourceName = value; }
+        public string TableName {
+            get { return _TableName; }
+            set { _TableName = value; }
         }
 
         /// <summary>
         /// Content storage source name
         /// </summary>
-        public string ContentSourceName {
-            get { return _ContentSourceName; }
-            set { _ContentSourceName = value; }
+        public string ContentTableName {
+            get { return _ContentTableName; }
+            set { _ContentTableName = value; }
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace NI.Data.Vfs {
        
         public IFileObject ResolveFile(string name) {
             if (name.Length > 0)  name = FormatPath(name);                                      
-            Query query = new Query(SourceName,
+            Query query = new Query(TableName,
                                     new QueryConditionNode((QField)KeyFieldName, 
                                                              Conditions.Equal, (QConst)name));
             IDictionary fileData = Dalc.LoadRecord(query);
@@ -119,11 +119,11 @@ namespace NI.Data.Vfs {
        /// <returns>Array of children instances</returns>
         public DalcFileObject[] GetChildren(string name) {
             if (name.Length > 0) name = FormatPath(name);    
-            Query q = new Query(SourceName, new QueryConditionNode((QField)ParentFieldName,Conditions.Equal,(QConst)name));
+            Query q = new Query(TableName, new QueryConditionNode((QField)ParentFieldName,Conditions.Equal,(QConst)name));
             DataSet ds = new DataSet();
 			Dalc.Load(q,ds);
             ArrayList fileList = new ArrayList();
-            foreach (DataRow row in ds.Tables[SourceName].Rows) 
+            foreach (DataRow row in ds.Tables[TableName].Rows) 
                 fileList.Add(FileSystemHelper.SetFileProperties(new DalcFileObject(this), 
                                                                     new DataRowDictionary(row)));           
             return (DalcFileObject[])fileList.ToArray(typeof(DalcFileObject));
@@ -137,7 +137,7 @@ namespace NI.Data.Vfs {
         /// <returns></returns>
         public DalcFileContent GetContent(DalcFileContent fileContent,string name) {
             if (name.Length > 0) name = FormatPath(name);    
-            Query q = new Query(ContentSourceName,
+            Query q = new Query(ContentTableName,
                                 new QueryConditionNode((QField)KeyFieldName,
                                                         Conditions.Equal,(QConst)name));
             IDictionary contentData = Dalc.LoadRecord(q);
@@ -152,7 +152,7 @@ namespace NI.Data.Vfs {
         /// <param name="fileObject">File object</param>
         public void SaveFile(DalcFileObject fileObject) {                
             SaveInternal(FileSystemHelper.SetFileDictionaryValues(new Hashtable(), fileObject),
-                            fileObject, SourceName, KeyFieldName);         
+                            fileObject, TableName, KeyFieldName);         
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace NI.Data.Vfs {
         public void SaveContent(DalcFileContent fileContent) {
             IDictionary data = FileSystemHelper.SetContentDictionaryValues(new Hashtable(), fileContent);
             SaveInternal(FileSystemHelper.SetContentDictionaryValues(new Hashtable(), fileContent),
-                           fileContent.File, ContentSourceName,KeyFieldName);               
+                           fileContent.File, ContentTableName,KeyFieldName);               
         }        
 
         /// <summary>
@@ -171,29 +171,29 @@ namespace NI.Data.Vfs {
         /// <param name="name">Filename</param>
         public void DeleteFile(string name) {
             if (name.Length > 0) name = FormatPath(name);    
-            DeleteInternal(name, ContentSourceName, KeyFieldName);
-            DeleteInternal(name, SourceName, KeyFieldName);
+            DeleteInternal(name, ContentTableName, KeyFieldName);
+            DeleteInternal(name, TableName, KeyFieldName);
         }
 
         #region Internal methods
         private void SaveInternal(IDictionary data, IFileObject fileObject, 
-                                    string sourceName,string keyFieldName) {          
+                                    string tableName,string keyFieldName) {          
            QueryConditionNode conditions =  new QueryConditionNode((QField)keyFieldName,
                                             Conditions.Equal, (QConst)fileObject.Name);
            Hashtable recordData = new Hashtable();
-           int result = Dalc.RecordsCount(new Query(sourceName, conditions));
+           int result = Dalc.RecordsCount(new Query(tableName, conditions));
            if (result > 0) {
                if ( data.Contains(keyFieldName) ){
                    data.Remove(keyFieldName); // fixed DB bug on update
                }
-			   Dalc.Update(new Query(sourceName, conditions), data);
+			   Dalc.Update(new Query(tableName, conditions), data);
 		   } else
-			   Dalc.Insert(sourceName, data);           
+			   Dalc.Insert(tableName, data);           
         }
 
-        private void DeleteInternal(string name, string sourceName, string keyFieldName) {
+        private void DeleteInternal(string name, string tableName, string keyFieldName) {
             if (name.Length > 0) name = FormatPath(name);    
-            Query q = new Query(sourceName);
+            Query q = new Query(tableName);
             q.Condition = new QueryConditionNode((QField)keyFieldName, Conditions.Equal, (QConst)name);
             Dalc.Delete(q);
         }

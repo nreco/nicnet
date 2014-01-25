@@ -51,22 +51,22 @@ namespace NI.Data
 
 		/// <see cref="NI.Data.IDalc.Load(NI.Data.Query,System.Data.DataSet)"/>
 		public virtual DataTable Load(Query query, DataSet ds) {
-			if (!PersistedDS.Tables.Contains(query.SourceName))
-				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
+			if (!PersistedDS.Tables.Contains(query.Table))
+				throw new Exception("Persisted dataset does not contain table with name "+query.Table);
 
 			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			string sortExpression = BuildSort( query );
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression, sortExpression );
+			DataRow[] result = PersistedDS.Tables[query.Table].Select( whereExpression, sortExpression );
 
-			if (!ds.Tables.Contains(query.SourceName))
-				ds.Tables.Add(PersistedDS.Tables[query.SourceName].Clone());
+			if (!ds.Tables.Contains(query.Table))
+				ds.Tables.Add(PersistedDS.Tables[query.Table].Clone());
 			else
-				ds.Tables[query.SourceName].Rows.Clear();
+				ds.Tables[query.Table].Rows.Clear();
 			
 			if (query.Fields != null && query.Fields.Length != 0) {
 				if (query.Fields.Length == 1 && query.Fields[0].Expression.ToLower() == "count(*)") {
-					ds.Tables.Remove(query.SourceName);
-					var t = ds.Tables.Add(query.SourceName);
+					ds.Tables.Remove(query.Table);
+					var t = ds.Tables.Add(query.Table);
 					t.Columns.Add("count", typeof(int));
 					var cntRow = t.NewRow();
 					cntRow["count"] = result.Length;
@@ -76,7 +76,7 @@ namespace NI.Data
 
 				for (int i=0; i<query.Fields.Length; i++) {
 					string fld = query.Fields[i].Name;
-					if (ds.Tables[query.SourceName].Columns.Contains(fld))
+					if (ds.Tables[query.Table].Columns.Contains(fld))
 						continue;
 					DataColumn column = new DataColumn();
 					int idx = fld.LastIndexOf(')');
@@ -86,15 +86,15 @@ namespace NI.Data
 						column.ColumnName = fld.Substring(idx + 1).Trim();
 						column.Expression = fld.Substring(0, idx + 1).Trim();
 					}
-					if (ds.Tables[query.SourceName].Columns.Contains(column.ColumnName))
-						ds.Tables[query.SourceName].Columns.Remove(column.ColumnName);
-					ds.Tables[query.SourceName].Columns.Add(column);
+					if (ds.Tables[query.Table].Columns.Contains(column.ColumnName))
+						ds.Tables[query.Table].Columns.Remove(column.ColumnName);
+					ds.Tables[query.Table].Columns.Add(column);
 				}
 			}
 			for (int i=0; i<result.Length; i++)
-				ds.Tables[query.SourceName].ImportRow(result[i]);
+				ds.Tables[query.Table].ImportRow(result[i]);
 
-			return ds.Tables[query.SourceName];
+			return ds.Tables[query.Table];
 		}
 
 		/// <see cref="NI.Data.IDalc.Update(System.Data.DataTable)"/>
@@ -164,11 +164,11 @@ namespace NI.Data
 
 		/// <see cref="NI.Data.IDalc.Update(NI.Data.Query,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
 		public int Update(Query query, IDictionary<string,IQueryValue> data) {
-			if (!PersistedDS.Tables.Contains(query.SourceName))
-				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
+			if (!PersistedDS.Tables.Contains(query.Table))
+				throw new Exception("Persisted dataset does not contain table with name "+query.Table);
 
 			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
+			DataRow[] result = PersistedDS.Tables[query.Table].Select( whereExpression );
 			for (int i=0; i<result.Length; i++) {
 				foreach (var fieldValue in data) {
 					if (fieldValue.Value!=null && !(fieldValue.Value is QConst))
@@ -183,29 +183,29 @@ namespace NI.Data
 
 
 		/// <see cref="NI.Data.IDalc.Insert(System.String,System.Collections.Generic.IDictionary<System.String,NI.Data.IQueryValue>)"/>
-        public void Insert(string sourceName, IDictionary<string,IQueryValue> data) {
-			if (!PersistedDS.Tables.Contains(sourceName))
-				throw new Exception("Persisted dataset does not contain table with name "+sourceName);
+        public void Insert(string tableName, IDictionary<string,IQueryValue> data) {
+			if (!PersistedDS.Tables.Contains(tableName))
+				throw new Exception("Persisted dataset does not contain table with name "+tableName);
 			
-			DataRow row = PersistedDS.Tables[sourceName].NewRow();
+			DataRow row = PersistedDS.Tables[tableName].NewRow();
 			foreach (var fldVal in data) {
 				if (fldVal.Value != null && !(fldVal.Value is QConst))
 					throw new NotSupportedException(
 						String.Format("DatasetDalc doesn't support {0} as value for Insert", fldVal.Value.GetType()));
 				row[fldVal.Key] = fldVal.Value != null ? ((QConst)fldVal.Value).Value : DBNull.Value;
 			}
-			PersistedDS.Tables[sourceName].Rows.Add( row );
+			PersistedDS.Tables[tableName].Rows.Add( row );
 			PersistedDS.AcceptChanges();
 			
 		}
 
 		/// <see cref="NI.Data.IDalc.Delete(NI.Data.Query)"/>
 		public int Delete(Query query) {
-			if (!PersistedDS.Tables.Contains(query.SourceName))
-				throw new Exception("Persisted dataset does not contain table with name "+query.SourceName);
+			if (!PersistedDS.Tables.Contains(query.Table))
+				throw new Exception("Persisted dataset does not contain table with name "+query.Table);
 
 			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
-			DataRow[] result = PersistedDS.Tables[query.SourceName].Select( whereExpression );
+			DataRow[] result = PersistedDS.Tables[query.Table].Select( whereExpression );
 			for (int i=0; i<result.Length; i++)
 				result[i].Delete();
 			PersistedDS.AcceptChanges();
@@ -244,7 +244,7 @@ namespace NI.Data
 						throw new Exception("Invalid nested query");
 					string whereExpression = BuildExpression(q.Condition);
 					string sortExpression = dsDalc.BuildSort(q);
-					DataRow[] result = dsDalc.PersistedDS.Tables[q.SourceName].Select(whereExpression, sortExpression);
+					DataRow[] result = dsDalc.PersistedDS.Tables[q.Table].Select(whereExpression, sortExpression);
 					if (result.Length == 1)
 						return base.BuildValue(new QConst(result[0][q.Fields[0].Name]));
 					if (result.Length > 1) {

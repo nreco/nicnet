@@ -41,14 +41,14 @@ namespace NI.Data.Permissions
 			Rules = rules;
 		}
 
-		protected virtual PermissionContext CreatePermissionContext(string sourceName, DalcOperation op) {
-			return new PermissionContext(sourceName, op);
+		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op) {
+			return new PermissionContext(tableName, op);
 		}
 
-		protected QueryNode ApplyRuleConditions(QueryNode node, string sourceName, DalcOperation operation) {
+		protected QueryNode ApplyRuleConditions(QueryNode node, string tableName, DalcOperation operation) {
 			var resNode = new QueryGroupNode(QueryGroupNodeType.And);
 			resNode.Nodes.Add(node);
-			var context = CreatePermissionContext(sourceName, operation);
+			var context = CreatePermissionContext(tableName, operation);
 			for (int i = 0; i < Rules.Length; i++) {
 				var r = Rules[i];
 				var extraCondition = r(context);
@@ -59,7 +59,7 @@ namespace NI.Data.Permissions
 		}
 
 		protected override Query PrepareSelectQuery(Query q) {
-			var withExtraConditions = ApplyRuleConditions(q.Condition, q.SourceName.Name, DalcOperation.Select);
+			var withExtraConditions = ApplyRuleConditions(q.Condition, q.Table.Name, DalcOperation.Select);
 			if (withExtraConditions != q.Condition) {
 				var qClone = new Query(q);
 				qClone.Condition = withExtraConditions;
@@ -75,7 +75,7 @@ namespace NI.Data.Permissions
 
 		protected override QueryNode ComposeDeleteCondition(Query query) {
 			var baseDelete = base.ComposeDeleteCondition(query);
-			return ApplyRuleConditions(baseDelete, query.SourceName.Name, DalcOperation.Delete);
+			return ApplyRuleConditions(baseDelete, query.Table.Name, DalcOperation.Delete);
 		}
 
 		protected override QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
@@ -85,7 +85,7 @@ namespace NI.Data.Permissions
 
 		protected override QueryNode ComposeUpdateCondition(Query query) {
 			var baseUpdate = base.ComposeUpdateCondition(query);
-			return ApplyRuleConditions( baseUpdate, query.SourceName.Name, DalcOperation.Update );
+			return ApplyRuleConditions( baseUpdate, query.Table.Name, DalcOperation.Update );
 		}
 
 		

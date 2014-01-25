@@ -45,14 +45,14 @@ namespace NI.Data.SqlClient {
 			return String.Join(".", parts);
 		}
 
-		protected override string GetTableName(string sourceName) {
+		protected override string GetTableName(string tableName) {
 			if (SqlClientFactory.NameBrackets) {
-				QSource qSourceName = (QSource)sourceName;
-				if (!String.IsNullOrEmpty(qSourceName.Alias))
-					return FormatInBrackets(qSourceName.Name) + " " + qSourceName.Alias;
-				return FormatInBrackets(qSourceName.Name);
+				QTable table = (QTable)tableName;
+				if (!String.IsNullOrEmpty(table.Alias))
+					return FormatInBrackets(table.Name) + " " + table.Alias;
+				return FormatInBrackets(table.Name);
 			}
-			return base.GetTableName(sourceName);
+			return base.GetTableName(tableName);
 		}		
 
 		protected override string BuildValue(QConst value) {
@@ -100,12 +100,12 @@ namespace NI.Data.SqlClient {
 				cmdTextBuilder.AppendFormat(
 					SelectTopFromPartFormatStr,
 					fields, 
-					GetTableName(query.SourceName),
+					GetTableName(query.Table),
 					query.RecordCount+query.StartRecord );
 			} else {
 				// standard SQL
 				cmdTextBuilder.AppendFormat(
-					SelectFromPartFormatStr, fields, GetTableName(query.SourceName) );
+					SelectFromPartFormatStr, fields, GetTableName(query.Table) );
 			}
 			if (whereExpression!=null && whereExpression.Length>0)
 				cmdTextBuilder.AppendFormat(SelectWherePartFormatStr, whereExpression);

@@ -37,8 +37,8 @@ namespace NI.Data.Web {
 			}
 		}
 		
-		public virtual bool IsMatch(string dataSource, string sourceName) {
-			return DataSource==dataSource && Array.IndexOf(TableNames,sourceName)>=0;
+		public virtual bool IsMatch(string dataSource, string tableName) {
+			return DataSource==dataSource && Array.IndexOf(TableNames,tableName)>=0;
 		}
 		
 		public static void NotifyChanged(string dataSourceId, string tableName) {

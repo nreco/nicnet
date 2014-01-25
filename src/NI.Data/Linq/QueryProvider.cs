@@ -25,12 +25,12 @@ using System.Text;
 namespace NI.Data.Linq
 {
 	public class QueryProvider : System.Linq.IQueryProvider {
-		string SourceName;
+		string TableName;
 		IDalc Dalc;
 
-		public QueryProvider(string sourceName, IDalc dalc)
+		public QueryProvider(string tableName, IDalc dalc)
 		{
-			SourceName = sourceName;
+			TableName = tableName;
 			Dalc = dalc;
 		}
 
@@ -59,7 +59,7 @@ namespace NI.Data.Linq
 
 		public TResult Execute<TResult>(Expression expression)
 		{
-			Query q = new Query(SourceName);
+			Query q = new Query(TableName);
 			BuildDalcQuery(q, expression);
 
 			object result = null;
@@ -121,8 +121,8 @@ namespace NI.Data.Linq
 		}
 
 		protected void ApplyLinq(Query q, MethodCallExpression call) {
-			ConstantExpression sourceNameConst = (ConstantExpression)call.Arguments[1];
-			q.SourceName = sourceNameConst.Value.ToString();
+			ConstantExpression tableNameConst = (ConstantExpression)call.Arguments[1];
+			q.Table = tableNameConst.Value.ToString();
 		}
 
 		protected void ApplyWhere(Query q, MethodCallExpression call) {
@@ -133,7 +133,7 @@ namespace NI.Data.Linq
 				if (unExpr.Operand is LambdaExpression) {
 					LambdaExpression lambdaExpr = (LambdaExpression)unExpr.Operand;
 					if (lambdaExpr.Parameters.Count == 1)
-						q.SourceName += "." + lambdaExpr.Parameters[0].Name;
+						q.Table += "." + lambdaExpr.Parameters[0].Name;
 				}
 			}
 		}
@@ -319,7 +319,7 @@ namespace NI.Data.Linq
 				} else if (methodExpr.Method.Name == "Select" && IsDalcQueryExpression(methodExpr) ) {
 					Query nestedQ = new Query(String.Empty);
 					BuildDalcQuery(nestedQ, methodExpr);
-					if (!String.IsNullOrEmpty(nestedQ.SourceName))
+					if (!String.IsNullOrEmpty(nestedQ.Table))
 						return nestedQ;
 					throw new NotSupportedException();
 				}

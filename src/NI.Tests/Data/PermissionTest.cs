@@ -29,7 +29,7 @@ namespace NI.Tests.Data
 				var oldCmdGen = (DbCommandGenerator)dalc.CommandGenerator;
 				dalc.CommandGenerator = new DbPermissionCommandGenerator(dalc.DbFactory, oldCmdGen.Views, new Func<PermissionContext, QueryNode>[] {
 					(new QueryRule("users", DalcOperation.Select, "users.role!=\"3\":int32 or \"IdentityName\":var=\"Mike\"" ) {
-						ViewNames = new[] { new QSource("users_view","u") }
+						ViewNames = new[] { new QTable("users_view","u") }
 					}).ComposeCondition,
 					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name " ).ComposeCondition
 				});

@@ -71,7 +71,7 @@ namespace NI.Data
 			if (Views != null) {
 				for (int i = 0; i < Views.Length; i++) {
 					var view = Views[i];
-					if (view.MatchSourceName(query.SourceName)) {
+					if (view.IsMatchTable(query.Table)) {
 						cmd.CommandText = view.ComposeSelect(PrepareSelectQuery(query), cmdSqlBuilder);
 						return cmd;
 					}
@@ -148,7 +148,7 @@ namespace NI.Data
 			// prepare WHERE part
 			var whereExpression = dbSqlBuilder.BuildExpression( ComposeDeleteCondition( query ) );
 			
-			cmd.CommandText = String.Format("DELETE FROM {0}",query.SourceName);
+			cmd.CommandText = String.Format("DELETE FROM {0}",query.Table);
 			if (whereExpression!=null && whereExpression.Length>0)
 				cmd.CommandText += " WHERE "+whereExpression;
 
@@ -213,7 +213,7 @@ namespace NI.Data
 			
 			cmd.CommandText = String.Format(
 				"UPDATE {0} SET {1}",
-				query.SourceName, setExpression);
+				query.Table, setExpression);
 			if (whereExpression!=null)
 				cmd.CommandText += " WHERE "+whereExpression;
 			

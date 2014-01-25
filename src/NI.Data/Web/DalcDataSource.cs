@@ -27,8 +27,8 @@ using NI.Data;
 namespace NI.Data.Web {
 
 	public class DalcDataSource : DataSourceControl {
-		string _SourceName;
-		string _SelectSourceName = null;
+		string _TableName;
+		string _SelectTableName = null;
 		IDalc _Dalc;
 		QueryNode _Condition = null;
 		bool _DataSetMode = false;
@@ -89,19 +89,19 @@ namespace NI.Data.Web {
 		}
 
 		/// <summary>
-		/// Get or set sourcename for this datasource (required).
+		/// Get or set table name for this datasource (required).
 		/// </summary>
-		public string SourceName {
-			get { return _SourceName; }
-			set { _SourceName = value; }
+		public string TableName {
+			get { return _TableName; }
+			set { _TableName = value; }
 		}
 
 		/// <summary>
-		/// Get or set sourcename for select action (optional).
+		/// Get or set table name for select action (optional).
 		/// </summary>
-		public string SelectSourceName {
-			get { return _SelectSourceName == null ? SourceName : _SelectSourceName; }
-			set { _SelectSourceName = value; }
+		public string SelectTableName {
+			get { return _SelectTableName == null ? TableName : _SelectTableName; }
+			set { _SelectTableName = value; }
 		}
 
 		/// <summary>
@@ -113,7 +113,7 @@ namespace NI.Data.Web {
 		}
 
 		/// <summary>
-		/// Get or set DataSet instance provider for specificed sourcename (optional).
+		/// Get or set DataSet instance provider for specificed table name (optional).
 		/// </summary>
 		public Func<string, DataSet> DataSetProvider { get; set; }
 
@@ -128,7 +128,7 @@ namespace NI.Data.Web {
 		public DalcDataSource() { }
 		
 		public Query GetSelectQuery(string viewName) {
-			Query q = new Query(viewName == SourceName ? SelectSourceName : viewName);
+			Query q = new Query(viewName == TableName ? SelectTableName : viewName);
 			q.Condition = Condition;
 			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
 			DataSet ds = DataSetProvider(viewName);
@@ -139,7 +139,7 @@ namespace NI.Data.Web {
 		}
 		
 		protected override DataSourceView GetView(string viewName) {
-			return new DalcDataSourceView(this, String.IsNullOrEmpty(viewName) ? SourceName : viewName );
+			return new DalcDataSourceView(this, String.IsNullOrEmpty(viewName) ? TableName : viewName );
 		}
 
 		internal void OnSelecting(object sender, DalcDataSourceSelectEventArgs e) {
@@ -185,15 +185,15 @@ namespace NI.Data.Web {
 	public delegate void DalcDataSourceSaveEventHandler(object sender, DalcDataSourceSaveEventArgs e);
 
 	public class DalcDataSourceSaveEventArgs : CancelEventArgs {
-		string _SourceName;
+		string _TableName;
 		IDictionary _OldValues;
 		IDictionary _Values;
 		IDictionary _Keys;
 		int _AffectedCount;
 
-		public string SourceName {
-			get { return _SourceName; }
-			set { _SourceName = value; }
+		public string TableName {
+			get { return _TableName; }
+			set { _TableName = value; }
 		}
 
 		public IDictionary OldValues {
@@ -215,8 +215,8 @@ namespace NI.Data.Web {
 			internal set { _AffectedCount = value; }
 		}
 
-		public DalcDataSourceSaveEventArgs(string sourcename, IDictionary keys, IDictionary oldValues, IDictionary newValues) {
-			SourceName = sourcename;
+		public DalcDataSourceSaveEventArgs(string tableName, IDictionary keys, IDictionary oldValues, IDictionary newValues) {
+			TableName = tableName;
 			Keys = keys;
 			OldValues = oldValues;
 			Values = newValues;
@@ -244,7 +244,7 @@ namespace NI.Data.Web {
 		}
 
         public int FetchedRowCount {
-            get { return Data.Tables[SelectQuery.SourceName].Rows.Count; }
+            get { return Data.Tables[SelectQuery.Table].Rows.Count; }
         }
 
 		public DalcDataSourceSelectEventArgs(Query q, DataSourceSelectArguments args, DataSet ds) {

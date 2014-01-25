@@ -22,9 +22,9 @@ namespace NI.Data.Linq
 {
     public static class DalcLinqExtensions
     {
-        public static IQueryable<T> Linq<T>(this IDalc dalc, string sourceName)
+        public static IQueryable<T> Linq<T>(this IDalc dalc, string tableName)
         {
-            return new DalcData<T>(new QueryProvider(sourceName, dalc));
+            return new DalcData<T>(new QueryProvider(tableName, dalc));
         }
 
 		

@@ -25,30 +25,30 @@ namespace NI.Data.Permissions {
 	/// </summary>
 	public class QueryRule {
 
-		public string SourceName { get; set; }
+		public string TableName { get; set; }
 
-		public QSource[] ViewNames { get; set; }
+		public QTable[] ViewNames { get; set; }
 
 		public DalcOperation Operation { get; set; }
 
 		protected QueryNode RuleCondition;
 
-		public QueryRule(string sourceName, DalcOperation op, QueryNode ruleCondition) {
-			SourceName = sourceName;
+		public QueryRule(string tableName, DalcOperation op, QueryNode ruleCondition) {
+			TableName = tableName;
 			Operation = op;
 			RuleCondition = ruleCondition;
 		}
 
-		public QueryRule(string sourceName, DalcOperation op, string relexCondition) {
-			SourceName = sourceName;
+		public QueryRule(string tableName, DalcOperation op, string relexCondition) {
+			TableName = tableName;
 			Operation = op;
 			RuleCondition = (new RelExParser()).ParseCondition(relexCondition);
 		}
 
-		protected QSource FindViewName(string sourceName) {
+		protected QTable FindViewName(string tableName) {
 			if (ViewNames!=null)
 				for (int i = 0; i < ViewNames.Length; i++) {
-					if (ViewNames[i].Name == sourceName)
+					if (ViewNames[i].Name == tableName)
 						return ViewNames[i];
 				}
 			return null;
@@ -57,18 +57,18 @@ namespace NI.Data.Permissions {
 		public virtual QueryNode ComposeCondition(PermissionContext context) {
 			if ((Operation & context.Operation) != context.Operation)
 				return null;
-			var matchedSourceName = SourceName == context.SourceName ? (QSource)SourceName : FindViewName(context.SourceName);
-			if (matchedSourceName==null)
+			var matchedTableName = TableName == context.TableName ? (QTable)TableName : FindViewName(context.TableName);
+			if (matchedTableName==null)
 				return null;
 
 			var ruleCondition = RuleCondition;
-			if (!String.IsNullOrEmpty( matchedSourceName.Alias )) {
+			if (!String.IsNullOrEmpty( matchedTableName.Alias )) {
 				Func<IQueryValue,IQueryValue> alignFieldPrefix = null;
 				alignFieldPrefix = (n) => {
 					if (n is QField) {
 						var fld = (QField)n;
-						if (fld.Prefix == SourceName)
-							return new QField(matchedSourceName.Alias, fld.Name, fld.Expression);
+						if (fld.Prefix == TableName)
+							return new QField(matchedTableName.Alias, fld.Name, fld.Expression);
 					}
 					if (n is Query) {
 						var q = (Query)n;

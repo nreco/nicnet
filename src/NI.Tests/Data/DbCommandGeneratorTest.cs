@@ -89,7 +89,7 @@ namespace NI.Tests.Data {
 			SqlClientDalcFactory factory = new SqlClientDalcFactory();
 			DbCommandGenerator cmdGenerator = new DbCommandGenerator(factory);
 			
-			Query q = new Query( new QSource("test","t") );
+			Query q = new Query( new QTable("test","t") );
 			q.Condition = createTestQuery();
 			q.Fields = new QField[] { "name", "t.age", new QField("age_months", "t.age*12") };
 
