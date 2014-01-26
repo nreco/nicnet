@@ -107,6 +107,13 @@ namespace NI.Data.Linq
 						return new DalcValue(entry.Value);
 				return new DalcValue(o);
 			}
+			// try to fill DTO object
+			try {
+				// TODO
+			} catch (Exception ex) {
+
+			}
+
 			throw new InvalidCastException();
 		}
 
@@ -115,9 +122,21 @@ namespace NI.Data.Linq
 			return Execute<IEnumerable>(expression);
 		}
 
-		protected void ApplySingleOrDefault(Query q, MethodCallExpression call) {
+		protected void ApplyFirstOrDefault(Query q, MethodCallExpression call) {
 			BuildDalcQuery(q, call.Arguments[0]);
 			q.RecordCount = 1;
+		}
+
+		protected void ApplyFirst(Query q, MethodCallExpression call) {
+			ApplyFirstOrDefault(q, call);
+		}
+
+		protected void ApplySingleOrDefault(Query q, MethodCallExpression call) {
+			ApplyFirstOrDefault(q, call);
+		}
+
+		protected void ApplySingle(Query q, MethodCallExpression call) {
+			ApplyFirstOrDefault(q, call);
 		}
 
 		protected void ApplyLinq(Query q, MethodCallExpression call) {
@@ -169,7 +188,7 @@ namespace NI.Data.Linq
 											BindingFlags.Instance | BindingFlags.NonPublic, null,
 											new Type[] { typeof(Query), typeof(MethodCallExpression) }, null);
 				if (applyMethod==null)
-					throw new NotSupportedException();
+					throw new NotSupportedException(String.Format("Method {0} is not supported", call.Method.Name));
 				applyMethod.Invoke(this, new object[] { q, call });
 			}
 		}
@@ -294,6 +313,10 @@ namespace NI.Data.Linq
 			if (expression is LambdaExpression) {
 				LambdaExpression lambdaExpr = (LambdaExpression)expression;
 				return ComposeValue(lambdaExpr.Body);
+			}
+			if (expression is MemberExpression) {
+				var memberExpr = (MemberExpression)expression;
+				return new QField(memberExpr.Member.Name);
 			}
 			if (expression is MethodCallExpression) {
 				MethodCallExpression methodExpr = (MethodCallExpression)expression;

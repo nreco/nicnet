@@ -51,22 +51,22 @@ namespace NI.Data
 
 		/// <see cref="NI.Data.IDalc.Load(NI.Data.Query,System.Data.DataSet)"/>
 		public virtual DataTable Load(Query query, DataSet ds) {
-			if (!PersistedDS.Tables.Contains(query.Table))
-				throw new Exception("Persisted dataset does not contain table with name "+query.Table);
+			if (!PersistedDS.Tables.Contains(query.Table.Name))
+				throw new Exception("Persisted dataset does not contain table with name "+query.Table.Name);
 
 			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			string sortExpression = BuildSort( query );
-			DataRow[] result = PersistedDS.Tables[query.Table].Select( whereExpression, sortExpression );
+			DataRow[] result = PersistedDS.Tables[query.Table.Name].Select( whereExpression, sortExpression );
 
-			if (!ds.Tables.Contains(query.Table))
-				ds.Tables.Add(PersistedDS.Tables[query.Table].Clone());
+			if (!ds.Tables.Contains(query.Table.Name))
+				ds.Tables.Add(PersistedDS.Tables[query.Table.Name].Clone());
 			else
-				ds.Tables[query.Table].Rows.Clear();
+				ds.Tables[query.Table.Name].Rows.Clear();
 			
 			if (query.Fields != null && query.Fields.Length != 0) {
-				if (query.Fields.Length == 1 && query.Fields[0].Expression.ToLower() == "count(*)") {
-					ds.Tables.Remove(query.Table);
-					var t = ds.Tables.Add(query.Table);
+				if (query.Fields.Length == 1 && query.Fields[0].Expression!=null && query.Fields[0].Expression.ToLower() == "count(*)") {
+					ds.Tables.Remove(query.Table.Name);
+					var t = ds.Tables.Add(query.Table.Name);
 					t.Columns.Add("count", typeof(int));
 					var cntRow = t.NewRow();
 					cntRow["count"] = result.Length;
@@ -92,9 +92,9 @@ namespace NI.Data
 				}
 			}
 			for (int i=0; i<result.Length; i++)
-				ds.Tables[query.Table].ImportRow(result[i]);
+				ds.Tables[query.Table.Name].ImportRow(result[i]);
 
-			return ds.Tables[query.Table];
+			return ds.Tables[query.Table.Name];
 		}
 
 		/// <see cref="NI.Data.IDalc.Update(System.Data.DataTable)"/>
@@ -279,6 +279,12 @@ namespace NI.Data
 					return "NULL";
 
 				return constValue.ToString();
+			}
+
+			protected override string BuildValue(QField fieldValue) {
+				if (!String.IsNullOrEmpty(fieldValue.Expression))
+					return fieldValue.Expression;
+				return fieldValue.Name;
 			}
 
 		}
