@@ -66,10 +66,15 @@ namespace NI.Tests.Ioc
 		}
 
 		[Test]
-		public void NamedConstructorArgs() {
+		public void ConstructorArgs() {
 			var c3 = componentFactory.GetComponent("testNamedConstructor") as Component3;
 			Assert.AreEqual("John", c3.Name);
 			Assert.AreEqual(5, c3.Age);
+
+			var c3other = componentFactory.GetComponent("testIndexConstructor") as Component3;
+			Assert.AreEqual("John", c3other.Name);
+			Assert.AreEqual(5, c3other.Age);
+
 		}
 
 		[Test]
@@ -183,6 +188,17 @@ namespace NI.Tests.Ioc
 							<value>John</value>
 						</constructor-arg>
 					</component>
+
+					<component name='testIndexConstructor'
+						type='NI.Tests.Ioc.Component3,NI.Tests'>
+						<constructor-arg index='1'>
+							<value>5</value>
+						</constructor-arg>
+						<constructor-arg index='0'>
+							<value>John</value>
+						</constructor-arg>
+					</component>
+
 
 					<component name='testDelegateInjection'
 						type='NI.Tests.Ioc.Component4,NI.Tests'>
