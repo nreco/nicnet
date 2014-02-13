@@ -1,11 +1,9 @@
 
-/examples/NI.Examples.Dalc/bin
-/examples/NI.Examples.Dalc/obj
-/examples/NI.Examples.Vfs/bin
-/examples/NI.Examples.Vfs/obj
-/examples/NI.Examples.Winter/bin
-/examples/NI.Examples.Winter/obj
+/examples/*/bin
+/examples/*/obj
 /examples/NI.Examples.suo
+/examples/*/*.suo
+/examples/*/*.user
 bin
 obj
 /src\NI.Common/NI.Common.xml
