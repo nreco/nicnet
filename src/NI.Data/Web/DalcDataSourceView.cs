@@ -41,8 +41,8 @@ namespace NI.Data.Web {
 		}
 
 		protected virtual DataSet GetDataSet() {
-			if (DataSource.DataSetProvider != null) {
-				DataSet ds = DataSource.DataSetProvider(Name);
+			if (DataSource.CreateDataSet != null) {
+				DataSet ds = DataSource.CreateDataSet(Name);
 				if (ds != null)
 					return ds;
 			}
@@ -72,9 +72,6 @@ namespace NI.Data.Web {
 			DataSource.Dalc.Load(q, ds);
 			// raise event
 			DataSource.OnSelected(DataSource, eArgs);
-
-			if (ds.Tables[q.Table].Rows.Count == 0 && DataSource.InsertMode)
-				ds.Tables[q.Table].Rows.Add(ds.Tables[q.Table].NewRow());
 			
 			return ds.Tables[q.Table].DefaultView;
 		}
@@ -90,7 +87,7 @@ namespace NI.Data.Web {
 		}
 
 		protected override int ExecuteInsert(IDictionary values) {
-			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, null, null, values);
+			DalcDataSourceChangeEventArgs eArgs = new DalcDataSourceChangeEventArgs(Name, null, null, values);
 			DataSource.OnInserting(DataSource, eArgs);
 			if (eArgs.Cancel)
 				return 0;
@@ -137,7 +134,7 @@ namespace NI.Data.Web {
 		}
 
 		protected override int ExecuteUpdate(IDictionary keys, IDictionary values, IDictionary oldValues) {
-			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, values);
+			DalcDataSourceChangeEventArgs eArgs = new DalcDataSourceChangeEventArgs(Name, keys, oldValues, values);
 			DataSource.OnUpdating(DataSource, eArgs);
 			
 			if (eArgs.Cancel)
@@ -167,7 +164,7 @@ namespace NI.Data.Web {
 		}
 
 		protected override int ExecuteDelete(IDictionary keys, IDictionary oldValues) {
-			DalcDataSourceSaveEventArgs eArgs = new DalcDataSourceSaveEventArgs(Name, keys, oldValues, oldValues);
+			DalcDataSourceChangeEventArgs eArgs = new DalcDataSourceChangeEventArgs(Name, keys, oldValues, oldValues);
 			DataSource.OnDeleting(DataSource, eArgs);
 			if (eArgs.Cancel)
 				return 0;
@@ -177,8 +174,8 @@ namespace NI.Data.Web {
 				var tbl = DataSource.Dalc.Load(new Query(eArgs.TableName, uidCondition), ds);
 				EnsureDataSchema(tbl);
 				eArgs.AffectedCount = tbl.Rows.Count;
-				foreach (DataRow r in tbl.Rows)
-					r.Delete();
+				for (int i=0; i<tbl.Rows.Count; i++)
+					tbl.Rows[i].Delete();
 				DataSource.Dalc.Update(tbl);
 
 			} else {

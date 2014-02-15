@@ -26,6 +26,9 @@ using NI.Data;
 
 namespace NI.Data.Web {
 
+	/// <summary>
+	/// Enables the use of IDalc component in an ASP.NET Web page to retrieve and modify data from a DALC
+	/// </summary>
 	public class DalcDataSource : DataSourceControl {
 		string _TableName;
 		string _SelectTableName = null;
@@ -36,31 +39,53 @@ namespace NI.Data.Web {
 		string[] _AutoIncrementNames = null;
 		string[] _DataKeyNames = null;
 
-		public event DalcDataSourceSelectEventHandler Selecting;
-		public event DalcDataSourceSelectEventHandler Selected;
-		public event DalcDataSourceSaveEventHandler Updating;
-		public event DalcDataSourceSaveEventHandler Updated;
-		public event DalcDataSourceSaveEventHandler Inserting;
-		public event DalcDataSourceSaveEventHandler Inserted;
-		public event DalcDataSourceSaveEventHandler Deleting;
-		public event DalcDataSourceSaveEventHandler Deleted;
+		/// <summary>
+		/// Occurs before a data-retrieval operation.
+		/// </summary>
+		public event EventHandler<DalcDataSourceSelectEventArgs> Selecting;
 
 		/// <summary>
-		/// Determines whether datasource should use DataSet for all operations (false by default).
+		/// Occurs when a data retrieval operation has finished.
+		/// </summary>
+		public event EventHandler<DalcDataSourceSelectEventArgs> Selected;
+		
+		/// <summary>
+		/// Occurs before update operation
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Updating;
+
+		/// <summary>
+		/// Occurs when update operation is finished
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Updated;
+
+		/// <summary>
+		/// Occurs before insert operation
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Inserting;
+
+		/// <summary>
+		/// Occurs when insert operation is finished
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Inserted;
+
+		/// <summary>
+		/// Occurs before delete operation
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Deleting;
+
+		/// <summary>
+		/// Occurs when delete operation is finished
+		/// </summary>
+		public event EventHandler<DalcDataSourceChangeEventArgs> Deleted;
+
+		/// <summary>
+		/// Determines whether datasource should use DataSet for insert/update/delete operations (false by default).
 		/// </summary>
 		public bool DataSetMode {
 			get { return _DataSetMode; }
 			set { _DataSetMode = value; }
 		}
-
-		/// <summary>
-		/// Determines whether datasource should return one new row if no records found (false by default).
-		/// </summary>
-		public bool InsertMode {
-			get { return _InsertMode; }
-			set { _InsertMode = value; }
-		}
-
 
 		/// <summary>
 		/// Get or set list of autoincrement field names (optional).
@@ -115,10 +140,10 @@ namespace NI.Data.Web {
 		/// <summary>
 		/// Get or set DataSet instance provider for specificed table name (optional).
 		/// </summary>
-		public Func<string, DataSet> DataSetProvider { get; set; }
+		public Func<string, DataSet> CreateDataSet { get; set; }
 
 		/// <summary>
-		/// Get or set data condition (optional).
+		/// Get or set data retrieval condition (optional).
 		/// </summary>
 		public QueryNode Condition {
 			get { return _Condition; }
@@ -131,7 +156,7 @@ namespace NI.Data.Web {
 			Query q = new Query(viewName == TableName ? SelectTableName : viewName);
 			q.Condition = Condition;
 			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
-			DataSet ds = DataSetProvider(viewName);
+			DataSet ds = CreateDataSet(viewName);
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, selectArgs, ds);
 			// raise event
 			OnSelecting(this, eArgs);
@@ -151,110 +176,34 @@ namespace NI.Data.Web {
 				Selected(sender, e);
 		}
 
-		internal void OnUpdating(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnUpdating(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Updating != null)
 				Updating(sender, e);
 		}
-		internal void OnUpdated(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnUpdated(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Updated != null)
 				Updated(sender, e);
 		}
 
-		internal void OnInserting(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnInserting(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Inserting != null)
 				Inserting(sender, e);
 		}
-		internal void OnInserted(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnInserted(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Inserted != null)
 				Inserted(sender, e);
 		}
 
-		internal void OnDeleting(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnDeleting(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Deleting != null)
 				Deleting(sender, e);
 		}
-		internal void OnDeleted(object sender, DalcDataSourceSaveEventArgs e) {
+		internal void OnDeleted(object sender, DalcDataSourceChangeEventArgs e) {
 			if (Deleted != null)
 				Deleted(sender, e);
 		}
 
 
 	}
-
-	public delegate void DalcDataSourceSelectEventHandler(object sender, DalcDataSourceSelectEventArgs e);
-	public delegate void DalcDataSourceSaveEventHandler(object sender, DalcDataSourceSaveEventArgs e);
-
-	public class DalcDataSourceSaveEventArgs : CancelEventArgs {
-		string _TableName;
-		IDictionary _OldValues;
-		IDictionary _Values;
-		IDictionary _Keys;
-		int _AffectedCount;
-
-		public string TableName {
-			get { return _TableName; }
-			set { _TableName = value; }
-		}
-
-		public IDictionary OldValues {
-			get { return _OldValues; }
-			set { _OldValues = value; }
-		}
-
-		public IDictionary Values {
-			get { return _Values; }
-			set { _Values = value; } 
-		}
-
-		public IDictionary Keys {
-			get { return _Keys; }
-			set { _Keys = value; }
-		}
-		public int AffectedCount {
-			get { return _AffectedCount; }
-			internal set { _AffectedCount = value; }
-		}
-
-		public DalcDataSourceSaveEventArgs(string tableName, IDictionary keys, IDictionary oldValues, IDictionary newValues) {
-			TableName = tableName;
-			Keys = keys;
-			OldValues = oldValues;
-			Values = newValues;
-		}
-	}
-
-	public class DalcDataSourceSelectEventArgs : CancelEventArgs {
-		Query _SelectQuery;
-		DataSet _Data;
-		DataSourceSelectArguments _SelectArgs;
-
-		public Query SelectQuery {
-			get { return _SelectQuery; }
-			set { _SelectQuery = value; }
-		}
-		
-		public DataSet Data {
-			get { return _Data; }
-			set { _Data = value; }
-		}
-
-		public DataSourceSelectArguments SelectArgs {
-			get { return _SelectArgs; }
-			set { _SelectArgs = value; } 
-		}
-
-        public int FetchedRowCount {
-            get { return Data.Tables[SelectQuery.Table].Rows.Count; }
-        }
-
-		public DalcDataSourceSelectEventArgs(Query q, DataSourceSelectArguments args, DataSet ds) {
-			SelectQuery = q;
-			SelectArgs = args;
-			Data = ds;
-		}
-	}
-
-
-
 
 }

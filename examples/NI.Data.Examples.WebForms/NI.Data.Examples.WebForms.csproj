@@ -56,6 +56,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="book.aspx" />
     <Content Include="default.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>

@@ -204,7 +204,9 @@
     <Compile Include="SqlClient\SqlClientDbSqlBuilder.cs" />
     <Compile Include="SqlClient\SqlClientDalcFactory.cs" />
     <Compile Include="Triggers\SqlCommandTraceTrigger.cs" />
+    <Compile Include="Web\DalcDataSourceSelectEventArgs.cs" />
     <Compile Include="Web\DalcDataSource.cs" />
+    <Compile Include="Web\DalcDataSourceChangeEventArgs.cs" />
     <Compile Include="Web\DalcDataSourceView.cs" />
     <Compile Include="Web\DataCacheDependency.cs" />
     <Compile Include="Triggers\InvalidateDataDependencyTrigger.cs" />
