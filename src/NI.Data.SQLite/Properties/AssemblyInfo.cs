@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NI.Data.Dalc.SQLite")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("SQLite Data Provider factory for DALC")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("NewtonIdeas")]
 [assembly: AssemblyProduct("NI.Data.Dalc.SQLite")]
 [assembly: AssemblyCopyright("Copyright © 2013 NewtonIdeas")]
 [assembly: AssemblyTrademark("")]

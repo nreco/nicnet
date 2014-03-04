@@ -6,8 +6,8 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("NI.Expressions")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("NI.Text")]
+[assembly: AssemblyDescription("StringTemplate and DataBind evaluators")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
 [assembly: AssemblyProduct("Open NIC.NET")]

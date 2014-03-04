@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NI.Data.MySql")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("MySql Data Provider factory for DALC")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
 [assembly: AssemblyProduct("Open NIC.NET")]
