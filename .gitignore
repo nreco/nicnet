@@ -1,17 +1,15 @@
 
 /examples/*/bin
 /examples/*/obj
-/examples/NI.Examples.suo
-/examples/*/*.suo
+/examples/*.suo
 /examples/*/*.user
 bin
 obj
-/src/NI.Common/NI.Common.xml
-/src/NI.Common/NI.Common.xml
-/src/NI.Data.Permissions/NI.Data.Permissions.xml
-/src/NI.Data.RelationalExpressions/NI.Data.RelationalExpressions.xml
-/src/NI.Data/NI.Data.xml
-/src/NI.Vfs/NI.Vfs.xml
-/src/NI.Ioc/NI.Ioc.xml
+/src/*/NI.*.xml
+/src/*/*.user
 /src/*.suo
 /src/packages
+/src/NI.Tests/x64
+/src/NI.Tests/x86
+/src/NI.Data.SQLite/x64
+/src/NI.Data.SQLite/x86

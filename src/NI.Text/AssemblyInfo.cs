@@ -10,9 +10,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
-[assembly: AssemblyProduct("NIC.NET")]
-[assembly: AssemblyCopyright("newtonideas.com")]
-[assembly: AssemblyTrademark("NIC.NET")]
+[assembly: AssemblyProduct("Open NIC.NET")]
+[assembly: AssemblyCopyright("Newtonideas")]
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
 
 //
@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("2.0.0.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

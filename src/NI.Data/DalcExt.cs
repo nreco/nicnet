@@ -98,12 +98,27 @@ namespace NI.Data {
 		}
 
 		internal static IDictionary<string, IQueryValue> GetDalcChangeset(IDictionary data) {
-			var updateFields = new Dictionary<string, IQueryValue>();
+			if (data == null)
+				throw new ArgumentNullException("Cannot prepare DALC changeset from null");
+			var updateFields = new Dictionary<string, IQueryValue>(data.Count);
 			foreach (DictionaryEntry entry in data)
 				updateFields[Convert.ToString(entry.Key)] = entry.Value is IQueryValue ?
 					(IQueryValue)entry.Value : new QConst(entry.Value);
 			return updateFields;
 		}
+
+		internal static IDictionary<string, IQueryValue> GetDalcChangeset(object o) {
+			if (o == null)
+				throw new ArgumentNullException("Cannot prepare DALC changeset from null");
+			var oType = o.GetType();
+			var changesetFields = new Dictionary<string, IQueryValue>();
+			foreach (var p in oType.GetProperties()) {
+				var pVal = p.GetValue(o, null);
+				changesetFields[p.Name] = pVal is IQueryValue ? (IQueryValue)pVal : new QConst(pVal);
+			}
+			return changesetFields;
+		}
+
 
 		/// <summary>
 		/// Update records matched by query
@@ -117,6 +132,18 @@ namespace NI.Data {
 		}
 
 		/// <summary>
+		/// Update records matched by query
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="q">query</param>
+		/// <param name="dto">DTO object with changeset data (properties are used as fields)</param>
+		/// <returns>number of updated records</returns>
+		public static int Update(this IDalc dalc, Query q, object dto) {
+			return dalc.Update(q, GetDalcChangeset(dto));
+		}
+
+
+		/// <summary>
 		/// Insert new record
 		/// </summary>
 		/// <param name="dalc">IDalc instance</param>
@@ -124,6 +151,16 @@ namespace NI.Data {
 		/// <param name="data">record data (field name -> set value)</param>
 		public static void Insert(this IDalc dalc, string tableName, IDictionary data) {
 			dalc.Insert(tableName, GetDalcChangeset(data));
+		}
+
+		/// <summary>
+		/// Insert new record
+		/// </summary>
+		/// <param name="dalc">IDalc instance</param>
+		/// <param name="tableName">table name</param>
+		/// <param name="data">DTO object with changeset data (properties are used as fields)</param>
+		public static void Insert(this IDalc dalc, string tableName, object dto) {
+			dalc.Insert(tableName, GetDalcChangeset(dto));
 		}
 
 		/// <summary>

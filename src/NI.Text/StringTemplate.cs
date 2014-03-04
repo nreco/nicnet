@@ -20,7 +20,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace NI.Expressions {
+namespace NI.Text {
 	
 	/// <summary>
 	/// Simple string template processor 

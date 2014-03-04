@@ -17,7 +17,7 @@ using System.Collections;
 using System.Text;
 using System.Reflection;
 
-namespace NI.Expressions {
+namespace NI.Text {
 
 	
 	/// <summary>

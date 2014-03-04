@@ -7,7 +7,7 @@ using System.Threading;
 using System.Xml;
 using System.IO;
 
-namespace NI.Expressions {
+namespace NI.Text {
 	
 	/// <summary>
 	/// Helper class that includes typical evaluation functions used in StringTemplate

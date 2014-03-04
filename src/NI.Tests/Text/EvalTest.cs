@@ -5,7 +5,7 @@ using System.IO;
 using System.Data;
 using NUnit.Framework;
 
-using NI.Expressions;
+using NI.Text;
 
 namespace NI.Tests.Expressions
 {

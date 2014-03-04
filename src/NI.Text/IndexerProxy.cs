@@ -18,7 +18,7 @@ using System.Linq;
 using System.Data;
 using System.Reflection;
 
-namespace NI.Expressions
+namespace NI.Text
 {
 	
 	/// <summary>

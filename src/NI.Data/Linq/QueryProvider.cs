@@ -108,10 +108,15 @@ namespace NI.Data.Linq
 				return new DalcValue(o);
 			}
 			// try to fill DTO object
-			try {
-				// TODO
-			} catch (Exception ex) {
-
+			if (o is IDictionary) {
+				var dto = Activator.CreateInstance(t);
+				foreach (DictionaryEntry entry in ((IDictionary)o)) {
+					var propName = entry.Key.ToString();
+					var p = t.GetProperty(propName);
+					if (p != null)
+						p.SetValue(dto, entry.Value == DBNull.Value ? (object)null : entry.Value, null);
+				}
+				return dto;
 			}
 
 			throw new InvalidCastException();

@@ -35,9 +35,8 @@
     <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.SQLite, Version=1.0.86.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\System.Data.SQLite.dll</HintPath>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.91.3\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
@@ -54,7 +53,7 @@
     <Compile Include="Data\DataSetDalcTest.cs" />
     <Compile Include="Data\DbCommandGeneratorTest.cs" />
     <Compile Include="Data\QueryTest.cs" />
-    <Compile Include="Expressions\EvalTest.cs" />
+    <Compile Include="Text\EvalTest.cs" />
     <Compile Include="Ioc\XmlComponentConfigurationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelationalExpressions\RelExQueryParserTest.cs" />
@@ -71,7 +70,7 @@
       <Project>{ef36d55d-e325-4b6e-b19f-1392776e72bf}</Project>
       <Name>NI.Data.SQLite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NI.Expressions\NI.Expressions.csproj">
+    <ProjectReference Include="..\NI.Text\NI.Text.csproj">
       <Project>{18403EE8-1014-45C2-9594-E4C5417F013B}</Project>
       <Name>NI.Common</Name>
     </ProjectReference>
@@ -93,12 +92,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\lib\SQLite.Interop.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </None>
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
