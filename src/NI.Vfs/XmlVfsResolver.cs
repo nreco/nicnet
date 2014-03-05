@@ -55,25 +55,11 @@ namespace NI.Vfs {
 		}
 
 		public override Uri ResolveUri(Uri baseUri, string relativeUri) {
-#if NET_1_1
-			string baseUriString = baseUri!=null ? 
-				baseUri.ToString().Substring(0, baseUri.ToString().LastIndexOf('/') ) :
-				String.Empty;
-			if ( baseUriString.StartsWith(AbsoluteBaseUri.ToString()) || relativeUri.StartsWith(AbsoluteBaseUri.ToString()) ) {
-				
-				return new Uri( baseUriString+relativeUri);
-			} else {
-				return new Uri( AbsoluteBaseUri.ToString()+relativeUri );
-			}
-#else
-
 			if (baseUri!=null && baseUri.IsAbsoluteUri) {
 				return new Uri(baseUri, relativeUri);
 			} else {
 				return new Uri(AbsoluteBaseUri, relativeUri);
 			}
-#endif
-
 		}
 
 	}
