@@ -51,7 +51,12 @@ namespace NI.Vfs {
 			}
 			string relativePath = AbsoluteBaseUri.MakeRelative(absoluteUri);
 			IFileObject file = FileSystem.ResolveFile( Path.Combine(BasePath, relativePath ) );
-			return file.GetContent().InputStream;
+			byte[] fileContent;
+			using (var input = file.GetContent().InputStream) {
+				fileContent = new byte[input.Length];
+				input.Read(fileContent, 0, fileContent.Length);
+			}
+			return new MemoryStream(fileContent);
 		}
 
 		public override Uri ResolveUri(Uri baseUri, string relativeUri) {

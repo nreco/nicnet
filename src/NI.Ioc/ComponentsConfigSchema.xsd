@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-			xmlns="urn:schemas-nicnet:ioc:v1"
-			targetNamespace="urn:schemas-nicnet:ioc:v1"
+			xmlns="urn:schemas-nicnet:ioc:v2"
+			targetNamespace="urn:schemas-nicnet:ioc:v2"
 			elementFormDefault="qualified">
 	<xsd:element name="components">
 		<xsd:complexType>

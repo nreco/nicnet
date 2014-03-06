@@ -20,7 +20,7 @@ namespace NI.Tests.Ioc
 		[Test]
 		public void FromXmlString() {
 			var xmlConfig = new XmlComponentConfiguration(@"
-				<components xmlns='urn:schemas-nicnet:ioc:v1'>
+				<components xmlns='urn:schemas-nicnet:ioc:v2'>
 					<description>test</description>
 					<component name='s1' type='System.String'/>
 					<component name='sb1' type='System.Text.StringBuilder'>
@@ -44,7 +44,7 @@ namespace NI.Tests.Ioc
 		[ExpectedException(typeof(XmlConfigurationException))]
 		public void WrongConfigSchema() {
 			var xmlConfig = new XmlComponentConfiguration(@"
-				<components xmlns='urn:schemas-nicnet:ioc:v1'>
+				<components xmlns='urn:schemas-nicnet:ioc:v2'>
 					<component/>
 					<component1/>
 				</components>");
@@ -54,7 +54,7 @@ namespace NI.Tests.Ioc
 		[ExpectedException(typeof(XmlConfigurationException))]
 		public void WrongRef() {
 			var xmlConfig = new XmlComponentConfiguration(@"
-				<components xmlns='urn:schemas-nicnet:ioc:v1'>
+				<components xmlns='urn:schemas-nicnet:ioc:v2'>
 					<component name='sb1' type='System.Text.StringBuilder'>
 						<constructor-arg><ref name='s2'/></constructor-arg>
 					</component>
@@ -65,7 +65,7 @@ namespace NI.Tests.Ioc
 		[ExpectedException(typeof(XmlConfigurationException))]
 		public void WrongType() {
 			var xmlConfig = new XmlComponentConfiguration(@"
-				<components xmlns='urn:schemas-nicnet:ioc:v1'>
+				<components xmlns='urn:schemas-nicnet:ioc:v2'>
 					<component name='sb1' type='System.Bla'>
 					</component>
 				</components>");

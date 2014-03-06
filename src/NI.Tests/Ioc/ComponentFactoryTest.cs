@@ -130,7 +130,7 @@ namespace NI.Tests.Ioc
 		XmlComponentConfiguration createConfig() {
 
 			string xml_config = @"
-				<components xmlns='urn:schemas-nicnet:ioc:v1'>
+				<components xmlns='urn:schemas-nicnet:ioc:v2'>
 					<component name='simple_template_template'>
 						<constructor-arg index='1'>
 							<map>

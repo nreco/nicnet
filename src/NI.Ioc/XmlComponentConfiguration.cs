@@ -85,7 +85,7 @@ namespace NI.Ioc
 
 		static XmlNamespaceManager GetNsManager(XPathNavigator nav) {
 			var xmlNsMgr = new XmlNamespaceManager(nav.NameTable);
-			xmlNsMgr.AddNamespace("ioc", "urn:schemas-nicnet:ioc:v1");
+			xmlNsMgr.AddNamespace("ioc", "urn:schemas-nicnet:ioc:v2");
 			return xmlNsMgr;
 		}
 
@@ -106,7 +106,7 @@ namespace NI.Ioc
 
 				var componentsNode = rootNav.SelectSingleNode("/ioc:components", xmlNsMgr);
 				if (componentsNode == null)
-					throw new XmlConfigurationException("Invalid configuration: root 'components' in namespace 'urn:schemas-nicnet:ioc:v1' node is missing");
+					throw new XmlConfigurationException("Invalid configuration: root 'components' in namespace 'urn:schemas-nicnet:ioc:v2' node is missing");
 
 				// extract default lazy init value
 				var defaultLazyInitAttr = componentsNode.GetAttribute("default-lazy-init",String.Empty);
