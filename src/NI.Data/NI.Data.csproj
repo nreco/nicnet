@@ -107,6 +107,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DbValueComparer.cs" />
     <Compile Include="DalcExt.cs" />
     <Compile Include="DataEventBroker.cs" />
     <Compile Include="DataRowDalcMapper.cs" />

@@ -24,7 +24,7 @@ namespace NI.Data {
 
 		Type t;
 
-		internal Logger(Type t) {
+		public Logger(Type t) {
 			this.t = t;
 		}
 

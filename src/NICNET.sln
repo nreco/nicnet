@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Vfs", "NI.Data.Vfs\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.SQLite", "NI.Data.SQLite\NI.Data.SQLite.csproj", "{EF36D55D-E325-4B6E-B19F-1392776E72BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Storage", "NI.Data.Storage\NI.Data.Storage.csproj", "{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NI.Data.Storage.Tests", "NI.Data.Storage.Tests\NI.Data.Storage.Tests.csproj", "{6B60207F-D612-412F-A87B-4FDC0E7A423F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +59,14 @@ Global
 		{EF36D55D-E325-4B6E-B19F-1392776E72BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF36D55D-E325-4B6E-B19F-1392776E72BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF36D55D-E325-4B6E-B19F-1392776E72BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B60207F-D612-412F-A87B-4FDC0E7A423F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B60207F-D612-412F-A87B-4FDC0E7A423F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B60207F-D612-412F-A87B-4FDC0E7A423F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B60207F-D612-412F-A87B-4FDC0E7A423F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
