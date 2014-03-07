@@ -27,9 +27,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
-	public class ObjectPersister : IObjectPersister {
+	public class ObjectContainerDalcStorage : IObjectContainerStorage {
 
-		static Logger log = new Logger(typeof(ObjectPersister));
+		static Logger log = new Logger(typeof(ObjectContainerDalcStorage));
 
 		#region Source names
 
@@ -50,7 +50,7 @@ namespace NI.Data.Storage {
 
 		protected IDalc LogDalc;
 
-		protected Func<Ontology> GetOntology;
+		protected Func<DataSchema> GetSchema;
 
 		public Func<object,object> GetContextAccountId { get; set; }
 
@@ -58,10 +58,10 @@ namespace NI.Data.Storage {
 
 		public IComparer ValueComparer { get; set; }
 
-		public ObjectPersister(DataRowDalcMapper objectDbMgr, IDalc logDalc, Func<Ontology> getOntology) {
+		public ObjectContainerDalcStorage(DataRowDalcMapper objectDbMgr, IDalc logDalc, Func<DataSchema> getSchema) {
 			DbMgr = objectDbMgr;
 			LogDalc = logDalc;
-			GetOntology = getOntology;
+			GetSchema = getSchema;
 			ObjectLogSourceName = "objects_log";
 			ObjectSourceName = "objects";
 			ObjectRelationSourceName = "object_relations";
@@ -274,8 +274,8 @@ namespace NI.Data.Storage {
 			return newValue.Equals(oldValue);
 		}
 
-		public IEnumerable<ObjectContainer> Load(params long[] ids) {
-			return Load(null, ids);
+		public IEnumerable<ObjectContainer> Load(long[] ids) {
+			return Load(ids, null);
 		}
 
 		/// <summary>
@@ -284,19 +284,19 @@ namespace NI.Data.Storage {
 		/// <param name="props">Properties to load. If null all properties are loaded</param>
 		/// <param name="ids">object IDs</param>
 		/// <returns>All matched by ID objects</returns>
-		public IEnumerable<ObjectContainer> Load(Property[] props, params long[] ids) {
+		public IEnumerable<ObjectContainer> Load(long[] ids, Property[] props) {
 			if (ids.Length==0)
 				return new ObjectContainer[0];
 			var objRowTbl = DbMgr.LoadAll(new Query(ObjectSourceName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(ids))));
 			var objById = new Dictionary<long,ObjectContainer>();
 			var loadWithoutProps = props!=null && props.Length==0;
 
-			var ontology = GetOntology();
+			var dataSchema = GetSchema();
 			var valueSourceNames = new List<string>();
 			// construct object containers + populate source names for values to load
 			foreach (DataRow objRow in objRowTbl.Rows) {
 				var compactClassId = Convert.ToInt32(objRow["compact_class_id"]);
-				var objClass = ontology.FindClassByCompactID(compactClassId);
+				var objClass = dataSchema.FindClassByCompactID(compactClassId);
 				if (objClass == null) {
 					log.Info("Class compact_id={0} of object id={1} not found; load object skipped", compactClassId, objRow["id"]);
 					continue;
@@ -331,7 +331,7 @@ namespace NI.Data.Storage {
 				foreach (DataRow valRow in valTbl.Rows) {
 					var propertyCompactId = Convert.ToInt32(valRow["property_compact_id"]);
 					var objId = Convert.ToInt64(valRow["object_id"]);
-					var prop = ontology.FindPropertyByCompactID(propertyCompactId);
+					var prop = dataSchema.FindPropertyByCompactID(propertyCompactId);
 					if (prop != null) {
 						// UNDONE: handle multi-values props
 						if (objById.ContainsKey(objId))
@@ -529,7 +529,7 @@ namespace NI.Data.Storage {
 					relObjToLoad.Add(relObjId);
 			}
 			// load related objects without properties (we need to know their classes)
-			var relObjects = Load(new Property[0], relObjToLoad.ToArray() );
+			var relObjects = Load(relObjToLoad.ToArray(), new Property[0]);
 			var objIdToClass = new Dictionary<long,Class>();
 			foreach (var o in objs)
 				if (o.ID.HasValue)
@@ -552,7 +552,7 @@ namespace NI.Data.Storage {
 				}
 
 				var subjClass = objIdToClass[relSubjId];
-				var predClass = subjClass.Ontology.FindClassByCompactID(predCompactId);
+				var predClass = subjClass.Schema.FindClassByCompactID(predCompactId);
 				if (predClass==null) {
 					log.Info("Predicate with compact ID={0} doesn't exist: relation skipped", predCompactId);
 					continue;

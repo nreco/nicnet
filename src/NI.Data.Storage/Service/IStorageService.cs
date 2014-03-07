@@ -31,10 +31,10 @@ namespace NI.Data.Storage.Service {
 	public interface IStorageService {
 		
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/ontology", Method = "GET")]
+		[WebInvoke(UriTemplate = "/dataschema", Method = "GET")]
 		[FaultContract(typeof(ApiFault))]
-		[Description("Get ontology information (classes, properties)")]
-		GetOntologyResult GetOntology();
+		[Description("Get data schema (classes, properties)")]
+		GetDataSchemaResult GetDataSchema();
 
 		//TODO: rest service that reflects IObjectPersister for rest
 

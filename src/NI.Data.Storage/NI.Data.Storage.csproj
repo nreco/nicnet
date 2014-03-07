@@ -7,8 +7,8 @@
     <ProjectGuid>{42986ABF-91F8-4697-BA95-F0E9EC5AE97E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NReco.Storage</RootNamespace>
-    <AssemblyName>NReco.Storage</AssemblyName>
+    <RootNamespace>NI.Data.Storage</RootNamespace>
+    <AssemblyName>NI.Data.Storage</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -47,23 +47,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IObjectPersister.cs" />
+    <Compile Include="Interfaces\IDataSchemaStorage.cs" />
+    <Compile Include="Interfaces\IObjectContainerStorage.cs" />
     <Compile Include="Model\Class.cs" />
     <Compile Include="Model\ObjectContainer.cs" />
     <Compile Include="Model\ObjectRelation.cs" />
     <Compile Include="Model\PropertyDataType.cs" />
     <Compile Include="Model\Relationship.cs" />
-    <Compile Include="Model\Ontology.cs" />
+    <Compile Include="Model\DataSchema.cs" />
     <Compile Include="Model\Property.cs" />
-    <Compile Include="ObjectPersister.cs" />
-    <Compile Include="OntologyDalcPersister.cs" />
-    <Compile Include="Service\Actions\GetOntology.cs" />
+    <Compile Include="ObjectContainerDalcStorage.cs" />
+    <Compile Include="DataSchemaDalcStorage.cs" />
+    <Compile Include="Service\Actions\GetDataSchema.cs" />
     <Compile Include="Service\ApiException.cs" />
     <Compile Include="Service\BasicAuthorizationManager.cs" />
     <Compile Include="Service\ErrorHandler.cs" />
     <Compile Include="Service\IStorageService.cs" />
     <Compile Include="Service\StorageService.cs" />
     <Compile Include="StorageDalc.cs" />
+    <Compile Include="StorageQueryTranslator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

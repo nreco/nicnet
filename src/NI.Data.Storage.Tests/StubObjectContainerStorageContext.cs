@@ -25,19 +25,20 @@ using NI.Data.Storage.Model;
 using NI.Data.Storage;
 
 namespace NI.Data.Storage.Tests {
-	public class EmptyStubObjectPersisterContext {
+
+	public class StubObjectContainerStorageContext {
 
 		public DataSet StorageDS;
 		DataSetDalc StorageDalc;
 		public DataRowDalcMapper StorageDbMgr;
-		public ObjectPersister ObjectPersisterInstance;
+		public IObjectContainerStorage ObjectContainerStorage;
 
-		public EmptyStubObjectPersisterContext(Func<Ontology> ontologyPrv) {
+		public StubObjectContainerStorageContext(Func<DataSchema> ontologyPrv) {
 			InitStorageDS();
 			StorageDalc = new DataSetDalc(StorageDS);
 
 			StorageDbMgr = new DataRowDalcMapper(StorageDalc, new StorageDataSetPrv(StorageDS).GetDataSet );
-			ObjectPersisterInstance = new ObjectPersister(StorageDbMgr, StorageDalc, ontologyPrv);
+			ObjectContainerStorage = new ObjectContainerDalcStorage(StorageDbMgr, StorageDalc, ontologyPrv);
 		}
 
 		public class StorageDataSetPrv : IDataSetFactory {
@@ -163,6 +164,119 @@ namespace NI.Data.Storage.Tests {
 			t.PrimaryKey = new[] { idCol };
 			return t;
 		}
+
+
+		public static DataSchema CreateTestSchema() {
+			var classes = new[] {
+				new Class() {
+					ID = "contacts",
+					CompactID = 1,
+					Name = "Contacts",
+					ObjectLocation = ClassObjectLocationMode.ObjectTable
+				},
+				new Class() {
+					ID = "companies",
+					CompactID = 2,
+					Name = "Companies",
+					ObjectLocation = ClassObjectLocationMode.ObjectTable
+				},
+				new Class() {
+					ID = "contactCompany",
+					CompactID = 3,
+					Name = "Company",
+					IsPredicate = true
+				},
+				new Class() {
+					ID = "parentCompany",
+					CompactID = 4,
+					Name = "Parent Company",
+					IsPredicate = true
+				}
+			};
+			var props = new[] {
+				new Property() {
+					ID = "name",
+					CompactID = 1,
+					Name = "Name",
+					DataType = PropertyDataType.String,
+					ValueLocation = PropertyValueLocationMode.ValueTable
+				},
+				new Property() {
+					ID = "title",
+					CompactID = 2,
+					Name = "Title",
+					DataType = PropertyDataType.String, 
+					ValueLocation = PropertyValueLocationMode.ValueTable
+				},
+				new Property() {
+					ID = "birthday",
+					CompactID = 3,
+					Name = "Birthday",
+					DataType = PropertyDataType.DateTime,
+					ValueLocation = PropertyValueLocationMode.ValueTable
+				},
+				new Property() {
+					ID = "is_primary",
+					CompactID = 4,
+					Name = "Primary",
+					DataType = PropertyDataType.Boolean
+				},
+				new Property() {
+					ID = "net_income",
+					CompactID = 5,
+					Name = "Net Income",
+					DataType = PropertyDataType.Decimal
+				}
+			};
+			var o = new DataSchema(classes, props);
+			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("title"));
+			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("net_income"));
+			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("name"));
+			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
+			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
+
+			var contactToCompanyRel = new Relationship() {
+				Subject = o.FindClassByID("contacts"),
+				Predicate = o.FindClassByID("contactCompany"),
+				Object = o.FindClassByID("companies"),
+				Reversed = false,
+				Multiplicity = false
+			};
+			o.AddRelationship(contactToCompanyRel);
+
+			var companyToContactRel = new Relationship() {
+				Object = o.FindClassByID("contacts"),
+				Predicate = o.FindClassByID("contactCompany"),
+				Subject = o.FindClassByID("companies"),
+				Reversed = true,
+				Multiplicity = true
+			};
+
+			o.AddRelationship(companyToContactRel);
+
+			var companyToParentRel = new Relationship() {
+				Subject = o.FindClassByID("companies"),
+				Predicate = o.FindClassByID("parentCompany"),
+				Object = o.FindClassByID("companies"),
+				Reversed = false,
+				Multiplicity = false
+			};
+
+			o.AddRelationship(companyToParentRel);
+
+			var companyToChildRel = new Relationship() {
+				Object = o.FindClassByID("companies"),
+				Predicate = o.FindClassByID("parentCompany"),
+				Subject = o.FindClassByID("companies"),
+				Reversed = true,
+				Multiplicity = true
+			};
+
+			o.AddRelationship(companyToChildRel);
+
+			return o;
+		}
+
 
 	}
 }

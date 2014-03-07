@@ -24,10 +24,10 @@ using NI.Data;
 using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
-    
-	public class OntologyDalcPersister {
 
-		protected DataRowDalcMapper DbManager { get; set; }
+	public class DataSchemaDalcStorage {
+
+		protected DataRowDalcMapper DbContext { get; set; }
 
 		protected ObjectDalcMapper<Class> ClassPersister { get; set; }
 		protected ObjectDalcMapper<Property> PropertyPersister { get; set; }
@@ -46,10 +46,10 @@ namespace NI.Data.Storage {
 		public string PropertyToClassSourceName { get; set; }
 		public IDictionary<string, string> PropertyToClassFieldMapping { get; private set; }
 
-		public OntologyDalcPersister(DataRowDalcMapper dbMgr) {
-			DbManager = dbMgr;
+		public DataSchemaDalcStorage(DataRowDalcMapper dbMgr) {
+			DbContext = dbMgr;
 
-			ClassSourceName = "ontology_classes";
+			ClassSourceName = "metadata_classes";
 			ClassFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
@@ -59,9 +59,9 @@ namespace NI.Data.Storage {
 				{"predicate", "IsPredicate"},
 				{"compact_id", "CompactID"}
 			};
-			ClassPersister = new ObjectDalcMapper<Class>(DbManager, ClassSourceName, ClassFieldMapping);
+			ClassPersister = new ObjectDalcMapper<Class>(DbContext, ClassSourceName, ClassFieldMapping);
 
-			PropertySourceName = "ontology_properties";
+			PropertySourceName = "metadata_properties";
 			PropertyFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
@@ -71,10 +71,10 @@ namespace NI.Data.Storage {
 				{"multivalue", "Multivalue"},
 				{"compact_id", "CompactID"}
 			};
-			PropertyPersister = new ObjectDalcMapper<Property>(DbManager, PropertySourceName,
-				new OntologyPropertyMapper(PropertyFieldMapping) );
+			PropertyPersister = new ObjectDalcMapper<Property>(DbContext, PropertySourceName,
+				new PropertyMapper(PropertyFieldMapping) );
 
-			RelationshipSourceName = "ontology_class_relationships";
+			RelationshipSourceName = "metadata_class_relationships";
 			RelationshipFieldMapping = new Dictionary<string, string>() {
 				{"subject_class_id", "SubjectClassID"},
 				{"predicate_class_id", "PredicateClassID"},
@@ -82,45 +82,45 @@ namespace NI.Data.Storage {
 				{"subject_multiplicity", "SubjectMultiplicity"},
 				{"object_multiplicity", "ObjectMultiplicity"}
 			};
-			RelationshipPersister = new ObjectDalcMapper<RelationshipData>(DbManager, RelationshipSourceName, RelationshipFieldMapping);
+			RelationshipPersister = new ObjectDalcMapper<RelationshipData>(DbContext, RelationshipSourceName, RelationshipFieldMapping);
 
-			PropertyToClassSourceName = "ontology_property_to_class";
+			PropertyToClassSourceName = "metadata_property_to_class";
 			PropertyToClassFieldMapping = new Dictionary<string, string>() {
 				{"class_id", "ClassID"},
 				{"property_id", "PropertyID"}
 			};
-			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbManager, PropertyToClassSourceName, PropertyToClassFieldMapping);
+			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassSourceName, PropertyToClassFieldMapping);
 		}
 
-		public Ontology GetOntology() {
+		public DataSchema GetSchema() {
 			var classes = ClassPersister.LoadAll(new Query(ClassSourceName) );
 			var props = PropertyPersister.LoadAll(new Query(PropertySourceName) );
 
 			var relData = RelationshipPersister.LoadAll(new Query(RelationshipSourceName));
 			var propToClass = PropertyToClassPersister.LoadAll(new Query(PropertyToClassSourceName));
 			
-			var ontology = new Ontology(classes, props);
+			var dataSchema = new DataSchema(classes, props);
 
 			foreach (var p2c in propToClass) {
-				var c = ontology.FindClassByID(p2c.ClassID);
-				var p = ontology.FindPropertyByID(p2c.PropertyID);
+				var c = dataSchema.FindClassByID(p2c.ClassID);
+				var p = dataSchema.FindPropertyByID(p2c.PropertyID);
 				if (c != null && p != null)
-					ontology.AddClassProperty(c, p);
+					dataSchema.AddClassProperty(c, p);
 			}
 
 			foreach (var r in relData) {
-				var subjClass = ontology.FindClassByID(r.SubjectClassID);
-				var objClass = ontology.FindClassByID(r.ObjectClassID);
-				var predClass = ontology.FindClassByID(r.PredicateClassID);
+				var subjClass = dataSchema.FindClassByID(r.SubjectClassID);
+				var objClass = dataSchema.FindClassByID(r.ObjectClassID);
+				var predClass = dataSchema.FindClassByID(r.PredicateClassID);
 				if (subjClass != null && objClass != null && predClass != null) {
-					ontology.AddRelationship(new Relationship() {
+					dataSchema.AddRelationship(new Relationship() {
 						Subject = subjClass,
 						Object = objClass,
 						Predicate = predClass,
 						Multiplicity = r.ObjectMultiplicity,
 						Reversed = false
 					});
-					ontology.AddRelationship(new Relationship() {
+					dataSchema.AddRelationship(new Relationship() {
 						Subject = objClass,
 						Object = subjClass,
 						Predicate = predClass,
@@ -130,7 +130,7 @@ namespace NI.Data.Storage {
 				}
 			}
 
-			return ontology;
+			return dataSchema;
 		}
 
 		protected class PropertyToClass {
@@ -147,8 +147,8 @@ namespace NI.Data.Storage {
 			public bool ObjectMultiplicity { get; set; }
 		}
 
-		protected class OntologyPropertyMapper : PropertyDataRowMapper {
-			public OntologyPropertyMapper(IDictionary<string,string> fieldToProperty) : base(fieldToProperty) {
+		protected class PropertyMapper : PropertyDataRowMapper {
+			public PropertyMapper(IDictionary<string,string> fieldToProperty) : base(fieldToProperty) {
 			}
 			public override void MapTo(DataRow r, object o) {
 				base.MapTo(r, o);

@@ -23,20 +23,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
-	public interface IObjectPersister {
-		//TODO: load by query?..
-		IEnumerable<ObjectContainer> Load(params long[] ids);
-		IEnumerable<ObjectContainer> Load(Property[] props = null, params long[] ids);
-
-		void Insert(ObjectContainer obj);
-		void Delete(ObjectContainer obj);
-		void Update(ObjectContainer obj);
-
-		void AddRelations(params ObjectRelation[] relations);
-		void RemoveRelations(params ObjectRelation[] relations);
+	public interface IDataSchemaStorage {
 		
-		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, Class[] predicates = null);
-		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, Class[] predicates = null);
+		DataSchema GetSchema();
 
 	}
 }

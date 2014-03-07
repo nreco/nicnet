@@ -33,17 +33,18 @@ namespace NI.Data.Storage.Tests {
 	[TestFixture]
 	public class RestStorageServiceTest {
 
-		EmptyStubObjectPersisterContext objPersisterContext;
+		StubObjectContainerStorageContext objPersisterContext;
 		WebServiceHost serviceHost;
 		ChannelFactory<IStorageService> storageServiceUnderTestProxyFactory;
 
 		[TestFixtureSetUp]
 		public void StartStorageService() {
-			var objectPersisterTest = new ObjectPersisterTest();
+			var objectPersisterTest = new ObjectContainerDalcStorageTest();
 
-			objPersisterContext = new EmptyStubObjectPersisterContext(objectPersisterTest.composeTestOntology);
+			var testSchema = StubObjectContainerStorageContext.CreateTestSchema();
+			objPersisterContext = new StubObjectContainerStorageContext(() => { return testSchema; });
 
-			var storageService = new StorageService(objPersisterContext.ObjectPersisterInstance, objectPersisterTest.composeTestOntology);
+			var storageService = new StorageService(objPersisterContext.ObjectContainerStorage, () => { return testSchema; });
 			serviceHost = new WebServiceHost(storageService, new[] { new Uri("http://localhost:8005") });
 
 			serviceHost.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
@@ -90,7 +91,7 @@ namespace NI.Data.Storage.Tests {
 		public void StorageService_Test() {
 			var baseUrl = "http://localhost:8005/";
 
-			var ontologyRes = GetUrl(baseUrl+"ontology");
+			var ontologyRes = GetUrl(baseUrl+"dataschema");
 
 			Console.WriteLine(ontologyRes);
 

@@ -27,119 +27,9 @@ namespace NI.Data.Storage.Tests
 {
 	
 	[TestFixture]
-    public class ObjectPersisterTest
+    public class ObjectContainerDalcStorageTest
     {
 		
-		public Ontology composeTestOntology() {
-			var classes = new[] {
-				new Class() {
-					ID = "contacts",
-					CompactID = 1,
-					Name = "Contacts",
-					ObjectLocation = ClassObjectLocationMode.ObjectTable
-				},
-				new Class() {
-					ID = "companies",
-					CompactID = 2,
-					Name = "Companies",
-					ObjectLocation = ClassObjectLocationMode.ObjectTable
-				},
-				new Class() {
-					ID = "contactCompany",
-					CompactID = 3,
-					Name = "Company",
-					IsPredicate = true
-				},
-				new Class() {
-					ID = "parentCompany",
-					CompactID = 4,
-					Name = "Parent Company",
-					IsPredicate = true
-				}
-			};
-			var props = new[] {
-				new Property() {
-					ID = "name",
-					CompactID = 1,
-					Name = "Name",
-					DataType = PropertyDataType.String,
-					ValueLocation = PropertyValueLocationMode.ValueTable
-				},
-				new Property() {
-					ID = "title",
-					CompactID = 2,
-					Name = "Title",
-					DataType = PropertyDataType.String, 
-					ValueLocation = PropertyValueLocationMode.ValueTable
-				},
-				new Property() {
-					ID = "birthday",
-					CompactID = 3,
-					Name = "Birthday",
-					DataType = PropertyDataType.DateTime,
-					ValueLocation = PropertyValueLocationMode.ValueTable
-				},
-				new Property() {
-					ID = "is_primary",
-					CompactID = 4,
-					Name = "Primary",
-					DataType = PropertyDataType.Boolean
-				},
-				new Property() {
-					ID = "net_income",
-					CompactID = 5,
-					Name = "Net Income",
-					DataType = PropertyDataType.Decimal
-				}
-			};
-			var o = new Ontology(classes, props);
-			o.AddClassProperty( o.FindClassByID("companies"), o.FindPropertyByID("title") );
-			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("net_income"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("name"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
-			
-			var contactToCompanyRel = new Relationship() {
-				Subject = o.FindClassByID("contacts"),
-				Predicate = o.FindClassByID("contactCompany"),
-				Object = o.FindClassByID("companies"),
-				Reversed = false,
-				Multiplicity = false
-			};
-			o.AddRelationship(contactToCompanyRel);
-
-			var companyToContactRel = new Relationship() {
-				Object = o.FindClassByID("contacts"),
-				Predicate = o.FindClassByID("contactCompany"),
-				Subject = o.FindClassByID("companies"),
-				Reversed = true,
-				Multiplicity = true
-			};
-
-			o.AddRelationship(companyToContactRel);
-
-			var companyToParentRel = new Relationship() {
-				Subject = o.FindClassByID("companies"),
-				Predicate = o.FindClassByID("parentCompany"),
-				Object = o.FindClassByID("companies"),
-				Reversed = false,
-				Multiplicity = false
-			};
-
-			o.AddRelationship(companyToParentRel);
-			
-			var companyToChildRel = new Relationship() {
-				Object = o.FindClassByID("companies"),
-				Predicate = o.FindClassByID("parentCompany"),
-				Subject = o.FindClassByID("companies"),
-				Reversed = true,
-				Multiplicity = true
-			};
-
-			o.AddRelationship(companyToChildRel);
-
-			return o;
-		}
 
 		protected void AssertObjectLog(DataSet ds, long objId, string action) {
 			Assert.True(
@@ -150,10 +40,10 @@ namespace NI.Data.Storage.Tests
 		}
 
 		[Test]
-		public void Test_ObjectPersister_BasicFunctions() {
+		public void InsertLoadUpdateDelete() {
+			var o = StubObjectContainerStorageContext.CreateTestSchema();
 
-			var objPersisterContext = new EmptyStubObjectPersisterContext( composeTestOntology );
-			var o = composeTestOntology();
+			var objPersisterContext = new StubObjectContainerStorageContext( () => { return o; } );
 
 			var googCompany = new ObjectContainer(o.FindClassByID("companies"));
 			googCompany["title"] = "Google";
@@ -180,24 +70,24 @@ namespace NI.Data.Storage.Tests
 			maryContact["is_primary"] = true;
 
 
-			objPersisterContext.ObjectPersisterInstance.Insert(googCompany);
+			objPersisterContext.ObjectContainerStorage.Insert(googCompany);
 			Assert.True(googCompany.ID.HasValue);
 			AssertObjectLog(objPersisterContext.StorageDS, googCompany.ID.Value, "insert");
-			objPersisterContext.ObjectPersisterInstance.Insert(yahooCompany);
-			objPersisterContext.ObjectPersisterInstance.Insert(googleChildCompany);
+			objPersisterContext.ObjectContainerStorage.Insert(yahooCompany);
+			objPersisterContext.ObjectContainerStorage.Insert(googleChildCompany);
 
-			objPersisterContext.ObjectPersisterInstance.Insert(johnContact);
-			objPersisterContext.ObjectPersisterInstance.Insert(maryContact);
-			objPersisterContext.ObjectPersisterInstance.Insert(bobContact);
+			objPersisterContext.ObjectContainerStorage.Insert(johnContact);
+			objPersisterContext.ObjectContainerStorage.Insert(maryContact);
+			objPersisterContext.ObjectContainerStorage.Insert(bobContact);
 
 			// load test
-			var maryCopy = objPersisterContext.ObjectPersisterInstance.Load(maryContact.ID.Value).FirstOrDefault();
+			var maryCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value }).FirstOrDefault();
 			Assert.NotNull(maryCopy, "Object Load failed");
 			Assert.AreEqual((string)maryContact["name"], (string)maryCopy["name"]);
 			Assert.AreEqual((bool)maryContact["is_primary"], (bool)maryCopy["is_primary"]);
 			Assert.AreEqual((DateTime)maryContact["birthday"], (DateTime)maryCopy["birthday"]);
 
-			var googCopy = objPersisterContext.ObjectPersisterInstance.Load(googCompany.ID.Value).FirstOrDefault();
+			var googCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ googCompany.ID.Value }).FirstOrDefault();
 			Assert.NotNull(googCopy, "Object Load failed");
 			Assert.AreEqual((string)googCompany["title"], (string)googCopy["title"]);
 			Assert.AreEqual((decimal)googCompany["net_income"], (decimal)googCopy["net_income"]);
@@ -206,11 +96,11 @@ namespace NI.Data.Storage.Tests
 			maryCopy["name"] = "Mary Second";
 			maryCopy["birthday"] = new DateTime(1988, 2, 10);
 			maryCopy["is_primary"] = true;
-			objPersisterContext.ObjectPersisterInstance.Update(maryCopy);
+			objPersisterContext.ObjectContainerStorage.Update(maryCopy);
 			AssertObjectLog(objPersisterContext.StorageDS, maryCopy.ID.Value, "update");
 
 			// reload mary contact
-			maryContact = objPersisterContext.ObjectPersisterInstance.Load(maryContact.ID.Value).FirstOrDefault();
+			maryContact = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value}).FirstOrDefault();
 			Assert.AreEqual((string)maryContact["name"], "Mary Second");
 			Assert.AreEqual((bool)maryContact["is_primary"], true);
 			Assert.AreEqual((DateTime)maryContact["birthday"], (DateTime)maryCopy["birthday"]);
@@ -222,30 +112,30 @@ namespace NI.Data.Storage.Tests
 			var companyToParentCompanyRel = googleChildCompany.GetClass().FindRelationship(
 				o.FindClassByID("parentCompany"), googCompany.GetClass(), false
 			);
-			objPersisterContext.ObjectPersisterInstance.AddRelations(
+			objPersisterContext.ObjectContainerStorage.AddRelations(
 				new ObjectRelation(maryContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(johnContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(bobContact.ID.Value, contactToCompanyRel, yahooCompany.ID.Value),
 				new ObjectRelation(googleChildCompany.ID.Value, companyToParentCompanyRel, googCompany.ID.Value)
 			);
 
-			var googCompanyRels = objPersisterContext.ObjectPersisterInstance.LoadRelations(googCompany);
+			var googCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany);
 			Assert.AreEqual(3, googCompanyRels.Count(), "Expected 3 relations for Google company");
 
-			var yahooCompanyRels = objPersisterContext.ObjectPersisterInstance.LoadRelations(yahooCompany);
+			var yahooCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(yahooCompany);
 			Assert.AreEqual(1, yahooCompanyRels.Count(), "Expected 1 relation for Yahoo company");
 			Assert.AreEqual(bobContact.ID.Value, yahooCompanyRels.First().ObjectID, "Bob should be a only contact of Yahoo");
 
 			// remove rel
 			var maryRel = googCompanyRels.Where( r=>r.ObjectID == maryContact.ID.Value ).First();
-			objPersisterContext.ObjectPersisterInstance.RemoveRelations( 
+			objPersisterContext.ObjectContainerStorage.RemoveRelations( 
 				new ObjectRelation(
 					googCompany.ID.Value, 
 					googCompany.GetClass().FindRelationship(o.FindClassByID("contactCompany"), maryContact.GetClass()), 
 					maryContact.ID.Value )
 			);
 
-			Assert.AreEqual(1, objPersisterContext.ObjectPersisterInstance.LoadRelations(googCompany, new []{ o.FindClassByID("contactCompany") }).Count(),
+			Assert.AreEqual(1, objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, new []{ o.FindClassByID("contactCompany") }).Count(),
 				 "Expected 1 relation for Google company after Mary removal");
 
 

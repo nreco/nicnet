@@ -31,16 +31,16 @@ namespace NI.Data.Storage.Service {
 	[ErrorBehavior(typeof(ErrorHandler))]
 	public class StorageService : IStorageService {
 
-		protected IObjectPersister ObjPersister;
-		protected Func<Ontology> ProvideOntology;
+		protected IObjectContainerStorage ObjPersister;
+		protected Func<DataSchema> ProvideOntology;
 
-		public StorageService(IObjectPersister objPersister, Func<Ontology> getOntology) {
+		public StorageService(IObjectContainerStorage objPersister, Func<DataSchema> getOntology) {
 			ObjPersister = objPersister;
 			ProvideOntology = getOntology;
 		}
 
-		public GetOntologyResult GetOntology() {
-			return new GetOntology(ProvideOntology()).Execute();
+		public GetDataSchemaResult GetDataSchema() {
+			return new GetDataSchema(ProvideOntology()).Execute();
 		}
 
 		/*protected void RunInTransaction(Action<object> a) {

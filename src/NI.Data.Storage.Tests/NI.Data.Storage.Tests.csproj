@@ -7,8 +7,8 @@
     <ProjectGuid>{6B60207F-D612-412F-A87B-4FDC0E7A423F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NReco.Storage.Tests</RootNamespace>
-    <AssemblyName>NReco.Storage.Tests</AssemblyName>
+    <RootNamespace>NI.Data.Storage.Tests</RootNamespace>
+    <AssemblyName>NI.Data.Storage.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,7 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
@@ -42,8 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EmptyStubObjectPersisterContext.cs" />
-    <Compile Include="ObjectPersisterTest.cs" />
+    <Compile Include="StorageDalcTests.cs" />
+    <Compile Include="StubObjectContainerStorageContext.cs" />
+    <Compile Include="ObjectContainerDalcStorageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestServiceTest.cs" />
   </ItemGroup>
@@ -56,6 +60,9 @@
       <Project>{ac4b7a7e-55ca-4eae-9ffa-dd6582390e81}</Project>
       <Name>NI.Data</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

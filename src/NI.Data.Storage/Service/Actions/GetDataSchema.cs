@@ -24,25 +24,25 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage.Service.Actions {
 	
-	public class GetOntology {
+	public class GetDataSchema {
 		
-		Ontology Ontology;
+		DataSchema Schema;
 
-		public GetOntology(Ontology ontology) {
-			Ontology = ontology;
+		public GetDataSchema(DataSchema schema) {
+			Schema = schema;
 		}
 
-		public GetOntologyResult Execute() {
-			var r = new GetOntologyResult();
+		public GetDataSchemaResult Execute() {
+			var r = new GetDataSchemaResult();
 
-			foreach (var c in Ontology.Classes) {
-				var cInfo = new OntologyClassInfo() {
+			foreach (var c in Schema.Classes) {
+				var cInfo = new DataSchemaClassInfo() {
 					ID = c.ID,
 					Name = c.Name,
 					IsPredicate = c.IsPredicate
 				};
 				foreach (var cProp in c.Properties) {
-					cInfo.Properties.Add( new OntologyClassPropertyInfo() { ID = cProp.ID } );
+					cInfo.Properties.Add( new DataSchemaClassPropertyInfo() { ID = cProp.ID } );
 				}
 				r.Classes.Add(cInfo);
 			}
@@ -52,14 +52,14 @@ namespace NI.Data.Storage.Service.Actions {
 
 	}
 
-	[DataContract(Name="ontology")]
-	public class GetOntologyResult {
+	[DataContract(Name="dataschema")]
+	public class GetDataSchemaResult {
 		
 		[DataMember(Name="classes")]
-		public List<OntologyClassInfo> Classes { get; private set; }
+		public List<DataSchemaClassInfo> Classes { get; private set; }
 
-		public GetOntologyResult() {
-			Classes = new List<OntologyClassInfo>();
+		public GetDataSchemaResult() {
+			Classes = new List<DataSchemaClassInfo>();
 		}
 
 
@@ -67,7 +67,7 @@ namespace NI.Data.Storage.Service.Actions {
 	}
 
 	[DataContract(Name="class")]
-	public class OntologyClassInfo {
+	public class DataSchemaClassInfo {
 		[DataMember(Name = "id")]
 		public string ID { get; set; }
 		[DataMember(Name = "name")]
@@ -76,15 +76,15 @@ namespace NI.Data.Storage.Service.Actions {
 		public bool IsPredicate { get; set; }
 
 		[DataMember(Name = "properties")]
-		public List<OntologyClassPropertyInfo> Properties { get; set; }
+		public List<DataSchemaClassPropertyInfo> Properties { get; set; }
 
-		public OntologyClassInfo() {
-			Properties = new List<OntologyClassPropertyInfo>();
+		public DataSchemaClassInfo() {
+			Properties = new List<DataSchemaClassPropertyInfo>();
 		}
 	}
 
 	[DataContract(Name="property")]
-	public class OntologyClassPropertyInfo {
+	public class DataSchemaClassPropertyInfo {
 		[DataMember(Name="id")]
 		public string ID { get; set; }
 	}

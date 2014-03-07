@@ -46,11 +46,11 @@ namespace NI.Data.Storage.Model {
 
         public IEnumerable<Class> Classes {
 			get {
-				return Ontology.FindPropertyClasses(ID);
+				return Schema.FindPropertyClasses(ID);
 			}
 		}
 
-		public Ontology Ontology { get; internal set; }
+		public DataSchema Schema { get; internal set; }
 
 		public Property() {
 			ValueLocation = PropertyValueLocationMode.ValueTable;

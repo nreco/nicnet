@@ -29,29 +29,26 @@ namespace NI.Data.Storage
 {
     public class StorageDalc : IDalc {
 
+		protected IObjectContainerStorage ObjectContainerStorage { get; set; }
+		protected IDalc UnderlyingDalc { get; set; }
+		
+		protected DataSchema Schema { get; set; }
 
-		public Regex MatchClassSourceNameRegex { get; set; }
-
-        protected OntologyDalcPersister OntologyPersister { get; set; }
-		protected ISqlDalc UnderlyingDalc { get; set; }
-		protected Ontology StorageOntology { get; set; }
-
-        public StorageDalc(ISqlDalc dalc, OntologyDalcPersister ontologyPersister) {
+		public StorageDalc(IDalc dalc, IObjectContainerStorage objContainerStorage, Func<DataSchema> getSchema) {
 			UnderlyingDalc = dalc;
-			OntologyPersister = ontologyPersister;
-			StorageOntology = OntologyPersister.GetOntology();
-			MatchClassSourceNameRegex = new Regex("^class_(?<classid>[a-zA-Z0-9_-]+)_objects$", RegexOptions.Singleline);
+			Schema = getSchema();
+			ObjectContainerStorage = objContainerStorage;
         }
 
-		protected Class MatchClassBySourceName(string sourceName) {
-			var m = MatchClassSourceNameRegex.Match(sourceName);
-			if (m.Success) {
-				var classId = m.Groups["classid"].Value;
-				return StorageOntology.FindClassByID(classId);
-			}
-			return null;
-		}
 
+		public DataTable Load(Query query, DataSet ds) {
+			var dataClass = Schema.FindClassByID(query.Table.Name);
+			if (dataClass != null) {
+				throw new NotImplementedException();
+			} else {
+				return UnderlyingDalc.Load(query, ds);
+			}
+		}
 
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
 			var ds = new DataSet();
@@ -61,7 +58,7 @@ namespace NI.Data.Storage
 
 		public int Delete(Query query) {
 			var srcName = new QTable(query.Table.Name);
-			var dataClass = MatchClassBySourceName(srcName.Name);
+			var dataClass = Schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
 				return 0;
 			} else {
@@ -70,32 +67,85 @@ namespace NI.Data.Storage
 		}
 
 		public void Insert(string tableName, IDictionary<string, IQueryValue> data) {
-			var dataClass = MatchClassBySourceName(tableName);
+			var dataClass = Schema.FindClassByID(tableName);
 			if (dataClass != null) {
+				var objContainer = new ObjectContainer(dataClass);
+				foreach (var changeEntry in data) {
+					if (!(changeEntry.Value is QConst))
+						throw new NotSupportedException(
+							String.Format("{0} value type is not supported", changeEntry.Value.GetType() ) );
 
+					objContainer[changeEntry.Key] = ((QConst)changeEntry.Value).Value;
+				}
+				ObjectContainerStorage.Insert(objContainer);
 			} else {
 				UnderlyingDalc.Insert(tableName,data);
 			}
 		}
 
-		public DataTable Load(Query query, DataSet ds) {
-			var srcName = new QTable(query.Table.Name);
-			var dataClass = MatchClassBySourceName(srcName.Name);
-			if (dataClass != null) {
-				throw new NotImplementedException();
-			} else {
-				Load(query, ds);
-				return ds.Tables[query.Table.Name];
-			}
-		}
-
 		public int Update(Query query, IDictionary<string, IQueryValue> data) {
-			throw new NotImplementedException();
+			return UnderlyingDalc.Update(query, data);
 		}
 
 		public void Update(DataTable t) {
-			throw new NotImplementedException();
+			var dataClass = Schema.FindClassByID(t.TableName);
+			if (dataClass!=null) {
+				
+				foreach (DataRow r in t.Rows) {
+					switch (r.RowState) {
+						case DataRowState.Added:
+							InsertDataRow(dataClass, r);
+							break;
+						case DataRowState.Modified:
+							UpdateDataRow(dataClass, r);
+							break;
+						case DataRowState.Deleted:
+							DeleteDataRow(dataClass, r);
+							break;
+					}
+				}
+				t.AcceptChanges();
+			} else {
+				UnderlyingDalc.Update(t);
+			}
 		}
+
+		protected void InsertDataRow(Class dataClass, DataRow r) {
+			var obj = new ObjectContainer(dataClass);
+			foreach (DataColumn c in r.Table.Columns)
+				if (!c.AutoIncrement) {
+					var val = r[c];
+					if (val==DBNull.Value)
+						val = null;
+					obj[ c.ColumnName ] = val;
+				}
+			ObjectContainerStorage.Insert(obj);
+			r["id"] = obj.ID.Value;
+			r.AcceptChanges();
+		}
+
+		protected void DeleteDataRow(Class dataClass, DataRow r) {
+			var objId = Convert.ToInt64( r["id",DataRowVersion.Original] );
+			var obj = new ObjectContainer(dataClass, objId );
+			ObjectContainerStorage.Delete( obj );
+			r.AcceptChanges();
+		}
+
+		protected void UpdateDataRow(Class dataClass, DataRow r) {
+			var objId = Convert.ToInt64(r["id"]);
+			var obj = new ObjectContainer(dataClass, objId);
+			foreach (DataColumn c in r.Table.Columns)
+				if (!c.AutoIncrement) {
+					var val = r[c];
+					if (val == DBNull.Value)
+						val = null;
+					obj[c.ColumnName] = val;
+				}
+
+			ObjectContainerStorage.Update(obj);
+			r.AcceptChanges();
+		}
+
 
 		protected Query TransformQuery(Query q, Class mainClass) {
 			return q;

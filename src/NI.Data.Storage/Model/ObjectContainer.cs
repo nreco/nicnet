@@ -42,20 +42,20 @@ namespace NI.Data.Storage.Model {
 			}
 			set {
 				if (!ObjectClass.HasProperty(p))
-					throw new ArgumentException( String.Format("Invalid property (PID={0}) for class (CID={0})", p.ID, ObjectClass.ID) );
+					throw new ArgumentException( String.Format("Invalid property (PID={0}) for class (CID={1})", p.ID, ObjectClass.ID) );
 				Values[p] = value==null || DBNull.Value.Equals(value) ? null : p.DataType.ConvertToValueType( value );
 			}
 		}
 
 		public object this[string propId] {
 			get { 
-				var p = ObjectClass.Ontology.FindPropertyByID(propId);
+				var p = ObjectClass.Schema.FindPropertyByID(propId);
 				if (p == null)
 					throw new ArgumentException(String.Format("Property with ID={0} doesn't exist", propId));
 				return this[p];
 			}
 			set {
-				var p = ObjectClass.Ontology.FindPropertyByID(propId);
+				var p = ObjectClass.Schema.FindPropertyByID(propId);
 				if (p == null)
 					throw new ArgumentException(String.Format("Property with ID={0} doesn't exist", propId));
 				this[p] = value;

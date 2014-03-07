@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace NI.Data.Storage.Model {
 	
@@ -58,17 +59,17 @@ namespace NI.Data.Storage.Model {
 
 		public IEnumerable<Property> Properties {
 			get {
-				return Ontology.FindPropertyByClassID(ID);
+				return Schema.FindPropertyByClassID(ID);
 			}
 		}
 
 		public IEnumerable<Relationship> Relationships {
 			get {
-				return Ontology.FindClassRelationships(ID);
+				return Schema.FindClassRelationships(ID);
 			}
 		}
 
-		public Ontology Ontology { get; internal set; }
+		public DataSchema Schema { get; internal set; }
 
 		public Class() {
 			ObjectLocation = ClassObjectLocationMode.ObjectTable;
@@ -114,11 +115,23 @@ namespace NI.Data.Storage.Model {
 			return !(a == b);
 		}
 
+		public DataTable CreateDataTable() {
+			var t = new DataTable(ID);
+			var idCol = t.Columns.Add( "id", typeof(long) );
+			idCol.AutoIncrement = true;
+			t.PrimaryKey = new[] { idCol };
+
+			foreach (var p in Properties) {
+				var col = t.Columns.Add( p.ID, p.DataType.ValueType );
+			}
+			return t;
+		}
+
 	}
 
 
 	public enum ClassObjectLocationMode {
-		ObjectTable // TODO: feature "SeparateTable"
+		ObjectTable // TBD: feature "SeparateTable"
 	}
 
 }

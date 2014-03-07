@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace NI.Data.Storage.Model {
     
-    public class Ontology {
+    public class DataSchema {
         
         public IEnumerable<Class> Classes { get; private set; }
         public IEnumerable<Property> Properties { get; private set; }
@@ -36,7 +36,7 @@ namespace NI.Data.Storage.Model {
 		IDictionary<string, List<Property>> PropertiesByClassId = null;
 		IDictionary<string, List<Relationship>> RelationshipsByClassId = null;
 
-        public Ontology(IEnumerable<Class> classes, IEnumerable<Property> props) {
+        public DataSchema(IEnumerable<Class> classes, IEnumerable<Property> props) {
             Classes = classes;
             Properties = props;
 			BuildClassIndex();
@@ -69,7 +69,7 @@ namespace NI.Data.Storage.Model {
 			ClassById = new Dictionary<string, Class>();
 			ClassByCompactId = new Dictionary<int, Class>();
 			foreach (var c in Classes) {
-				c.Ontology = this;
+				c.Schema = this;
 				ClassById[c.ID] = c;
 				ClassByCompactId[c.CompactID] = c;
 			}
@@ -79,7 +79,7 @@ namespace NI.Data.Storage.Model {
 			PropertyById = new Dictionary<string, Property>();
 			PropertyByCompactId = new Dictionary<int, Property>();
 			foreach (var p in Properties) {
-				p.Ontology = this;
+				p.Schema = this;
 				PropertyById[p.ID] = p;
 				PropertyByCompactId[p.CompactID] = p;
 			}
