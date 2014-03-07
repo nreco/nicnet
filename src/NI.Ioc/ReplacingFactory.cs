@@ -19,7 +19,7 @@ using System.Reflection;
 namespace NI.Ioc
 {
 	/// <summary>
-	/// Factory component which returns a value which is the result of a static or instance method invocation.
+	/// Factory component which returns a specified object.
 	/// </summary>
 	/// <example><code>
 	/// &lt;component name="testEnabled" type="NI.Ioc.ReplacingFactory,NI.Ioc" singleton="true"&gt;
@@ -28,15 +28,16 @@ namespace NI.Ioc
 	/// </code></example>
 	public class ReplacingFactory : IFactoryComponent
 	{
-		object _TargetObject;
+		/// <summary>
+		/// Get or set object to return
+		/// </summary>
+		public object TargetObject { get; set; }
 		
-		public object TargetObject {
-			get { return _TargetObject; }
-			set { _TargetObject = value; }
+		public ReplacingFactory() {
 		}
-		
-		public ReplacingFactory()
-		{
+
+		public ReplacingFactory(object target) {
+			TargetObject = target;
 		}
 		
 		public object GetObject() {

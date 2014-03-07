@@ -148,14 +148,16 @@ namespace NI.Tests.Vfs
 		public void test_MaskFileSelector() {
 				
 			MaskFileSelector maskSelector = new MaskFileSelector("a*.txt");
-			if (!maskSelector.IncludeFile( new StubFileObject("aaa/hehe/a1.txt") ) )
-				throw new Exception("MaskFileSelector.IncludeFile failed");
-			if (!maskSelector.IncludeFile( new StubFileObject("a2.txt") ) )
-				throw new Exception("MaskFileSelector.IncludeFile failed");
-			if (maskSelector.IncludeFile( new StubFileObject("a2.txt1") ) )
-				throw new Exception("MaskFileSelector.IncludeFile failed");
-			if (maskSelector.IncludeFile( new StubFileObject("2.txt") ))
-				throw new Exception("MaskFileSelector.IncludeFile failed");
+			
+			Assert.True( maskSelector.IncludeFile( new StubFileObject("aaa/hehe/a1.txt")  ) );
+			Assert.True( maskSelector.IncludeFile( new StubFileObject("a2.txt") ) );
+			Assert.False(maskSelector.IncludeFile( new StubFileObject("a2.txt1") ) );
+			Assert.False(maskSelector.IncludeFile( new StubFileObject("2.txt") ));
+
+			var maskSelector2 = new MaskFileSelector(@"folder\**\*.xml");
+			Assert.True(maskSelector2.IncludeFile(new StubFileObject("folder/hehe/a1.xml")));
+			Assert.False(maskSelector2.IncludeFile(new StubFileObject("test/hehe/a1.xml")));
+			Assert.False(maskSelector2.IncludeFile(new StubFileObject("folder/a1.txt")));
 		}
 		
 		/// <summary>

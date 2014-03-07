@@ -148,7 +148,7 @@
     <Compile Include="RegexFileSelector.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="XmlVfsResolver.cs" />
+    <Compile Include="VfsXmlResolver.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -15,6 +15,7 @@
 using System;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Text;
 
 namespace NI.Vfs
 {
@@ -31,30 +32,60 @@ namespace NI.Vfs
 
 		public MaskFileSelector(string mask) {
 			Mask = mask;
-			string regEx = mask.Replace(@"\", @"[\/\\]");
-			regEx = regEx.Replace(@"/", @"[\/\\]");
-			regEx = regEx.Replace("*", @"[^\/\\]*");
-			regEx = regEx.Replace("?", @"[^\/\\]");
-			regEx = regEx.Replace(".", @"\.");
+			string regEx = GetMaskRegex( mask );
 			regEx = @"(?:^|\/|\\)" + regEx + "$";
 			
 			MaskRegex = new Regex(regEx, RegexOptions.Compiled|RegexOptions.ExplicitCapture);
 
+			PathPrefix = GetMaskParentPath(mask);
+			if (PathPrefix != null)
+				PathPrefix = PathPrefix.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+		}
+
+		public static string GetMaskParentPath(string mask) {
 			int wildcardIdx = mask.IndexOfAny(wildcardChars), slashIdx;
 			if (wildcardIdx == -1) {
 				slashIdx = mask.LastIndexOfAny(pathDelimiters);
 				if (slashIdx != -1)
-					PathPrefix = mask.Substring(0, slashIdx + 1);
+					return mask.Substring(0, slashIdx + 1);
 			} else if (wildcardIdx > 1) {
 				slashIdx = mask.LastIndexOfAny(pathDelimiters, wildcardIdx - 1);
 				if (slashIdx != -1)
-					PathPrefix = mask.Substring(0, slashIdx + 1);
+					return mask.Substring(0, slashIdx + 1);
 			}
-			if (PathPrefix != null)
-				PathPrefix = PathPrefix.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-		
+			return null;
 		}
-		
+
+		protected virtual string GetMaskRegex(string mask) {
+			var sb = new StringBuilder();
+			for (int i = 0; i < mask.Length; i++) {
+				switch (mask[i]) {
+					case '\\':
+						sb.Append(@"[\/\\]");
+						break;
+					case '/':
+						sb.Append(@"[\/\\]");
+						break;
+					case '*':
+						if ((i + 1) < mask.Length && mask[i + 1] == '*') {
+							// handle **
+							i++;
+							sb.Append(".*?");
+						} else {
+							sb.Append(@"[^\/\\]*");
+						}
+						break;
+					case '?':
+						sb.Append(@"[^\/\\]");
+						break;
+					default:
+						sb.AppendFormat("[{0}]", mask[i]);
+						break;
+				}
+			}
+			return sb.ToString();
+		}
+
 		public bool IncludeFile(IFileObject file) {
 			return MaskRegex.IsMatch(file.Name);
 		}
