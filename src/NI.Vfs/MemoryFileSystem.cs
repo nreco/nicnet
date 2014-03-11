@@ -41,6 +41,12 @@ namespace NI.Vfs
 		
 		public IFileObject ResolveFile(string name) {
 			if (name.Length>0) {
+				if (name.Contains("..")) {
+					var fakeRootPath = "f:\\";
+					var fakeAbsolutePath = Path.GetFullPath( Path.Combine(fakeRootPath, name) );
+					name = fakeAbsolutePath.Substring(Path.GetPathRoot(fakeAbsolutePath).Length);
+				}
+
 				// use only one symbol as directory separator
 				name = name.Replace( Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar );
 				// normalize file name

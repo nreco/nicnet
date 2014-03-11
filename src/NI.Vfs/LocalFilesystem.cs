@@ -85,6 +85,12 @@ namespace NI.Vfs
 
 		protected string NormalizeLocalName(string name) {
 			if (name.Length>0) {
+				if (name.Contains("..")) {
+					var fakeRootPath = "f:\\";
+					var fakeAbsolutePath = Path.GetFullPath(Path.Combine(fakeRootPath, name));
+					name = fakeAbsolutePath.Substring(Path.GetPathRoot(fakeAbsolutePath).Length);
+				}
+
 				// normalize file name
 				name = Path.Combine( Path.GetDirectoryName(name), Path.GetFileName(name) );
 			}
