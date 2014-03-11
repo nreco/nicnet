@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Collections;
+using System.Collections.Generic;
 using NI.Data;
 
 using NUnit.Framework;
@@ -53,6 +54,20 @@ namespace NI.Tests.Data
 			var res = dsDalc.LoadRecord(q);
 			Assert.NotNull(res,"LoadRecord failed");
 			Assert.AreEqual(1, (int)res["id"], "LoadRecord failed");
+		}
+
+		[Test]
+		public void test_LoadReader() {
+			IDalc dsDalc = createDsDalc();
+			
+			var rdrRes = new List<object>();
+			dsDalc.ExecuteReader( new Query("users", (QField)"id"==(QConst)2), (rdr) => {
+				while (rdr.Read()) {
+					rdrRes.Add( rdr["name"] );
+				}
+			});
+			Assert.AreEqual(1, rdrRes.Count);
+			Assert.AreEqual("Joe", rdrRes[0].ToString() );
 		}
 		
 		[Test]

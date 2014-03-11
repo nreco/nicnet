@@ -8,12 +8,15 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
-	public class StorageQueryTranslator {
+	public class DalcStorageQueryTranslator {
 		
 		protected DataSchema Schema;
 
-		public StorageQueryTranslator(DataSchema schema) {
+		protected ObjectContainerDalcStorage ObjStorage;
+
+		public DalcStorageQueryTranslator(DataSchema schema, ObjectContainerDalcStorage objStorage) {
 			Schema = schema;
+			ObjStorage = objStorage;
 		}
 
 		public QueryNode TranslateQueryNode(Class targetClass, QueryNode condition) {
@@ -33,17 +36,25 @@ namespace NI.Data.Storage {
 			return group;
 		}
 
-		protected QueryConditionNode TranslateConditionNode(Class dataClass, QueryConditionNode node) {
+		protected QueryNode TranslateConditionNode(Class dataClass, QueryConditionNode node) {
 			if (node.LValue is QField && node.RValue is QField)
 				throw new NotSupportedException("Cannot compare 2 fields");
 
-			//var cond = new QueryConditionNode( (QField)"id", Conditions.In, 
-
-			//cond.LValue = TranslateQueryValue( cond.LValue );
-			//cond.RValue = TranslateQueryValue( cond.RValue );
-
-			return null;
+			if (node.LValue is QField) {
+				return ObjStorage.ComposeFieldCondition(dataClass, (QField)node.LValue, node.Condition, node.RValue );
+			}
+			if (node.RValue is QField) {
+				var cnd = node.Condition;
+				if ( (cnd & Conditions.GreaterThan)==Conditions.GreaterThan ) {
+					cnd = (cnd & ~Conditions.GreaterThan) | Conditions.LessThan;
+				} else if ((cnd & Conditions.LessThan) == Conditions.LessThan) {
+					cnd = (cnd & ~Conditions.LessThan) | Conditions.GreaterThan;
+				}
+				return ObjStorage.ComposeFieldCondition(dataClass, (QField)node.RValue, cnd, node.RValue );
+			}
+			return node;
 		}
+
 
 
 	}

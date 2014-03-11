@@ -66,8 +66,8 @@ namespace NI.Data.Storage.Tests
 			maryContact["is_primary"] = false;
 			maryContact["birthday"] = new DateTime(1999, 5, 20);
 			var bobContact = new ObjectContainer(o.FindClassByID("contacts"));
-			maryContact["name"] = "Bob";
-			maryContact["is_primary"] = true;
+			bobContact["name"] = "Bob";
+			bobContact["is_primary"] = true;
 
 
 			objPersisterContext.ObjectContainerStorage.Insert(googCompany);
@@ -81,13 +81,13 @@ namespace NI.Data.Storage.Tests
 			objPersisterContext.ObjectContainerStorage.Insert(bobContact);
 
 			// load test
-			var maryCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value }).FirstOrDefault();
+			var maryCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value }).Values.FirstOrDefault();
 			Assert.NotNull(maryCopy, "Object Load failed");
 			Assert.AreEqual((string)maryContact["name"], (string)maryCopy["name"]);
 			Assert.AreEqual((bool)maryContact["is_primary"], (bool)maryCopy["is_primary"]);
 			Assert.AreEqual((DateTime)maryContact["birthday"], (DateTime)maryCopy["birthday"]);
 
-			var googCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ googCompany.ID.Value }).FirstOrDefault();
+			var googCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ googCompany.ID.Value }).Values.FirstOrDefault();
 			Assert.NotNull(googCopy, "Object Load failed");
 			Assert.AreEqual((string)googCompany["title"], (string)googCopy["title"]);
 			Assert.AreEqual((decimal)googCompany["net_income"], (decimal)googCopy["net_income"]);
@@ -100,7 +100,7 @@ namespace NI.Data.Storage.Tests
 			AssertObjectLog(objPersisterContext.StorageDS, maryCopy.ID.Value, "update");
 
 			// reload mary contact
-			maryContact = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value}).FirstOrDefault();
+			maryContact = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value}).Values.FirstOrDefault();
 			Assert.AreEqual((string)maryContact["name"], "Mary Second");
 			Assert.AreEqual((bool)maryContact["is_primary"], true);
 			Assert.AreEqual((DateTime)maryContact["birthday"], (DateTime)maryCopy["birthday"]);

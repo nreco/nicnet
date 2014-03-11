@@ -109,6 +109,14 @@ namespace NI.Data
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the Query with specified table
+		/// </summary>
+		/// <param name="table">target table</param>
+		public Query(QTable table) {
+			_Table = table;
+		}
+
+		/// <summary>
 		/// Initializes a new instance of the Query with specified table name and condition node
 		/// </summary>
 		/// <param name="tableName">target table name</param>
@@ -119,57 +127,13 @@ namespace NI.Data
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the Query with specified table name, condition and sort options
+		/// Initializes a new instance of the Query with specified table and condition
 		/// </summary>
-		/// <param name="tableName">target table name</param>
+		/// <param name="table">target table</param>
 		/// <param name="condition">condition represented by QueryNode</param>
-		/// <param name="sort">list of sort fields</param>
-		public Query(string tableName, QueryNode condition, string[] sort) {
-			_Table = tableName;
+		public Query(QTable table, QueryNode condition) {
+			_Table = table;
 			Condition = condition;
-			_Sort = sort.Select(s => new QSort(s) ).ToArray();
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the Query with specified table name, condition, sort options and result limits
-		/// </summary>
-		/// <param name="tableName">target table name</param>
-		/// <param name="condition">condition represented by QueryNode</param>
-		/// <param name="sort">list of sort fields</param>
-		/// <param name="startRecord">The zero-based record number to start with</param>
-		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string tableName, QueryNode condition, string[] sort, int startRecord, int recordCount) {
-			_Table = tableName;
-			SetSort(sort);
-			_StartRecord = startRecord;
-			_RecordCount = recordCount;
-			Condition = condition;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the Query with specified table name and result limits
-		/// </summary>
-		/// <param name="tableName">target table name</param>
-		/// <param name="startRecord">The zero-based record number to start with</param>
-		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string tableName, int startRecord, int recordCount) {
-			_Table = tableName;
-			_StartRecord = startRecord;
-			_RecordCount = recordCount;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the Query with specified table name, sort options and result limits
-		/// </summary>
-		/// <param name="tableName">target table name</param>
-		/// <param name="sort">list of sort fields</param>
-		/// <param name="startRecord">The zero-based record number to start with</param>
-		/// <param name="recordCount">The maximum number of records to retrieve</param>
-		public Query(string tableName, string[] sort, int startRecord, int recordCount) {
-			_Table = tableName;
-			SetSort(sort);
-			_StartRecord = startRecord;
-			_RecordCount = recordCount;
 		}
 
 		/// <summary>

@@ -96,6 +96,12 @@ namespace NI.Data.Storage.Model {
 			return Properties.Contains(p);
 		}
 
+		public Property FindPropertyByID(string id) {
+			var p = Schema.FindPropertyByID(id);
+			if (p!=null && !HasProperty(p) )
+				return null;
+			return p;
+		}
 
 		public Relationship FindRelationship(Class predicate, Class refClass, bool? reversed = null) {
 			var rels = Relationships.Where(r => r.Predicate == predicate && r.Object==refClass);

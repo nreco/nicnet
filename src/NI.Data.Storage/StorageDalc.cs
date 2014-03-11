@@ -44,7 +44,81 @@ namespace NI.Data.Storage
 		public DataTable Load(Query query, DataSet ds) {
 			var dataClass = Schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-				throw new NotImplementedException();
+
+				// special count query
+				if (query.Fields!=null && 
+					query.Fields.Length == 1 && 
+					query.Fields[0].Expression != null && 
+					query.Fields[0].Expression.ToLower() == "count(*)") {
+					
+					if (ds.Tables.Contains(query.Table.Name))
+						ds.Tables.Remove(query.Table.Name);
+					var t = ds.Tables.Add(query.Table.Name);
+					t.Columns.Add("count", typeof(int));
+					var cntRow = t.NewRow();
+					cntRow["count"] = ObjectContainerStorage.ObjectsCount(query);
+					t.Rows.Add(cntRow);
+					return t;
+				}
+
+				DataTable tbl;
+				if (!ds.Tables.Contains(dataClass.ID)) {
+					tbl = ds.Tables.Add( dataClass.ID );
+				} else {
+					tbl = ds.Tables[dataClass.ID];
+				}
+				// check columns
+				IEnumerable<Property> propsToLoad = null;
+				bool includeId = query.Fields==null || query.Fields.Where(f=>f.Name=="id" && f.Prefix==query.Table.Alias).Any();
+
+				if (includeId) {
+					// ensure special "id" column
+					if (!tbl.Columns.Contains("id") || tbl.Columns["id"].DataType!=typeof(long)) {
+						if (tbl.Columns.Contains("id"))
+							tbl.Columns.Remove("id");
+						tbl.Columns.Add("id", typeof(long));
+					}
+				}
+				if (query.Fields==null) {
+					propsToLoad = dataClass.Properties;
+				} else {
+					var queryProps = new List<Property>();
+					foreach (var fld in query.Fields) {
+						var prop = dataClass.FindPropertyByID(fld.Name);
+						if (prop==null || fld.Prefix!=query.Table.Alias)
+							throw new Exception(String.Format("Unknown field {0}", fld));
+						queryProps.Add(prop);
+					}
+					propsToLoad = queryProps;
+				}
+
+				// ensure property columns
+				foreach (var p in propsToLoad) {
+					if (!tbl.Columns.Contains(p.ID) || tbl.Columns[p.ID].DataType != p.DataType.ValueType) {
+						if (tbl.Columns.Contains(p.ID))
+							tbl.Columns.Remove(p.ID);
+						tbl.Columns.Add(p.ID, p.DataType.ValueType); //todo: handle multivalue
+					}
+				}
+				var ids = ObjectContainerStorage.ObjectIds(query);
+				var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray() );
+				foreach (var id in ids) {
+					if (objects.ContainsKey(id)) {
+						var obj = objects[id];
+						var r = tbl.NewRow();
+
+						if (includeId)
+							r["id"] = obj.ID.Value;
+
+						foreach (var p in propsToLoad)
+							r[p.ID] = obj[p] ?? DBNull.Value;
+
+						tbl.Rows.Add(r);
+						r.AcceptChanges();
+					}
+				}
+				tbl.AcceptChanges();
+				return tbl;
 			} else {
 				return UnderlyingDalc.Load(query, ds);
 			}
@@ -90,7 +164,6 @@ namespace NI.Data.Storage
 		public void Update(DataTable t) {
 			var dataClass = Schema.FindClassByID(t.TableName);
 			if (dataClass!=null) {
-				
 				foreach (DataRow r in t.Rows) {
 					switch (r.RowState) {
 						case DataRowState.Added:
@@ -121,14 +194,12 @@ namespace NI.Data.Storage
 				}
 			ObjectContainerStorage.Insert(obj);
 			r["id"] = obj.ID.Value;
-			r.AcceptChanges();
 		}
 
 		protected void DeleteDataRow(Class dataClass, DataRow r) {
 			var objId = Convert.ToInt64( r["id",DataRowVersion.Original] );
 			var obj = new ObjectContainer(dataClass, objId );
 			ObjectContainerStorage.Delete( obj );
-			r.AcceptChanges();
 		}
 
 		protected void UpdateDataRow(Class dataClass, DataRow r) {
@@ -143,12 +214,6 @@ namespace NI.Data.Storage
 				}
 
 			ObjectContainerStorage.Update(obj);
-			r.AcceptChanges();
-		}
-
-
-		protected Query TransformQuery(Query q, Class mainClass) {
-			return q;
 		}
 	}
 }

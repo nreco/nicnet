@@ -274,7 +274,7 @@ namespace NI.Data.Storage {
 			return newValue.Equals(oldValue);
 		}
 
-		public IEnumerable<ObjectContainer> Load(long[] ids) {
+		public IDictionary<long, ObjectContainer> Load(long[] ids) {
 			return Load(ids, null);
 		}
 
@@ -284,15 +284,15 @@ namespace NI.Data.Storage {
 		/// <param name="props">Properties to load. If null all properties are loaded</param>
 		/// <param name="ids">object IDs</param>
 		/// <returns>All matched by ID objects</returns>
-		public IEnumerable<ObjectContainer> Load(long[] ids, Property[] props) {
-			if (ids.Length==0)
-				return new ObjectContainer[0];
-			var objRowTbl = DbMgr.LoadAll(new Query(ObjectSourceName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(ids))));
+		public IDictionary<long,ObjectContainer> Load(long[] ids, Property[] props) {
 			var objById = new Dictionary<long,ObjectContainer>();
+			if (ids.Length==0)
+				return objById;
+			var objRowTbl = DbMgr.LoadAll(new Query(ObjectSourceName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(ids))));
 			var loadWithoutProps = props!=null && props.Length==0;
 
 			var dataSchema = GetSchema();
-			var valueSourceNames = new List<string>();
+			var valueSourceNames = new Dictionary<string,List<int>>();
 			// construct object containers + populate source names for values to load
 			foreach (DataRow objRow in objRowTbl.Rows) {
 				var compactClassId = Convert.ToInt32(objRow["compact_class_id"]);
@@ -310,24 +310,30 @@ namespace NI.Data.Storage {
 							continue;
 						EnsureKnownDataType(p.DataType.ID);
 						var pSrcName = DataTypeSourceNames[p.DataType.ID];
-						if (!valueSourceNames.Contains(pSrcName))
-							valueSourceNames.Add(pSrcName);
+						if (!valueSourceNames.ContainsKey(pSrcName))
+							valueSourceNames[pSrcName] = new List<int>();
+						valueSourceNames[pSrcName].Add( p.CompactID );
 					}
 				}
 				objById[ obj.ID.Value ] = obj;
 			}
-			// degenerated case: no objects at all
-			if (objById.Count==0) 
-				return new ObjectContainer[0];
-			// degenerated case: no properties to load
+			// special case: no objects at all
+			if (objById.Count==0)
+				return objById;
+			// special case: no properties to load
 			if (loadWithoutProps)
-				return objById.Values;
+				return objById;
 
 			// load values by sourcenames
 			var objIds = objById.Keys.ToArray();
 			foreach (var valSrcName in valueSourceNames) {
 				var valTbl = DbMgr.LoadAll(
-						new Query(valSrcName, new QueryConditionNode((QField)"object_id", Conditions.In, new QConst(objIds))));
+						new Query(valSrcName.Key, 
+							new QueryConditionNode((QField)"object_id", Conditions.In, new QConst(objIds))
+							&
+							new QueryConditionNode((QField)"property_compact_id",
+								Conditions.In, new QConst(valSrcName.Value))
+						));
 				foreach (DataRow valRow in valTbl.Rows) {
 					var propertyCompactId = Convert.ToInt32(valRow["property_compact_id"]);
 					var objId = Convert.ToInt64(valRow["object_id"]);
@@ -340,7 +346,7 @@ namespace NI.Data.Storage {
 				}
 			}
 
-			return objById.Values;
+			return objById;
 		}
 
 		public void Insert(ObjectContainer obj) {
@@ -534,7 +540,7 @@ namespace NI.Data.Storage {
 			foreach (var o in objs)
 				if (o.ID.HasValue)
 					objIdToClass[o.ID.Value] = o.GetClass();
-			foreach (var o in relObjects)
+			foreach (var o in relObjects.Values)
 				objIdToClass[o.ID.Value] = o.GetClass();
 
 			foreach (DataRow relRow in relTbl.Rows) {
@@ -570,6 +576,74 @@ namespace NI.Data.Storage {
 			return rs;
 		}
 
+		public long[] ObjectIds(Query q) {
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(q.Table.Name);
+			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+
+			var translatedQuery = new Query( new QTable( ObjectSourceName, q.Table.Alias ) );
+			translatedQuery.StartRecord = q.StartRecord;
+			translatedQuery.RecordCount = q.RecordCount;
+			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
+			
+			translatedQuery.Fields = new [] { new QField(q.Table.Alias, "id", null) };
+
+			var ids = new List<long>();
+			DbMgr.Dalc.ExecuteReader(translatedQuery, (rdr) => {
+				while (rdr.Read()) {
+					var id = Convert.ToInt64( rdr.GetValue(0) );
+					ids.Add(id);
+				}
+			});
+			return ids.ToArray();
+		}
+
+		public int ObjectsCount(Query q) {
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(q.Table.Name);
+			var translatedQuery = new Query(new QTable(ObjectSourceName, q.Table.Alias));
+			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
+
+			return DbMgr.Dalc.RecordsCount( translatedQuery );
+		}
+
+		protected QueryNode TranslateQueryCondition(Class dataClass, DataSchema schema, QueryNode condition) {
+			var conditionGrp = QueryGroupNode.And();
+			conditionGrp.Nodes.Add(
+				(QField)"compact_class_id" == (QConst)dataClass.CompactID
+			);
+			var qTranslator = new DalcStorageQueryTranslator(schema, this);
+			if (condition != null)
+				conditionGrp.Nodes.Add(qTranslator.TranslateQueryNode(dataClass, condition));
+			
+			return conditionGrp;
+		}
+
+
+
+		public QueryNode ComposeFieldCondition(Class dataClass, QField field, Conditions cnd, IQueryValue val) {
+			//tmp hack for predefined fields
+			if (field.Name=="id") {
+				return new QueryConditionNode( field, cnd, val);
+			}
+
+			var prop = dataClass.FindPropertyByID(field.Name);
+			if (prop==null)
+				throw new Exception(String.Format("Class ID={0} doesn't contain property ID={1}", dataClass.ID, field.Name) );
+
+			var pSrcName = DataTypeSourceNames[prop.DataType.ID];
+			return new QueryConditionNode( 
+				new QField( field.Prefix, "id",null ),
+				Conditions.In,
+				new Query( pSrcName, 
+					(QField)"property_compact_id"==(QConst)prop.CompactID
+					&
+					new QueryConditionNode( (QConst)"value", cnd, val )
+				) {
+					Fields = new[] { (QField)"object_id" }
+				}
+			);
+		}
 
 	}
 }

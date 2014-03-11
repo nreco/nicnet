@@ -65,7 +65,7 @@
     <Compile Include="Service\IStorageService.cs" />
     <Compile Include="Service\StorageService.cs" />
     <Compile Include="StorageDalc.cs" />
-    <Compile Include="StorageQueryTranslator.cs" />
+    <Compile Include="DalcStorageQueryTranslator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -25,9 +25,9 @@ using NI.Data.Storage.Model;
 namespace NI.Data.Storage {
 	
 	public interface IObjectContainerStorage {
-		//TODO: load by query?..
-		IEnumerable<ObjectContainer> Load(long[] ids);
-		IEnumerable<ObjectContainer> Load(long[] ids, Property[] props = null);
+
+		IDictionary<long, ObjectContainer> Load(long[] ids);
+		IDictionary<long, ObjectContainer> Load(long[] ids, Property[] props = null);
 
 		void Insert(ObjectContainer obj);
 		void Delete(ObjectContainer obj);
@@ -38,7 +38,9 @@ namespace NI.Data.Storage {
 		
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, Class[] predicates = null);
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, Class[] predicates = null);
+		
+		long[] ObjectIds(Query q);
+		int ObjectsCount(Query q);
 
-		//QueryNode ComposeValueCondition();
 	}
 }
