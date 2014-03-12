@@ -134,7 +134,8 @@ namespace NI.Data.Storage
 			var srcName = new QTable(query.Table.Name);
 			var dataClass = Schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-				return 0;
+				var ids = ObjectContainerStorage.ObjectIds(query);
+				return ObjectContainerStorage.Delete(ids);
 			} else {
 				return UnderlyingDalc.Delete(query);
 			}

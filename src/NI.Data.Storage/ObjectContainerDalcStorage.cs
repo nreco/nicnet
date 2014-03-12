@@ -327,21 +327,21 @@ namespace NI.Data.Storage {
 			// load values by sourcenames
 			var objIds = objById.Keys.ToArray();
 			foreach (var valSrcName in valueSourceNames) {
-				var valTbl = DbMgr.LoadAll(
+				var valData = DbMgr.Dalc.LoadAllRecords(
 						new Query(valSrcName.Key, 
 							new QueryConditionNode((QField)"object_id", Conditions.In, new QConst(objIds))
 							&
 							new QueryConditionNode((QField)"property_compact_id",
 								Conditions.In, new QConst(valSrcName.Value))
 						));
-				foreach (DataRow valRow in valTbl.Rows) {
-					var propertyCompactId = Convert.ToInt32(valRow["property_compact_id"]);
-					var objId = Convert.ToInt64(valRow["object_id"]);
+				foreach (var val in valData) {
+					var propertyCompactId = Convert.ToInt32(val["property_compact_id"]);
+					var objId = Convert.ToInt64(val["object_id"]);
 					var prop = dataSchema.FindPropertyByCompactID(propertyCompactId);
 					if (prop != null) {
 						// UNDONE: handle multi-values props
 						if (objById.ContainsKey(objId))
-							objById[objId][prop] = DeserializeValueData(prop, valRow["value"] );
+							objById[objId][prop] = DeserializeValueData(prop, val["value"]);
 					}
 				}
 			}
@@ -423,18 +423,26 @@ namespace NI.Data.Storage {
 		public void Delete(ObjectContainer obj) {
 			if (!obj.ID.HasValue)
 				throw new ArgumentException("Object ID is required for delete");
-			Delete(obj.ID.Value);
+			var delCount = Delete(obj.ID.Value);
+			if (delCount == 0)
+				throw new DBConcurrencyException(String.Format("Object id={0} doesn't exist", obj.ID.Value));
 		}
 
-		public void Delete(long objId) {
+		public int Delete(params long[] objIds) {
+			if (objIds.Length==0)
+				return 0;
 
-			var objRow = DbMgr.Load(ObjectSourceName, objId);
-			if (objRow == null)
-				throw new DBConcurrencyException(String.Format("Object id={0} doesn't exist", objId));
+			var objTbl = DbMgr.LoadAll( new Query(ObjectSourceName,
+				new QueryConditionNode( (QField)"id", Conditions.In, new QConst(objIds) ) ) );
+			var loadedObjIds = objTbl.Rows.Cast<DataRow>().Select( r => Convert.ToInt64(r["id"]) ).ToArray();
+			if (loadedObjIds.Length==0)
+				return 0;
 
 			// load all values & remove'em
 			foreach (var valSrcName in DataTypeSourceNames.Values.Distinct()) {
-				var valTbl = DbMgr.LoadAll(new Query(valSrcName, (QField)"object_id" == new QConst(objId) ));
+				var valTbl = DbMgr.LoadAll(new Query(valSrcName, 
+						new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(loadedObjIds) )
+					) );
 				foreach (DataRow valRow in valTbl.Rows) {
 					valRow["value"] = DBNull.Value;
 					WriteValueLog(valRow);
@@ -444,17 +452,24 @@ namespace NI.Data.Storage {
 			}
 			// load all relations & remove'em
 			var refTbl = DbMgr.LoadAll(new Query(ObjectRelationSourceName,
-					(QField)"subject_id" == new QConst(objId) | (QField)"object_id" == new QConst(objId)));
+					new QueryConditionNode( (QField)"subject_id", Conditions.In, new QConst(loadedObjIds) )
+					|
+					new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(loadedObjIds) )
+				) );
 			foreach (DataRow r in refTbl.Rows) {
 				WriteRelationLog(r,true);
 				r.Delete();
 			}
 			DbMgr.Update(refTbl);
 
-			if (LoggingEnabled)
-				WriteObjectLog(objRow, "delete");
-			objRow.Delete();
-			DbMgr.Update(objRow);
+			var delCount = objTbl.Rows.Count;
+			foreach (DataRow objRow in objTbl.Rows) {
+				if (LoggingEnabled)
+					WriteObjectLog(objRow, "delete");
+				objRow.Delete();
+			}
+			DbMgr.Update(objTbl);
+			return delCount;
 		}
 
 		public void Update(ObjectContainer obj) {
@@ -638,7 +653,7 @@ namespace NI.Data.Storage {
 				new Query( pSrcName, 
 					(QField)"property_compact_id"==(QConst)prop.CompactID
 					&
-					new QueryConditionNode( (QConst)"value", cnd, val )
+					new QueryConditionNode( (QField)"value", cnd, val )
 				) {
 					Fields = new[] { (QField)"object_id" }
 				}

@@ -46,7 +46,7 @@ namespace NI.Data.Storage.Tests {
 			maryContact["is_primary"] = false;
 			maryContact["birthday"] = new DateTime(1999, 5, 20);
 			var bobContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
-			maryContact["name"] = "Bob";
+			bobContact["name"] = "Bob";
 			bobContact["is_primary"] = true;
 
 			objContext.ObjectContainerStorage.Insert(johnContact);
@@ -70,11 +70,15 @@ namespace NI.Data.Storage.Tests {
 			var contactsTbl = testSchema.FindClassByID("contacts").CreateDataTable();
 			ds.Tables.Add(contactsTbl);
 
+			// test insert as datarow
 			var newRow = contactsTbl.NewRow();
 			newRow["name"] = "John Smith";
 			newRow["birthday"] = new DateTime(1980,1,1);
 			contactsTbl.Rows.Add(newRow);
 			storageDalc.Update( contactsTbl );
+
+			Assert.AreEqual(2, objContext.StorageDS.Tables["objects"].Rows.Count);
+			Assert.AreEqual("John Smith", objContext.StorageDS.Tables["object_string_values"].Rows[1]["value"]);
 		}
 
 		[Test]
@@ -93,6 +97,55 @@ namespace NI.Data.Storage.Tests {
 			storageDalc.Update(ds.Tables["contacts"]);
 
 			Assert.AreEqual(2, storageDalc.RecordsCount(new Query("contacts")));
+
+			Assert.AreEqual(2, storageDalc.Delete( new Query("contacts") ) );
+			Assert.AreEqual(0, storageDalc.RecordsCount(new Query("contacts")));
+			Assert.AreEqual(2, storageDalc.RecordsCount(new Query("companies")));
+
+			Assert.AreEqual(1, storageDalc.Delete( new Query("companies", (QField)"title" == (QConst)"Microsoft") ) );
+			Assert.AreEqual(1, storageDalc.RecordsCount(new Query("companies")));
+		}
+
+		[Test]
+		public void Update() {
+			addTestData();
+
+			var ds = new DataSet();
+			var contactsTbl = testSchema.FindClassByID("contacts").CreateDataTable();
+			ds.Tables.Add(contactsTbl);
+
+			storageDalc.Load(new Query("contacts", (QField)"name" == (QConst)"Bob"), ds);
+			Assert.AreEqual(1, contactsTbl.Rows.Count);
+
+			contactsTbl.Rows[0]["name"] = "Bob Marley";
+			contactsTbl.Rows[0]["birthday"] = new DateTime(1945, 2, 6);
+
+			storageDalc.Update(contactsTbl);
+
+			Assert.AreEqual(0, storageDalc.RecordsCount(  new Query("contacts", (QField)"name" == (QConst)"Bob") ) );
+			Assert.AreEqual(1, storageDalc.RecordsCount(new Query("contacts", (QField)"name" == (QConst)"Bob Marley")));
+
+		}
+
+		[Test]
+		public void Load() {
+			addTestData();
+
+			var primaryContacts = storageDalc.LoadAllRecords( new Query("contacts", (QField)"is_primary"==new QConst(true) ) );
+			Assert.AreEqual(2, primaryContacts.Length);
+			Assert.True( primaryContacts.Where(r=>r["name"].ToString()=="John").Any() );
+			Assert.True(primaryContacts.Where(r => r["name"].ToString() == "Bob").Any());
+
+			// load only some fields
+			var ds = new DataSet();
+			var contactsTbl = storageDalc.Load( new Query("contacts") { Fields = new[] { (QField)"name" } }, ds );
+			Assert.AreEqual(1, contactsTbl.Columns.Count );
+			Assert.AreEqual("name", contactsTbl.Columns[0].ColumnName);
+
+			Assert.AreEqual( new DateTime(1999, 5, 20), 
+				storageDalc.LoadValue( new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
+					Fields = new[] { (QField)"birthday" }
+				} ) );
 		}
 
 	}

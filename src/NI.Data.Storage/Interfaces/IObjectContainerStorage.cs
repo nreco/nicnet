@@ -33,6 +33,8 @@ namespace NI.Data.Storage {
 		void Delete(ObjectContainer obj);
 		void Update(ObjectContainer obj);
 
+		int Delete(params long[] objIds);
+
 		void AddRelations(params ObjectRelation[] relations);
 		void RemoveRelations(params ObjectRelation[] relations);
 		
