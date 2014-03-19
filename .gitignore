@@ -11,5 +11,7 @@ obj
 /src/packages
 /src/NI.Tests/x64
 /src/NI.Tests/x86
+/src/NI.Data.Storage.Tests/x64
+/src/NI.Data.Storage.Tests/x86
 /src/NI.Data.SQLite/x64
 /src/NI.Data.SQLite/x86

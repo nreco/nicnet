@@ -33,7 +33,7 @@ namespace NI.Data.Storage.Tests {
 	[TestFixture]
 	public class RestStorageServiceTest {
 
-		StubObjectContainerStorageContext objPersisterContext;
+		StubDataSetDalcStorageContext objPersisterContext;
 		WebServiceHost serviceHost;
 		ChannelFactory<IStorageService> storageServiceUnderTestProxyFactory;
 
@@ -41,8 +41,8 @@ namespace NI.Data.Storage.Tests {
 		public void StartStorageService() {
 			var objectPersisterTest = new ObjectContainerDalcStorageTest();
 
-			var testSchema = StubObjectContainerStorageContext.CreateTestSchema();
-			objPersisterContext = new StubObjectContainerStorageContext(() => { return testSchema; });
+			var testSchema = StubDataSetDalcStorageContext.CreateTestSchema();
+			objPersisterContext = new StubDataSetDalcStorageContext(() => { return testSchema; });
 
 			var storageService = new StorageService(objPersisterContext.ObjectContainerStorage, () => { return testSchema; });
 			serviceHost = new WebServiceHost(storageService, new[] { new Uri("http://localhost:8005") });

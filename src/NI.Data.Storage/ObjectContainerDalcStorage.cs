@@ -33,16 +33,16 @@ namespace NI.Data.Storage {
 
 		#region Source names
 
-		public string ObjectLogSourceName { get; set; }
-		public string ObjectSourceName { get; set; }
-		public string ObjectRelationSourceName { get; set; }
-		public string ObjectRelationLogSourceName { get; set; }
-		public IDictionary<string, string> DataTypeSourceNames { get; set; }
+		public string ObjectLogTableName { get; set; }
+		public string ObjectTableName { get; set; }
+		public string ObjectRelationTableName { get; set; }
+		public string ObjectRelationLogTableName { get; set; }
+		public IDictionary<string, string> DataTypeTableNames { get; set; }
 		
 		/// <summary>
 		/// Value source name to log source name mapping
 		/// </summary>
-		public IDictionary<string, string> ValueSourceNameForLogs { get; set; }
+		public IDictionary<string, string> ValueTableNameForLogs { get; set; }
 
 		#endregion
 
@@ -62,18 +62,18 @@ namespace NI.Data.Storage {
 			DbMgr = objectDbMgr;
 			LogDalc = logDalc;
 			GetSchema = getSchema;
-			ObjectLogSourceName = "objects_log";
-			ObjectSourceName = "objects";
-			ObjectRelationSourceName = "object_relations";
-			ObjectRelationLogSourceName = "object_relations_log";
-			DataTypeSourceNames = new Dictionary<string, string>() {
-				{"boolean", "object_number_values"},
-				{"decimal", "object_number_values"},
-				{"string", "object_string_values"},
-				{"date", "object_datetime_values"},
-				{"datetime", "object_datetime_values"}
+			ObjectLogTableName = "objects_log";
+			ObjectTableName = "objects";
+			ObjectRelationTableName = "object_relations";
+			ObjectRelationLogTableName = "object_relations_log";
+			DataTypeTableNames = new Dictionary<string, string>() {
+				{PropertyDataType.Boolean.ID, "object_number_values"},
+				{PropertyDataType.Decimal.ID, "object_number_values"},
+				{PropertyDataType.String.ID, "object_string_values"},
+				{PropertyDataType.Date.ID, "object_datetime_values"},
+				{PropertyDataType.DateTime.ID, "object_datetime_values"}
 			};
-			ValueSourceNameForLogs = new Dictionary<string, string>() {
+			ValueTableNameForLogs = new Dictionary<string, string>() {
 				{"object_number_values", "object_number_values_log"},
 				{"object_string_values", "object_string_values_log"},
 				{"object_datetime_values", "object_datetime_values_log"}
@@ -93,14 +93,14 @@ namespace NI.Data.Storage {
 			logData["compact_class_id"] = objRow["compact_class_id"];
 			logData["object_id"] = objRow["id"];
 			logData["action"] = action;
-			LogDalc.Insert(ObjectLogSourceName, logData);
+			LogDalc.Insert(ObjectLogTableName, logData);
 		}
 
 		protected void WriteValueLog(DataRow valRow, bool deleted = false) {
 			if (!LoggingEnabled)
 				return;
 
-			var logSrcName = ValueSourceNameForLogs[valRow.Table.TableName];
+			var logSrcName = ValueTableNameForLogs[valRow.Table.TableName];
 
 			var logData = new Hashtable();
 			logData["timestamp"] = DateTime.Now;
@@ -127,11 +127,11 @@ namespace NI.Data.Storage {
 			logData["predicate_class_compact_id"] = refRow["predicate_class_compact_id"];
 			logData["object_id"] = refRow["object_id"];
 
-			LogDalc.Insert(ObjectRelationLogSourceName, logData);		
+			LogDalc.Insert(ObjectRelationLogTableName, logData);		
 		}
 
 		protected void EnsureKnownDataType(string dataType) {
-			if (!DataTypeSourceNames.ContainsKey(dataType))
+			if (!DataTypeTableNames.ContainsKey(dataType))
 				throw new Exception("Unknown data type: "+dataType);
 		}
 
@@ -170,7 +170,7 @@ namespace NI.Data.Storage {
 			var propSrcNameProps = new Dictionary<string, IList<int>>();
 			foreach (var v in obj) {
 				EnsureKnownDataType(v.Key.DataType.ID);
-				var valueSrcName = DataTypeSourceNames[v.Key.DataType.ID];
+				var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
 
 				if (!propSrcNameProps.ContainsKey(valueSrcName))
 					propSrcNameProps[valueSrcName] = new List<int>();
@@ -203,7 +203,7 @@ namespace NI.Data.Storage {
 
 			// process values
 			foreach (var v in obj) {
-				var valueSrcName = DataTypeSourceNames[v.Key.DataType.ID];
+				var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
 				var tbl = propSrcNameToTbl[valueSrcName];
 
 				var isEmpty = IsEmpty(v.Key, v.Value);
@@ -288,7 +288,7 @@ namespace NI.Data.Storage {
 			var objById = new Dictionary<long,ObjectContainer>();
 			if (ids.Length==0)
 				return objById;
-			var objRowTbl = DbMgr.LoadAll(new Query(ObjectSourceName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(ids))));
+			var objRowTbl = DbMgr.LoadAll(new Query(ObjectTableName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(ids))));
 			var loadWithoutProps = props!=null && props.Length==0;
 
 			var dataSchema = GetSchema();
@@ -309,7 +309,7 @@ namespace NI.Data.Storage {
 						if (props!=null && !props.Contains(p))
 							continue;
 						EnsureKnownDataType(p.DataType.ID);
-						var pSrcName = DataTypeSourceNames[p.DataType.ID];
+						var pSrcName = DataTypeTableNames[p.DataType.ID];
 						if (!valueSourceNames.ContainsKey(pSrcName))
 							valueSourceNames[pSrcName] = new List<int>();
 						valueSourceNames[pSrcName].Add( p.CompactID );
@@ -350,7 +350,7 @@ namespace NI.Data.Storage {
 		}
 
 		public void Insert(ObjectContainer obj) {
-			var objRow = DbMgr.Insert(ObjectSourceName, new Dictionary<string, object>() {
+			var objRow = DbMgr.Insert(ObjectTableName, new Dictionary<string, object>() {
 				{"compact_class_id", obj.GetClass().CompactID}
 			});
 			obj.ID = Convert.ToInt64( objRow["id"] );
@@ -364,7 +364,7 @@ namespace NI.Data.Storage {
 		}
 
 		protected Query ComposeLoadRelationsQuery(ObjectRelation[] relations) {
-			var loadRelQ = new Query(ObjectRelationSourceName);
+			var loadRelQ = new Query(ObjectRelationTableName);
 			var orCondition = new QueryGroupNode(QueryGroupNodeType.Or);
 			loadRelQ.Condition = orCondition;
 			foreach (var r in relations) {
@@ -432,14 +432,14 @@ namespace NI.Data.Storage {
 			if (objIds.Length==0)
 				return 0;
 
-			var objTbl = DbMgr.LoadAll( new Query(ObjectSourceName,
+			var objTbl = DbMgr.LoadAll( new Query(ObjectTableName,
 				new QueryConditionNode( (QField)"id", Conditions.In, new QConst(objIds) ) ) );
 			var loadedObjIds = objTbl.Rows.Cast<DataRow>().Select( r => Convert.ToInt64(r["id"]) ).ToArray();
 			if (loadedObjIds.Length==0)
 				return 0;
 
 			// load all values & remove'em
-			foreach (var valSrcName in DataTypeSourceNames.Values.Distinct()) {
+			foreach (var valSrcName in DataTypeTableNames.Values.Distinct()) {
 				var valTbl = DbMgr.LoadAll(new Query(valSrcName, 
 						new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(loadedObjIds) )
 					) );
@@ -451,7 +451,7 @@ namespace NI.Data.Storage {
 				DbMgr.Update(valTbl);
 			}
 			// load all relations & remove'em
-			var refTbl = DbMgr.LoadAll(new Query(ObjectRelationSourceName,
+			var refTbl = DbMgr.LoadAll(new Query(ObjectRelationTableName,
 					new QueryConditionNode( (QField)"subject_id", Conditions.In, new QConst(loadedObjIds) )
 					|
 					new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(loadedObjIds) )
@@ -476,7 +476,7 @@ namespace NI.Data.Storage {
 			if (!obj.ID.HasValue)
 				throw new ArgumentException("Object ID is required for update");
 
-			var objRow = DbMgr.Load(ObjectSourceName, obj.ID);
+			var objRow = DbMgr.Load(ObjectTableName, obj.ID);
 			if (objRow == null)
 				throw new DBConcurrencyException(String.Format("Object with ID={0} doesn't exist", obj.ID));
 
@@ -510,7 +510,7 @@ namespace NI.Data.Storage {
 			if (objs.Length == 0)
 				return new ObjectRelation[0];
 
-			var loadQ = new Query(ObjectRelationSourceName);
+			var loadQ = new Query(ObjectRelationTableName);
 			var andCond = new QueryGroupNode(QueryGroupNodeType.And);
 			loadQ.Condition = andCond;
 			var objOrCond = new QueryGroupNode(QueryGroupNodeType.Or);
@@ -596,27 +596,64 @@ namespace NI.Data.Storage {
 			var dataClass = schema.FindClassByID(q.Table.Name);
 			var qTranslator = new DalcStorageQueryTranslator(schema, this );
 
-			var translatedQuery = new Query( new QTable( ObjectSourceName, q.Table.Alias ) );
+			var translatedQuery = new Query( new QTable( ObjectTableName, q.Table.Alias ) );
 			translatedQuery.StartRecord = q.StartRecord;
 			translatedQuery.RecordCount = q.RecordCount;
 			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
 			
 			translatedQuery.Fields = new [] { new QField(q.Table.Alias, "id", null) };
+			return LoadTranslatedQueryInternal(dataClass, translatedQuery, q, q.Sort );
+		}
 
+		protected virtual long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery, QSort[] sort) {
+			var applySort = sort!=null && sort.Length>0;
 			var ids = new List<long>();
+			if (applySort) {
+				translatedQuery.StartRecord = 0;
+				translatedQuery.RecordCount = Int32.MaxValue;
+			}
 			DbMgr.Dalc.ExecuteReader(translatedQuery, (rdr) => {
 				while (rdr.Read()) {
-					var id = Convert.ToInt64( rdr.GetValue(0) );
+					var id = Convert.ToInt64(rdr.GetValue(0));
 					ids.Add(id);
 				}
 			});
-			return ids.ToArray();
+			var idsArr = ids.ToArray();
+
+			if (applySort) {
+				// the following "in-code" implementation is used for abstract IDalc implementations
+				var sortProperties = new List<Property>();
+				foreach (var sortFld in sort) {
+					// id is not handled. TBD: predefined column
+					var p = dataClass.FindPropertyByID( sortFld.Field );
+					if (p==null)
+						throw new Exception("Unknown property "+sortFld.Field );
+					sortProperties.Add(p);
+				}
+
+				var idToObj = Load(idsArr, sortProperties.ToArray() );
+				ids.Sort(  (a,b) => {
+					for (int i=0; i<sortProperties.Count; i++) {
+						var aVal = idToObj.ContainsKey(a) ? idToObj[a][sortProperties[i]] : null;
+						var bVal = idToObj.ContainsKey(b) ? idToObj[b][sortProperties[i]] : null;
+						var compareRes = DbValueComparer.Instance.Compare(aVal,bVal);
+						if (sort[i].SortDirection==System.ComponentModel.ListSortDirection.Descending)
+							compareRes = -compareRes;
+						if (compareRes!=0)
+							return compareRes;
+					}
+					return 0;
+				});
+				idsArr = ids.Skip(originalQuery.StartRecord).Take(originalQuery.RecordCount).ToArray();
+			}
+
+			return idsArr;
 		}
 
 		public int ObjectsCount(Query q) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
-			var translatedQuery = new Query(new QTable(ObjectSourceName, q.Table.Alias));
+			var translatedQuery = new Query(new QTable(ObjectTableName, q.Table.Alias));
 			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
 
 			return DbMgr.Dalc.RecordsCount( translatedQuery );
@@ -646,7 +683,7 @@ namespace NI.Data.Storage {
 			if (prop==null)
 				throw new Exception(String.Format("Class ID={0} doesn't contain property ID={1}", dataClass.ID, field.Name) );
 
-			var pSrcName = DataTypeSourceNames[prop.DataType.ID];
+			var pSrcName = DataTypeTableNames[prop.DataType.ID];
 			return new QueryConditionNode( 
 				new QField( field.Prefix, "id",null ),
 				Conditions.In,

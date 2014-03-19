@@ -16,15 +16,15 @@ namespace NI.Data.Storage.Tests {
 	public class StorageDalcTests {
 		
 		DataSchema testSchema;
-		StubObjectContainerStorageContext objContext;
+		StubDataSetDalcStorageContext objContext;
 		IDalc storageDalc;
 
 		[SetUp]
 		public void createTestStorageDalc() {
-			testSchema = StubObjectContainerStorageContext.CreateTestSchema();
+			testSchema = StubDataSetDalcStorageContext.CreateTestSchema();
 			Func<DataSchema> getTestSchema = () => { return testSchema; };
 
-			objContext = new StubObjectContainerStorageContext(getTestSchema);
+			objContext = new StubDataSetDalcStorageContext(getTestSchema);
 			storageDalc = new StorageDalc(objContext.StorageDbMgr.Dalc, objContext.ObjectContainerStorage, getTestSchema);
 		}
 
@@ -146,6 +146,31 @@ namespace NI.Data.Storage.Tests {
 				storageDalc.LoadValue( new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
 					Fields = new[] { (QField)"birthday" }
 				} ) );
+
+			// sort 
+			var companies = storageDalc.LoadAllRecords( new Query("companies") { 
+				Sort = new[] { new QSort("title", System.ComponentModel.ListSortDirection.Descending) } } );
+			Assert.AreEqual("Microsoft", companies[0]["title"] );
+			Assert.AreEqual("Google", companies[1]["title"] );
+
+			var sortedContactsQuery = new Query("contacts") {
+				Fields = new [] { (QField)"id" },
+				Sort = new[] { 
+					new QSort("birthday", System.ComponentModel.ListSortDirection.Ascending),
+					new QSort("is_primary", System.ComponentModel.ListSortDirection.Descending),
+					new QSort("name", System.ComponentModel.ListSortDirection.Descending) }
+				};
+			var sortedContactIds = storageDalc.LoadAllValues(sortedContactsQuery);
+
+			Assert.AreEqual(3, sortedContactIds[0]);
+			Assert.AreEqual(5, sortedContactIds[1]);
+			Assert.AreEqual(4, sortedContactIds[2]);
+
+			sortedContactsQuery.StartRecord = 1;
+			sortedContactsQuery.RecordCount = 1;
+			var pagedContactIds = storageDalc.LoadAllValues( sortedContactsQuery );
+			Assert.AreEqual(1, pagedContactIds.Length);
+			Assert.AreEqual(5, pagedContactIds[0]);
 		}
 
 	}

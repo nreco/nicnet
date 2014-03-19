@@ -84,6 +84,8 @@ namespace NI.Data.Storage
 				} else {
 					var queryProps = new List<Property>();
 					foreach (var fld in query.Fields) {
+						if (fld.Name=="id") continue; // tmp
+
 						var prop = dataClass.FindPropertyByID(fld.Name);
 						if (prop==null || fld.Prefix!=query.Table.Alias)
 							throw new Exception(String.Format("Unknown field {0}", fld));

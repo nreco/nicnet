@@ -26,14 +26,14 @@ using NI.Data.Storage;
 
 namespace NI.Data.Storage.Tests {
 
-	public class StubObjectContainerStorageContext {
+	public class StubDataSetDalcStorageContext {
 
 		public DataSet StorageDS;
 		DataSetDalc StorageDalc;
 		public DataRowDalcMapper StorageDbMgr;
 		public IObjectContainerStorage ObjectContainerStorage;
 
-		public StubObjectContainerStorageContext(Func<DataSchema> ontologyPrv) {
+		public StubDataSetDalcStorageContext(Func<DataSchema> ontologyPrv) {
 			InitStorageDS();
 			StorageDalc = new DataSetDalc(StorageDS);
 

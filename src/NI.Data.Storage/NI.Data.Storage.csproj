@@ -58,6 +58,7 @@
     <Compile Include="Model\Property.cs" />
     <Compile Include="ObjectContainerDalcStorage.cs" />
     <Compile Include="DataSchemaDalcStorage.cs" />
+    <Compile Include="ObjectContainerSqlDalcStorage.cs" />
     <Compile Include="Service\Actions\GetDataSchema.cs" />
     <Compile Include="Service\ApiException.cs" />
     <Compile Include="Service\BasicAuthorizationManager.cs" />

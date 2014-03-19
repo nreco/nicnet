@@ -41,9 +41,9 @@ namespace NI.Data.Storage.Tests
 
 		[Test]
 		public void InsertLoadUpdateDelete() {
-			var o = StubObjectContainerStorageContext.CreateTestSchema();
+			var o = StubDataSetDalcStorageContext.CreateTestSchema();
 
-			var objPersisterContext = new StubObjectContainerStorageContext( () => { return o; } );
+			var objPersisterContext = new StubDataSetDalcStorageContext( () => { return o; } );
 
 			var googCompany = new ObjectContainer(o.FindClassByID("companies"));
 			googCompany["title"] = "Google";
