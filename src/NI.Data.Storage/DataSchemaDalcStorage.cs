@@ -25,7 +25,7 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 
-	public class DataSchemaDalcStorage {
+	public class DataSchemaDalcStorage : IDataSchemaStorage {
 
 		protected DataRowDalcMapper DbContext { get; set; }
 
@@ -34,22 +34,22 @@ namespace NI.Data.Storage {
 		protected ObjectDalcMapper<RelationshipData> RelationshipPersister { get; set; }
 		protected ObjectDalcMapper<PropertyToClass> PropertyToClassPersister { get; set; }
 
-		public string ClassSourceName { get; set; }
+		public string ClassTableName { get; set; }
 		public IDictionary<string, string> ClassFieldMapping { get; private set; }
 
-		public string PropertySourceName { get; set; }
+		public string PropertyTableName { get; set; }
 		public IDictionary<string, string> PropertyFieldMapping { get; private set; }
 
-		public string RelationshipSourceName { get; set; }
+		public string RelationshipTableName { get; set; }
 		public IDictionary<string, string> RelationshipFieldMapping { get; private set; }
 
-		public string PropertyToClassSourceName { get; set; }
+		public string PropertyToClassTableName { get; set; }
 		public IDictionary<string, string> PropertyToClassFieldMapping { get; private set; }
 
 		public DataSchemaDalcStorage(DataRowDalcMapper dbMgr) {
 			DbContext = dbMgr;
 
-			ClassSourceName = "metadata_classes";
+			ClassTableName = "metadata_classes";
 			ClassFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
@@ -59,9 +59,9 @@ namespace NI.Data.Storage {
 				{"predicate", "IsPredicate"},
 				{"compact_id", "CompactID"}
 			};
-			ClassPersister = new ObjectDalcMapper<Class>(DbContext, ClassSourceName, ClassFieldMapping);
+			ClassPersister = new ObjectDalcMapper<Class>(DbContext, ClassTableName, ClassFieldMapping);
 
-			PropertySourceName = "metadata_properties";
+			PropertyTableName = "metadata_properties";
 			PropertyFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
@@ -71,10 +71,10 @@ namespace NI.Data.Storage {
 				{"multivalue", "Multivalue"},
 				{"compact_id", "CompactID"}
 			};
-			PropertyPersister = new ObjectDalcMapper<Property>(DbContext, PropertySourceName,
+			PropertyPersister = new ObjectDalcMapper<Property>(DbContext, PropertyTableName,
 				new PropertyMapper(PropertyFieldMapping) );
 
-			RelationshipSourceName = "metadata_class_relationships";
+			RelationshipTableName = "metadata_class_relationships";
 			RelationshipFieldMapping = new Dictionary<string, string>() {
 				{"subject_class_id", "SubjectClassID"},
 				{"predicate_class_id", "PredicateClassID"},
@@ -82,22 +82,22 @@ namespace NI.Data.Storage {
 				{"subject_multiplicity", "SubjectMultiplicity"},
 				{"object_multiplicity", "ObjectMultiplicity"}
 			};
-			RelationshipPersister = new ObjectDalcMapper<RelationshipData>(DbContext, RelationshipSourceName, RelationshipFieldMapping);
+			RelationshipPersister = new ObjectDalcMapper<RelationshipData>(DbContext, RelationshipTableName, RelationshipFieldMapping);
 
-			PropertyToClassSourceName = "metadata_property_to_class";
+			PropertyToClassTableName = "metadata_property_to_class";
 			PropertyToClassFieldMapping = new Dictionary<string, string>() {
 				{"class_id", "ClassID"},
 				{"property_id", "PropertyID"}
 			};
-			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassSourceName, PropertyToClassFieldMapping);
+			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassTableName, PropertyToClassFieldMapping);
 		}
 
 		public DataSchema GetSchema() {
-			var classes = ClassPersister.LoadAll(new Query(ClassSourceName) );
-			var props = PropertyPersister.LoadAll(new Query(PropertySourceName) );
+			var classes = ClassPersister.LoadAll(new Query(ClassTableName) );
+			var props = PropertyPersister.LoadAll(new Query(PropertyTableName) );
 
-			var relData = RelationshipPersister.LoadAll(new Query(RelationshipSourceName));
-			var propToClass = PropertyToClassPersister.LoadAll(new Query(PropertyToClassSourceName));
+			var relData = RelationshipPersister.LoadAll(new Query(RelationshipTableName));
+			var propToClass = PropertyToClassPersister.LoadAll(new Query(PropertyToClassTableName));
 			
 			var dataSchema = new DataSchema(classes, props);
 

@@ -16,15 +16,15 @@ namespace NI.Data.Storage.Tests {
 	public class StorageDalcTests {
 		
 		DataSchema testSchema;
-		StubDataSetDalcStorageContext objContext;
+		DataSetStorageContext objContext;
 		IDalc storageDalc;
 
 		[SetUp]
 		public void createTestStorageDalc() {
-			testSchema = StubDataSetDalcStorageContext.CreateTestSchema();
+			testSchema = DataSetStorageContext.CreateTestSchema();
 			Func<DataSchema> getTestSchema = () => { return testSchema; };
 
-			objContext = new StubDataSetDalcStorageContext(getTestSchema);
+			objContext = new DataSetStorageContext(getTestSchema);
 			storageDalc = new StorageDalc(objContext.StorageDbMgr.Dalc, objContext.ObjectContainerStorage, getTestSchema);
 		}
 

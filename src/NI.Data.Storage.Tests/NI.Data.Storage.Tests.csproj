@@ -48,13 +48,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObjectContainerSqlDalcStorageTests.cs" />
+    <Compile Include="SQLiteStorageContext.cs" />
     <Compile Include="StorageDalcTests.cs" />
-    <Compile Include="StubDataSetDalcStorageContext.cs" />
+    <Compile Include="DataSetStorageContext.cs" />
     <Compile Include="ObjectContainerDalcStorageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NI.Data.SQLite\NI.Data.SQLite.csproj">
+      <Project>{ef36d55d-e325-4b6e-b19f-1392776e72bf}</Project>
+      <Name>NI.Data.SQLite</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NI.Data.Storage\NI.Data.Storage.csproj">
       <Project>{42986abf-91f8-4697-ba95-f0e9ec5ae97e}</Project>
       <Name>NI.Data.Storage</Name>

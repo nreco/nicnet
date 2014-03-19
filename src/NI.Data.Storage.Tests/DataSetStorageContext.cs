@@ -26,14 +26,14 @@ using NI.Data.Storage;
 
 namespace NI.Data.Storage.Tests {
 
-	public class StubDataSetDalcStorageContext {
+	public class DataSetStorageContext {
 
 		public DataSet StorageDS;
 		DataSetDalc StorageDalc;
 		public DataRowDalcMapper StorageDbMgr;
 		public IObjectContainerStorage ObjectContainerStorage;
 
-		public StubDataSetDalcStorageContext(Func<DataSchema> ontologyPrv) {
+		public DataSetStorageContext(Func<DataSchema> ontologyPrv) {
 			InitStorageDS();
 			StorageDalc = new DataSetDalc(StorageDS);
 
@@ -74,7 +74,7 @@ namespace NI.Data.Storage.Tests {
 
 		}
 
-		private DataTable CreateObjectLogTable() {
+		public static DataTable CreateObjectLogTable() {
 			var t = new DataTable("objects_log");
 			var idCol = t.Columns.Add("id", typeof(long));
 			idCol.AutoIncrement = true;
@@ -91,7 +91,7 @@ namespace NI.Data.Storage.Tests {
 			return t;
 		}
 
-		private DataTable CreateObjectTable() {
+		public static DataTable CreateObjectTable() {
 			var t = new DataTable("objects");
 			var idCol = t.Columns.Add("id", typeof(long));
 			idCol.AutoIncrement = true;
@@ -103,7 +103,7 @@ namespace NI.Data.Storage.Tests {
 			return t;
 		}
 
-		private DataTable CreateRelationsTable() {
+		public static DataTable CreateRelationsTable() {
 			var t = new DataTable("object_relations");
 			var sId = t.Columns.Add("subject_id", typeof(long) );
 			var predClassCompId = t.Columns.Add("predicate_class_compact_id", typeof(int) );
@@ -111,7 +111,7 @@ namespace NI.Data.Storage.Tests {
 			t.PrimaryKey = new[] { sId, predClassCompId, oId };
 			return t;
 		}
-		private DataTable CreateRelationsLogTable() {
+		public static DataTable CreateRelationsLogTable() {
 			var t = new DataTable("object_relations_log");
 			var sId = t.Columns.Add("subject_id", typeof(long));
 			var predClassCompId = t.Columns.Add("predicate_class_compact_id", typeof(int));
@@ -132,7 +132,7 @@ namespace NI.Data.Storage.Tests {
 		}
 
 
-		DataTable CreateValueTable(string tableName, Type valueType) {
+		public static DataTable CreateValueTable(string tableName, Type valueType) {
 			var t = new DataTable(tableName);
 			var idCol = t.Columns.Add("id", typeof(long));
 			idCol.AutoIncrement = true;
@@ -145,7 +145,7 @@ namespace NI.Data.Storage.Tests {
 			t.PrimaryKey = new[] { idCol };
 			return t;
 		}
-		DataTable CreateValueLogTable(string tableName, Type valueType) {
+		public static DataTable CreateValueLogTable(string tableName, Type valueType) {
 			var t = new DataTable(tableName);
 			var idCol = t.Columns.Add("id", typeof(long));
 			idCol.AutoIncrement = true;
