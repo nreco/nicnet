@@ -42,13 +42,16 @@ namespace NI.Data.Storage.Tests {
 		public SQLiteStorageContext() {
 			dbFileName = Path.GetTempFileName() + ".db";
 			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=False;", dbFileName);
-			StorageDalc = new DbDalc(new SQLiteDalcFactory(), connStr);
+			var sqliteDalcFactory = new SQLiteDalcFactory();
+			Connection = sqliteDalcFactory.CreateConnection();
+			Connection.ConnectionString = connStr;
+			StorageDalc = new DbDalc(sqliteDalcFactory, Connection);
 
 			InitDbSchema();
 
 			StorageDbMgr = new DataRowDalcMapper(StorageDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
 			DataSchemaStorage = new DataSchemaDalcStorage(StorageDbMgr);
-			ObjectContainerStorage = new ObjectContainerDalcStorage(StorageDbMgr, StorageDalc, DataSchemaStorage.GetSchema);
+			ObjectContainerStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, StorageDalc, DataSchemaStorage.GetSchema);
 		}
 
 
@@ -59,6 +62,27 @@ namespace NI.Data.Storage.Tests {
 			if (dbFileName != null && File.Exists(dbFileName))
 				File.Delete(dbFileName);
 
+		}
+
+		public void CreateTestDataSchema() {
+			StorageDbMgr.Insert( "metadata_classes", new Dictionary<string,object>() {
+				{"id", "companies"},
+				{"name", "Company"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"predicate", false},
+				{"compact_id", 1}
+			});
+			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
+				{"id", "contacts"},
+				{"name", "Contact"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"predicate", false},
+				{"compact_id", 2}
+			});
 		}
 
 		void InitDbSchema() {
@@ -86,17 +110,19 @@ namespace NI.Data.Storage.Tests {
 
 			StorageDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_class_relationships]  (
-					[subject_class_id] INTEGER PRIMARY KEY,
-					[predicate_class_id] INTEGER PRIMARY KEY,
-					[object_class_id] INTEGER PRIMARY KEY,
+					[subject_class_id] INTEGER,
+					[predicate_class_id] INTEGER,
+					[object_class_id] INTEGER,
 					[subject_multiplicity] INTEGER,
-					[object_multiplicity] INTEGER
+					[object_multiplicity] INTEGER,
+					PRIMARY KEY (subject_class_id,predicate_class_id,object_class_id)
 				)");
 
 			StorageDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_property_to_class]  (
-					[property_id] TEXT PRIMARY KEY,
-					[class_id] TEXT PRIMARY KEY
+					[property_id] TEXT,
+					[class_id] TEXT,
+					PRIMARY KEY (property_id, class_id)
 				)");
 
 			
@@ -117,9 +143,10 @@ namespace NI.Data.Storage.Tests {
 
 			StorageDalc.ExecuteNonQuery(@"
 				CREATE TABLE [object_relations]  (
-					[subject_id] INTEGER PRIMARY KEY,
-					[predicate_class_compact_id] INTEGER PRIMARY KEY,
-					[object_id] INTEGER PRIMARY KEY
+					[subject_id] INTEGER,
+					[predicate_class_compact_id] INTEGER,
+					[object_id] INTEGER,
+					PRIMARY KEY (subject_id,predicate_class_compact_id,object_id)
 				)");
 			StorageDalc.ExecuteNonQuery(@"
 				CREATE TABLE [object_relations_log]  (
