@@ -33,7 +33,6 @@ namespace NI.Data
 		private int _StartRecord = 0;
 		private int _RecordCount = Int32.MaxValue;
 		private QTable _Table = null;
-		private IDictionary _ExtendedProperties = null;
 		
 		/// <summary>
 		/// Query condition represented by QueryNode. Can be null.
@@ -91,14 +90,7 @@ namespace NI.Data
 		/// Get or set query extended properties. 
 		/// </summary>
 		/// <remarks>Extended properties may be used by concrete implementations of DALC</remarks>
-		public IDictionary ExtendedProperties {
-			get {
-				if (_ExtendedProperties==null)
-					_ExtendedProperties = new Hashtable();
-				return _ExtendedProperties;
-			}
-			set { _ExtendedProperties = value; }
-		}
+		public IDictionary<string,object> ExtendedProperties { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the Query with specified table name
@@ -147,7 +139,8 @@ namespace NI.Data
 			_RecordCount = q.RecordCount;
 			Condition = q.Condition;
 			_Fields = q.Fields;
-			_ExtendedProperties = new Hashtable( q.ExtendedProperties );
+			if (q.ExtendedProperties!=null)
+				ExtendedProperties = new Dictionary<string,object>( q.ExtendedProperties );
 		}
 		
 		/// <summary>

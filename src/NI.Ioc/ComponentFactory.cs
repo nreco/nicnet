@@ -325,7 +325,6 @@ namespace NI.Ioc
 							for (int i=0; i<constructorArgs.Length; i++)
 								constructorArgs[i] = componentInfo.ConstructorArgs[i].GetValue(factory, args[i].ParameterType );
 						} catch (Exception ex) {
-							Console.WriteLine(ex.ToString());
 							lastTryException = ex;
 							// try next constructor ...
 							continue;

@@ -77,8 +77,7 @@ namespace NI.Data
 					}
 				}
 			}
-			
-			cmd.CommandText = cmdSqlBuilder.BuildSelect(PrepareSelectQuery( query ) );
+			cmd.CommandText = cmdSqlBuilder.BuildSelect(PrepareSelectQuery(query));
 			return cmd;
 		}
 

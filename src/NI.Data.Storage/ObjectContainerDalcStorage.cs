@@ -600,8 +600,8 @@ namespace NI.Data.Storage {
 			translatedQuery.StartRecord = q.StartRecord;
 			translatedQuery.RecordCount = q.RecordCount;
 			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
-			
-			translatedQuery.Fields = new [] { new QField(q.Table.Alias, "id", null) };
+
+			translatedQuery.Fields = new[] { new QField(q.Table.Alias, "id", null) };
 			return LoadTranslatedQueryInternal(dataClass, translatedQuery, q, q.Sort );
 		}
 

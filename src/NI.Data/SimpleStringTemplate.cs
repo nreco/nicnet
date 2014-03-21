@@ -18,11 +18,7 @@ namespace NI.Data {
 		/// <summary>
 		/// Performs default SQL template parsing that can handle simple code snippets
 		/// </summary>
-		public string FormatTemplate(object viewContext) {
-			var callProps = new Dictionary<string, PropertyInfo>();
-			foreach (var p in viewContext.GetType().GetProperties()) {
-				callProps[p.Name] = p;
-			}
+		public string FormatTemplate(IDictionary<string,object> props) {
 
 			var sb = new StringBuilder();
 			var sqlTpl = Template;
@@ -32,7 +28,7 @@ namespace NI.Data {
 				if (c == '@') {
 					int endPos;
 					var name = ReadName(sqlTpl, pos + 1, out endPos);
-					if (name != null && callProps.ContainsKey(name)) {
+					if (name != null) {
 						string[] formatOptions;
 						try {
 							formatOptions = ReadFormatOptions(sqlTpl, endPos, out endPos);
@@ -42,7 +38,7 @@ namespace NI.Data {
 						}
 						object callRes;
 						try {
-							callRes = callProps[name].GetValue(viewContext, null);
+							callRes = props.ContainsKey(name) ? props[name] : null;
 						} catch (Exception ex) {
 							throw new Exception(String.Format("Evaluation of property {0} at position {1} failed: {2}",
 								name, pos, ex.Message), ex);
@@ -60,11 +56,11 @@ namespace NI.Data {
 							}
 						}
 						pos = endPos;
+						continue;
 					}
-				} else {
-					sb.Append(c);
-					pos++;
 				}
+				sb.Append(c);
+				pos++;
 			}
 
 			return sb.ToString();

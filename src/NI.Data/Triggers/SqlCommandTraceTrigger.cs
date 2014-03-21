@@ -77,7 +77,7 @@ namespace NI.Data.Triggers {
 		}
 
 		protected virtual void Write(IDbCommand cmd, string message) {
-			string msg = String.Format("[SQL][{1}] {2}", cmd.GetHashCode(), message );
+			string msg = String.Format("[SQL][{0}] {1}", cmd.GetHashCode(), message );
 			log.Info(msg);
 		}
 

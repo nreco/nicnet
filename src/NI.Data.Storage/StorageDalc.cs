@@ -31,20 +31,19 @@ namespace NI.Data.Storage
 
 		protected IObjectContainerStorage ObjectContainerStorage { get; set; }
 		protected IDalc UnderlyingDalc { get; set; }
-		
-		protected DataSchema Schema { get; set; }
+
+		protected Func<DataSchema> GetSchema { get; set; }
 
 		public StorageDalc(IDalc dalc, IObjectContainerStorage objContainerStorage, Func<DataSchema> getSchema) {
 			UnderlyingDalc = dalc;
-			Schema = getSchema();
+			GetSchema = getSchema;
 			ObjectContainerStorage = objContainerStorage;
         }
 
 
 		public DataTable Load(Query query, DataSet ds) {
-			var dataClass = Schema.FindClassByID(query.Table.Name);
+			var dataClass = GetSchema().FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-
 				// special count query
 				if (query.Fields!=null && 
 					query.Fields.Length == 1 && 
@@ -103,7 +102,7 @@ namespace NI.Data.Storage
 					}
 				}
 				var ids = ObjectContainerStorage.ObjectIds(query);
-				var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray() );
+				var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray());
 				foreach (var id in ids) {
 					if (objects.ContainsKey(id)) {
 						var obj = objects[id];
@@ -134,7 +133,7 @@ namespace NI.Data.Storage
 
 		public int Delete(Query query) {
 			var srcName = new QTable(query.Table.Name);
-			var dataClass = Schema.FindClassByID(query.Table.Name);
+			var dataClass = GetSchema().FindClassByID(query.Table.Name);
 			if (dataClass != null) {
 				var ids = ObjectContainerStorage.ObjectIds(query);
 				return ObjectContainerStorage.Delete(ids);
@@ -144,7 +143,7 @@ namespace NI.Data.Storage
 		}
 
 		public void Insert(string tableName, IDictionary<string, IQueryValue> data) {
-			var dataClass = Schema.FindClassByID(tableName);
+			var dataClass = GetSchema().FindClassByID(tableName);
 			if (dataClass != null) {
 				var objContainer = new ObjectContainer(dataClass);
 				foreach (var changeEntry in data) {
@@ -165,7 +164,7 @@ namespace NI.Data.Storage
 		}
 
 		public void Update(DataTable t) {
-			var dataClass = Schema.FindClassByID(t.TableName);
+			var dataClass = GetSchema().FindClassByID(t.TableName);
 			if (dataClass!=null) {
 				foreach (DataRow r in t.Rows) {
 					switch (r.RowState) {

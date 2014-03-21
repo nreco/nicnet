@@ -64,8 +64,6 @@ namespace NI.Data
 			CountFields = sqlCountFields;
 		}
 
-
-
 		public virtual bool IsMatchTable(QTable table) {
 			return TableName==table.Name;
 		}
@@ -87,14 +85,22 @@ namespace NI.Data
 		/// </summary>
 		protected string FormatSelectSql(ViewContext viewContext) {
 			var strTpl = new SimpleStringTemplate(SqlCommandTextTemplate);
-			return strTpl.FormatTemplate(viewContext);
+			var props = new Dictionary<string, object>();
+			foreach (var p in viewContext.GetType().GetProperties()) {
+				props[p.Name] = p.GetValue(viewContext, null);
+			}
+			if (viewContext.Query.ExtendedProperties != null) {
+				foreach (var extProp in viewContext.Query.ExtendedProperties) {
+					props[extProp.Key] = extProp.Value;
+				}
+			}
+			return strTpl.FormatTemplate(props);
 		}
 
 		public class ViewContext {
 			string _SqlOrderBy = null;
 			string _SqlWhere = null;
 			string _SqlFields = null;
-			string _SqlCountFields = null;
 
 			public Query Query { get; private set; }
 
@@ -159,7 +165,17 @@ namespace NI.Data
 				if (!String.IsNullOrEmpty(View.SelectFields)) {
 					return View.SelectFields;
 				}
-				return SqlBuilder.BuildFields(Query);
+				var origFields = Query.Fields;
+				try {
+					if (Query.Fields!=null) {
+						for (int i=0; i<Query.Fields.Length; i++) {
+							Query.Fields[i] = (QField)ApplyFieldMapping( Query.Fields[i] );
+						}
+					}
+					return SqlBuilder.BuildFields(Query);
+				} finally {
+					Query.Fields = origFields;
+				}
 			}
 
 			protected string BuildWhere() {
@@ -171,7 +187,7 @@ namespace NI.Data
 			protected virtual IQueryValue ApplyFieldMapping(IQueryValue qValue) {
 				if (qValue is QField) {
 					var qFld = (QField)qValue;
-					if (View.FieldMapping.ContainsKey(qFld.Name)) {
+					if (View.FieldMapping!=null && View.FieldMapping.ContainsKey(qFld.Name)) {
 						return new QField(qFld.Name, View.FieldMapping[qFld.Name]);
 					}
 				}
@@ -186,7 +202,7 @@ namespace NI.Data
 
 				var sortParts = new List<string>();
 				foreach (var sf in Query.Sort) {
-					if (View.FieldMapping.ContainsKey(sf.Field.Name)) {
+					if (View.FieldMapping!=null && View.FieldMapping.ContainsKey(sf.Field.Name)) {
 						var fldMapping = View.FieldMapping[sf.Field.Name];
 						sortParts.Add(sf.SortDirection == ListSortDirection.Ascending ?
 							fldMapping : String.Format("{0} {1}", fldMapping, QSort.Desc));

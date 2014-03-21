@@ -92,7 +92,12 @@ namespace NI.Data.Storage {
 			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassTableName, PropertyToClassFieldMapping);
 		}
 
+		protected DataSchema CachedDataSchema = null;
+
 		public DataSchema GetSchema() {
+			if (CachedDataSchema!=null)
+				return CachedDataSchema; // tmp for tests
+
 			var classes = ClassPersister.LoadAll(new Query(ClassTableName) );
 			var props = PropertyPersister.LoadAll(new Query(PropertyTableName) );
 
@@ -130,6 +135,7 @@ namespace NI.Data.Storage {
 				}
 			}
 
+			CachedDataSchema = dataSchema;
 			return dataSchema;
 		}
 

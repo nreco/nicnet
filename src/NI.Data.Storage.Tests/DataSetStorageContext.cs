@@ -165,6 +165,45 @@ namespace NI.Data.Storage.Tests {
 			return t;
 		}
 
+		public static DataTable CreateMetadataClassTable() {
+			var t = new DataTable("metadata_classes");
+			var idCol = t.Columns.Add("id", typeof(string));
+			t.Columns.Add("compact_id", typeof(int));
+			t.Columns.Add("name", typeof(string));
+			t.Columns.Add("hidden", typeof(bool));
+			t.Columns.Add("indexable", typeof(bool));
+			t.Columns.Add("predefined", typeof(bool));
+			t.Columns.Add("predicate", typeof(bool));
+
+			t.PrimaryKey = new[] { idCol };
+			return t;
+		}
+
+
+		public static DataTable CreateMetadataPropertyTable() {
+			var t = new DataTable("metadata_properties");
+			var idCol = t.Columns.Add("id", typeof(string));
+			t.Columns.Add("compact_id", typeof(int));
+			t.Columns.Add("name", typeof(string));
+			t.Columns.Add("hidden", typeof(bool));
+			t.Columns.Add("indexable", typeof(bool));
+			t.Columns.Add("predefined", typeof(bool));
+			t.Columns.Add("datatype", typeof(string));
+
+			t.PrimaryKey = new[] { idCol };
+			return t;
+		}
+
+		public static DataTable CreateMetadataPropertyToClassTable() {
+			var t = new DataTable("metadata_property_to_class");
+			var propIdCol = t.Columns.Add("property_id", typeof(string));
+			var classIdCol = t.Columns.Add("class_id", typeof(string));
+
+			t.PrimaryKey = new[] { propIdCol, classIdCol };
+			return t;
+		}
+
+
 
 		public static DataSchema CreateTestSchema() {
 			var classes = new[] {

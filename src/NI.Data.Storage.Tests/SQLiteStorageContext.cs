@@ -32,12 +32,13 @@ namespace NI.Data.Storage.Tests {
 
 	public class SQLiteStorageContext {
 
-		DbDalc StorageDalc;
+		DbDalc InternalDalc;
 		public IDbConnection Connection;
 		string dbFileName;
 		public DataRowDalcMapper StorageDbMgr;
 		public IObjectContainerStorage ObjectContainerStorage;
 		public DataSchemaDalcStorage DataSchemaStorage;
+		public IDalc StorageDalc;
 
 		public SQLiteStorageContext() {
 			dbFileName = Path.GetTempFileName() + ".db";
@@ -45,13 +46,32 @@ namespace NI.Data.Storage.Tests {
 			var sqliteDalcFactory = new SQLiteDalcFactory();
 			Connection = sqliteDalcFactory.CreateConnection();
 			Connection.ConnectionString = connStr;
-			StorageDalc = new DbDalc(sqliteDalcFactory, Connection);
+			InternalDalc = new DbDalc(sqliteDalcFactory, Connection, new [] {
+				new DbDalcView("objects_view", @"
+					SELECT @SqlFields
+					FROM objects
+					@Joins
+					@SqlWhere[where {0}]
+					@SqlOrderBy[order by {0}]
+				") {
+					FieldMapping = new Dictionary<string,string>() {
+						{"id", "objects.id"},
+						{"compact_class_id", "objects.compact_class_id"}
+					}
+				}
+			});
+			var dbEventsBroker = new DataEventBroker(InternalDalc);
+			var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
 
 			InitDbSchema();
 
-			StorageDbMgr = new DataRowDalcMapper(StorageDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
+			StorageDbMgr = new DataRowDalcMapper(InternalDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
 			DataSchemaStorage = new DataSchemaDalcStorage(StorageDbMgr);
-			ObjectContainerStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, StorageDalc, DataSchemaStorage.GetSchema);
+			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, DataSchemaStorage.GetSchema);
+			objStorage.ObjectViewName = "objects_view";
+			ObjectContainerStorage = objStorage;
+
+			StorageDalc = new StorageDalc(InternalDalc, ObjectContainerStorage, DataSchemaStorage.GetSchema );
 		}
 
 
@@ -83,11 +103,54 @@ namespace NI.Data.Storage.Tests {
 				{"predicate", false},
 				{"compact_id", 2}
 			});
+
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "name"},
+				{"name", "Name"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"datatype", "string"},
+				{"compact_id", 1}
+			});
+
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "birthday"},
+				{"name", "Birthday"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"datatype", "date"},
+				{"compact_id", 2}
+			});
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "is_primary"},
+				{"name", "Is Primary?"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"datatype", "boolean"},
+				{"compact_id", 3}
+			});
+
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "name"},
+				{"class_id", "companies"} } );
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "is_primary"},
+				{"class_id", "contacts"} });
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "name"},
+				{"class_id", "contacts"} });
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "birthday"},
+				{"class_id", "contacts"} });
+
 		}
 
 		void InitDbSchema() {
 
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_classes]  (
 					[id] TEXT PRIMARY KEY,
 					[name] TEXT,
@@ -98,17 +161,18 @@ namespace NI.Data.Storage.Tests {
 					[compact_id] INTEGER
 				)");
 
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_properties]  (
 					[id] TEXT PRIMARY KEY,
 					[name] TEXT,
+					[datatype] TEXT,
 					[hidden] INTEGER,
 					[indexable] INTEGER,
 					[predefined] INTEGER,
 					[compact_id] INTEGER
 				)");
 
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_class_relationships]  (
 					[subject_class_id] INTEGER,
 					[predicate_class_id] INTEGER,
@@ -118,7 +182,7 @@ namespace NI.Data.Storage.Tests {
 					PRIMARY KEY (subject_class_id,predicate_class_id,object_class_id)
 				)");
 
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_property_to_class]  (
 					[property_id] TEXT,
 					[class_id] TEXT,
@@ -126,36 +190,36 @@ namespace NI.Data.Storage.Tests {
 				)");
 
 			
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [objects]  (
 					[id] INTEGER PRIMARY KEY AUTOINCREMENT,
 					[compact_class_id] INTEGER
 				)");
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [objects_log]  (
 					[id] INTEGER PRIMARY KEY AUTOINCREMENT,
 					[compact_class_id] INTEGER,
 					[object_id] INTEGER,
 					[account_id] INTEGER,
-					[timestamp] INTEGER,
+					[timestamp] TEXT,
 					[action] TEXT
 				)");
 
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [object_relations]  (
 					[subject_id] INTEGER,
 					[predicate_class_compact_id] INTEGER,
 					[object_id] INTEGER,
 					PRIMARY KEY (subject_id,predicate_class_compact_id,object_id)
 				)");
-			StorageDalc.ExecuteNonQuery(@"
+			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [object_relations_log]  (
 					[id] INTEGER PRIMARY KEY AUTOINCREMENT,
 					[subject_id] INTEGER,
 					[predicate_class_compact_id] INTEGER,
 					[object_id] INTEGER,
 					[account_id] INTEGER,
-					[timestamp] INTEGER,
+					[timestamp] TEXT,
 					[deleted] INTEGER
 				)");
 
@@ -175,18 +239,18 @@ namespace NI.Data.Storage.Tests {
 					[property_compact_id] INTEGER,
 					[value] {1},
 					[account_id] INTEGER,
-					[timestamp] INTEGER,
+					[timestamp] TEXT,
 					[deleted] INTEGER
 				)
 			";
 
-			StorageDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_datetime_values", "INTEGER"));
-			StorageDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_number_values", "REAL"));
-			StorageDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_string_values", "TEXT"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_datetime_values", "TEXT"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_number_values", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_string_values", "TEXT"));
 
-			StorageDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_datetime_values_log", "INTEGER"));
-			StorageDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_number_values_log", "REAL"));
-			StorageDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_string_values_log", "TEXT"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_datetime_values_log", "TEXT"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_number_values_log", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_string_values_log", "TEXT"));
 
 		}
 
@@ -220,6 +284,11 @@ namespace NI.Data.Storage.Tests {
 
 			ds.Tables.Add(DataSetStorageContext.CreateObjectTable());
 			ds.Tables.Add(DataSetStorageContext.CreateObjectLogTable());
+
+			ds.Tables.Add(DataSetStorageContext.CreateMetadataClassTable());
+			ds.Tables.Add(DataSetStorageContext.CreateMetadataPropertyTable());
+			ds.Tables.Add(DataSetStorageContext.CreateMetadataPropertyToClassTable());
+
 			return ds;
 		}
 
