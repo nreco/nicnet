@@ -97,7 +97,6 @@ namespace NI.Data.Storage.Model {
 					: new Relationship[0];
 		}
 
-
 		public IEnumerable<Class> FindPropertyClasses(string propId) {
 			return ClassesByPropertyId.ContainsKey(propId) ?
 					ClassesByPropertyId[propId].AsEnumerable()

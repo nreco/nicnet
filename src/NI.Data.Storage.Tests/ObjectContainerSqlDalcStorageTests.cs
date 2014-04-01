@@ -42,7 +42,8 @@ namespace NI.Data.Storage.Tests {
 						var obj = new ObjectContainer( contactsClass );
 						obj["name"] = String.Format("Contact_{0}", i);
 						obj["is_primary"] = i%10==0;
-						obj["birthday"] = dt.AddHours( i%24 );
+						var birthday = dt.AddDays( i );
+						obj["birthday"] = birthday;
 						StorageContext.ObjectContainerStorage.Insert( obj );
 					}
 				});
@@ -56,10 +57,14 @@ namespace NI.Data.Storage.Tests {
 			}; 
 
 			var contactIds = StorageContext.ObjectContainerStorage.ObjectIds( selectWithSortQuery );
-			Assert.AreEqual( 100, contactIds.Length );
-			Assert.AreEqual( dt.AddHours(23), contactIds[0] );
-			Assert.AreEqual(dt.AddHours(23), contactIds[1]);
-			Assert.AreEqual(dt, contactIds[99]);
+			Assert.AreEqual( 10, contactIds.Length );
+			Assert.AreEqual( 91, contactIds[0] );
+			Assert.AreEqual( 1, contactIds[9] );
+			
+			var contacts = StorageContext.ObjectContainerStorage.Load( contactIds );
+			Assert.AreEqual(10, contacts.Count);
+			Assert.AreEqual( dt, contacts[contactIds[9]]["birthday"] ); //dt - smallest value that can be
+			Assert.True( (DateTime)contacts[contactIds[0]]["birthday"] > (DateTime)contacts[contactIds[9]]["birthday"]);
 		}
 
 		[TestFixtureTearDown]

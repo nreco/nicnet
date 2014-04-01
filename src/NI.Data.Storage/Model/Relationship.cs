@@ -42,7 +42,7 @@ namespace NI.Data.Storage.Model {
 
 
 		public override string ToString() {
-			return String.Format("Relationship(Subject:{0}, Predicate:{1}, Object:{2}", Subject.ID, Predicate.ID, Object.ID);
+			return String.Format("Relationship(Subject:{0}, Predicate:{1}, Object:{2})", Subject.ID, Predicate.ID, Object.ID);
 		}
 
 

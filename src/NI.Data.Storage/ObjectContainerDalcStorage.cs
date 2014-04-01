@@ -395,6 +395,13 @@ namespace NI.Data.Storage {
 					}
 				}
 				if (relRow == null) {
+					// check multiplicity constraint
+					if (!r.Relation.Multiplicity) {
+						//var currentRelations = ;
+						//if (currentRelations.Where(rr=>rr.Relation==).Count()>0)
+						//	throw new ConstraintException(String.Format("{0} doesn't allow multiplicity", r.Relation ) );
+					}
+
 					// create new relation entry
 					relRow = relTbl.NewRow();
 					relRow[subjIdFld] = r.SubjectID;
@@ -406,6 +413,12 @@ namespace NI.Data.Storage {
 			}
 			DbMgr.Update(relTbl);
 		}
+
+		/*protected Query ComposeSubjectRelationQuery(Relationship relationship, long subjectId) {
+			var q = new Query(ObjectRelationTableName);
+			var cond = QueryGroupNode.And((QField)"predicate_class_compact_id" == new QConst() );
+
+		}*/
 
 		public void RemoveRelations(params ObjectRelation[] relations) {
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
@@ -564,12 +577,13 @@ namespace NI.Data.Storage {
 				var predCompactId = Convert.ToInt32(relRow["predicate_class_compact_id"]);
 				
 				long relSubjId, relObjId;
-				if (objIds.Contains(subjId)) {
-					relSubjId = subjId;
-					relObjId = objId;
-				} else {
+				var isReversed = !objIds.Contains(subjId);
+				if (isReversed) {
 					relSubjId = objId;
 					relObjId = subjId;
+				} else {
+					relSubjId = subjId;
+					relObjId = objId;
 				}
 
 				var subjClass = objIdToClass[relSubjId];
@@ -579,7 +593,7 @@ namespace NI.Data.Storage {
 					continue;
 				}
 
-				var rel = subjClass.FindRelationship(predClass, objIdToClass[relObjId]);
+				var rel = subjClass.FindRelationship(predClass, objIdToClass[relObjId], isReversed);
 				if (rel!=null) {
 					rs.Add(new ObjectRelation(relSubjId, rel, relObjId));
 				} else {
