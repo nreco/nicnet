@@ -92,16 +92,27 @@ namespace NI.Data
 			foreach (var f in query.Fields) {
 				var fld = BuildValue((IQueryValue)f);
 				if (fld != f.Name) { //skip "as" for usual fields
-					fld = fld + " as " + f.Name;
+					fld = String.Format("({0}) as {1}", fld, f.Name);
 				}
 				joinFields.Add(fld);
 			}
 			return String.Join(",", joinFields.ToArray() );
 		}
 
+		protected override string BuildConditionLValue(QueryConditionNode node) {
+			var lValue = base.BuildConditionLValue(node);
+			return (node.LValue is Query) ?	"("+lValue+")" : lValue;
+		}
+
+		protected override string BuildConditionRValue(QueryConditionNode node) {
+			var rValue = base.BuildConditionRValue(node);
+			return (node.RValue is Query && ((node.Condition & Conditions.In) != Conditions.In)) ?
+				"(" + rValue + ")" : rValue;
+		}
+
 		public override string BuildValue(IQueryValue value) {
 			if (value is Query)
-				return "("+BuildSelectInternal( (Query)value, true )+")";
+				return BuildSelectInternal( (Query)value, true );
 
 			return base.BuildValue(value);
 		}

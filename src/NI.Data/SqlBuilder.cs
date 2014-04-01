@@ -48,24 +48,18 @@ namespace NI.Data
 		
 		protected virtual string BuildGroup(QueryGroupNode node) {
 			// do not render empty group
-			if (node.Nodes==null) return null;
-			
-			// if group contains only one node ignore group node...
+			if (node.Nodes==null || node.Nodes.Count==0) return null;
+
+			// if group contains only one node ignore group rendering logic
+			if (node.Nodes.Count==1)
+				return BuildExpression( node.Nodes[0] );
+
 			var subNodes = new List<string>();
 			foreach (QueryNode childNode in node.Nodes) {
 				string childNodeExpression = BuildExpression( childNode );
 				if (childNodeExpression!=null)
 					subNodes.Add( "("+childNodeExpression+")" ); 
 			}
-			
-			// if only one child node just ignore group node
-			if (subNodes.Count==1) {
-				string childNodeExpression = subNodes[0];
-				return childNodeExpression.Substring(1, childNodeExpression.Length-2);
-			}
-			
-			// do not render empty group
-			if (subNodes.Count==0) return null;
 			
 			return String.Join(
 				" "+node.GroupType.ToString()+" ",
@@ -85,8 +79,8 @@ namespace NI.Data
 				Conditions.In | Conditions.LessThan |
 				Conditions.Like | Conditions.Null
 				);
-			string lvalue = BuildValue( node.LValue);
-			string rvalue = BuildValue( node.RValue);
+			string lvalue = BuildConditionLValue(node);
+			string rvalue = BuildConditionRValue(node);
 			string res = null;
 			
 			switch (condition) {
@@ -125,6 +119,15 @@ namespace NI.Data
 			return res;
 		}
 		
+		protected virtual string BuildConditionLValue(QueryConditionNode node) {
+			return BuildValue( node.LValue);
+		}
+
+		protected virtual string BuildConditionRValue(QueryConditionNode node) {
+			return BuildValue( node.RValue);
+		}
+
+
 		public virtual string BuildValue(IQueryValue value) {
 			if (value==null) return null;
 			

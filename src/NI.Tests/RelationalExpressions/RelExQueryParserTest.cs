@@ -28,7 +28,7 @@ namespace NI.Tests.Data.RelationalExpressions
 		};
 
 		string[] oldRelExCommandTexts = new string[] {
-			@"SELECT value FROM tokens WHERE (id IN ((SELECT right_uid FROM custompage_to_token WHERE (left_uid=@p0) Or (left_uid=@p1)))) And (type=@p2)",
+			@"SELECT value FROM tokens WHERE (id IN (SELECT right_uid FROM custompage_to_token WHERE (left_uid=@p0) Or (left_uid=@p1))) And (type=@p2)",
 			@"SELECT id,unit_uid,money_equivalent FROM expenses WHERE expense_report_id=@p0",
 			@"SELECT * FROM users WHERE (id>@p0) Or (id<=@p1)",
 			@"SELECT * FROM users WHERE (id IS  NULL) And (id IS NOT NULL)"

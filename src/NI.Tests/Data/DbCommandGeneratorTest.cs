@@ -95,7 +95,7 @@ namespace NI.Tests.Data {
 
 			// SELECT TEST with prefixes and expressions
 			IDbCommand cmd = cmdGenerator.ComposeSelect( q );	
-			string masterSQL = "SELECT name,t.age as age,t.age*12 as age_months FROM test t WHERE (((name LIKE @p0) Or (NOT(age>=@p1))) And ((weight=@p2) And (type IN (@p3,@p4)))) Or ((name<>@p5) And (type IS NOT NULL))";
+			string masterSQL = "SELECT name,(t.age) as age,(t.age*12) as age_months FROM test t WHERE (((name LIKE @p0) Or (NOT(age>=@p1))) And ((weight=@p2) And (type IN (@p3,@p4)))) Or ((name<>@p5) And (type IS NOT NULL))";
 			
 			Assert.AreEqual( cmd.CommandText, masterSQL, "Select command generation failed");
 
@@ -104,7 +104,7 @@ namespace NI.Tests.Data {
 					new Query("accounts.a",
 						new QueryConditionNode( (QField)"a.id", Conditions.In, 
 							new Query("dbo.accounts.b", (QField)"a.id"!=(QField)"b.id" ) ) ) );
-			masterSQL = "SELECT * FROM accounts a WHERE a.id IN ((SELECT * FROM dbo.accounts b WHERE a.id<>b.id))";
+			masterSQL = "SELECT * FROM accounts a WHERE a.id IN (SELECT * FROM dbo.accounts b WHERE a.id<>b.id)";
 			Assert.AreEqual( masterSQL, cmd.CommandText);
 
 			DataSet ds = new DataSet();

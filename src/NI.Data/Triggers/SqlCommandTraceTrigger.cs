@@ -84,20 +84,19 @@ namespace NI.Data.Triggers {
 
 		protected string FormatDbCommand(IDbCommand dbCmd) {
 			var commandText = new StringBuilder( dbCmd.CommandText );
-			
-			for (int i=dbCmd.Parameters.Count-1; i>=0; i--) {
+
+			for (int i = 0; i < dbCmd.Parameters.Count; i++) {
 				IDbDataParameter param = (IDbDataParameter)dbCmd.Parameters[i];
-				
-				commandText = commandText.Replace( param.ParameterName, FormatDbParameterValue( param ) );
+				commandText.AppendLine();
+				commandText.AppendFormat( "DbParameter#{0}[{1}]={2}", i, param.ParameterName, FormatDbParameterValue(param));
 			}
-			
+
 			return commandText.ToString();
 		}
 
 		protected string FormatDbParameterValue(IDbDataParameter dbParam) {
-			string paramValue = dbParam.Value==null || dbParam.Value==DBNull.Value ?
+			return dbParam.Value==null || dbParam.Value==DBNull.Value ?
 				"NULL" : Convert.ToString(dbParam.Value);
-			return "'"+paramValue.Replace("'", "''")+"'";
 		}
 
 
