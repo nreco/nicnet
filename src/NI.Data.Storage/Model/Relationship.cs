@@ -22,22 +22,29 @@ using System.Threading.Tasks;
 namespace NI.Data.Storage.Model {
 	
     /// <summary>
-    /// Generic class relationship
+    /// Represents relationship determined by subject, predictate and object classes
     /// </summary>
 	public class Relationship {
 
-		public Class Subject { get; set; }
+		public string ID { get; private set; }
 
-        public Class Predicate { get; set; }
+		public Class Subject { get; private set; }
 
-        public Class Object { get; set; }
+        public Class Predicate { get; private set; }
 
-        public bool Multiplicity { get; set; }
+        public Class Object { get; private set; }
 
-		public bool Reversed { get; set; }
+        public bool Multiplicity { get; private set; }
 
-		public Relationship() {
+		public bool Reversed { get; private set; }
 
+		public Relationship(Class subj, Class predicate, Class obj, bool multiplicity, bool reversed) {
+			Subject = subj;
+			Predicate = predicate;
+			Object = obj;
+			Multiplicity = multiplicity;
+			Reversed = reversed;
+			ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
 		}
 
 

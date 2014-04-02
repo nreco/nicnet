@@ -397,9 +397,8 @@ namespace NI.Data.Storage {
 				if (relRow == null) {
 					// check multiplicity constraint
 					if (!r.Relation.Multiplicity) {
-						//var currentRelations = ;
-						//if (currentRelations.Where(rr=>rr.Relation==).Count()>0)
-						//	throw new ConstraintException(String.Format("{0} doesn't allow multiplicity", r.Relation ) );
+						if (DbMgr.Dalc.RecordsCount( ComposeSubjectRelationQuery(r.Relation, r.SubjectID) )>0)
+							throw new ConstraintException(String.Format("{0} doesn't allow multiplicity", r.Relation ) );
 					}
 
 					// create new relation entry
@@ -414,11 +413,16 @@ namespace NI.Data.Storage {
 			DbMgr.Update(relTbl);
 		}
 
-		/*protected Query ComposeSubjectRelationQuery(Relationship relationship, long subjectId) {
+		protected Query ComposeSubjectRelationQuery(Relationship relationship, long subjectId) {
 			var q = new Query(ObjectRelationTableName);
-			var cond = QueryGroupNode.And((QField)"predicate_class_compact_id" == new QConst() );
-
-		}*/
+			var cond = QueryGroupNode.And((QField)"predicate_class_compact_id" == new QConst(relationship.Predicate.CompactID));
+			if (relationship.Reversed) {
+				cond.Nodes.Add( (QField)"object_id"==new QConst(subjectId) );
+			} else {
+				cond.Nodes.Add((QField)"subject_id" == new QConst(subjectId));
+			}
+			return q;
+		}
 
 		public void RemoveRelations(params ObjectRelation[] relations) {
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
@@ -605,6 +609,33 @@ namespace NI.Data.Storage {
 			return rs;
 		}
 
+		public IEnumerable<ObjectRelation> LoadRelations(Query query) {
+			if (query.Fields!=null)
+				throw new NotSupportedException("Relation query does not support explicit list of fields");
+
+			var schema = GetSchema();
+			// check for relation table
+			var relationship = schema.Relationships.Where(r => !r.Reversed && r.ID == query.Table.Name).FirstOrDefault();
+			if (relationship == null)
+				throw new Exception(String.Format("Relationship with ID={0} does not exist", query.Table.Name));
+
+			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+			var relQuery = qTranslator.TranslateSubQuery( query );
+			relQuery.Sort = query.Sort; // leave as is
+			
+			var rs = new List<ObjectRelation>();
+			DbMgr.Dalc.ExecuteReader( relQuery, (rdr) => {
+				while (rdr.Read()) {
+					var subjectId = Convert.ToInt64( rdr["subject_id"] );
+					var objectId = Convert.ToInt64( rdr["object_id"] );
+					rs.Add( new ObjectRelation(subjectId, relationship, objectId) );
+				}
+			});
+
+			return rs;
+		}
+
+
 		public long[] ObjectIds(Query q) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
@@ -685,21 +716,10 @@ namespace NI.Data.Storage {
 			return conditionGrp;
 		}
 
-
-
-		public QueryNode ComposeFieldCondition(Class dataClass, QField field, Conditions cnd, IQueryValue val) {
-			//tmp hack for predefined fields
-			if (field.Name=="id") {
-				return new QueryConditionNode( field, cnd, val);
-			}
-
-			var prop = dataClass.FindPropertyByID(field.Name);
-			if (prop==null)
-				throw new Exception(String.Format("Class ID={0} doesn't contain property ID={1}", dataClass.ID, field.Name) );
-
+		public QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
 			var pSrcName = DataTypeTableNames[prop.DataType.ID];
-			return new QueryConditionNode( 
-				new QField( field.Prefix, "id",null ),
+			return new QueryConditionNode(
+				new QField(null, "id", null),
 				Conditions.In,
 				new Query( pSrcName, 
 					(QField)"property_compact_id"==(QConst)prop.CompactID

@@ -203,7 +203,20 @@ namespace NI.Data.Storage.Tests {
 			return t;
 		}
 
+		public static DataTable CreateMetadataRelationshipTable() {
+			var t = new DataTable("metadata_class_relationships");
+			var idCol = t.Columns.Add("id", typeof(int));
+			idCol.AutoIncrement=true;
 
+			t.Columns.Add("subject_class_id", typeof(string));
+			t.Columns.Add("predicate_class_id", typeof(string));
+			t.Columns.Add("object_class_id", typeof(string));
+			t.Columns.Add("subject_multiplicity", typeof(bool));
+			t.Columns.Add("object_multiplicity", typeof(bool));
+
+			t.PrimaryKey = new[] { idCol };
+			return t;
+		}
 
 		public static DataSchema CreateTestSchema() {
 			var classes = new[] {
@@ -274,42 +287,40 @@ namespace NI.Data.Storage.Tests {
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
 
-			var contactToCompanyRel = new Relationship() {
-				Subject = o.FindClassByID("contacts"),
-				Predicate = o.FindClassByID("contactCompany"),
-				Object = o.FindClassByID("companies"),
-				Reversed = false,
-				Multiplicity = false
-			};
+			var contactToCompanyRel = new Relationship(
+					o.FindClassByID("contacts"),
+					o.FindClassByID("contactCompany"),
+					o.FindClassByID("companies"),
+					false,
+					false );
 			o.AddRelationship(contactToCompanyRel);
 
-			var companyToContactRel = new Relationship() {
-				Object = o.FindClassByID("contacts"),
-				Predicate = o.FindClassByID("contactCompany"),
-				Subject = o.FindClassByID("companies"),
-				Reversed = true,
-				Multiplicity = true
-			};
+			var companyToContactRel = new Relationship(
+				o.FindClassByID("companies"),
+				o.FindClassByID("contactCompany"),
+				o.FindClassByID("contacts"),
+				true,
+				true);
 
 			o.AddRelationship(companyToContactRel);
 
-			var companyToParentRel = new Relationship() {
-				Subject = o.FindClassByID("companies"),
-				Predicate = o.FindClassByID("parentCompany"),
-				Object = o.FindClassByID("companies"),
-				Reversed = false,
-				Multiplicity = false
-			};
+			var companyToParentRel = new Relationship(
+				o.FindClassByID("companies"),
+				o.FindClassByID("parentCompany"),
+				o.FindClassByID("companies"),
+				false,
+				false
+			);
 
 			o.AddRelationship(companyToParentRel);
 
-			var companyToChildRel = new Relationship() {
-				Object = o.FindClassByID("companies"),
-				Predicate = o.FindClassByID("parentCompany"),
-				Subject = o.FindClassByID("companies"),
-				Reversed = true,
-				Multiplicity = true
-			};
+			var companyToChildRel = new Relationship(
+				o.FindClassByID("companies"),
+				o.FindClassByID("parentCompany"),
+				o.FindClassByID("companies"),
+				true,
+				true
+			);
 
 			o.AddRelationship(companyToChildRel);
 

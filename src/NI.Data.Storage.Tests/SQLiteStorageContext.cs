@@ -104,6 +104,24 @@ namespace NI.Data.Storage.Tests {
 				{"compact_id", 2}
 			});
 
+			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
+				{"id", "employee"},
+				{"name", "Employee"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"predicate", true},
+				{"compact_id", 3}
+			});
+
+			StorageDbMgr.Insert("metadata_class_relationships", new Dictionary<string, object>() {
+				{"subject_class_id", "contacts"},
+				{"predicate_class_id", "employee"},
+				{"object_class_id", "companies"},
+				{"subject_multiplicity", true},
+				{"object_multiplicity", false}
+			});
+
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "name"},
 				{"name", "Name"},
@@ -174,9 +192,9 @@ namespace NI.Data.Storage.Tests {
 
 			InternalDalc.ExecuteNonQuery(@"
 				CREATE TABLE [metadata_class_relationships]  (
-					[subject_class_id] INTEGER,
-					[predicate_class_id] INTEGER,
-					[object_class_id] INTEGER,
+					[subject_class_id] TEXT,
+					[predicate_class_id] TEXT,
+					[object_class_id] TEXT,
 					[subject_multiplicity] INTEGER,
 					[object_multiplicity] INTEGER,
 					PRIMARY KEY (subject_class_id,predicate_class_id,object_class_id)
@@ -289,6 +307,7 @@ namespace NI.Data.Storage.Tests {
 			ds.Tables.Add(DataSetStorageContext.CreateMetadataPropertyTable());
 			ds.Tables.Add(DataSetStorageContext.CreateMetadataPropertyToClassTable());
 
+			ds.Tables.Add(DataSetStorageContext.CreateMetadataRelationshipTable());
 			return ds;
 		}
 

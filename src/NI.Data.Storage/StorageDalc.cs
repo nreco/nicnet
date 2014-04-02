@@ -44,18 +44,44 @@ namespace NI.Data.Storage
 		public DataTable Load(Query query, DataSet ds) {
 			var dataClass = GetSchema().FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-				if (dataClass.IsPredicate) {
-					return LoadRelationTable(query,ds,dataClass);
-				} else {
-					return LoadObjectTable(query,ds,dataClass);
-				}
-			} else {
-				return UnderlyingDalc.Load(query, ds);
+				return LoadObjectTable(query, ds, dataClass);
 			}
+			// check for relation table
+			var relations = dataClass.Relationships.Where( r=>r.ID==query.Table.Name ).ToArray();
+			if (relations.Length>0) {
+				// matched
+				return LoadRelationTable(query, ds);
+			}
+
+			return UnderlyingDalc.Load(query, ds);
 		}
 
-		protected DataTable LoadRelationTable(Query query, DataSet ds, Class predicateClass) {
-			return null;
+		protected DataTable LoadRelationTable(Query query, DataSet ds) {
+			var relations = ObjectContainerStorage.LoadRelations(query);
+			if (!ds.Tables.Contains(query.Table.Name))
+				ds.Tables.Add(query.Table.Name);
+				
+			var tbl = ds.Tables[query.Table.Name];
+			// ensure columns
+			var fields = query.Fields ?? new[] { (QField)"subject_id", (QField)"object_id" };
+			foreach (var f in fields)
+				if (!tbl.Columns.Contains(f.Name))
+					tbl.Columns.Add( f.Name, typeof(long) );
+
+			var loadSubj = tbl.Columns.Contains("subject_id");
+			var loadObj = tbl.Columns.Contains("object_id");
+			foreach (var rel in relations) {
+				var row = tbl.NewRow();
+				if (loadSubj)
+					row["subject_id"] = rel.SubjectID;
+				if (loadObj)
+					row["object_id"] = rel.ObjectID;
+
+				tbl.Rows.Add(row);
+			}
+			tbl.AcceptChanges();
+
+			return tbl;
 		}
 
 		protected DataTable LoadObjectTable(Query query, DataSet ds, Class dataClass) {

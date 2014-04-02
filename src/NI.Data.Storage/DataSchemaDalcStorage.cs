@@ -118,20 +118,8 @@ namespace NI.Data.Storage {
 				var objClass = dataSchema.FindClassByID(r.ObjectClassID);
 				var predClass = dataSchema.FindClassByID(r.PredicateClassID);
 				if (subjClass != null && objClass != null && predClass != null) {
-					dataSchema.AddRelationship(new Relationship() {
-						Subject = subjClass,
-						Object = objClass,
-						Predicate = predClass,
-						Multiplicity = r.ObjectMultiplicity,
-						Reversed = false
-					});
-					dataSchema.AddRelationship(new Relationship() {
-						Subject = objClass,
-						Object = subjClass,
-						Predicate = predClass,
-						Multiplicity = r.SubjectMultiplicity,
-						Reversed = true
-					});
+					dataSchema.AddRelationship(new Relationship(subjClass, predClass, objClass, r.SubjectMultiplicity, false));
+					dataSchema.AddRelationship(new Relationship(objClass, predClass, subjClass, r.ObjectMultiplicity, true));
 				}
 			}
 

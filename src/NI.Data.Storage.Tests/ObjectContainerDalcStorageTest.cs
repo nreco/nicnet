@@ -139,7 +139,52 @@ namespace NI.Data.Storage.Tests
 				 "Expected 1 relation for Google company after Mary removal");
 
 
-			Console.WriteLine("DataSet after test:\n" + objPersisterContext.StorageDS.GetXml());
+			//Console.WriteLine("DataSet after test:\n" + objPersisterContext.StorageDS.GetXml());
+		}
+
+		[Test]
+		public void RelationAddRemoveConstraint() {
+			var o = DataSetStorageContext.CreateTestSchema();
+			var objPersisterContext = new DataSetStorageContext(() => { return o; });
+			
+			// add one company and one contact
+			var googCompany = new ObjectContainer(o.FindClassByID("companies"));
+			googCompany["title"] = "Google";
+			objPersisterContext.ObjectContainerStorage.Insert(googCompany);
+
+			var johnContact = new ObjectContainer(o.FindClassByID("contacts"));
+			johnContact["name"] = "John";
+			objPersisterContext.ObjectContainerStorage.Insert(johnContact);
+
+			// set relation
+			var rel = o.FindClassByID("contacts").FindRelationship(o.FindClassByID("contactCompany"), o.FindClassByID("companies") );
+			objPersisterContext.ObjectContainerStorage.AddRelations( 
+				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value ) );
+
+			// test relation
+			var johnRelations = objPersisterContext.ObjectContainerStorage.LoadRelations( johnContact, new[]{ o.FindClassByID("contactCompany") } );
+			Assert.AreEqual(1, johnRelations.Count() );
+			Assert.AreEqual( false, johnRelations.First().Relation.Reversed );
+			Assert.AreEqual(johnContact.ID.Value, johnRelations.First().SubjectID);
+			Assert.AreEqual(googCompany.ID.Value, johnRelations.First().ObjectID);
+
+			var googRelations = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, new[] { o.FindClassByID("contactCompany") });
+			Assert.AreEqual(1, googRelations.Count());
+			Assert.AreEqual(true, googRelations.First().Relation.Reversed);
+			Assert.AreEqual(johnContact.ID.Value, googRelations.First().ObjectID);
+			Assert.AreEqual(googCompany.ID.Value, googRelations.First().SubjectID);
+
+			// constraint
+			var msCompany = new ObjectContainer(o.FindClassByID("companies"));
+			msCompany["title"] = "Microsoft";
+			objPersisterContext.ObjectContainerStorage.Insert(msCompany);
+			// try to add one more company for John
+			Assert.Throws<ConstraintException>( () => {
+				objPersisterContext.ObjectContainerStorage.AddRelations(
+					new ObjectRelation(johnContact.ID.Value, rel, msCompany.ID.Value));
+			});
+
+
 		}
 
     }

@@ -26,7 +26,11 @@ namespace NI.Data.Storage.Model {
         public IEnumerable<Class> Classes { get; private set; }
         public IEnumerable<Property> Properties { get; private set; }
         
-		IList<Relationship> Relationships { get; set; }
+		public IEnumerable<Relationship> Relationships {
+			get { return RelationshipList; }
+		}
+
+		IList<Relationship> RelationshipList { get; set; }
 
 		IDictionary<string, Class> ClassById = null;
 		IDictionary<string, Property> PropertyById = null;
@@ -45,11 +49,11 @@ namespace NI.Data.Storage.Model {
 			ClassesByPropertyId = new Dictionary<string, List<Class>>();
 			PropertiesByClassId = new Dictionary<string, List<Property>>();
 			RelationshipsByClassId = new Dictionary<string, List<Relationship>>();
-			Relationships = new List<Relationship>();
+			RelationshipList = new List<Relationship>();
 		}
 
 		public void AddRelationship(Relationship r) {
-			Relationships.Add(r);
+			RelationshipList.Add(r);
 			if (!RelationshipsByClassId.ContainsKey(r.Subject.ID))
 				RelationshipsByClassId[r.Subject.ID] = new List<Relationship>();
 			RelationshipsByClassId[r.Subject.ID].Add(r);

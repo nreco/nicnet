@@ -15,9 +15,14 @@ namespace NI.Data.Storage.Tests {
 		
 		SQLiteStorageContext StorageContext;
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void SetUp() {
 			StorageContext = new SQLiteStorageContext();
+		}
+
+		[TearDown]
+		public void CleanUp() {
+			StorageContext.Destroy();
 		}
 
 		[Test]
@@ -29,7 +34,7 @@ namespace NI.Data.Storage.Tests {
 			StorageContext.CreateTestDataSchema();
 
 			var schema = StorageContext.DataSchemaStorage.GetSchema();
-			Assert.AreEqual(2, schema.Classes.Count() );
+			Assert.AreEqual(2, schema.Classes.Where(c=>!c.IsPredicate).Count() );
 			
 			var contactsClass = schema.FindClassByID("contacts");
 			Assert.IsNotNull(contactsClass);
@@ -67,10 +72,71 @@ namespace NI.Data.Storage.Tests {
 			Assert.True( (DateTime)contacts[contactIds[0]]["birthday"] > (DateTime)contacts[contactIds[9]]["birthday"]);
 		}
 
-		[TestFixtureTearDown]
-		public void CleanUp() {
-			StorageContext.Destroy();
+		[Test]
+		public void LoadBySubqueryAndRelation() {
+			StorageContext.CreateTestDataSchema();
+
+			var schema = StorageContext.DataSchemaStorage.GetSchema();
+			var contactsClass = schema.FindClassByID("contacts");
+			var companiesClass = schema.FindClassByID("companies");
+			var emplClass = schema.FindClassByID("employee");
+			Assert.NotNull(emplClass);
+			
+			var contactCompanyEmployeeRel = contactsClass.FindRelationship( emplClass, companiesClass );
+			Assert.NotNull(contactCompanyEmployeeRel);
+
+			using (var t = new TransactionScope()) {
+				DataHelper.EnsureConnectionOpen(StorageContext.Connection, () => {
+					for (int i=0; i<10; i++) {
+						var objCompany = new ObjectContainer(companiesClass);
+						objCompany["name"] = String.Format("Company_{0}", i);						
+						StorageContext.ObjectContainerStorage.Insert(objCompany);
+
+						for (int j=0; j<10; j++) {
+							var objContact = new ObjectContainer(contactsClass);
+							objContact["name"] = String.Format("Company_{0} Contact_{1}", i, j);
+							StorageContext.ObjectContainerStorage.Insert(objContact);
+
+							StorageContext.ObjectContainerStorage.AddRelations( 
+								new ObjectRelation(objContact.ID.Value, contactCompanyEmployeeRel, objCompany.ID.Value ) );
+						}
+					}
+				});
+				t.Complete();
+			}
+
+			// subquery test
+			Assert.AreEqual("Company_1", StorageContext.StorageDalc.LoadValue(
+					new Query("companies", 
+						new QueryConditionNode( (QField)"id", Conditions.In,
+							new Query("contacts_employee_companies", 
+								new QueryConditionNode(
+									(QField)"subject_id", Conditions.In,
+									new Query("contacts", new QueryConditionNode((QField)"name", Conditions.Like, (QConst)"Company_1%") ) {
+										Fields = new [] { (QField)"id" }
+									}
+								)
+							) {
+								Fields = new[] {(QField)"object_id"}
+							}
+						)
+					) { Fields = new [] { (QField)"name" } }
+				) );
+
+			// relation load test
+			var company0rels = StorageContext.ObjectContainerStorage.LoadRelations( 
+					new Query("contacts_employee_companies",
+						new QueryConditionNode( 
+							(QField)"object_id",
+							Conditions.In,
+							new Query("companies.c", (QField)"name"==(QConst)"Company_0" ) {
+								Fields = new[] { (QField)"c.id" }
+							}
+						)
+					) );
+			Assert.AreEqual(10, company0rels.Count() );
 		}
+
 
 	}
 }

@@ -40,6 +40,8 @@ namespace NI.Data.Storage {
 		
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, Class[] predicates = null);
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, Class[] predicates = null);
+
+		IEnumerable<ObjectRelation> LoadRelations(Query q);
 		
 		long[] ObjectIds(Query q);
 		int ObjectsCount(Query q);
