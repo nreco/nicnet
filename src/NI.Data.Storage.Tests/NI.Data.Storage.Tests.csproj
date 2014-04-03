@@ -49,9 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SQLiteStorageDalcTests.cs" />
     <Compile Include="ObjectContainerSqlDalcStorageTests.cs" />
     <Compile Include="SQLiteStorageContext.cs" />
-    <Compile Include="StorageDalcTests.cs" />
+    <Compile Include="DataSetStorageDalcTests.cs" />
     <Compile Include="DataSetStorageContext.cs" />
     <Compile Include="ObjectContainerDalcStorageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

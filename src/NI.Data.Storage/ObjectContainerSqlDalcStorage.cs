@@ -27,20 +27,44 @@ namespace NI.Data.Storage {
 			var sortFields = new List<QSort>();
 			if (sort!=null && sort.Length>0) {
 				foreach (var origSort in sort) {
-					var p = dataClass.FindPropertyByID(origSort.Field);
-					if (p.Multivalue)
-						throw new Exception("Cannot sort by mulivalue property");
+					if (origSort.Field.Prefix!=null && origSort.Field.Prefix!=originalQuery.Table.Alias) {
+						// related field?
+						var relationship = dataClass.Schema.FindRelationshipByID(origSort.Field.Prefix);
+						/*if (relatedDataClass!=null) {
+							var relatedProperty = relatedDataClass.FindPropertyByID(origSort.Field.Name);
+							if (relatedProperty!=null) {
+								// determine relation
+								dataClass.FindRelationship(
+							}
+						}*/
+					}
 
-					var propTblName = DataTypeTableNames[p.DataType.ID];
-					var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
-					sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
-					joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and property_compact_id={3}) ",
-						propTblName, propTblAlias, ObjectTableName, p.CompactID );
+					if (origSort.Field.Prefix==null || origSort.Field.Prefix==originalQuery.Table.Alias) {
+						var p = dataClass.FindPropertyByID(origSort.Field);
+						if (p!=null) {
+							if (p.Multivalue)
+								throw new Exception("Cannot sort by mulivalue property");
+
+							var propTblName = DataTypeTableNames[p.DataType.ID];
+							var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
+							sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
+							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
+								propTblName, propTblAlias, ObjectTableName, p.CompactID );
+
+							continue;
+						}
+					}
+
+					sortFields.Add(origSort);
+
 				}
 				translatedQuery.Sort = sortFields.ToArray();
 				translatedQuery.ExtendedProperties = new Dictionary<string,object>();
 				translatedQuery.ExtendedProperties["Joins"] = joinSb.ToString();
 			}
+			translatedQuery.StartRecord = originalQuery.StartRecord;
+			translatedQuery.RecordCount = originalQuery.RecordCount;
+			Console.WriteLine(translatedQuery);
 
 			var ids = new List<long>();
 			DbMgr.Dalc.ExecuteReader(translatedQuery, (rdr) => {

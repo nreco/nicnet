@@ -13,7 +13,7 @@ using NI.Data.Storage.Model;
 namespace NI.Data.Storage.Tests {
 	
 	[TestFixture]
-	public class StorageDalcTests {
+	public class DataSetStorageDalcTests {
 		
 		DataSchema testSchema;
 		DataSetStorageContext objContext;
@@ -52,6 +52,12 @@ namespace NI.Data.Storage.Tests {
 			objContext.ObjectContainerStorage.Insert(johnContact);
 			objContext.ObjectContainerStorage.Insert(maryContact);
 			objContext.ObjectContainerStorage.Insert(bobContact);
+
+			var rel = testSchema.FindClassByID("contacts").FindRelationship(
+				testSchema.FindClassByID("contactCompany"), testSchema.FindClassByID("companies") );
+			objContext.ObjectContainerStorage.AddRelations( 
+				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value )
+			);
 		}
 
 		[Test]
@@ -150,6 +156,7 @@ namespace NI.Data.Storage.Tests {
 			// sort 
 			var companies = storageDalc.LoadAllRecords( new Query("companies") { 
 				Sort = new[] { new QSort("title", System.ComponentModel.ListSortDirection.Descending) } } );
+			Assert.AreEqual(2, companies.Length);
 			Assert.AreEqual("Microsoft", companies[0]["title"] );
 			Assert.AreEqual("Google", companies[1]["title"] );
 
@@ -171,6 +178,12 @@ namespace NI.Data.Storage.Tests {
 			var pagedContactIds = storageDalc.LoadAllValues( sortedContactsQuery );
 			Assert.AreEqual(1, pagedContactIds.Length);
 			Assert.AreEqual(5, pagedContactIds[0]);
+
+			// load relation
+			var googContactIds = storageDalc.LoadAllValues( new Query("contacts_contactCompany_companies",
+				(QField)"object_id" == new QConst(1) ) { Fields = new[] {(QField)"subject_id"} } );
+			Assert.AreEqual(1, googContactIds.Length );
+			Assert.AreEqual(3, googContactIds[0]);
 		}
 
 	}

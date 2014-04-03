@@ -39,6 +39,7 @@ namespace NI.Data.Storage.Model {
 		IDictionary<string, List<Class>> ClassesByPropertyId = null;
 		IDictionary<string, List<Property>> PropertiesByClassId = null;
 		IDictionary<string, List<Relationship>> RelationshipsByClassId = null;
+		IDictionary<string, Relationship> RelationshipById = null;
 
         public DataSchema(IEnumerable<Class> classes, IEnumerable<Property> props) {
             Classes = classes;
@@ -50,6 +51,7 @@ namespace NI.Data.Storage.Model {
 			PropertiesByClassId = new Dictionary<string, List<Property>>();
 			RelationshipsByClassId = new Dictionary<string, List<Relationship>>();
 			RelationshipList = new List<Relationship>();
+			RelationshipById = new Dictionary<string,Relationship>();
 		}
 
 		public void AddRelationship(Relationship r) {
@@ -57,6 +59,8 @@ namespace NI.Data.Storage.Model {
 			if (!RelationshipsByClassId.ContainsKey(r.Subject.ID))
 				RelationshipsByClassId[r.Subject.ID] = new List<Relationship>();
 			RelationshipsByClassId[r.Subject.ID].Add(r);
+			if (r.ID!=null)
+				RelationshipById[r.ID] = r;
 		}
 
 		public void AddClassProperty(Class c, Property p) {
@@ -124,6 +128,9 @@ namespace NI.Data.Storage.Model {
 			return PropertyByCompactId.ContainsKey(id) ? PropertyByCompactId[id] : null;
 		}
 
+		public Relationship FindRelationshipByID(string id) {
+			return RelationshipById.ContainsKey(id) ? RelationshipById[id] : null;
+		}
 
     }
 }

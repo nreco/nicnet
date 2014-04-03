@@ -30,7 +30,7 @@ namespace NI.Data.Storage {
 				dataClassQuery.Fields = query.Fields;
 				return dataClassQuery;
 			}
-			var relationship = Schema.Relationships.Where( r=> !r.Reversed && r.ID==query.Table.Name ).FirstOrDefault();
+			var relationship = Schema.FindRelationshipByID(query.Table.Name);
 			if (relationship!=null) {
 				var relQuery = new Query( new QTable( ObjStorage.ObjectRelationTableName, query.Table.Alias) );
 				var relQueryCondition = QueryGroupNode.And( (QField)"predicate_class_compact_id" == new QConst(relationship.Predicate.CompactID) );

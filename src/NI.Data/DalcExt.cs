@@ -22,6 +22,8 @@ namespace NI.Data {
             var oneRecordQuery = new Query(q);
             q.RecordCount = 1;
             dalc.ExecuteReader(oneRecordQuery, (reader) => {
+				for (int i = 0; i < q.StartRecord; i++)
+					reader.Read(); // skip first N records
 				if (reader.Read()) {
 					data = new Hashtable();
 					// fetch all fields & values in hashtable
@@ -40,19 +42,16 @@ namespace NI.Data {
 		/// <returns>object or null if no records matched</returns>
 		public static object LoadValue(this IDalc dalc, Query q) {
 			object val = null;
+			if (q.Fields==null || q.Fields.Length != 1)
+				throw new ArgumentException("LoadValue expects exactly one field to load");
 			dalc.ExecuteReader(q, (reader) => {
+				for (int i=0; i<q.StartRecord; i++)
+					reader.Read(); // skip first N records
 				if (reader.Read()) {
-					if (q.Fields != null && q.Fields.Length == 1) {
-						var fldMatched = false;
-						for (int i=0; i<reader.FieldCount; i++)
-							if (reader.GetName(i) == q.Fields[0].Name) {
-								val = reader.GetValue(i);
-								fldMatched = true;
-							}
-						if (!fldMatched)
-							val = reader[0];
-					} else {
+					if (reader.FieldCount==1) {
 						val = reader[0];
+					} else {
+						val = reader[q.Fields[0].Name];
 					}
 				}
 			});
@@ -68,12 +67,16 @@ namespace NI.Data {
 		public static IDictionary[] LoadAllRecords(this IDalc dalc, Query q) {
 			var rs = new List<IDictionary>();
 			dalc.ExecuteReader(q, (reader) => {
-				while (reader.Read()) {
-					var data = new Hashtable();
-					// fetch all fields & values in hashtable
-					for (int i = 0; i < reader.FieldCount; i++)
-						data[reader.GetName(i)] = reader.GetValue(i);
-					rs.Add(data);
+				int index = 0;
+				while (reader.Read() && rs.Count < q.RecordCount) {
+					if (index>=q.StartRecord) {
+						var data = new Hashtable();
+						// fetch all fields & values in hashtable
+						for (int i = 0; i < reader.FieldCount; i++)
+							data[reader.GetName(i)] = reader.GetValue(i);
+						rs.Add(data);
+					}
+					index++;
 				}
 			});
 			return rs.ToArray();
@@ -87,11 +90,15 @@ namespace NI.Data {
 		/// <returns>object[] with first values</returns>
 		public static object[] LoadAllValues(this IDalc dalc, Query q) {
 			var rs = new List<object>();
-			if (q.Fields.Length != 1)
+			if (q.Fields == null || q.Fields.Length != 1)
 				throw new ArgumentException("LoadAllValues expects exactly one field to load");
 			dalc.ExecuteReader(q, (reader) => {
-				while (reader.Read()) {
-					rs.Add(reader[q.Fields[0].Name]);
+				int index = 0;
+				while (reader.Read() && rs.Count < q.RecordCount ) {
+					if (index>=q.StartRecord) {
+						rs.Add(reader.FieldCount>1 ? reader[q.Fields[0].Name] : reader[0] );
+					}
+					index++;
 				}
 			});
 			return rs.ToArray();

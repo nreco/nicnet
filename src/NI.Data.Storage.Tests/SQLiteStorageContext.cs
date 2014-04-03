@@ -60,8 +60,8 @@ namespace NI.Data.Storage.Tests {
 					}
 				}
 			});
-			//var dbEventsBroker = new DataEventBroker(InternalDalc);
-			//var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
+			var dbEventsBroker = new DataEventBroker(InternalDalc);
+			var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
 
 			InitDbSchema();
 

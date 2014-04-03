@@ -91,10 +91,14 @@ namespace NI.Data
 					ds.Tables[query.Table].Columns.Add(column);
 				}
 			}
-			for (int i=0; i<result.Length; i++)
-				ds.Tables[query.Table.Name].ImportRow(result[i]);
+			var tbl = ds.Tables[query.Table.Name];
+			for (int i=0; i<result.Length && tbl.Rows.Count<query.RecordCount; i++) {
+				if (i>=query.StartRecord) {
+					tbl.ImportRow(result[i]);
+				}
+			}
 
-			return ds.Tables[query.Table.Name];
+			return tbl;
 		}
 
 		/// <see cref="NI.Data.IDalc.Update(System.Data.DataTable)"/>
@@ -215,7 +219,15 @@ namespace NI.Data
 		/// <see cref="NI.Data.IDalc.ExecuteReader(NI.Data.Query,System.Action<System.Data.IDataReader>)"/>
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
 			var ds = new DataSet();
-			var tbl = Load(q, ds);
+			
+			// emulate real DB cursor
+			var internalQuery = new Query(q);
+			internalQuery.StartRecord = 0;
+			if (q.RecordCount<Int32.MaxValue)
+				internalQuery.RecordCount = q.StartRecord+q.RecordCount;
+
+			var tbl = Load(internalQuery, ds);
+			Console.WriteLine("Q={0} LOADED={1}", internalQuery, tbl.Rows.Count); 
 			var rdr = new DataTableReader(tbl);
 			handler(rdr);
 		}
@@ -226,8 +238,6 @@ namespace NI.Data
 				return string.Join(",", q.Sort.Select(v=>(string)v).ToArray() );
 			return null;
 		}
-
-
 		
 		internal class DataSetSqlBuilder : SqlBuilder {
 

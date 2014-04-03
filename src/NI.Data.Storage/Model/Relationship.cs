@@ -44,7 +44,10 @@ namespace NI.Data.Storage.Model {
 			Object = obj;
 			Multiplicity = multiplicity;
 			Reversed = reversed;
-			ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
+			
+			// only "real" relations have an ID
+			if (!reversed)
+				ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
 		}
 
 

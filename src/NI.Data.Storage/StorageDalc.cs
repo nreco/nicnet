@@ -42,13 +42,14 @@ namespace NI.Data.Storage
 
 
 		public DataTable Load(Query query, DataSet ds) {
-			var dataClass = GetSchema().FindClassByID(query.Table.Name);
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
 				return LoadObjectTable(query, ds, dataClass);
 			}
 			// check for relation table
-			var relations = dataClass.Relationships.Where( r=>r.ID==query.Table.Name ).ToArray();
-			if (relations.Length>0) {
+			var relation = schema.FindRelationshipByID(query.Table.Name);
+			if (relation!=null) {
 				// matched
 				return LoadRelationTable(query, ds);
 			}
@@ -57,7 +58,10 @@ namespace NI.Data.Storage
 		}
 
 		protected DataTable LoadRelationTable(Query query, DataSet ds) {
-			var relations = ObjectContainerStorage.LoadRelations(query);
+			var relQuery = new Query(query);
+			relQuery.Fields = null; // no explicit fields
+
+			var relations = ObjectContainerStorage.LoadRelations(relQuery);
 			if (!ds.Tables.Contains(query.Table.Name))
 				ds.Tables.Add(query.Table.Name);
 				
@@ -166,7 +170,11 @@ namespace NI.Data.Storage
 
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
 			var ds = new DataSet();
-			Load(q, ds);
+			var internalQuery = new Query(q);
+			internalQuery.StartRecord = 0;
+			if (q.RecordCount<Int32.MaxValue)
+				internalQuery.RecordCount = q.StartRecord + q.RecordCount;
+			Load(internalQuery, ds);  // todo - avoid intermediate table?
 			handler( new DataTableReader(ds.Tables[q.Table.Name]) );
 		}
 

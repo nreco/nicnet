@@ -159,6 +159,23 @@ order by r.role desc".Trim()},
 
 			// test sql expr
 			Assert.AreEqual(1, Dalc.LoadValue(new Query("users", (QField)"id"==(QConst)1) { Fields = new[] { new QField("sumIds", "sum(id)") } }) );
+
+			// test utility load helpers 
+			var loadAllValuesRes = Dalc.LoadAllValues( new Query("users",
+					new QueryConditionNode((QField)"role", Conditions.In, subQuery ) ) {
+						Fields = new[] { (QField)"name" },
+						StartRecord = 1,
+						Sort = new[] { (QSort)"name" }
+					} );
+			Assert.AreEqual(1, loadAllValuesRes.Length);
+			Assert.AreEqual("Mike", loadAllValuesRes[0]);
+
+			Assert.AreEqual("Joe", Dalc.LoadValue(new Query("users",
+					new QueryConditionNode((QField)"role", Conditions.In, subQuery)) {
+						Fields = new[] { (QField)"name" },
+						StartRecord = 1,
+						Sort = new[] { (QSort)"name desc" }
+					}) );
 		}
 
 		[Test]

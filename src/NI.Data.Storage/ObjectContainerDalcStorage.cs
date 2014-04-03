@@ -615,7 +615,7 @@ namespace NI.Data.Storage {
 
 			var schema = GetSchema();
 			// check for relation table
-			var relationship = schema.Relationships.Where(r => !r.Reversed && r.ID == query.Table.Name).FirstOrDefault();
+			var relationship = schema.FindRelationshipByID(query.Table.Name);
 			if (relationship == null)
 				throw new Exception(String.Format("Relationship with ID={0} does not exist", query.Table.Name));
 
@@ -657,13 +657,10 @@ namespace NI.Data.Storage {
 				translatedQuery.StartRecord = 0;
 				translatedQuery.RecordCount = Int32.MaxValue;
 			}
-			DbMgr.Dalc.ExecuteReader(translatedQuery, (rdr) => {
-				while (rdr.Read()) {
-					var id = Convert.ToInt64(rdr.GetValue(0));
-					ids.Add(id);
-				}
-			});
-			var idsArr = ids.ToArray();
+			var loadedIds = DbMgr.Dalc.LoadAllValues( translatedQuery );
+			var idsArr = new long[loadedIds.Length];
+			for (int i=0; i<loadedIds.Length; i++)
+				idsArr[i] = Convert.ToInt64(loadedIds[i]);
 
 			if (applySort) {
 				// the following "in-code" implementation is used for abstract IDalc implementations
@@ -677,7 +674,7 @@ namespace NI.Data.Storage {
 				}
 
 				var idToObj = Load(idsArr, sortProperties.ToArray() );
-				ids.Sort(  (a,b) => {
+				Array.Sort( idsArr, (a, b) => {
 					for (int i=0; i<sortProperties.Count; i++) {
 						var aVal = idToObj.ContainsKey(a) ? idToObj[a][sortProperties[i]] : null;
 						var bVal = idToObj.ContainsKey(b) ? idToObj[b][sortProperties[i]] : null;
@@ -689,9 +686,8 @@ namespace NI.Data.Storage {
 					}
 					return 0;
 				});
-				idsArr = ids.Skip(originalQuery.StartRecord).Take(originalQuery.RecordCount).ToArray();
+				idsArr = idsArr.Skip(originalQuery.StartRecord).Take(originalQuery.RecordCount).ToArray();
 			}
-
 			return idsArr;
 		}
 
