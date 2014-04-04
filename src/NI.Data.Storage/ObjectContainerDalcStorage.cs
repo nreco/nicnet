@@ -554,14 +554,14 @@ namespace NI.Data.Storage {
 					) );
 			}
 			
-			var relTbl = DbMgr.LoadAll(loadQ);
+			var relData = DbMgr.Dalc.LoadAllRecords(loadQ);
 			var rs = new List<ObjectRelation>();
 
 			var relObjToLoad = new List<long>();
 			// 1st pass: collect related object IDs
-			foreach (DataRow relRow in relTbl.Rows) {
-				var subjId = Convert.ToInt64(relRow["subject_id"]);
-				var relObjId = Convert.ToInt64(relRow["object_id"]);
+			foreach (var rel in relData) {
+				var subjId = Convert.ToInt64(rel["subject_id"]);
+				var relObjId = Convert.ToInt64(rel["object_id"]);
 				if (!objIds.Contains(subjId))
 					relObjToLoad.Add(subjId);
 				if (!objIds.Contains(relObjId))
@@ -576,10 +576,10 @@ namespace NI.Data.Storage {
 			foreach (var o in relObjects.Values)
 				objIdToClass[o.ID.Value] = o.GetClass();
 
-			foreach (DataRow relRow in relTbl.Rows) {
-				var subjId = Convert.ToInt64(relRow["subject_id"]);
-				var objId = Convert.ToInt64(relRow["object_id"]);
-				var predCompactId = Convert.ToInt32(relRow["predicate_class_compact_id"]);
+			foreach (var rel in relData) {
+				var subjId = Convert.ToInt64(rel["subject_id"]);
+				var objId = Convert.ToInt64(rel["object_id"]);
+				var predCompactId = Convert.ToInt32(rel["predicate_class_compact_id"]);
 				
 				long relSubjId, relObjId;
 				var isReversed = !objIds.Contains(subjId);
@@ -598,9 +598,9 @@ namespace NI.Data.Storage {
 					continue;
 				}
 
-				var rel = subjClass.FindRelationship(predClass, objIdToClass[relObjId], isReversed);
-				if (rel!=null) {
-					rs.Add(new ObjectRelation(relSubjId, rel, relObjId));
+				var relationship = subjClass.FindRelationship(predClass, objIdToClass[relObjId], isReversed);
+				if (relationship != null) {
+					rs.Add(new ObjectRelation(relSubjId, relationship, relObjId));
 				} else {
 					log.Info( "Relation between ObjectID={0} and ObjectID={1} with predicate ClassID={0} doesn't exist: relation skipped",
 						relSubjId, relObjId, predClass.ID);

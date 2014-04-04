@@ -227,7 +227,6 @@ namespace NI.Data
 				internalQuery.RecordCount = q.StartRecord+q.RecordCount;
 
 			var tbl = Load(internalQuery, ds);
-			Console.WriteLine("Q={0} LOADED={1}", internalQuery, tbl.Rows.Count); 
 			var rdr = new DataTableReader(tbl);
 			handler(rdr);
 		}
