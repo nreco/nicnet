@@ -125,6 +125,8 @@ namespace NI.Data.Storage.Model {
 			var t = new DataTable(ID);
 			var idCol = t.Columns.Add( "id", typeof(long) );
 			idCol.AutoIncrement = true;
+			idCol.AutoIncrementSeed = -1;
+			idCol.AutoIncrementStep = -1;
 			t.PrimaryKey = new[] { idCol };
 
 			foreach (var p in Properties) {

@@ -62,6 +62,9 @@ namespace NI.Data.Storage {
 
 
 		public QueryNode TranslateQueryNode(Class targetClass, QueryNode condition) {
+			if (condition==null)
+				return null;
+
 			if (condition is QueryGroupNode) {
 				return TranslateGroupNode(targetClass, (QueryGroupNode)condition );
 			} else if (condition is QueryConditionNode) {

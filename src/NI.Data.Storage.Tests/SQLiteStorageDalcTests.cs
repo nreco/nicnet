@@ -61,10 +61,133 @@ namespace NI.Data.Storage.Tests {
 
 			var rel = testSchema.FindClassByID("contacts").FindRelationship(
 				testSchema.FindClassByID("employee"), testSchema.FindClassByID("companies"));
+			
 			StorageContext.ObjectContainerStorage.AddRelations( 
 				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value )
 			);
+			StorageContext.ObjectContainerStorage.AddRelations(
+				new ObjectRelation(bobContact.ID.Value, rel, msCompany.ID.Value)
+			);
 		}
+
+		[Test]
+		public void Insert() {
+			var testSchema = StorageContext.DataSchemaStorage.GetSchema();
+			// add using DataRow
+			
+			var ds = new DataSet();
+			var contactsTbl = testSchema.FindClassByID("contacts").CreateDataTable();
+			ds.Tables.Add(contactsTbl);
+
+			for (int i=0; i<5; i++) {
+				var r = contactsTbl.NewRow();
+				r["name"] = "Contact "+i.ToString();
+				contactsTbl.Rows.Add(r);
+			}
+
+			StorageContext.StorageDalc.Update(contactsTbl);
+			// should be 5 contacts
+			Assert.AreEqual(5, StorageContext.ObjectContainerStorage.ObjectsCount( new Query("contacts") ) );
+
+			// quick insert
+			StorageContext.StorageDalc.Insert("companies", new {
+				name = "TestCompany 1"
+			});
+			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("companies")));
+			StorageContext.StorageDalc.Insert("companies", new {
+				name = "TestCompany 2"
+			});
+			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("companies")));
+
+			// test insert relation using datarow
+			var rel = testSchema.FindRelationshipByID("contacts_employee_companies");
+			var relTbl = rel.CreateDataTable();
+			ds.Tables.Add(relTbl);
+			var relRow = relTbl.NewRow();
+			relRow["subject_id"] = contactsTbl.Rows[0]["id"];
+			relRow["object_id"] = StorageContext.StorageDalc.LoadValue(
+				new Query("companies", (QField)"name" == (QConst)"TestCompany 1") { Fields = new[]{(QField)"id"} } );
+			relTbl.Rows.Add(relRow);
+
+			StorageContext.StorageDalc.Update(relTbl);
+
+			Assert.AreEqual(1, 
+				StorageContext.ObjectContainerStorage.LoadRelations( 
+					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[0]["id"]) ) ).Count() );
+
+			// quick relation insert
+			StorageContext.StorageDalc.Insert("contacts_employee_companies", new {
+				subject_id = contactsTbl.Rows[1]["id"],
+				object_id = StorageContext.StorageDalc.LoadValue(
+				new Query("companies", (QField)"name" == (QConst)"TestCompany 2") { Fields = new[] { (QField)"id" } }) } );
+
+			Assert.AreEqual(1,
+				StorageContext.ObjectContainerStorage.LoadRelations(
+					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[1]["id"]))).Count());
+		}
+
+		[Test]
+		public void Update() {
+			addTestData();
+			var testSchema = StorageContext.DataSchemaStorage.GetSchema();
+
+			// datarow update
+			var ds = new DataSet();
+			ds.Tables.Add(testSchema.FindClassByID("contacts").CreateDataTable());
+			var contactsTbl = StorageContext.StorageDalc.Load( new Query("contacts", (QField)"name"==(QConst)"Bob" ), ds);
+			contactsTbl.Rows[0]["name"] = "Bob1";
+			contactsTbl.Rows[0]["birthday"] = new DateTime(1985, 2, 2);
+			StorageContext.StorageDalc.Update(contactsTbl);
+
+			var bob1Contact = StorageContext.StorageDalc.LoadRecord(new Query("contacts", (QField)"id" == new QConst(contactsTbl.Rows[0]["id"])));
+			Assert.NotNull(bob1Contact);
+			Assert.AreEqual("Bob1", bob1Contact["name"]);
+			Assert.AreEqual(new DateTime(1985, 2, 2), bob1Contact["birthday"]);
+
+			// quick update
+			Assert.AreEqual(1, StorageContext.StorageDalc.Update( new Query("contacts",  (QField)"name" == new QConst("Bob1") ), new {
+				name = "Bob2", birthday = (string)null
+			}) );
+
+			var bobObj = StorageContext.ObjectContainerStorage.Load( new [] {  Convert.ToInt64(contactsTbl.Rows[0]["id"]) } ).Values.First();
+			Assert.AreEqual("Bob2", bobObj["name"] );
+			Assert.AreEqual(null, bobObj["birthday"]);
+
+
+		}
+
+		[Test]
+		public void Delete() {
+			addTestData();
+			var testSchema = StorageContext.DataSchemaStorage.GetSchema();
+
+			// datarow delete
+			var ds = new DataSet();
+			ds.Tables.Add(testSchema.FindClassByID("contacts").CreateDataTable());
+			var contactsTbl = StorageContext.StorageDalc.Load(new Query("contacts"), ds);
+			Assert.AreEqual(3, contactsTbl.Rows.Count);
+
+			contactsTbl.Rows[0].Delete();
+			StorageContext.StorageDalc.Update(contactsTbl);
+			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.ObjectsCount( new Query("contacts") ) );
+
+			// delete by query
+			StorageContext.StorageDalc.Delete(new Query("contacts", (QField)"name" == new QConst(contactsTbl.Rows[0]["name"])));
+			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("contacts")));
+
+			// delete relation row
+			var rel = testSchema.FindRelationshipByID("contacts_employee_companies");
+			var relTbl = rel.CreateDataTable();
+			ds.Tables.Add(relTbl);
+			StorageContext.StorageDalc.Load( new Query("contacts_employee_companies"), ds);
+			Assert.AreEqual(1, relTbl.Rows.Count );
+
+			relTbl.Rows[0].Delete();
+			StorageContext.StorageDalc.Update(relTbl);
+
+			Assert.AreEqual(0, StorageContext.ObjectContainerStorage.LoadRelations( new Query("contacts_employee_companies") ).Count() );
+		}
+
 
 		[Test]
 		public void LoadAndSubquery() {
@@ -135,6 +258,24 @@ namespace NI.Data.Storage.Tests {
 							)
 						) { Fields = new[] { (QField)"name" } }
 					));
+
+			// sort by related field
+			var contactsByCompanyName = StorageContext.StorageDalc.LoadAllRecords( new Query("contacts") {
+				Sort = new[] { (QSort)"contacts_employee_companies.name asc" }
+			});
+			Assert.AreEqual(3, contactsByCompanyName.Length);
+			Assert.AreEqual("Mary", contactsByCompanyName[0]["name"]);
+			Assert.AreEqual("John", contactsByCompanyName[1]["name"]);
+			Assert.AreEqual("Bob", contactsByCompanyName[2]["name"]);
+
+			var contactsByCompanyNameDesc = StorageContext.StorageDalc.LoadAllRecords(new Query("contacts") {
+				Sort = new[] { (QSort)"contacts_employee_companies.name desc" }
+			});
+			Assert.AreEqual(3, contactsByCompanyNameDesc.Length);
+			Assert.AreEqual("Bob", contactsByCompanyNameDesc[0]["name"]);
+			Assert.AreEqual("John", contactsByCompanyNameDesc[1]["name"]);
+			Assert.AreEqual("Mary", contactsByCompanyNameDesc[2]["name"]);
+
 		}
 
 	}

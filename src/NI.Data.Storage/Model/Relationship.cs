@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace NI.Data.Storage.Model {
@@ -50,6 +51,18 @@ namespace NI.Data.Storage.Model {
 				ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
 		}
 
+		public DataTable CreateDataTable() {
+			if (Reversed)
+				throw new NotSupportedException("Reversed relation doesn't support DataTable creation");
+
+			var t = new DataTable(ID);
+			var subjCol = t.Columns.Add("subject_id", typeof(long));
+			subjCol.AllowDBNull = false;
+			var objCol = t.Columns.Add("object_id", typeof(long));
+			objCol.AllowDBNull = false;
+			t.PrimaryKey = new[] { subjCol, objCol };
+			return t;
+		}
 
 		public override string ToString() {
 			return String.Format("Relationship(Subject:{0}, Predicate:{1}, Object:{2})", Subject.ID, Predicate.ID, Object.ID);

@@ -421,6 +421,7 @@ namespace NI.Data.Storage {
 			} else {
 				cond.Nodes.Add((QField)"subject_id" == new QConst(subjectId));
 			}
+			q.Condition = cond;
 			return q;
 		}
 

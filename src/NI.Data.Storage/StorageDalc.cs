@@ -184,13 +184,13 @@ namespace NI.Data.Storage
 			if (dataClass != null) {
 				var ids = ObjectContainerStorage.ObjectIds(query);
 				return ObjectContainerStorage.Delete(ids);
-			} else {
-				return UnderlyingDalc.Delete(query);
 			}
+			return UnderlyingDalc.Delete(query);
 		}
 
 		public void Insert(string tableName, IDictionary<string, IQueryValue> data) {
-			var dataClass = GetSchema().FindClassByID(tableName);
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(tableName);
 			if (dataClass != null) {
 				var objContainer = new ObjectContainer(dataClass);
 				foreach (var changeEntry in data) {
@@ -201,17 +201,67 @@ namespace NI.Data.Storage
 					objContainer[changeEntry.Key] = ((QConst)changeEntry.Value).Value;
 				}
 				ObjectContainerStorage.Insert(objContainer);
-			} else {
-				UnderlyingDalc.Insert(tableName,data);
+				return;
 			}
+			
+			// check for relation table
+			var relation = schema.FindRelationshipByID(tableName);
+			if (relation!=null) {
+				long? subjId = null;
+				long? objId = null;
+				foreach (var entry in data) {
+					var valConst = entry.Value as QConst;
+					if (valConst==null)
+						throw new NotSupportedException(
+							String.Format("Value {0} for {1} is not supported", entry.Value, entry.Key ) );
+					if (entry.Key=="subject_id")
+						subjId = Convert.ToInt64( ((QConst)entry.Value).Value );
+					else if (entry.Key=="object_id")
+						objId = Convert.ToInt64( ((QConst)entry.Value).Value );
+					else {
+						throw new ArgumentException(String.Format("{0} does not exist in {1}", entry.Key, tableName));
+					}
+				}
+				if (!subjId.HasValue)
+					throw new ArgumentException("subject_id is required");
+				if (!objId.HasValue)
+					throw new ArgumentException("object_id is required");
+				ObjectContainerStorage.AddRelations(
+					new ObjectRelation(subjId.Value, relation, objId.Value) );
+				return;
+			}
+
+			UnderlyingDalc.Insert(tableName,data);
 		}
 
 		public int Update(Query query, IDictionary<string, IQueryValue> data) {
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(query.Table.Name);
+			if (dataClass!=null) {
+				var affectedObjIds = ObjectContainerStorage.ObjectIds( query );
+				foreach (var objId in affectedObjIds) {
+					var obj = new ObjectContainer(dataClass, objId);
+					foreach (var entry in data) {
+						var valConst = entry.Value as QConst;
+						if (valConst == null)
+							throw new NotSupportedException(
+								String.Format("Value {0} for {1} is not supported", entry.Value, entry.Key));						
+						obj[entry.Key] = valConst.Value;
+					}
+					ObjectContainerStorage.Update(obj);
+				}
+				return affectedObjIds.Length;
+			}
+			var relation = schema.FindRelationshipByID(query.Table.Name);
+			if (relation!=null) {
+				throw new NotSupportedException(String.Format("Update is not allowed for relationship {0}", relation.ID ) );
+			}			
 			return UnderlyingDalc.Update(query, data);
 		}
 
 		public void Update(DataTable t) {
-			var dataClass = GetSchema().FindClassByID(t.TableName);
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(t.TableName);
 			if (dataClass!=null) {
 				foreach (DataRow r in t.Rows) {
 					switch (r.RowState) {
@@ -227,9 +277,44 @@ namespace NI.Data.Storage
 					}
 				}
 				t.AcceptChanges();
-			} else {
-				UnderlyingDalc.Update(t);
+				return;
 			}
+			// check for relation table
+			var relation = schema.FindRelationshipByID(t.TableName);
+			if (relation!=null) {
+				foreach (DataColumn c in t.Columns)
+					if (c.ColumnName!="subject_id" && c.ColumnName!="object_id")
+						throw new ArgumentException(String.Format("{0} does not exist in {1}", c.ColumnName, t.TableName));
+				if (!t.Columns.Contains("subject_id"))
+					throw new ArgumentException("subject_id column is required");
+				if (!t.Columns.Contains("object_id"))
+					throw new ArgumentException("object_id column is required");
+				foreach (DataRow r in t.Rows) {
+					switch (r.RowState) {
+						case DataRowState.Added:
+							ObjectContainerStorage.AddRelations(
+								new ObjectRelation( 
+									Convert.ToInt64(r["subject_id"]),
+									relation,
+									Convert.ToInt64(r["object_id"])));
+							break;
+						case DataRowState.Deleted:
+							ObjectContainerStorage.RemoveRelations(
+								new ObjectRelation(
+									Convert.ToInt64(r["subject_id",DataRowVersion.Original]),
+									relation,
+									Convert.ToInt64(r["object_id",DataRowVersion.Original]))
+							);
+							break;
+						default:
+							throw new NotSupportedException(String.Format("Relation doesn't support row state {0}", r.RowState));
+					}
+				}
+				t.AcceptChanges();
+				return;
+			}
+
+			UnderlyingDalc.Update(t);
 		}
 
 		protected void InsertDataRow(Class dataClass, DataRow r) {
