@@ -322,7 +322,7 @@ namespace NI.Ioc
 				var refNode = objectDefinition.SelectSingleNode("ioc:ref", xmlNs);
 				if (refNode != null) {
 					string refName = refNode.GetAttribute("name",String.Empty);
-					if (components[refName] == null)
+					if (!components.ContainsKey(refName))
 						throw new NullReferenceException("Reference to non-existent component: " + refName);
 					return new RefValueInfo(components[refName]);
 				}

@@ -337,7 +337,7 @@ namespace NI.Vfs
 		/// </summary>		
 		public IFileObject[] FindFiles(IFileSelector selector) {
 			if (Type!=FileType.Folder)
-				throw new FileSystemException("Cannot search files in non-folder"); // TODO: more structured exception
+				throw new FileSystemException(String.Format("Cannot search files in non-folder: {0}", Name)); // TODO: more structured exception
 
 			IFileObject[] children = GetChildren();
 			ArrayList resultList = new ArrayList(children.Length);

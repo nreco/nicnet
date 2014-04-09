@@ -49,36 +49,40 @@ namespace NI.Vfs {
 		static Regex MatchXmlDeclaration = new Regex(@"^\s*[<][?]xml[^>]*[?][>]", RegexOptions.Compiled|RegexOptions.Singleline);
 
 		public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
-			if ((ofObjectToReturn != null) && (ofObjectToReturn != typeof(Stream))) {
-				throw new XmlException("Unsupported object type");
-			}
-			string relativePath = AbsoluteBaseUri.MakeRelative(absoluteUri);
+			try {
+				if ((ofObjectToReturn != null) && (ofObjectToReturn != typeof(Stream))) {
+					throw new XmlException("Unsupported object type");
+				}
+				string relativePath = AbsoluteBaseUri.MakeRelative(absoluteUri);
 
-			if (relativePath.IndexOfAny(new char[] { '*', '?' }) >= 0) {
-				// several files
-				var startPath = MaskFileSelector.GetMaskParentPath(relativePath) ?? String.Empty;
-				var startFile = FileSystem.ResolveFile(startPath);
-				var sb = new StringBuilder();
-				sb.Append("<root>"); 
-				var matchedFiles = startFile.FindFiles(new MaskFileSelector(relativePath));
-				foreach (var f in matchedFiles) {
-					using (var input = f.GetContent().InputStream) {
-						var fileText = new StreamReader(input).ReadToEnd();
-						fileText = MatchXmlDeclaration.Replace(fileText, String.Empty);
-						sb.Append(fileText);
+				if (relativePath.IndexOfAny(new char[] { '*', '?' }) >= 0) {
+					// several files
+					var startPath = MaskFileSelector.GetMaskParentPath(relativePath) ?? String.Empty;
+					var startFile = FileSystem.ResolveFile(startPath);
+					var sb = new StringBuilder();
+					sb.Append("<root>"); 
+					var matchedFiles = startFile.FindFiles(new MaskFileSelector(relativePath));
+					foreach (var f in matchedFiles) {
+						using (var input = f.GetContent().InputStream) {
+							var fileText = new StreamReader(input).ReadToEnd();
+							fileText = MatchXmlDeclaration.Replace(fileText, String.Empty);
+							sb.Append(fileText);
+						}
 					}
+					sb.Append("</root>");
+					return new MemoryStream( Encoding.UTF8.GetBytes( sb.ToString() ) );
+				} else {
+					// one file
+					IFileObject file = FileSystem.ResolveFile(Path.Combine(BasePath, relativePath));
+					byte[] fileContent;
+					using (var input = file.GetContent().InputStream) {
+						fileContent = new byte[input.Length];
+						input.Read(fileContent, 0, fileContent.Length);
+					}
+					return new MemoryStream(fileContent);
 				}
-				sb.Append("</root>");
-				return new MemoryStream( Encoding.UTF8.GetBytes( sb.ToString() ) );
-			} else {
-				// one file
-				IFileObject file = FileSystem.ResolveFile(Path.Combine(BasePath, relativePath));
-				byte[] fileContent;
-				using (var input = file.GetContent().InputStream) {
-					fileContent = new byte[input.Length];
-					input.Read(fileContent, 0, fileContent.Length);
-				}
-				return new MemoryStream(fileContent);
+			} catch (Exception ex) {
+				throw new FileSystemException(String.Format("Cannot resolve {0}: {1}", absoluteUri, ex.Message), ex);
 			}
 		}
 
