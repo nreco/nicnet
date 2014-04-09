@@ -54,14 +54,15 @@ namespace NI.Vfs {
 					throw new XmlException("Unsupported object type");
 				}
 				string relativePath = AbsoluteBaseUri.MakeRelative(absoluteUri);
+				var fullPath = Path.Combine(BasePath, relativePath);
 
 				if (relativePath.IndexOfAny(new char[] { '*', '?' }) >= 0) {
 					// several files
-					var startPath = MaskFileSelector.GetMaskParentPath(relativePath) ?? String.Empty;
+					var startPath = MaskFileSelector.GetMaskParentPath(fullPath) ?? String.Empty;
 					var startFile = FileSystem.ResolveFile(startPath);
 					var sb = new StringBuilder();
 					sb.Append("<root>"); 
-					var matchedFiles = startFile.FindFiles(new MaskFileSelector(relativePath));
+					var matchedFiles = startFile.FindFiles(new MaskFileSelector(fullPath));
 					foreach (var f in matchedFiles) {
 						using (var input = f.GetContent().InputStream) {
 							var fileText = new StreamReader(input).ReadToEnd();
@@ -73,7 +74,7 @@ namespace NI.Vfs {
 					return new MemoryStream( Encoding.UTF8.GetBytes( sb.ToString() ) );
 				} else {
 					// one file
-					IFileObject file = FileSystem.ResolveFile(Path.Combine(BasePath, relativePath));
+					IFileObject file = FileSystem.ResolveFile(fullPath);
 					byte[] fileContent;
 					using (var input = file.GetContent().InputStream) {
 						fileContent = new byte[input.Length];
