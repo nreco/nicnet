@@ -15,4 +15,9 @@
     <copyright>Copyright 2004-2012 NewtonIdeas, v2 2013-2014 Vitalii Fedorchenko</copyright>
     <tags>Ioc DependencyInjection DI XML</tags>
   </metadata>
+  
+  <files>
+	<file src="ComponentConfiguration.xsd" target="content/config/xsd/ComponentConfiguration.xsd" /> 
+  </files>  
+  
 </package>

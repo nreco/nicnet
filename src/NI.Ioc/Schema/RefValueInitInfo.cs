@@ -21,15 +21,29 @@ namespace NI.Ioc
 	/// </summary>
 	public class RefValueInfo : IValueInitInfo
 	{
-		public IComponentInitInfo ComponentRef;
+		public IComponentInitInfo ComponentRef { get; private set; }
 		
-		public RefValueInfo(IComponentInitInfo componentRef) {
+		public string ComponentMethod { get; private set; }
+
+		public RefValueInfo(IComponentInitInfo componentRef) : this(componentRef, null) {
+		}
+
+		public RefValueInfo(IComponentInitInfo componentRef, string method) {
 			ComponentRef = componentRef;
+			ComponentMethod = method;
 		}
 		
 		public object GetValue(IValueFactory factory, Type conversionType)
 		{
-			return factory.GetInstance(ComponentRef, conversionType);
+			if (ComponentMethod!=null) {
+				var targetInstance = factory.GetInstance(ComponentRef, typeof(object) );
+				return factory.GetInstance( 
+					new DelegateFactory(targetInstance, ComponentMethod).GetObject(),
+					conversionType
+				);
+			} else {
+				return factory.GetInstance(ComponentRef, conversionType);
+			}
 		}
 	}
 }

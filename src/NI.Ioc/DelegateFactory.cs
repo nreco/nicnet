@@ -56,7 +56,11 @@ namespace NI.Ioc
 		public Type GetObjectType() {
 			if (DelegateType == null) {
 				// autosuggest behaviour
-				var mInfo = TargetObject.GetType().GetMethod(TargetMethod);
+				var targetType = TargetObject.GetType();
+				var mInfo = targetType.GetMethod(TargetMethod);
+				if (mInfo==null)
+					throw new MissingMethodException(targetType.ToString(), TargetMethod );
+
 				var mParams = mInfo.GetParameters();
 				if (mInfo.ReturnType == typeof(void)) {
 					var actionType = SuggestGenericType(actionTypeByParamCnt, mParams.Length);

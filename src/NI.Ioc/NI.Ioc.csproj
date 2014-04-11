@@ -184,10 +184,7 @@
     <Compile Include="StaticMethodInvokingFactory.cs" />
     <Compile Include="StaticPropertyInvokingFactory.cs" />
     <Compile Include="XmlComponentConfigurationSectionHandler.cs" />
-    <EmbeddedResource Include="ComponentsConfigSchema.xsd" />
-    <None Include="ComponentsConfigSchema.xsx">
-      <DependentUpon>ComponentsConfigSchema.xsd</DependentUpon>
-    </None>
+    <EmbeddedResource Include="ComponentConfiguration.xsd" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

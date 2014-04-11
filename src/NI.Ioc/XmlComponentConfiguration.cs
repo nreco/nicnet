@@ -73,7 +73,7 @@ namespace NI.Ioc
 		}
 
 		static Stream GetXsdStream() {
-			string name = typeof(XmlComponentConfiguration).Namespace + ".ComponentsConfigSchema.xsd";
+			string name = typeof(XmlComponentConfiguration).Namespace + ".ComponentConfiguration.xsd";
 			return Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
 		}
 
@@ -324,7 +324,10 @@ namespace NI.Ioc
 					string refName = refNode.GetAttribute("name",String.Empty);
 					if (!components.ContainsKey(refName))
 						throw new NullReferenceException("Reference to non-existent component: " + refName);
-					return new RefValueInfo(components[refName]);
+					string methodName = refNode.GetAttribute("method", String.Empty);
+					if (methodName.Trim()==String.Empty)
+						methodName = null;
+					return new RefValueInfo(components[refName], methodName);
 				}
 
 				// value ?
