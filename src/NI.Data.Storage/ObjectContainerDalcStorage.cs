@@ -312,7 +312,9 @@ namespace NI.Data.Storage {
 						var pSrcName = DataTypeTableNames[p.DataType.ID];
 						if (!valueSourceNames.ContainsKey(pSrcName))
 							valueSourceNames[pSrcName] = new List<int>();
-						valueSourceNames[pSrcName].Add( p.CompactID );
+						
+						if (!valueSourceNames[pSrcName].Contains(p.CompactID))
+							valueSourceNames[pSrcName].Add( p.CompactID );
 					}
 				}
 				objById[ obj.ID.Value ] = obj;

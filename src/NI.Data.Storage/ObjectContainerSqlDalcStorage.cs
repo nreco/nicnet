@@ -102,14 +102,11 @@ namespace NI.Data.Storage {
 			translatedQuery.StartRecord = originalQuery.StartRecord;
 			translatedQuery.RecordCount = originalQuery.RecordCount;
 
-			var ids = new List<long>();
-			DbMgr.Dalc.ExecuteReader(translatedQuery, (rdr) => {
-				while (rdr.Read()) {
-					var id = Convert.ToInt64(rdr.GetValue(0));
-					ids.Add(id);
-				}
-			});
-			return ids.ToArray();
+			var idValues = DbMgr.Dalc.LoadAllValues( translatedQuery );
+			var ids = new long[idValues.Length];
+			for (int i=0; i<ids.Length; i++)
+				ids[i] =  Convert.ToInt64(idValues[i]);
+			return ids;
 		}
 
 	}
