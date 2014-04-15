@@ -61,8 +61,13 @@ namespace NI.Data.Storage.Tests {
 
 			StorageDS.Tables.Add(CreateValueTable("object_datetime_values", typeof(DateTime)));
 			StorageDS.Tables.Add(CreateValueLogTable("object_datetime_values_log", typeof(DateTime)));
-			StorageDS.Tables.Add(CreateValueTable("object_number_values", typeof(decimal)));
-			StorageDS.Tables.Add(CreateValueLogTable("object_number_values_log", typeof(decimal)));
+
+			StorageDS.Tables.Add(CreateValueTable("object_integer_values", typeof(decimal)));
+			StorageDS.Tables.Add(CreateValueLogTable("object_integer_values_log", typeof(decimal)));
+			
+			StorageDS.Tables.Add(CreateValueTable("object_decimal_values", typeof(decimal)));
+			StorageDS.Tables.Add(CreateValueLogTable("object_decimal_values_log", typeof(decimal)));
+
 			StorageDS.Tables.Add(CreateValueTable("object_string_values", typeof(string)));
 			StorageDS.Tables.Add(CreateValueLogTable("object_string_values_log", typeof(string)));
 

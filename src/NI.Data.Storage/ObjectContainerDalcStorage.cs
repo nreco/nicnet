@@ -67,14 +67,16 @@ namespace NI.Data.Storage {
 			ObjectRelationTableName = "object_relations";
 			ObjectRelationLogTableName = "object_relations_log";
 			DataTypeTableNames = new Dictionary<string, string>() {
-				{PropertyDataType.Boolean.ID, "object_number_values"},
-				{PropertyDataType.Decimal.ID, "object_number_values"},
+				{PropertyDataType.Boolean.ID, "object_integer_values"},
+				{PropertyDataType.Integer.ID, "object_integer_values"},
+				{PropertyDataType.Decimal.ID, "object_decimal_values"},
 				{PropertyDataType.String.ID, "object_string_values"},
 				{PropertyDataType.Date.ID, "object_datetime_values"},
 				{PropertyDataType.DateTime.ID, "object_datetime_values"}
 			};
 			ValueTableNameForLogs = new Dictionary<string, string>() {
-				{"object_number_values", "object_number_values_log"},
+				{"object_integer_values", "object_integer_values_log"},
+				{"object_decimal_values", "object_decimal_values_log"},
 				{"object_string_values", "object_string_values_log"},
 				{"object_datetime_values", "object_datetime_values_log"}
 			};
@@ -523,37 +525,45 @@ namespace NI.Data.Storage {
 			return DbValueComparer.Instance.Compare( o1norm, o2norm )==0;
 		}
 
-		public IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, Class[] predicates = null) {
-			return LoadRelations(new[] { obj }, predicates);
+		public IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, IEnumerable<Relationship> rels) {
+			return LoadRelations(new[] { obj }, rels);
 		}
-		public IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] objs, Class[] predicates = null) {
+		public IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] objs, IEnumerable<Relationship> rels) {
 			if (objs.Length == 0)
 				return new ObjectRelation[0];
 
 			var loadQ = new Query(ObjectRelationTableName);
-			var andCond = new QueryGroupNode(QueryGroupNodeType.And);
-			loadQ.Condition = andCond;
-			var objOrCond = new QueryGroupNode(QueryGroupNodeType.Or);
-			andCond.Nodes.Add(objOrCond);
+			var orCond = QueryGroupNode.Or();
+			loadQ.Condition = orCond;
 
 			var objIds = objs.Where(o => o.ID.HasValue).Select(o => o.ID.Value).ToArray();
-			if (objIds.Length == 1) {
-				objOrCond.Nodes.Add((QField)"subject_id" == new QConst(objIds[0]));
-				objOrCond.Nodes.Add((QField)"object_id" == new QConst(objIds[0]));
+
+			if (objIds.Length==0)
+				return new ObjectRelation[0];
+
+			var subjCond = new QueryConditionNode( (QField)"subject_id", Conditions.In, new QConst(objIds));
+			var objCond = new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(objIds));
+
+			if (rels!=null) {
+				var relCompactIds = rels.Where(r=>!r.Reversed).Select(r=>r.Predicate.CompactID).ToArray();
+				if (relCompactIds.Length>0) {
+					orCond.Nodes.Add(
+						subjCond
+						&
+						new QueryConditionNode( (QField)"predicate_class_compact_id", Conditions.In, new QConst(relCompactIds) )
+					);
+				}
+				var revRelCompactIds = rels.Where(r=>r.Reversed).Select(r=>r.Predicate.CompactID).ToArray();
+				if (revRelCompactIds.Length>0) {
+					orCond.Nodes.Add(
+						objCond
+						&
+						new QueryConditionNode( (QField)"predicate_class_compact_id", Conditions.In, new QConst(revRelCompactIds) )
+					);
+				}
 			} else {
-				// degenerated case: nothing to do
-				if (objIds.Length==0)
-					return new ObjectRelation[0];
-				objOrCond.Nodes.Add(new QueryConditionNode(
-						(QField)"subject_id", Conditions.In, new QConst(objIds)) );
-				objOrCond.Nodes.Add(new QueryConditionNode(
-						(QField)"object_id", Conditions.In, new QConst(objIds)) );
-			}
-			if (predicates != null && predicates.Length > 0) {
-				var pCompactIds = predicates.Select(p=>p.CompactID).ToArray();
-				andCond.Nodes.Add( new QueryConditionNode(
-						(QField)"predicate_class_compact_id", Conditions.In, new QConst(pCompactIds)
-					) );
+				orCond.Nodes.Add( subjCond );
+				orCond.Nodes.Add( objCond );
 			}
 			
 			var relData = DbMgr.Dalc.LoadAllRecords(loadQ);
@@ -602,7 +612,8 @@ namespace NI.Data.Storage {
 
 				var relationship = subjClass.FindRelationship(predClass, objIdToClass[relObjId], isReversed);
 				if (relationship != null) {
-					rs.Add(new ObjectRelation(relSubjId, relationship, relObjId));
+					if (rels==null || rels.Contains(relationship) )
+						rs.Add(new ObjectRelation(relSubjId, relationship, relObjId));
 				} else {
 					log.Info( "Relation between ObjectID={0} and ObjectID={1} with predicate ClassID={0} doesn't exist: relation skipped",
 						relSubjId, relObjId, predClass.ID);
@@ -715,20 +726,6 @@ namespace NI.Data.Storage {
 			return conditionGrp;
 		}
 
-		public QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
-			var pSrcName = DataTypeTableNames[prop.DataType.ID];
-			return new QueryConditionNode(
-				new QField(null, "id", null),
-				Conditions.In,
-				new Query( pSrcName, 
-					(QField)"property_compact_id"==(QConst)prop.CompactID
-					&
-					new QueryConditionNode( (QField)"value", cnd, val )
-				) {
-					Fields = new[] { (QField)"object_id" }
-				}
-			);
-		}
 
 	}
 }

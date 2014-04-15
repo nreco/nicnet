@@ -38,8 +38,8 @@ namespace NI.Data.Storage {
 		void AddRelations(params ObjectRelation[] relations);
 		void RemoveRelations(params ObjectRelation[] relations);
 		
-		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, Class[] predicates = null);
-		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, Class[] predicates = null);
+		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, IEnumerable<Relationship> rels);
+		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, IEnumerable<Relationship> rels);
 
 		IEnumerable<ObjectRelation> LoadRelations(Query q);
 		

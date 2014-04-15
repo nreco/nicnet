@@ -113,6 +113,10 @@ namespace NI.Data.Storage
 			}
 			// check columns
 			IEnumerable<Property> propsToLoad = null;
+			var relatedPropsToLoad = new Dictionary<Relationship,List<Property>>();
+			var relationFieldNamePrefix = new Dictionary<Relationship,string>();
+			var relatedProps = new List<Property>();
+
 			bool includeId = query.Fields == null || query.Fields.Where(f => f.Name == "id" && f.Prefix == query.Table.Alias).Any();
 
 			if (includeId) {
@@ -130,24 +134,78 @@ namespace NI.Data.Storage
 				foreach (var fld in query.Fields) {
 					if (fld.Name == "id") continue; // tmp
 
+					if (fld.Prefix!=null) {
+						var rel = dataClass.Schema.FindRelationshipByID( fld.Prefix );
+						if (rel!=null) {
+							if (rel.Object == dataClass ) {
+								rel  = dataClass.FindRelationship( rel.Predicate, rel.Subject, true );
+							}
+							if (rel.Subject!=dataClass)
+								throw new ArgumentException(String.Format(
+									"Relation {0} is not applicable with {1}", fld.Prefix, dataClass.ID ) );
+							var relProp = rel.Object.FindPropertyByID( fld.Name );
+
+							if (relProp != null) {
+								if (!relatedPropsToLoad.ContainsKey(rel))
+									relatedPropsToLoad[rel] = new List<Property>();
+								relatedPropsToLoad[rel].Add(relProp);
+								relationFieldNamePrefix[rel] = fld.Prefix;
+								relatedProps.Add(relProp);
+								continue;
+							}
+						}
+					}
 					var prop = dataClass.FindPropertyByID(fld.Name);
-					if (prop == null || fld.Prefix != query.Table.Alias)
+					if (prop==null)
 						throw new Exception(String.Format("Unknown field {0}", fld));
 					queryProps.Add(prop);
 				}
 				propsToLoad = queryProps;
 			}
 
+
 			// ensure property columns
 			foreach (var p in propsToLoad) {
-				if (!tbl.Columns.Contains(p.ID) || tbl.Columns[p.ID].DataType != p.DataType.ValueType) {
+				var propType = p.DataType.ValueType;
+				if (p.Multivalue)
+					propType = propType.MakeArrayType();
+				if (!tbl.Columns.Contains(p.ID) || tbl.Columns[p.ID].DataType != propType) {
 					if (tbl.Columns.Contains(p.ID))
 						tbl.Columns.Remove(p.ID);
-					tbl.Columns.Add(p.ID, p.DataType.ValueType); //todo: handle multivalue
+					tbl.Columns.Add(p.ID, propType);
 				}
 			}
+			foreach (var relEntry in relatedPropsToLoad)
+				foreach (var relProp in relEntry.Value) {
+					var propType = relProp.DataType.ValueType;
+					if (relProp.Multivalue || relEntry.Key.Multiplicity)
+						propType = propType.MakeArrayType();
+					
+					var relColName = String.Format("{0}_{1}", relationFieldNamePrefix[relEntry.Key], relProp.ID);
+
+					if (!tbl.Columns.Contains(relColName) || tbl.Columns[relColName].DataType != propType) {
+						if (tbl.Columns.Contains(relColName))
+							tbl.Columns.Remove(relColName);
+						tbl.Columns.Add(relColName, propType);
+					}
+				}
+
 			var ids = ObjectContainerStorage.ObjectIds(query);
 			var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray());
+			
+			IDictionary<long,ObjectContainer> relatedObjects = null;
+			IEnumerable<ObjectRelation> relationData = null;
+			if (relatedPropsToLoad.Count>0) {
+				relationData = ObjectContainerStorage.LoadRelations( objects.Values.ToArray(), relatedPropsToLoad.Keys );
+				var relObjIds = new List<long>();
+				foreach (var r in relationData) {
+					if (!relObjIds.Contains(r.ObjectID)) {
+						relObjIds.Add(r.ObjectID);
+					}
+				}
+				relatedObjects = ObjectContainerStorage.Load(relObjIds.ToArray(), relatedProps.ToArray());
+			}
+
 			foreach (var id in ids) {
 				if (objects.ContainsKey(id)) {
 					var obj = objects[id];
@@ -158,6 +216,26 @@ namespace NI.Data.Storage
 
 					foreach (var p in propsToLoad)
 						r[p.ID] = obj[p] ?? DBNull.Value;
+
+					if (relatedPropsToLoad.Count>0)
+						foreach (var relEntry in relatedPropsToLoad) {
+							long? relObjId = null;
+							foreach (var rel in relationData)
+								if (rel.SubjectID==obj.ID.Value && rel.Relation==relEntry.Key)
+									relObjId = rel.ObjectID;
+							if (relObjId.HasValue && relatedObjects.ContainsKey(relObjId.Value)) {
+								// process related props
+								foreach (var relProp in relEntry.Value) {
+									var relColName = String.Format("{0}_{1}", relationFieldNamePrefix[relEntry.Key], relProp.ID);
+									if (relEntry.Key.Multiplicity) {
+										//TBD: add merge values 
+										r[relColName] = relatedObjects[relObjId.Value][relProp];
+									} else {
+										r[ relColName ] = relatedObjects[relObjId.Value][relProp];
+									}
+								}
+							}
+						}
 
 					tbl.Rows.Add(r);
 					r.AcceptChanges();

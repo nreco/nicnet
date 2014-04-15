@@ -113,7 +113,7 @@ namespace NI.Data.Storage.Tests {
 
 			Assert.AreEqual(1, 
 				StorageContext.ObjectContainerStorage.LoadRelations( 
-					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[0]["id"]) ) ).Count() );
+					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[0]["id"]) ), null ).Count() );
 
 			// quick relation insert
 			StorageContext.StorageDalc.Insert("contacts_employee_companies", new {
@@ -123,7 +123,7 @@ namespace NI.Data.Storage.Tests {
 
 			Assert.AreEqual(1,
 				StorageContext.ObjectContainerStorage.LoadRelations(
-					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[1]["id"]))).Count());
+					new ObjectContainer(testSchema.FindClassByID("contacts"), Convert.ToInt64(contactsTbl.Rows[1]["id"])), null).Count());
 		}
 
 		[Test]
@@ -199,11 +199,24 @@ namespace NI.Data.Storage.Tests {
 			Assert.True( primaryContacts.Where(r=>r["name"].ToString()=="John").Any() );
 			Assert.True(primaryContacts.Where(r => r["name"].ToString() == "Bob").Any());
 
-			// load only some fields
+			// load only some fields (including related field
 			var ds = new DataSet();
-			var contactsTbl = storageDalc.Load( new Query("contacts") { Fields = new[] { (QField)"name" } }, ds );
-			Assert.AreEqual(1, contactsTbl.Columns.Count );
+			var contactsTbl = storageDalc.Load( new Query("contacts") { 
+					Fields = new[] { (QField)"name", (QField)"contacts_employee_companies.name" } 
+				}, ds );
+			Assert.AreEqual(2, contactsTbl.Columns.Count );
+			Assert.AreEqual(3, contactsTbl.Rows.Count );
 			Assert.AreEqual("name", contactsTbl.Columns[0].ColumnName);
+			Assert.AreEqual("contacts_employee_companies_name", contactsTbl.Columns[1].ColumnName);
+			var expectedCompanyNames = new Dictionary<string,object>(){
+				{"John","Google"},
+				{"Mary", DBNull.Value},
+				{"Bob", "Microsoft"}
+			};
+			foreach (DataRow r in contactsTbl.Rows) {
+				Assert.AreEqual( expectedCompanyNames[r["name"].ToString()], r["contacts_employee_companies_name"] );
+			}
+
 
 			Assert.AreEqual( new DateTime(1999, 5, 20), 
 				storageDalc.LoadValue( new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
@@ -259,6 +272,13 @@ namespace NI.Data.Storage.Tests {
 						) { Fields = new[] { (QField)"name" } }
 					));
 
+			// load by related field (identical to query above)
+			Assert.AreEqual("Google", StorageContext.StorageDalc.LoadValue(
+				new Query("companies",
+					new QueryConditionNode((QField)"contacts_employee_companies.name",Conditions.Like, (QConst)"Jo%")
+				) { Fields = new[] { (QField)"name" } }
+			));
+
 			// sort by related field
 			var contactsByCompanyName = StorageContext.StorageDalc.LoadAllRecords( new Query("contacts") {
 				Sort = new[] { (QSort)"contacts_employee_companies.name asc" }
@@ -275,6 +295,8 @@ namespace NI.Data.Storage.Tests {
 			Assert.AreEqual("Bob", contactsByCompanyNameDesc[0]["name"]);
 			Assert.AreEqual("John", contactsByCompanyNameDesc[1]["name"]);
 			Assert.AreEqual("Mary", contactsByCompanyNameDesc[2]["name"]);
+
+
 
 		}
 

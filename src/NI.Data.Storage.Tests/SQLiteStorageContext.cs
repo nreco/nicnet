@@ -263,11 +263,13 @@ namespace NI.Data.Storage.Tests {
 			";
 
 			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_datetime_values", "TEXT"));
-			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_number_values", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_decimal_values", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_integer_values", "INTEGER"));
 			InternalDalc.ExecuteNonQuery(String.Format(valueTableCreateSqlTemplate, "object_string_values", "TEXT"));
 
 			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_datetime_values_log", "TEXT"));
-			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_number_values_log", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_decimal_values_log", "REAL"));
+			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_integer_values_log", "INTEGER"));
 			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_string_values_log", "TEXT"));
 
 		}
@@ -292,8 +294,13 @@ namespace NI.Data.Storage.Tests {
 
 			ds.Tables.Add(DataSetStorageContext.CreateValueTable("object_datetime_values", typeof(DateTime)));
 			ds.Tables.Add(DataSetStorageContext.CreateValueLogTable("object_datetime_values_log", typeof(DateTime)));
-			ds.Tables.Add(DataSetStorageContext.CreateValueTable("object_number_values", typeof(decimal)));
-			ds.Tables.Add(DataSetStorageContext.CreateValueLogTable("object_number_values_log", typeof(decimal)));
+			
+			ds.Tables.Add(DataSetStorageContext.CreateValueTable("object_decimal_values", typeof(decimal)));
+			ds.Tables.Add(DataSetStorageContext.CreateValueLogTable("object_decimal_values_log", typeof(decimal)));
+
+			ds.Tables.Add(DataSetStorageContext.CreateValueTable("object_integer_values", typeof(long)));
+			ds.Tables.Add(DataSetStorageContext.CreateValueLogTable("object_integer_values_log", typeof(long)));
+
 			ds.Tables.Add(DataSetStorageContext.CreateValueTable("object_string_values", typeof(string)));
 			ds.Tables.Add(DataSetStorageContext.CreateValueLogTable("object_string_values_log", typeof(string)));
 

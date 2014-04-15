@@ -139,7 +139,8 @@ namespace NI.Data.Storage.Model {
 
 
 	public enum ClassObjectLocationMode {
-		ObjectTable // TBD: feature "SeparateTable"
+		ObjectTable, // TBD: feature "SeparateTable"
+		NativeTable
 	}
 
 }

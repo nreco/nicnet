@@ -38,6 +38,8 @@ namespace NI.Data.Storage.Model {
 
 		public object ConvertToValueType(object from) {
 			switch (ID) {
+				case "integer":
+					return Convert.ToInt64(from, CultureInfo.InvariantCulture);
 				case "decimal":
 					return Convert.ToDecimal(from, CultureInfo.InvariantCulture);
 				case "string":
@@ -69,6 +71,7 @@ namespace NI.Data.Storage.Model {
 
 		public static readonly PropertyDataType String = new PropertyDataType() { ID = "string", ValueType = typeof(string) };
 		public static readonly PropertyDataType Decimal = new PropertyDataType() { ID = "decimal", ValueType = typeof(decimal) };
+		public static readonly PropertyDataType Integer = new PropertyDataType() { ID = "integer", ValueType = typeof(long) };
 		public static readonly PropertyDataType DateTime = new PropertyDataType() { ID = "datetime", ValueType = typeof(DateTime) };
 		public static readonly PropertyDataType Date = new PropertyDataType() { ID = "date", ValueType = typeof(DateTime) };
 		public static readonly PropertyDataType Boolean = new PropertyDataType() { ID = "boolean", ValueType = typeof(bool) };

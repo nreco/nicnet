@@ -81,25 +81,104 @@ namespace NI.Data.Storage {
 			return group;
 		}
 
-		protected QueryNode TranslateConditionNode(Class dataClass, QueryConditionNode node) {
-			var lValProperty = node.LValue is QField ? dataClass.FindPropertyByID( ((QField)node.LValue).Name ) : null;
-			var rValProperty = node.RValue is QField ? dataClass.FindPropertyByID( ((QField)node.RValue).Name ) : null;
+		protected QueryNode ComposeRelatedPropertyCondition(Class dataClass, Relationship rel, QField fld, Conditions cnd, IQueryValue val) {
+			var reversed = rel.Object == dataClass;
+			var relationship = rel;
+			if (reversed) {
+				var revRelationship = dataClass.FindRelationship(rel.Predicate, rel.Subject, true);
+				if (revRelationship == null)
+					throw new ArgumentException(
+						String.Format("Relationship {0} cannot be used in reverse direction", rel.ID));
+				relationship = revRelationship;
+			}
 
-			if (lValProperty != null && rValProperty!=null)
+			var p = relationship.Object.FindPropertyByID(fld.Name);
+			if (p == null)
+				throw new ArgumentException(
+					String.Format("Related field {0} referenced by relationship {1} doesn't exist",
+						fld.Name, fld.Prefix));
+
+			var pSrcName = ObjStorage.DataTypeTableNames[p.DataType.ID];
+
+			return new QueryConditionNode(
+				(QField)"id", Conditions.In,
+				new Query(
+					new QTable(ObjStorage.ObjectRelationTableName),
+					(QField)"predicate_class_compact_id" == new QConst(relationship.Predicate.CompactID) 
+					&
+					new QueryConditionNode( new QField(reversed ? "subject_id" : "object_id"), Conditions.In,
+						new Query(pSrcName,
+							(QField)"property_compact_id" == (QConst)p.CompactID
+							&
+							new QueryConditionNode((QField)"value", cnd, val)							
+						) {
+							Fields = new[] { (QField)"object_id" }
+						}
+					)
+				) {
+					Fields = new[] { new QField(reversed ? "object_id" : "subject_id") }
+				}
+			);
+		}
+
+		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
+			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
+			return new QueryConditionNode(
+				new QField(null, "id", null),
+				Conditions.In,
+				new Query(pSrcName,
+					(QField)"property_compact_id" == (QConst)prop.CompactID
+					&
+					new QueryConditionNode((QField)"value", cnd, val)
+				) {
+					Fields = new[] { (QField)"object_id" }
+				}
+			);
+		}
+
+
+		protected QueryNode TranslateConditionNode(Class dataClass, QueryConditionNode node) {
+			if (node.LValue is QField && node.RValue is QField)
 				throw new NotSupportedException("Cannot compare 2 class properties");
 
-			if (lValProperty!=null) {
-				return ObjStorage.ComposePropertyCondition(dataClass, lValProperty, node.Condition, 
-					TranslateQueryValue( node.RValue ) );
+			if (node.LValue is QField) {
+				var lFld = (QField)node.LValue;
+
+				// check for related property
+				if (lFld.Prefix!=null) {
+					var rel = dataClass.Schema.FindRelationshipByID(lFld.Prefix);
+					if (rel!=null) {
+						return ComposeRelatedPropertyCondition(dataClass, rel, lFld, node.Condition, TranslateQueryValue(node.RValue));
+					}
+				}
+
+				var lValProperty = dataClass.FindPropertyByID(lFld.Name);
+				if (lValProperty!=null) {
+					return ComposePropertyCondition(dataClass, lValProperty, node.Condition, 
+						TranslateQueryValue( node.RValue ) );
+				}
 			}
-			if (rValProperty!=null) {
+			if (node.RValue is QField) {
+				var rFld = (QField)node.RValue;
+
 				var cnd = node.Condition;
-				if ( (cnd & Conditions.GreaterThan)==Conditions.GreaterThan ) {
+				if ((cnd & Conditions.GreaterThan) == Conditions.GreaterThan) {
 					cnd = (cnd & ~Conditions.GreaterThan) | Conditions.LessThan;
 				} else if ((cnd & Conditions.LessThan) == Conditions.LessThan) {
 					cnd = (cnd & ~Conditions.LessThan) | Conditions.GreaterThan;
 				}
-				return ObjStorage.ComposePropertyCondition(dataClass, rValProperty, cnd, TranslateQueryValue(node.LValue));
+
+				if (rFld.Prefix!=null) {
+					var rel = dataClass.Schema.FindRelationshipByID(rFld.Prefix);
+					if (rel != null) {
+						return ComposeRelatedPropertyCondition(dataClass, rel, rFld, cnd, TranslateQueryValue(node.LValue));
+					}					
+				}
+
+				var rValProperty = dataClass.FindPropertyByID(rFld.Name);
+				if (rValProperty!=null) {
+					return ComposePropertyCondition(dataClass, rValProperty, cnd, TranslateQueryValue(node.LValue));
+				}
 			}
 			
 			var translatedNode = new QueryConditionNode( 

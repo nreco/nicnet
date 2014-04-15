@@ -119,10 +119,10 @@ namespace NI.Data.Storage.Tests
 				new ObjectRelation(googleChildCompany.ID.Value, companyToParentCompanyRel, googCompany.ID.Value)
 			);
 
-			var googCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany);
+			var googCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, null);
 			Assert.AreEqual(3, googCompanyRels.Count(), "Expected 3 relations for Google company");
 
-			var yahooCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(yahooCompany);
+			var yahooCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(yahooCompany, null);
 			Assert.AreEqual(1, yahooCompanyRels.Count(), "Expected 1 relation for Yahoo company");
 			Assert.AreEqual(bobContact.ID.Value, yahooCompanyRels.First().ObjectID, "Bob should be a only contact of Yahoo");
 
@@ -135,9 +135,11 @@ namespace NI.Data.Storage.Tests
 					maryContact.ID.Value )
 			);
 
-			Assert.AreEqual(1, objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, new []{ o.FindClassByID("contactCompany") }).Count(),
-				 "Expected 1 relation for Google company after Mary removal");
-
+			Assert.AreEqual(1, objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany,
+				new[] {
+					googCompany.GetClass().FindRelationship(o.FindClassByID("contactCompany"), maryContact.GetClass())
+				}).Count(),
+				"Expected 1 relation for Google company after Mary removal");
 
 			//Console.WriteLine("DataSet after test:\n" + objPersisterContext.StorageDS.GetXml());
 		}
@@ -162,13 +164,15 @@ namespace NI.Data.Storage.Tests
 				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value ) );
 
 			// test relation
-			var johnRelations = objPersisterContext.ObjectContainerStorage.LoadRelations( johnContact, new[]{ o.FindClassByID("contactCompany") } );
+			var johnRelations = objPersisterContext.ObjectContainerStorage.LoadRelations( johnContact,
+				new[] { rel });
 			Assert.AreEqual(1, johnRelations.Count() );
 			Assert.AreEqual( false, johnRelations.First().Relation.Reversed );
 			Assert.AreEqual(johnContact.ID.Value, johnRelations.First().SubjectID);
 			Assert.AreEqual(googCompany.ID.Value, johnRelations.First().ObjectID);
 
-			var googRelations = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, new[] { o.FindClassByID("contactCompany") });
+			var googRelations = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, 
+				new[] { o.FindClassByID("companies").FindRelationship( o.FindClassByID("contactCompany"), o.FindClassByID("contacts") ) });
 			Assert.AreEqual(1, googRelations.Count());
 			Assert.AreEqual(true, googRelations.First().Relation.Reversed);
 			Assert.AreEqual(johnContact.ID.Value, googRelations.First().ObjectID);
