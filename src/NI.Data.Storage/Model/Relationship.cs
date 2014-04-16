@@ -25,19 +25,47 @@ namespace NI.Data.Storage.Model {
     /// <summary>
     /// Represents relationship determined by subject, predictate and object classes
     /// </summary>
-	public class Relationship {
+	public sealed class Relationship {
 
+		/// <summary>
+		/// Unique identifier of this relationship (applicable only for non-reversed relations)
+		/// </summary>
 		public string ID { get; private set; }
 
+		/// <summary>
+		/// Subject class of this relationship
+		/// </summary>
 		public Class Subject { get; private set; }
 
-        public Class Predicate { get; private set; }
+        /// <summary>
+        /// Predicate class of this relationship (applicable only for non-inferred relations)
+        /// </summary>
+		public Class Predicate { get; private set; }
 
-        public Class Object { get; private set; }
+        /// <summary>
+        /// Object class of this relationship
+        /// </summary>
+		public Class Object { get; private set; }
 
-        public bool Multiplicity { get; private set; }
+        /// <summary>
+        /// True if cardinality of this relationship supports multiplicity (*:N)
+        /// </summary>
+		public bool Multiplicity { get; private set; }
 
+		/// <summary>
+		/// True if this relationship is reversed view of another relationship
+		/// </summary>
 		public bool Reversed { get; private set; }
+
+		/// <summary>
+		/// True if this relationship is inferred view of relationship sequence
+		/// </summary>
+		public bool Inferred { get; private set; }
+
+		/// <summary>
+		/// Sequence of relationships (applicable only for inferred relationship)
+		/// </summary>
+		public IEnumerable<Relationship> InferredByRelationships { get; private set; }
 
 		public Relationship(Class subj, Class predicate, Class obj, bool multiplicity, bool reversed) {
 			Subject = subj;
@@ -45,15 +73,39 @@ namespace NI.Data.Storage.Model {
 			Object = obj;
 			Multiplicity = multiplicity;
 			Reversed = reversed;
+			Inferred = false;
 			
 			// only "real" relations have an ID
 			if (!reversed)
 				ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
 		}
 
+		public Relationship(Class subj, IEnumerable<Relationship> inferredByRelationships, Class obj) {
+			Inferred = true;
+			Subject = subj;
+			Object = obj;
+			InferredByRelationships = inferredByRelationships;
+			
+			Multiplicity = false;
+			// validate and check multiplicity
+			var lastSubj = Subject;
+			foreach (var r in inferredByRelationships) {
+				if (r.Subject!=lastSubj)
+					throw new ArgumentException("Relationship cannot be inferred from given relationships");
+				lastSubj = r.Object;
+				if (r.Multiplicity)
+					Multiplicity = true;
+			}
+			if (lastSubj!=Object)
+				throw new ArgumentException("Relationship cannot be inferred from given relationships");
+		}
+
+
 		public DataTable CreateDataTable() {
+			if (Inferred)
+				throw new NotSupportedException("Inferred relationship doesn't support DataTable creation");
 			if (Reversed)
-				throw new NotSupportedException("Reversed relation doesn't support DataTable creation");
+				throw new NotSupportedException("Reversed relationship doesn't support DataTable creation");
 
 			var t = new DataTable(ID);
 			var subjCol = t.Columns.Add("subject_id", typeof(long));
@@ -64,8 +116,35 @@ namespace NI.Data.Storage.Model {
 			return t;
 		}
 
+		public override bool Equals(object obj) {
+			if (obj is Relationship) {
+				var r = (Relationship)obj;
+				if (r.Subject!=Subject || r.Object!=Object)
+					return false;
+				if (r.Inferred && Inferred) {
+					var otherInfRels = r.InferredByRelationships.GetEnumerator();
+					foreach (var infRel in InferredByRelationships) {
+						if (!otherInfRels.MoveNext()) // sequence is shorter
+							return false;
+						if (infRel!=otherInfRels.Current) // element doesn't match
+							return false;
+					}
+					if (otherInfRels.MoveNext()) // sequence is longer
+						return false;
+					return true;
+				}
+			}
+			return base.Equals(obj);
+		}
+
 		public override string ToString() {
-			return String.Format("Relationship(Subject:{0}, Predicate:{1}, Object:{2})", Subject.ID, Predicate.ID, Object.ID);
+			string predicateStr;
+			if (Inferred) {
+				predicateStr = "Inferred: "+String.Join(" -> ", InferredByRelationships.Select( r=>r.ToString()).ToArray() );
+			} else {
+				predicateStr = String.Format("Predicate: {0}", Predicate.ID);
+			}
+			return String.Format("Relationship(Subject:{0}, {1}, Object:{2})", Subject.ID, predicateStr, Object.ID);
 		}
 
 

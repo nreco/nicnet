@@ -69,6 +69,11 @@ namespace NI.Data.Storage.Tests
 			bobContact["name"] = "Bob";
 			bobContact["is_primary"] = true;
 
+			var usaCountry = new ObjectContainer(o.FindClassByID("countries"));
+			usaCountry["title"] = "USA";
+			var canadaCountry = new ObjectContainer(o.FindClassByID("countries"));
+			canadaCountry["title"] = "Canada";
+
 
 			objPersisterContext.ObjectContainerStorage.Insert(googCompany);
 			Assert.True(googCompany.ID.HasValue);
@@ -79,6 +84,10 @@ namespace NI.Data.Storage.Tests
 			objPersisterContext.ObjectContainerStorage.Insert(johnContact);
 			objPersisterContext.ObjectContainerStorage.Insert(maryContact);
 			objPersisterContext.ObjectContainerStorage.Insert(bobContact);
+
+			objPersisterContext.ObjectContainerStorage.Insert(usaCountry);
+			objPersisterContext.ObjectContainerStorage.Insert(canadaCountry);
+
 
 			// load test
 			var maryCopy = objPersisterContext.ObjectContainerStorage.Load(new[]{ maryContact.ID.Value }).Values.FirstOrDefault();
@@ -112,19 +121,27 @@ namespace NI.Data.Storage.Tests
 			var companyToParentCompanyRel = googleChildCompany.GetClass().FindRelationship(
 				o.FindClassByID("parentCompany"), googCompany.GetClass(), false
 			);
+			var companyToCountryRel = googCompany.GetClass().FindRelationship(
+				o.FindClassByID("companyCountry"), usaCountry.GetClass(), false
+			);
 			objPersisterContext.ObjectContainerStorage.AddRelations(
 				new ObjectRelation(maryContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(johnContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(bobContact.ID.Value, contactToCompanyRel, yahooCompany.ID.Value),
-				new ObjectRelation(googleChildCompany.ID.Value, companyToParentCompanyRel, googCompany.ID.Value)
+				new ObjectRelation(googleChildCompany.ID.Value, companyToParentCompanyRel, googCompany.ID.Value),
+				new ObjectRelation(googCompany.ID.Value, companyToCountryRel, usaCountry.ID.Value),
+				new ObjectRelation(yahooCompany.ID.Value, companyToCountryRel, usaCountry.ID.Value),
+				new ObjectRelation(googleChildCompany.ID.Value, companyToCountryRel, canadaCountry.ID.Value)
 			);
 
 			var googCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(googCompany, null);
-			Assert.AreEqual(3, googCompanyRels.Count(), "Expected 3 relations for Google company");
+			Assert.AreEqual(4, googCompanyRels.Count(), "Expected 3 relations for Google company");
 
 			var yahooCompanyRels = objPersisterContext.ObjectContainerStorage.LoadRelations(yahooCompany, null);
-			Assert.AreEqual(1, yahooCompanyRels.Count(), "Expected 1 relation for Yahoo company");
-			Assert.AreEqual(bobContact.ID.Value, yahooCompanyRels.First().ObjectID, "Bob should be a only contact of Yahoo");
+			Assert.AreEqual(2, yahooCompanyRels.Count(), "Expected 1 relation for Yahoo company");
+			Assert.AreEqual(bobContact.ID.Value, 
+				yahooCompanyRels.Where(r => r.Relation.Predicate.ID == "contactCompany").First().ObjectID, 
+				"Bob should be a only contact of Yahoo");
 
 			// remove rel
 			var maryRel = googCompanyRels.Where( r=>r.ObjectID == maryContact.ID.Value ).First();
@@ -140,6 +157,16 @@ namespace NI.Data.Storage.Tests
 					googCompany.GetClass().FindRelationship(o.FindClassByID("contactCompany"), maryContact.GetClass())
 				}).Count(),
 				"Expected 1 relation for Google company after Mary removal");
+
+			// test for inferred relation
+			var johnToCountryRels = objPersisterContext.ObjectContainerStorage.LoadRelations( johnContact, new[] {
+				new Relationship(
+					 johnContact.GetClass(), 
+					new [] { contactToCompanyRel, companyToCountryRel },
+					o.FindClassByID("countries") ) 
+			});
+			Assert.AreEqual(1, johnToCountryRels.Count() );
+			Assert.AreEqual( usaCountry.ID.Value, johnToCountryRels.First().ObjectID );
 
 			//Console.WriteLine("DataSet after test:\n" + objPersisterContext.StorageDS.GetXml());
 		}

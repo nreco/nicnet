@@ -248,6 +248,17 @@ namespace NI.Data.Storage.Tests {
 					CompactID = 4,
 					Name = "Parent Company",
 					IsPredicate = true
+				},
+				new Class() {
+					ID = "countries",
+					CompactID = 5,
+					Name = "Country Lookup",
+				},
+				new Class() {
+					ID = "companyCountry",
+					CompactID = 6,
+					Name = "Country",
+					IsPredicate = true
 				}
 			};
 			var props = new[] {
@@ -291,6 +302,7 @@ namespace NI.Data.Storage.Tests {
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("name"));
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
+			o.AddClassProperty(o.FindClassByID("countries"), o.FindPropertyByID("title"));
 
 			var contactToCompanyRel = new Relationship(
 					o.FindClassByID("contacts"),
@@ -328,6 +340,15 @@ namespace NI.Data.Storage.Tests {
 			);
 
 			o.AddRelationship(companyToChildRel);
+
+			var companyToCountryRel = new Relationship(
+				o.FindClassByID("companies"),
+				o.FindClassByID("companyCountry"),
+				o.FindClassByID("countries"),
+				false, false
+			);
+
+			o.AddRelationship(companyToCountryRel);
 
 			return o;
 		}

@@ -372,6 +372,10 @@ namespace NI.Data.Storage {
 			var orCondition = new QueryGroupNode(QueryGroupNodeType.Or);
 			loadRelQ.Condition = orCondition;
 			foreach (var r in relations) {
+				if (r.Relation.Inferred) {
+					throw new ArgumentException("Add/Remove operations are not supported for inferred relationship");
+				}
+
 				var subjIdFld = r.Relation.Reversed ? "object_id" : "subject_id";
 				var objIdFld = r.Relation.Reversed ? "subject_id" : "object_id";
 				var relCondition = (QField)subjIdFld == new QConst(r.SubjectID)
@@ -386,6 +390,7 @@ namespace NI.Data.Storage {
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
 			var relTbl = DbMgr.LoadAll(loadRelQ);
 			foreach (var r in relations) {
+				
 				var subjIdFld = r.Relation.Reversed ? "object_id" : "subject_id";
 				var objIdFld = r.Relation.Reversed ? "subject_id" : "object_id";
 				
@@ -545,7 +550,7 @@ namespace NI.Data.Storage {
 			var objCond = new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(objIds));
 
 			if (rels!=null) {
-				var relCompactIds = rels.Where(r=>!r.Reversed).Select(r=>r.Predicate.CompactID).ToArray();
+				var relCompactIds = rels.Where(r=>!r.Reversed && !r.Inferred).Select(r=>r.Predicate.CompactID).ToArray();
 				if (relCompactIds.Length>0) {
 					orCond.Nodes.Add(
 						subjCond
@@ -553,7 +558,7 @@ namespace NI.Data.Storage {
 						new QueryConditionNode( (QField)"predicate_class_compact_id", Conditions.In, new QConst(relCompactIds) )
 					);
 				}
-				var revRelCompactIds = rels.Where(r=>r.Reversed).Select(r=>r.Predicate.CompactID).ToArray();
+				var revRelCompactIds = rels.Where(r=>r.Reversed && !r.Inferred).Select(r=>r.Predicate.CompactID).ToArray();
 				if (revRelCompactIds.Length>0) {
 					orCond.Nodes.Add(
 						objCond
@@ -619,9 +624,90 @@ namespace NI.Data.Storage {
 						relSubjId, relObjId, predClass.ID);
 				}
 			}
+			if (rels!=null) {
+				// process inferred relations, if specified
+				var inferredRels = rels.Where(r=>r.Inferred).ToArray();
+				if (inferredRels.Length>0) {
+					var maxLevel = inferredRels.Select( r=>r.InferredByRelationships.Count() ).Max();
+
+					var loadedRels = new Dictionary<Relationship, RelationMappingInfo>();
+					foreach (var r in rs) {
+						if (!loadedRels.ContainsKey(r.Relation))
+							loadedRels[r.Relation] = new RelationMappingInfo();
+						loadedRels[r.Relation].Data.Add( r );
+						loadedRels[r.Relation].ObjectIdToSubjectId[r.ObjectID] = r.SubjectID;
+					}
+
+					// load relation data
+					foreach (var infRel in inferredRels) {
+						var relSeqList = new List<Relationship>();
+						IList<long> relSeqSubjIds = objIds;
+						Relationship prevSeqRel = null;
+						foreach (var rship in infRel.InferredByRelationships ) {
+							relSeqList.Add(rship);
+							var seqInfRel = relSeqList.Count==1 ? 
+									relSeqList[0] :
+									new Relationship( infRel.Subject, relSeqList.ToArray(), rship.Object );
+							
+							IList<long> seqObjIds = null;
+							if (loadedRels.ContainsKey(seqInfRel)) {
+								seqObjIds = loadedRels[seqInfRel].ObjectIdToSubjectId.Keys.ToArray();
+							} else {
+								var q = new Query(ObjectRelationTableName,
+										(QField)"predicate_class_compact_id"==new QConst(rship.Predicate.CompactID)
+										&
+										new QueryConditionNode(
+											(QField)(rship.Reversed ? "object_id" : "subject_id"), 
+											Conditions.In, new QConst(relSeqSubjIds))
+									) {
+										Fields = new[] { (QField)"subject_id", (QField)"object_id" }
+									};
+								var seqInfRelationInfo = new RelationMappingInfo();
+								loadedRels[ seqInfRel ] = seqInfRelationInfo;
+								seqObjIds = new List<long>();
+								DbMgr.Dalc.ExecuteReader( q, (rdr)=> {
+									while (rdr.Read()) {
+										var loadedSubjId = Convert.ToInt64( rdr[rship.Reversed ? "object_id" : "subject_id"] );
+										var loadedObjId = Convert.ToInt64( rdr[rship.Reversed ? "subject_id" : "object_id"] );
+										seqObjIds.Add(loadedObjId);
+										
+										var mappedSubjId = prevSeqRel!=null ? 
+												loadedRels[ prevSeqRel ].ObjectIdToSubjectId[ loadedSubjId ] : loadedSubjId;
+
+										seqInfRelationInfo.Data.Add( new ObjectRelation(
+											mappedSubjId, seqInfRel, loadedObjId
+										) );
+										seqInfRelationInfo.ObjectIdToSubjectId[ loadedObjId ] = mappedSubjId;
+									}
+								});
+
+								relSeqSubjIds = seqObjIds;
+							}
+
+							prevSeqRel = seqInfRel;
+						}
+
+						// lets copy resolved inferred relations to resultset
+						foreach (var r in loadedRels[infRel].Data) {
+							rs.Add( r );
+						}
+					}
+				}
+			}
 			
 			return rs;
 		}
+
+		protected class RelationMappingInfo {
+			internal IList<ObjectRelation> Data;
+			internal IDictionary<long,long> ObjectIdToSubjectId;
+
+			internal RelationMappingInfo() {
+				Data = new List<ObjectRelation>();
+				ObjectIdToSubjectId = new Dictionary<long,long>();
+			}
+		}
+
 
 		public IEnumerable<ObjectRelation> LoadRelations(Query query) {
 			if (query.Fields!=null)

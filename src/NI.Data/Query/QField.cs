@@ -75,7 +75,7 @@ namespace NI.Data
 		}
 
 		private void SetName(string nameStr) {
-			var dotIdx = nameStr!=null ? nameStr.IndexOf('.') : -1;
+			var dotIdx = nameStr!=null ? nameStr.LastIndexOf('.') : -1;
 			if (dotIdx > 0) {
 				Prefix = nameStr.Substring(0, dotIdx);
 				Name = nameStr.Substring(dotIdx + 1);
