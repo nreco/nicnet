@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\DataSchemaTests.cs" />
+    <Compile Include="Model\RelationshipTests.cs" />
     <Compile Include="SQLiteStorageDalcTests.cs" />
     <Compile Include="ObjectContainerSqlDalcStorageTests.cs" />
     <Compile Include="SQLiteStorageContext.cs" />

@@ -136,8 +136,11 @@ namespace NI.Data.Storage
 
 					if (fld.Prefix!=null) {
 						var rel = dataClass.Schema.FindRelationshipByID( fld.Prefix );
+						if (rel==null)
+							rel = dataClass.Schema.InferRelationshipByID( fld.Prefix, dataClass );
+
 						if (rel!=null) {
-							if (rel.Object == dataClass ) {
+							if (rel.Object == dataClass && !rel.Inferred) {
 								rel  = dataClass.FindRelationship( rel.Predicate, rel.Subject, true );
 							}
 							if (rel.Subject!=dataClass)
@@ -149,7 +152,7 @@ namespace NI.Data.Storage
 								if (!relatedPropsToLoad.ContainsKey(rel))
 									relatedPropsToLoad[rel] = new List<Property>();
 								relatedPropsToLoad[rel].Add(relProp);
-								relationFieldNamePrefix[rel] = fld.Prefix;
+								relationFieldNamePrefix[rel] = fld.Prefix.Replace('.','_'); // for inferred relations
 								relatedProps.Add(relProp);
 								continue;
 							}
@@ -194,14 +197,17 @@ namespace NI.Data.Storage
 			var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray());
 			
 			IDictionary<long,ObjectContainer> relatedObjects = null;
-			IEnumerable<ObjectRelation> relationData = null;
+			var objIdToRelationData = new Dictionary<long,List<ObjectRelation>>();
 			if (relatedPropsToLoad.Count>0) {
-				relationData = ObjectContainerStorage.LoadRelations( objects.Values.ToArray(), relatedPropsToLoad.Keys );
+				var relationData = ObjectContainerStorage.LoadRelations( objects.Values.ToArray(), relatedPropsToLoad.Keys );
 				var relObjIds = new List<long>();
 				foreach (var r in relationData) {
 					if (!relObjIds.Contains(r.ObjectID)) {
 						relObjIds.Add(r.ObjectID);
 					}
+					if (!objIdToRelationData.ContainsKey(r.SubjectID))
+						objIdToRelationData[r.SubjectID] = new List<ObjectRelation>();
+					objIdToRelationData[r.SubjectID].Add( r );
 				}
 				relatedObjects = ObjectContainerStorage.Load(relObjIds.ToArray(), relatedProps.ToArray());
 			}
@@ -217,21 +223,21 @@ namespace NI.Data.Storage
 					foreach (var p in propsToLoad)
 						r[p.ID] = obj[p] ?? DBNull.Value;
 
-					if (relatedPropsToLoad.Count>0)
+					if (relatedPropsToLoad.Count>0 && objIdToRelationData.ContainsKey(obj.ID.Value))
 						foreach (var relEntry in relatedPropsToLoad) {
-							long? relObjId = null;
-							foreach (var rel in relationData)
-								if (rel.SubjectID==obj.ID.Value && rel.Relation==relEntry.Key)
-									relObjId = rel.ObjectID;
-							if (relObjId.HasValue && relatedObjects.ContainsKey(relObjId.Value)) {
-								// process related props
-								foreach (var relProp in relEntry.Value) {
-									var relColName = String.Format("{0}_{1}", relationFieldNamePrefix[relEntry.Key], relProp.ID);
-									if (relEntry.Key.Multiplicity) {
-										//TBD: add merge values 
-										r[relColName] = relatedObjects[relObjId.Value][relProp];
-									} else {
-										r[ relColName ] = relatedObjects[relObjId.Value][relProp];
+							foreach (var rel in objIdToRelationData[obj.ID.Value]) {
+								if (rel.Relation.Equals(relEntry.Key) && relatedObjects.ContainsKey(rel.ObjectID)) {
+									// process related props
+									foreach (var relProp in relEntry.Value) {
+										var relColName = String.Format("{0}_{1}", relationFieldNamePrefix[relEntry.Key], relProp.ID);
+										if (relEntry.Key.Multiplicity) {
+											//TBD: add merge values 
+											r[relColName] = r.IsNull(relColName) ? 
+												relatedObjects[rel.ObjectID][relProp] :
+												MergeMultivalueColumns(r[relColName], relatedObjects[rel.ObjectID][relProp] );
+										} else {
+											r[relColName] = relatedObjects[rel.ObjectID][relProp];
+										}
 									}
 								}
 							}
@@ -243,6 +249,16 @@ namespace NI.Data.Storage
 			}
 			tbl.AcceptChanges();
 			return tbl;			
+		}
+
+		protected object MergeMultivalueColumns(object o1, object o2) {
+			var ar1 = o1 as Array;
+			var ar2 = o2 as Array;
+			if (ar1==null || ar2==null || ar1.GetType().GetElementType()!=ar2.GetType().GetElementType() ) return o1;
+			var newArr = Array.CreateInstance( ar1.GetType().GetElementType(), ar1.Length+ar2.Length);
+			Array.Copy( ar1, 0, newArr, 0, ar1.Length);
+			Array.Copy(ar2, 0, newArr, ar1.Length, ar2.Length);
+			return newArr;
 		}
 
 

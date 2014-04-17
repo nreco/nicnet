@@ -116,6 +116,18 @@ namespace NI.Data.Storage.Model {
 			return t;
 		}
 
+		public override int GetHashCode() {
+			var hash = Subject.GetHashCode() ^ Object.GetHashCode();
+			if (Inferred) {
+				foreach (var r in InferredByRelationships) {
+					hash = hash^r.GetHashCode();
+				}
+			} else {
+				hash = hash^Predicate.GetHashCode();
+			}
+			return hash;
+		}
+
 		public override bool Equals(object obj) {
 			if (obj is Relationship) {
 				var r = (Relationship)obj;
@@ -133,6 +145,7 @@ namespace NI.Data.Storage.Model {
 						return false;
 					return true;
 				}
+				return r.Predicate==Predicate;
 			}
 			return base.Equals(obj);
 		}

@@ -550,16 +550,28 @@ namespace NI.Data.Storage {
 			var objCond = new QueryConditionNode( (QField)"object_id", Conditions.In, new QConst(objIds));
 
 			if (rels!=null) {
-				var relCompactIds = rels.Where(r=>!r.Reversed && !r.Inferred).Select(r=>r.Predicate.CompactID).ToArray();
-				if (relCompactIds.Length>0) {
+				var relCompactIds = new List<long>();
+				var revRelCompactIds = new List<long>();
+				foreach (var r in rels) {
+					// lets include first relation of inferred relationships into first query
+					var rr = r.Inferred ? r.InferredByRelationships.First() : r;
+					if (rr.Reversed) {
+						if (!revRelCompactIds.Contains(rr.Predicate.CompactID))
+							revRelCompactIds.Add(rr.Predicate.CompactID);
+					} else {
+						if (!relCompactIds.Contains(rr.Predicate.CompactID))
+							relCompactIds.Add(rr.Predicate.CompactID);
+					}
+				}
+
+				if (relCompactIds.Count>0) {
 					orCond.Nodes.Add(
 						subjCond
 						&
 						new QueryConditionNode( (QField)"predicate_class_compact_id", Conditions.In, new QConst(relCompactIds) )
 					);
 				}
-				var revRelCompactIds = rels.Where(r=>r.Reversed && !r.Inferred).Select(r=>r.Predicate.CompactID).ToArray();
-				if (revRelCompactIds.Length>0) {
+				if (revRelCompactIds.Count>0) {
 					orCond.Nodes.Add(
 						objCond
 						&
@@ -570,7 +582,6 @@ namespace NI.Data.Storage {
 				orCond.Nodes.Add( subjCond );
 				orCond.Nodes.Add( objCond );
 			}
-			
 			var relData = DbMgr.Dalc.LoadAllRecords(loadQ);
 			var rs = new List<ObjectRelation>();
 
@@ -649,9 +660,8 @@ namespace NI.Data.Storage {
 									relSeqList[0] :
 									new Relationship( infRel.Subject, relSeqList.ToArray(), rship.Object );
 							
-							IList<long> seqObjIds = null;
 							if (loadedRels.ContainsKey(seqInfRel)) {
-								seqObjIds = loadedRels[seqInfRel].ObjectIdToSubjectId.Keys.ToArray();
+								relSeqSubjIds = loadedRels[seqInfRel].ObjectIdToSubjectId.Keys.ToArray();
 							} else {
 								var q = new Query(ObjectRelationTableName,
 										(QField)"predicate_class_compact_id"==new QConst(rship.Predicate.CompactID)
@@ -664,7 +674,7 @@ namespace NI.Data.Storage {
 									};
 								var seqInfRelationInfo = new RelationMappingInfo();
 								loadedRels[ seqInfRel ] = seqInfRelationInfo;
-								seqObjIds = new List<long>();
+								var seqObjIds = new List<long>();
 								DbMgr.Dalc.ExecuteReader( q, (rdr)=> {
 									while (rdr.Read()) {
 										var loadedSubjId = Convert.ToInt64( rdr[rship.Reversed ? "object_id" : "subject_id"] );

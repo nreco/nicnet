@@ -350,6 +350,16 @@ namespace NI.Data.Storage.Tests {
 
 			o.AddRelationship(companyToCountryRel);
 
+			var countryToCompanyRel = new Relationship(
+				o.FindClassByID("countries"),
+				o.FindClassByID("companyCountry"),
+				o.FindClassByID("companies"),
+				true, true
+			);
+
+			o.AddRelationship(countryToCompanyRel);
+
+
 			return o;
 		}
 

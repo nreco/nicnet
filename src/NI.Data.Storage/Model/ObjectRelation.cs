@@ -32,6 +32,10 @@ namespace NI.Data.Storage.Model {
 			Relation = r;
 			ObjectID = objId;
 		}
+
+		public override string ToString() {
+			return String.Format("[SubjectID={0}; {1}; ObjectID={2}]", SubjectID, Relation.ToString(), ObjectID);
+		}
 	}
 
 }

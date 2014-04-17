@@ -132,5 +132,28 @@ namespace NI.Data.Storage.Model {
 			return RelationshipById.ContainsKey(id) ? RelationshipById[id] : null;
 		}
 
+		public Relationship InferRelationshipByID(string id, Class subjClass) {
+			var nextSubj = subjClass;
+			var relIds = id.Split('.');
+			if (relIds.Length>1) {
+				var rels = new Relationship[relIds.Length];
+				for (int i=0; i<rels.Length;i++) {
+					var r = FindRelationshipByID(relIds[i]);
+					if (r==null)
+						return null;
+					if (r.Subject!=nextSubj && r.Object==nextSubj) {
+						r = nextSubj.FindRelationship(r.Predicate, r.Subject, true);
+					}
+					if (r==null || r.Subject!=nextSubj)
+						return null;
+					nextSubj = r.Object;
+					rels[i] = r;
+				}
+				return new Relationship( rels[0].Subject, rels, rels[rels.Length-1].Object );
+			}
+			return null;
+		}
+
+
     }
 }

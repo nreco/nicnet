@@ -34,7 +34,7 @@ namespace NI.Data.Storage.Tests {
 			StorageContext.CreateTestDataSchema();
 
 			var schema = StorageContext.DataSchemaStorage.GetSchema();
-			Assert.AreEqual(2, schema.Classes.Where(c=>!c.IsPredicate).Count() );
+			Assert.AreEqual(3, schema.Classes.Where(c=>!c.IsPredicate).Count() );
 			
 			var contactsClass = schema.FindClassByID("contacts");
 			Assert.IsNotNull(contactsClass);

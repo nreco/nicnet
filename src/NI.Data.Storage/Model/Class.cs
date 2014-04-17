@@ -88,8 +88,22 @@ namespace NI.Data.Storage.Model {
 			return base.Equals(obj);
 		}
 
+		public static bool operator ==(Class v1, Class v2) {
+			if ( ((object)v1)==null)
+				return ((object)v2)==null;
+			return v1.Equals(v2);
+		}
+
+		public static bool operator !=(Class a, Class b) {
+			return !(a == b);
+		}
+
 		public override int GetHashCode() {
 			return String.IsNullOrEmpty(ID) ? base.GetHashCode() : ID.GetHashCode();
+		}
+
+		public override string ToString() {
+			return String.Format("Class(ID={0})", ID);
 		}
 
 		public bool HasProperty(Property p) {
@@ -111,15 +125,7 @@ namespace NI.Data.Storage.Model {
 				return rels.FirstOrDefault();
 		}
 
-		public static bool operator ==(Class a, Class b) {
-			if ( (object)a == null && (object)b == null) return true;
-			if ( (object)a != null && (object)b!=null)
-				return a.ID==b.ID;
-			return false;
-		}
-		public static bool operator !=(Class a, Class b) {
-			return !(a == b);
-		}
+
 
 		public DataTable CreateDataTable() {
 			var t = new DataTable(ID);

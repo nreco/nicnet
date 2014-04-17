@@ -59,8 +59,16 @@ namespace NI.Data.Storage.Tests {
 			StorageContext.ObjectContainerStorage.Insert(maryContact);
 			StorageContext.ObjectContainerStorage.Insert(bobContact);
 
+			var usaCountry = new ObjectContainer(testSchema.FindClassByID("countries"));
+			usaCountry["name"] = "USA";
+			var canadaCountry = new ObjectContainer(testSchema.FindClassByID("countries"));
+			canadaCountry["name"] = "Canada";
+			StorageContext.ObjectContainerStorage.Insert(usaCountry);
+			StorageContext.ObjectContainerStorage.Insert(canadaCountry);
+
 			var rel = testSchema.FindClassByID("contacts").FindRelationship(
 				testSchema.FindClassByID("employee"), testSchema.FindClassByID("companies"));
+			var countryRel = testSchema.FindRelationshipByID("companies_country_countries");
 			
 			StorageContext.ObjectContainerStorage.AddRelations( 
 				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value )
@@ -68,6 +76,14 @@ namespace NI.Data.Storage.Tests {
 			StorageContext.ObjectContainerStorage.AddRelations(
 				new ObjectRelation(bobContact.ID.Value, rel, msCompany.ID.Value)
 			);
+
+			StorageContext.ObjectContainerStorage.AddRelations(
+				new ObjectRelation(msCompany.ID.Value, countryRel, usaCountry.ID.Value)
+			);
+			StorageContext.ObjectContainerStorage.AddRelations(
+				new ObjectRelation(googCompany.ID.Value, countryRel, canadaCountry.ID.Value)
+			);
+
 		}
 
 		[Test]
@@ -281,12 +297,16 @@ namespace NI.Data.Storage.Tests {
 
 			// sort by related field
 			var contactsByCompanyName = StorageContext.StorageDalc.LoadAllRecords( new Query("contacts") {
-				Sort = new[] { (QSort)"contacts_employee_companies.name asc" }
+				Sort = new[] { (QSort)"contacts_employee_companies.name asc" },
+				Fields = new [] { (QField)"name", (QField)"contacts_employee_companies.companies_country_countries.name" }
 			});
 			Assert.AreEqual(3, contactsByCompanyName.Length);
 			Assert.AreEqual("Mary", contactsByCompanyName[0]["name"]);
+			Assert.AreEqual(DBNull.Value, contactsByCompanyName[0]["contacts_employee_companies_companies_country_countries_name"]);
 			Assert.AreEqual("John", contactsByCompanyName[1]["name"]);
+			Assert.AreEqual("Canada", contactsByCompanyName[1]["contacts_employee_companies_companies_country_countries_name"]);
 			Assert.AreEqual("Bob", contactsByCompanyName[2]["name"]);
+			Assert.AreEqual("USA", contactsByCompanyName[2]["contacts_employee_companies_companies_country_countries_name"]);
 
 			var contactsByCompanyNameDesc = StorageContext.StorageDalc.LoadAllRecords(new Query("contacts") {
 				Sort = new[] { (QSort)"contacts_employee_companies.name desc" }

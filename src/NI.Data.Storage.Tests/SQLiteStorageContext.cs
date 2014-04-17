@@ -60,8 +60,8 @@ namespace NI.Data.Storage.Tests {
 					}
 				}
 			});
-			//var dbEventsBroker = new DataEventBroker(InternalDalc);
-			//var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
+			var dbEventsBroker = new DataEventBroker(InternalDalc);
+			var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
 
 			InitDbSchema();
 
@@ -114,6 +114,27 @@ namespace NI.Data.Storage.Tests {
 				{"compact_id", 3}
 			});
 
+			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
+				{"id", "countries"},
+				{"name", "Country Lookup"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"predicate", false},
+				{"compact_id", 4}
+			});
+
+			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
+				{"id", "country"},
+				{"name", "Country"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", false},
+				{"predicate", true},
+				{"compact_id", 5}
+			});
+
+
 			StorageDbMgr.Insert("metadata_class_relationships", new Dictionary<string, object>() {
 				{"subject_class_id", "contacts"},
 				{"predicate_class_id", "employee"},
@@ -121,6 +142,15 @@ namespace NI.Data.Storage.Tests {
 				{"subject_multiplicity", true},
 				{"object_multiplicity", false}
 			});
+
+			StorageDbMgr.Insert("metadata_class_relationships", new Dictionary<string, object>() {
+				{"subject_class_id", "companies"},
+				{"predicate_class_id", "country"},
+				{"object_class_id", "countries"},
+				{"subject_multiplicity", true},
+				{"object_multiplicity", false}
+			});
+
 
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "name"},
@@ -163,6 +193,9 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "birthday"},
 				{"class_id", "contacts"} });
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "name"},
+				{"class_id", "countries"} });
 
 		}
 
