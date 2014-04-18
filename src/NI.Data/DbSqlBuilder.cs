@@ -92,7 +92,7 @@ namespace NI.Data
 			foreach (var f in query.Fields) {
 				var fld = BuildValue((IQueryValue)f);
 				if (fld != f.Name) { //skip "as" for usual fields
-					fld = String.Format("({0}) as {1}", fld, f.Name);
+					fld = String.IsNullOrEmpty(f.Name) ? f.Expression : String.Format("({0}) as {1}", fld, f.Name);
 				}
 				joinFields.Add(fld);
 			}
