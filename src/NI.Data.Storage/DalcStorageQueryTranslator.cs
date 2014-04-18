@@ -82,15 +82,16 @@ namespace NI.Data.Storage {
 		}
 
 		protected QueryNode ComposeRelatedPropertyCondition(Class dataClass, Relationship rel, QField fld, Conditions cnd, IQueryValue val) {
-			var reversed = rel.Object == dataClass;
 			var relationship = rel;
-			if (reversed) {
+			if (!rel.Inferred && rel.Object == dataClass) {
 				var revRelationship = dataClass.FindRelationship(rel.Predicate, rel.Subject, true);
 				if (revRelationship == null)
 					throw new ArgumentException(
-						String.Format("Relationship {0} cannot be used in reverse direction", rel.ID));
+						String.Format("Relationship {0} cannot be used in reverse direction", fld.Prefix));
 				relationship = revRelationship;
 			}
+			if (relationship.Subject!=dataClass)
+				throw new ArgumentException(String.Format("Relationship {0} cannot be used with {1}",fld.Prefix,dataClass.ID)); 
 
 			var p = relationship.Object.FindPropertyByID(fld.Name);
 			if (p == null)
@@ -100,25 +101,29 @@ namespace NI.Data.Storage {
 
 			var pSrcName = ObjStorage.DataTypeTableNames[p.DataType.ID];
 
-			return new QueryConditionNode(
-				(QField)"id", Conditions.In,
-				new Query(
-					new QTable(ObjStorage.ObjectRelationTableName),
-					(QField)"predicate_class_compact_id" == new QConst(relationship.Predicate.CompactID) 
-					&
-					new QueryConditionNode( new QField(reversed ? "subject_id" : "object_id"), Conditions.In,
-						new Query(pSrcName,
+			var propQuery = new Query(pSrcName,
 							(QField)"property_compact_id" == (QConst)p.CompactID
 							&
 							new QueryConditionNode((QField)"value", cnd, val)							
 						) {
 							Fields = new[] { (QField)"object_id" }
-						}
+						};
+			var reverseRelSequence = relationship.Inferred ? relationship.InferredByRelationships.Reverse() : new[] { relationship };
+
+			foreach (var r in reverseRelSequence) {
+				propQuery = new Query(
+					new QTable(ObjStorage.ObjectRelationTableName),
+					(QField)"predicate_class_compact_id" == new QConst(r.Predicate.CompactID) 
+					&
+					new QueryConditionNode( new QField(r.Reversed ? "subject_id" : "object_id"), Conditions.In,
+						propQuery
 					)
 				) {
-					Fields = new[] { new QField(reversed ? "object_id" : "subject_id") }
-				}
-			);
+					Fields = new[] { new QField(r.Reversed ? "object_id" : "subject_id") }
+				};
+			}
+
+			return new QueryConditionNode( (QField)"id", Conditions.In, propQuery );
 		}
 
 		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
@@ -147,6 +152,9 @@ namespace NI.Data.Storage {
 				// check for related property
 				if (lFld.Prefix!=null) {
 					var rel = dataClass.Schema.FindRelationshipByID(lFld.Prefix);
+					if (rel==null) {
+						rel = dataClass.Schema.InferRelationshipByID(lFld.Prefix, dataClass);
+					}
 					if (rel!=null) {
 						return ComposeRelatedPropertyCondition(dataClass, rel, lFld, node.Condition, TranslateQueryValue(node.RValue));
 					}

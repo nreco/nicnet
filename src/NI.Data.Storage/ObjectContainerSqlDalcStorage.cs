@@ -31,48 +31,48 @@ namespace NI.Data.Storage {
 					if (origSort.Field.Prefix!=null && origSort.Field.Prefix!=originalQuery.Table.Alias) {
 						// related field?
 						var relationship = dataClass.Schema.FindRelationshipByID(origSort.Field.Prefix);
+						if (relationship==null)
+							relationship = dataClass.Schema.InferRelationshipByID(origSort.Field.Prefix, dataClass);
+
 						if (relationship!=null) {
-							if (relationship.Subject==dataClass || relationship.Object==dataClass) {
-								var reversed = relationship.Object==dataClass;
-								if (reversed) {
-									var revRelationship = dataClass.FindRelationship( relationship.Predicate, relationship.Subject, true );
-									if (revRelationship==null)
-										throw new ArgumentException(
-											String.Format("Relationship {0} cannot be used in reverse direction", relationship.ID) );
-									relationship = revRelationship;
-								}
-
-								var p = relationship.Object.FindPropertyByID(origSort.Field.Name);
-								if (p==null)
+							if (!relationship.Inferred && relationship.Object==dataClass) {
+								var revRelationship = dataClass.FindRelationship(relationship.Predicate, relationship.Subject, true);
+								if (revRelationship == null)
 									throw new ArgumentException(
-										String.Format("Sort field {0} referenced by relationship {1} doesn't exist",
-											origSort.Field.Name, origSort.Field.Prefix));
-								if (p.Multivalue)
-									throw new ArgumentException(
-										String.Format("Cannot sort by multivalue property {0}", p.ID));
-
-								// matched related object property
-								if (relationship.Multiplicity)
-									throw new ArgumentException(
-										String.Format("Sorting by relationship {0} is not possible because of multiplicity", origSort.Field.Prefix));									
-									
-								var propTblName = DataTypeTableNames[p.DataType.ID];
-								var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
-								var subjFieldName = reversed ? "object_id" : "subject_id";
-								var objFieldName = reversed ? "subject_id" : "object_id";
-
-								sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
-								joinSb.AppendFormat("LEFT JOIN {0} {1}_rel ON ({1}_rel.{3}={4}.id and {1}_rel.predicate_class_compact_id={2}) ",
-									ObjectRelationTableName, propTblAlias, relationship.Predicate.CompactID, subjFieldName, objTableAlias);
-								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={1}_rel.{4} and {1}.property_compact_id={3}) ",
-									propTblName, propTblAlias, objTableAlias, p.CompactID, objFieldName);
-
-								continue;
-							} else {
-								throw new ArgumentException(
-									String.Format("Relationship {0} cannot be used with {1}", relationship.ID, dataClass.ID) );
+										String.Format("Relationship {0} cannot be used in reverse direction", relationship.ID));
+								relationship = revRelationship;
 							}
 
+							if (relationship.Subject!=dataClass)
+								throw new ArgumentException(
+									String.Format("Relationship {0} cannot be used with {1}", relationship.ID, dataClass.ID));								
+
+								
+							var p = relationship.Object.FindPropertyByID(origSort.Field.Name);
+							if (p==null)
+								throw new ArgumentException(
+									String.Format("Sort field {0} referenced by relationship {1} doesn't exist",
+										origSort.Field.Name, origSort.Field.Prefix));
+							if (p.Multivalue)
+								throw new ArgumentException(
+									String.Format("Cannot sort by multivalue property {0}", p.ID));
+
+							// matched related object property
+							if (relationship.Multiplicity)
+								throw new ArgumentException(
+									String.Format("Sorting by relationship {0} is not possible because of multiplicity", origSort.Field.Prefix));									
+									
+							var propTblName = DataTypeTableNames[p.DataType.ID];
+							var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
+
+							var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propTblAlias, String.Format("{0}.id", objTableAlias),
+									relationship.Inferred ? relationship.InferredByRelationships : new[]{ relationship } );
+
+							sortFields.Add(new QSort(propTblAlias + ".value", origSort.SortDirection));
+							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
+								propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
+
+							continue;
 						}
 					}
 
@@ -107,6 +107,23 @@ namespace NI.Data.Storage {
 			for (int i=0; i<ids.Length; i++)
 				ids[i] =  Convert.ToInt64(idValues[i]);
 			return ids;
+		}
+
+		protected string GenerateRelationshipJoins(StringBuilder sqlBuilder, string joinTblPrefix, string subjIdFld, IEnumerable<Relationship> rels) {
+			string lastRelObjIdFld = subjIdFld;
+			var joinCount = 0;
+			foreach (var r in rels) {
+				var subjFieldName = r.Reversed ? "object_id" : "subject_id";
+				var objFieldName = r.Reversed ? "subject_id" : "object_id";
+
+				var relTblAlias = String.Format("{0}_{1}_rel", joinTblPrefix, joinCount++);
+
+				sqlBuilder.AppendFormat("LEFT JOIN {0} {1} ON ({1}.{2}={3} and {1}.predicate_class_compact_id={4})\n",
+					ObjectRelationTableName, relTblAlias, subjFieldName, lastRelObjIdFld, r.Predicate.CompactID);
+
+				lastRelObjIdFld = relTblAlias+"."+objFieldName;
+			}
+			return lastRelObjIdFld;
 		}
 
 	}
