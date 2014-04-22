@@ -21,6 +21,9 @@ using System.ComponentModel;
 namespace NI.Data.SQLite
 {
 
+	/// <summary>
+	/// SQLite Dalc Factory implementation
+	/// </summary>
 	public class SQLiteDalcFactory : GenericDbProviderFactory
 	{
 		public SQLiteDalcFactory()
