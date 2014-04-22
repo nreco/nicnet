@@ -39,7 +39,11 @@ namespace NI.Data {
 						if (Nullable.GetUnderlyingType(propType) != null)
 							propType = Nullable.GetUnderlyingType(propType);
 
-						rVal = Convert.ChangeType(rVal, propType, CultureInfo.InvariantCulture);
+						if (propType.IsEnum) {
+							rVal = Enum.Parse(propType, rVal.ToString(), true); 
+						} else {
+							rVal = Convert.ChangeType(rVal, propType, CultureInfo.InvariantCulture);
+						}
 					}
 					pInfo.SetValue(o, rVal, null);
 				}

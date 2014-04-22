@@ -127,6 +127,10 @@ namespace NI.Data.Storage {
 		}
 
 		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
+			if (prop.PrimaryKey) {
+				return new QueryConditionNode( (QField)"id", cnd, val );
+			}
+
 			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
 			return new QueryConditionNode(
 				new QField(null, "id", null),

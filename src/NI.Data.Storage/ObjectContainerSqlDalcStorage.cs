@@ -68,9 +68,13 @@ namespace NI.Data.Storage {
 							var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propTblAlias, String.Format("{0}.id", objTableAlias),
 									relationship.Inferred ? relationship.InferredByRelationships : new[]{ relationship } );
 
-							sortFields.Add(new QSort(propTblAlias + ".value", origSort.SortDirection));
-							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
-								propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
+							if (p.PrimaryKey) {
+								sortFields.Add(new QSort(lastRelObjIdFld, origSort.SortDirection));
+							} else {
+								sortFields.Add(new QSort(propTblAlias + ".value", origSort.SortDirection));
+								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
+									propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
+							}
 
 							continue;
 						}
@@ -82,12 +86,15 @@ namespace NI.Data.Storage {
 							if (p.Multivalue)
 								throw new ArgumentException("Cannot sort by mulivalue property");
 
-							var propTblName = DataTypeTableNames[p.DataType.ID];
-							var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
-							sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
-							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
-								propTblName, propTblAlias, objTableAlias, p.CompactID);
-
+							if (p.PrimaryKey) {
+								sortFields.Add(new QSort( String.Format("{0}.id", objTableAlias), origSort.SortDirection));
+							} else {
+								var propTblName = DataTypeTableNames[p.DataType.ID];
+								var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
+								sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
+								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
+									propTblName, propTblAlias, objTableAlias, p.CompactID);
+							}
 							continue;
 						}
 					}

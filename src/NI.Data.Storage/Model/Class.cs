@@ -129,15 +129,19 @@ namespace NI.Data.Storage.Model {
 
 		public DataTable CreateDataTable() {
 			var t = new DataTable(ID);
-			var idCol = t.Columns.Add( "id", typeof(long) );
-			idCol.AutoIncrement = true;
-			idCol.AutoIncrementSeed = -1;
-			idCol.AutoIncrementStep = -1;
-			t.PrimaryKey = new[] { idCol };
-
+			var pkList = new List<DataColumn>();
 			foreach (var p in Properties) {
 				var col = t.Columns.Add( p.ID, p.DataType.ValueType );
+				if (p.PrimaryKey) {
+					pkList.Add(col);
+					if (col.DataType==typeof(long) || col.DataType==typeof(int)) {
+						col.AutoIncrement = true;
+						col.AutoIncrementSeed = -1;
+						col.AutoIncrementStep = -1;
+					}
+				}
 			}
+			t.PrimaryKey = pkList.ToArray();
 			return t;
 		}
 

@@ -179,6 +179,7 @@ namespace NI.Data.Storage.Tests {
 			t.Columns.Add("indexable", typeof(bool));
 			t.Columns.Add("predefined", typeof(bool));
 			t.Columns.Add("predicate", typeof(bool));
+			t.Columns.Add("object_location", typeof(string));
 
 			t.PrimaryKey = new[] { idCol };
 			return t;
@@ -194,6 +195,8 @@ namespace NI.Data.Storage.Tests {
 			t.Columns.Add("indexable", typeof(bool));
 			t.Columns.Add("predefined", typeof(bool));
 			t.Columns.Add("datatype", typeof(string));
+			t.Columns.Add("value_location", typeof(string));
+			t.Columns.Add("primary_key", typeof(bool)).DefaultValue = false;
 
 			t.PrimaryKey = new[] { idCol };
 			return t;
@@ -294,6 +297,15 @@ namespace NI.Data.Storage.Tests {
 					CompactID = 5,
 					Name = "Net Income",
 					DataType = PropertyDataType.Decimal
+				},
+				new Property() {
+					ID = "id",
+					CompactID = 6,
+					Name = "ID",
+					Predefined = true,
+					PrimaryKey = true,
+					DataType = PropertyDataType.Integer,
+					ValueLocation = PropertyValueLocationMode.ObjectTableColumn
 				}
 			};
 			var o = new DataSchema(classes, props);
@@ -303,6 +315,10 @@ namespace NI.Data.Storage.Tests {
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
 			o.AddClassProperty(o.FindClassByID("countries"), o.FindPropertyByID("title"));
+
+			o.AddClassProperty(o.FindClassByID("countries"), o.FindPropertyByID("id"));
+			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("id"));
+			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("id"));
 
 			var contactToCompanyRel = new Relationship(
 					o.FindClassByID("contacts"),

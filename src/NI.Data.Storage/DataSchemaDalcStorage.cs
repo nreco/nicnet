@@ -57,7 +57,8 @@ namespace NI.Data.Storage {
 				{"indexable", "Indexable"},
 				{"predefined", "Predefined"},
 				{"predicate", "IsPredicate"},
-				{"compact_id", "CompactID"}
+				{"compact_id", "CompactID"},
+				{"object_location", "ObjectLocation"}
 			};
 			ClassPersister = new ObjectDalcMapper<Class>(DbContext, ClassTableName, ClassFieldMapping);
 
@@ -69,7 +70,9 @@ namespace NI.Data.Storage {
 				{"hidden", "Hidden"},
 				{"indexable", "Indexable"},
 				{"multivalue", "Multivalue"},
-				{"compact_id", "CompactID"}
+				{"compact_id", "CompactID"},
+				{"value_location","ValueLocation"},
+				{"primary_key","PrimaryKey"}
 			};
 			PropertyPersister = new ObjectDalcMapper<Property>(DbContext, PropertyTableName,
 				new PropertyMapper(PropertyFieldMapping) );

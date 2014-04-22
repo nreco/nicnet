@@ -76,7 +76,7 @@ namespace NI.Data.Storage.Model {
 		public static readonly PropertyDataType Date = new PropertyDataType() { ID = "date", ValueType = typeof(DateTime) };
 		public static readonly PropertyDataType Boolean = new PropertyDataType() { ID = "boolean", ValueType = typeof(bool) };
 
-		public static readonly IEnumerable<PropertyDataType> KnownDataTypes = new[] {String, Decimal, DateTime, Date, Boolean};
+		public static readonly IEnumerable<PropertyDataType> KnownDataTypes = new[] {String, Integer, Decimal, DateTime, Date, Boolean};
 	}
 
 }

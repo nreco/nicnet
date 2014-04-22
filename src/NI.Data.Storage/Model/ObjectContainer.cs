@@ -38,12 +38,18 @@ namespace NI.Data.Storage.Model {
 
 		public object this[Property p] {
 			get {
+				if (p.PrimaryKey)
+					return ID.HasValue ? (object)ID.Value : null;
 				return Values.ContainsKey(p) ? Values[p] : null;
 			}
 			set {
 				if (!ObjectClass.HasProperty(p))
 					throw new ArgumentException( String.Format("Invalid property (PID={0}) for class (CID={1})", p.ID, ObjectClass.ID) );
-				Values[p] = value==null || DBNull.Value.Equals(value) ? null : p.DataType.ConvertToValueType( value );
+				if (p.PrimaryKey) {
+					ID = value==null? (long?)null : (long?)Convert.ToInt64(value);
+				} else {
+					Values[p] = value==null || DBNull.Value.Equals(value) ? null : p.DataType.ConvertToValueType( value );
+				}
 			}
 		}
 

@@ -42,6 +42,8 @@ namespace NI.Data.Storage.Model {
 
         public bool Multivalue { get; set; }
 
+		public bool PrimaryKey { get; set; }
+
 		public PropertyValueLocationMode ValueLocation { get; set; }
 
         public IEnumerable<Class> Classes {
@@ -54,6 +56,7 @@ namespace NI.Data.Storage.Model {
 
 		public Property() {
 			ValueLocation = PropertyValueLocationMode.ValueTable;
+			PrimaryKey = false;
 		}
 
         public Property(string id) {
@@ -86,7 +89,8 @@ namespace NI.Data.Storage.Model {
 	}
 
 	public enum PropertyValueLocationMode {
-		ValueTable
+		ValueTable,
+		ObjectTableColumn
 		//TODO: feature "TableColumn"
 	}
 }

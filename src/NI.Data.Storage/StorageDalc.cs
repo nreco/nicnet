@@ -117,23 +117,11 @@ namespace NI.Data.Storage
 			var relationFieldNamePrefix = new Dictionary<Relationship,string>();
 			var relatedProps = new List<Property>();
 
-			bool includeId = query.Fields == null || query.Fields.Where(f => f.Name == "id" && f.Prefix == query.Table.Alias).Any();
-
-			if (includeId) {
-				// ensure special "id" column
-				if (!tbl.Columns.Contains("id") || tbl.Columns["id"].DataType != typeof(long)) {
-					if (tbl.Columns.Contains("id"))
-						tbl.Columns.Remove("id");
-					tbl.Columns.Add("id", typeof(long));
-				}
-			}
 			if (query.Fields == null) {
 				propsToLoad = dataClass.Properties;
 			} else {
 				var queryProps = new List<Property>();
 				foreach (var fld in query.Fields) {
-					if (fld.Name == "id") continue; // tmp
-
 					if (fld.Prefix!=null) {
 						var rel = dataClass.Schema.FindRelationshipByID( fld.Prefix );
 						if (rel==null)
@@ -216,9 +204,6 @@ namespace NI.Data.Storage
 				if (objects.ContainsKey(id)) {
 					var obj = objects[id];
 					var r = tbl.NewRow();
-
-					if (includeId)
-						r["id"] = obj.ID.Value;
 
 					foreach (var p in propsToLoad)
 						r[p.ID] = obj[p] ?? DBNull.Value;

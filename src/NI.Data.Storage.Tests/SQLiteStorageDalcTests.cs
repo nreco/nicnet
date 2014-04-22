@@ -319,13 +319,23 @@ namespace NI.Data.Storage.Tests {
 
 			// order by inferred rel
 			var contactsByCompanyCountryAsc = StorageContext.StorageDalc.LoadAllRecords(new Query("contacts") {
-				Fields = new[] { (QField)"name", (QField)"contacts_employee_companies.companies_country_countries.name" },
+				Fields = new[] { 
+					(QField)"name", 
+					(QField)"contacts_employee_companies.companies_country_countries.name",
+					(QField)"id", // object id
+					(QField)"contacts_employee_companies.id", // related object id
+					(QField)"contacts_employee_companies.companies_country_countries.id"
+				 },
 				Sort = new[] { (QSort)"contacts_employee_companies.companies_country_countries.name asc" }
 			});
 			Assert.AreEqual(3, contactsByCompanyCountryAsc.Length);
 			Assert.AreEqual(DBNull.Value, contactsByCompanyCountryAsc[0]["contacts_employee_companies_companies_country_countries_name"]);
 			Assert.AreEqual("Canada", contactsByCompanyCountryAsc[1]["contacts_employee_companies_companies_country_countries_name"]);
 			Assert.AreEqual("USA", contactsByCompanyCountryAsc[2]["contacts_employee_companies_companies_country_countries_name"]);
+			// check ids
+			Assert.True( contactsByCompanyCountryAsc[1]["id"] is long );
+			Assert.True(contactsByCompanyCountryAsc[1]["contacts_employee_companies_id"] is long);
+			Assert.True(contactsByCompanyCountryAsc[1]["contacts_employee_companies_companies_country_countries_id"] is long);
 
 			// filter by inferred rel
 			Assert.AreEqual("Bob", StorageContext.StorageDalc.LoadValue(

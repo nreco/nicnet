@@ -308,7 +308,7 @@ namespace NI.Data.Storage {
 				// populate value source names by class properties
 				if (!loadWithoutProps) {
 					foreach (var p in objClass.Properties) {
-						if (props!=null && !props.Contains(p))
+						if (p.PrimaryKey || (props!=null && !props.Contains(p)) )
 							continue;
 						EnsureKnownDataType(p.DataType.ID);
 						var pSrcName = DataTypeTableNames[p.DataType.ID];

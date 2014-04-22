@@ -92,7 +92,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"predicate", false},
-				{"compact_id", 1}
+				{"compact_id", 1},
+				{"object_location", "ObjectTable"}
 			});
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
 				{"id", "contacts"},
@@ -101,7 +102,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"predicate", false},
-				{"compact_id", 2}
+				{"compact_id", 2},
+				{"object_location", "ObjectTable"}
 			});
 
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
@@ -111,7 +113,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"predicate", true},
-				{"compact_id", 3}
+				{"compact_id", 3},
+				{"object_location", "ObjectTable"}
 			});
 
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
@@ -121,7 +124,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"predicate", false},
-				{"compact_id", 4}
+				{"compact_id", 4},
+				{"object_location", "ObjectTable"}
 			});
 
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
@@ -131,7 +135,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"predicate", true},
-				{"compact_id", 5}
+				{"compact_id", 5},
+				{"object_location", "ObjectTable"}
 			});
 
 
@@ -159,7 +164,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "string"},
-				{"compact_id", 1}
+				{"compact_id", 1},
+				{"value_location", "ValueTable"}
 			});
 
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
@@ -169,7 +175,8 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "date"},
-				{"compact_id", 2}
+				{"compact_id", 2},
+				{"value_location", "ValueTable"}
 			});
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "is_primary"},
@@ -178,7 +185,19 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "boolean"},
-				{"compact_id", 3}
+				{"compact_id", 3},
+				{"value_location", "ValueTable"}
+			});
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "id"},
+				{"name", "ID"},
+				{"hidden", false},
+				{"indexable", false},
+				{"predefined", true},
+				{"datatype", "integer"},
+				{"compact_id", 4},
+				{"primary_key", true},
+				{"value_location", "ObjectTableColumn"}
 			});
 
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
@@ -197,6 +216,15 @@ namespace NI.Data.Storage.Tests {
 				{"property_id", "name"},
 				{"class_id", "countries"} });
 
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "id"},
+				{"class_id", "countries"} });
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "id"},
+				{"class_id", "contacts"} });
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "id"},
+				{"class_id", "companies"} });
 		}
 
 		void InitDbSchema() {
@@ -209,7 +237,8 @@ namespace NI.Data.Storage.Tests {
 					[indexable] INTEGER,
 					[predefined] INTEGER,
 					[predicate] INTEGER,
-					[compact_id] INTEGER
+					[compact_id] INTEGER,
+					[object_location] TEXT
 				)");
 
 			InternalDalc.ExecuteNonQuery(@"
@@ -220,7 +249,9 @@ namespace NI.Data.Storage.Tests {
 					[hidden] INTEGER,
 					[indexable] INTEGER,
 					[predefined] INTEGER,
-					[compact_id] INTEGER
+					[compact_id] INTEGER,
+					[value_location] TEXT,
+					[primary_key] INTEGER
 				)");
 
 			InternalDalc.ExecuteNonQuery(@"
