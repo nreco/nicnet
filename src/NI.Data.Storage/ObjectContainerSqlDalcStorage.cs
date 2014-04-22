@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +14,19 @@ namespace NI.Data.Storage {
 	public class ObjectContainerSqlDalcStorage : ObjectContainerDalcStorage {
 
 		public string ObjectViewName { get; set; }
+		public string ObjectRelationViewName { get; set; }
 
 		public ObjectContainerSqlDalcStorage(DataRowDalcMapper objectDbMgr, IDalc logDalc, Func<DataSchema> getSchema) :
 			base(objectDbMgr, logDalc, getSchema) {
+		}
+
+		protected override IDictionary[] LoadRelationData(Query q) {
+			if (!String.IsNullOrEmpty(ObjectRelationViewName)) {
+				var viewQuery = new Query(ObjectRelationViewName, q.Condition);
+				return DbMgr.Dalc.LoadAllRecords(viewQuery);
+			} else {
+				return base.LoadRelationData(q);
+			}
 		}
 
 		protected override long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery, QSort[] sort) {

@@ -58,7 +58,18 @@ namespace NI.Data.Storage.Tests {
 						{"id", "objects.id"},
 						{"compact_class_id", "objects.compact_class_id"}
 					}
-				}
+				},
+
+				new DbDalcView("object_relations_view", @"
+					SELECT @SqlFields
+					FROM object_relations r
+					LEFT JOIN objects subj ON (subj.id=subject_id)
+					LEFT JOIN objects obj ON (obj.id=object_id)
+					@SqlWhere[where {0}]
+					@SqlOrderBy[order by {0}]					
+				", 
+				"subject_id,predicate_class_compact_id,object_id,subj.compact_class_id as subject_compact_class_id,obj.compact_class_id as object_compact_class_id", 
+				"count(r.id)")
 			});
 			var dbEventsBroker = new DataEventBroker(InternalDalc);
 			var sqlTraceLogger = new NI.Data.Triggers.SqlCommandTraceTrigger(dbEventsBroker);
@@ -69,6 +80,7 @@ namespace NI.Data.Storage.Tests {
 			DataSchemaStorage = new DataSchemaDalcStorage(StorageDbMgr);
 			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, DataSchemaStorage.GetSchema);
 			objStorage.ObjectViewName = "objects_view";
+			objStorage.ObjectRelationViewName = "object_relations_view";
 			ObjectContainerStorage = objStorage;
 
 			StorageDalc = new StorageDalc(InternalDalc, ObjectContainerStorage, DataSchemaStorage.GetSchema );

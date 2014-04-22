@@ -582,27 +582,27 @@ namespace NI.Data.Storage {
 				orCond.Nodes.Add( subjCond );
 				orCond.Nodes.Add( objCond );
 			}
-			var relData = DbMgr.Dalc.LoadAllRecords(loadQ);
+			var relData = LoadRelationData(loadQ);
 			var rs = new List<ObjectRelation>();
 
-			var relObjToLoad = new List<long>();
-			// 1st pass: collect related object IDs
+			var objIdToClass = new Dictionary<long, Class>();
+			var dataSchema = GetSchema();
 			foreach (var rel in relData) {
 				var subjId = Convert.ToInt64(rel["subject_id"]);
-				var relObjId = Convert.ToInt64(rel["object_id"]);
-				if (!objIds.Contains(subjId))
-					relObjToLoad.Add(subjId);
-				if (!objIds.Contains(relObjId))
-					relObjToLoad.Add(relObjId);
+				if (rel["subject_compact_class_id"]!=null) {
+					var subjCompactClassId = Convert.ToInt32(rel["subject_compact_class_id"]);
+					var subjClass = dataSchema.FindClassByCompactID( subjCompactClassId );
+					if (subjClass!=null)
+						objIdToClass[ subjId ] = subjClass;
+				}
+				var objId = Convert.ToInt64(rel["object_id"]);
+				if (rel["object_compact_class_id"]!=null) {
+					var objCompactClassId = Convert.ToInt32(rel["object_compact_class_id"]);
+					var objClass = dataSchema.FindClassByCompactID(objCompactClassId);
+					if (objClass != null)
+						objIdToClass[objId] = objClass;
+				}
 			}
-			// load related objects without properties (we need to know their classes)
-			var relObjects = Load(relObjToLoad.ToArray(), new Property[0]);
-			var objIdToClass = new Dictionary<long,Class>();
-			foreach (var o in objs)
-				if (o.ID.HasValue)
-					objIdToClass[o.ID.Value] = o.GetClass();
-			foreach (var o in relObjects.Values)
-				objIdToClass[o.ID.Value] = o.GetClass();
 
 			foreach (var rel in relData) {
 				var subjId = Convert.ToInt64(rel["subject_id"]);
@@ -706,6 +706,40 @@ namespace NI.Data.Storage {
 			}
 			
 			return rs;
+		}
+
+		protected virtual IDictionary[] LoadRelationData(Query q) {
+			var relData = DbMgr.Dalc.LoadAllRecords(q);
+			var relObjToLoad = new List<long>();
+			foreach (var rel in relData) {
+				var subjId = Convert.ToInt64(rel["subject_id"]);
+				var relObjId = Convert.ToInt64(rel["object_id"]);
+				if (!relObjToLoad.Contains(subjId))
+					relObjToLoad.Add(subjId);
+				if (!relObjToLoad.Contains(relObjId))
+					relObjToLoad.Add(relObjId);
+			}
+			if (relObjToLoad.Count>0) {
+				var objQuery = new Query(ObjectTableName,
+						new QueryConditionNode((QField)"id", Conditions.In, new QConst(relObjToLoad)));
+				objQuery.Fields = new[] { (QField)"id", (QField)"compact_class_id" };
+				var objIdToClassCompactId = new Dictionary<long,int>();
+				DbMgr.Dalc.ExecuteReader( objQuery, (rdr) => {
+					while (rdr.Read()) {
+						objIdToClassCompactId[ Convert.ToInt64(rdr["id"]) ] = Convert.ToInt32( rdr["compact_class_id"] );
+					}
+				});
+				foreach (var rel in relData) {
+					var subjId = Convert.ToInt64(rel["subject_id"]);
+					if (objIdToClassCompactId.ContainsKey(subjId))
+						rel["subject_compact_class_id"] = objIdToClassCompactId[subjId];
+					var objId = Convert.ToInt64(rel["object_id"]);
+					if (objIdToClassCompactId.ContainsKey(objId))
+						rel["object_compact_class_id"] = objIdToClassCompactId[objId];
+				}
+			}
+
+			return relData;			
 		}
 
 		protected class RelationMappingInfo {
