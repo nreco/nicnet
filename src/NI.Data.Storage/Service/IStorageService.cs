@@ -24,6 +24,7 @@ using System.ComponentModel;
 
 using NI.Data.Storage.Service;
 using NI.Data.Storage.Service.Actions;
+using NI.Data.Storage.Service.Schema;
 
 namespace NI.Data.Storage.Service {
 
@@ -38,6 +39,10 @@ namespace NI.Data.Storage.Service {
 
 		//TODO: rest service that reflects IObjectPersister for rest
 
-
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/relex?q={relex}", Method = "GET")] //, ResponseFormat=WebMessageFormat.Json
+		[FaultContract(typeof(ApiFault))]
+		[Description("Query storage data with relex expression")]
+		LoadRelexResult LoadRelex(string relex);
 	}
 }

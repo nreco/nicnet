@@ -24,6 +24,7 @@ using System.ServiceModel;
 
 using NI.Data.Storage.Model;
 using NI.Data.Storage.Service.Actions;
+using NI.Data.Storage.Service.Schema;
 
 namespace NI.Data.Storage.Service {
 
@@ -33,14 +34,25 @@ namespace NI.Data.Storage.Service {
 
 		protected IObjectContainerStorage ObjPersister;
 		protected Func<DataSchema> ProvideOntology;
+		protected IDalc StorageDalc;
 
-		public StorageService(IObjectContainerStorage objPersister, Func<DataSchema> getOntology) {
+		public StorageService(IObjectContainerStorage objPersister, IDalc storageDalc, Func<DataSchema> getOntology) {
 			ObjPersister = objPersister;
 			ProvideOntology = getOntology;
+			StorageDalc = storageDalc;
 		}
 
 		public GetDataSchemaResult GetDataSchema() {
 			return new GetDataSchema(ProvideOntology()).Execute();
+		}
+
+		public LoadRelexResult LoadRelex(string relex) {
+			try {
+				return new LoadRelex(ProvideOntology(), StorageDalc ).Execute(relex); 
+			} catch (Exception ex) {
+				Console.WriteLine("RELEX ERROR: {0}", ex);
+				throw;
+			}
 		}
 
 		/*protected void RunInTransaction(Action<object> a) {

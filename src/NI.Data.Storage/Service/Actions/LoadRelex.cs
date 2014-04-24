@@ -18,39 +18,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
+using System.Data;
 using System.ServiceModel;
+using System.Globalization;
 
 using NI.Data.Storage.Model;
+using NI.Data;
+using NI.Data.RelationalExpressions;
 using NI.Data.Storage.Service.Schema;
 
 namespace NI.Data.Storage.Service.Actions {
 	
-	public class GetDataSchema {
+	public class LoadRelex {
 		
 		DataSchema Schema;
+		IDalc StorageDalc;
 
-		public GetDataSchema(DataSchema schema) {
+		public LoadRelex(DataSchema schema, IDalc storageDalc) {
 			Schema = schema;
+			StorageDalc = storageDalc;
 		}
 
-		public GetDataSchemaResult Execute() {
-			var r = new GetDataSchemaResult();
+		public LoadRelexResult Execute(string relex) {
+			var res = new LoadRelexResult();
 
-			foreach (var c in Schema.Classes) {
-				var cInfo = new DataSchemaClassInfo() {
-					ID = c.ID,
-					Name = c.Name,
-					IsPredicate = c.IsPredicate
-				};
-				foreach (var cProp in c.Properties) {
-					cInfo.Properties.Add( new DataSchemaClassPropertyInfo() { ID = cProp.ID } );
-				}
-				r.Classes.Add(cInfo);
+			var relexParser = new RelExParser();
+			var q = relexParser.Parse(relex);
+			var ds = new DataSet();
+			var tbl = StorageDalc.Load(q, ds);
+			
+			var data = new DataRowItemList();
+			foreach (DataRow r in tbl.Rows) {
+				data.Add( new DataRowItem(r) );
 			}
-
-			return r;
+			res.Data = data;
+			return res;
 		}
 
 	}
+
 
 }

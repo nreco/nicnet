@@ -28,38 +28,6 @@ namespace NI.Data.Storage.Tests {
 			storageDalc = new StorageDalc(objContext.StorageDbMgr.Dalc, objContext.ObjectContainerStorage, getTestSchema);
 		}
 
-		protected void addTestData() {
-			var googCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
-			googCompany["title"] = "Google";
-			
-			var msCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
-			msCompany["title"] = "Microsoft";
-			
-			objContext.ObjectContainerStorage.Insert(googCompany);
-			objContext.ObjectContainerStorage.Insert(msCompany);
-
-			var johnContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
-			johnContact["name"] = "John";
-			johnContact["is_primary"] = true;
-			var maryContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
-			maryContact["name"] = "Mary";
-			maryContact["is_primary"] = false;
-			maryContact["birthday"] = new DateTime(1999, 5, 20);
-			var bobContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
-			bobContact["name"] = "Bob";
-			bobContact["is_primary"] = true;
-
-			objContext.ObjectContainerStorage.Insert(johnContact);
-			objContext.ObjectContainerStorage.Insert(maryContact);
-			objContext.ObjectContainerStorage.Insert(bobContact);
-
-			var rel = testSchema.FindClassByID("contacts").FindRelationship(
-				testSchema.FindClassByID("contactCompany"), testSchema.FindClassByID("companies") );
-			objContext.ObjectContainerStorage.AddRelations( 
-				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value )
-			);
-		}
-
 		[Test]
 		public void Insert() {
 			// direct insert
@@ -89,7 +57,7 @@ namespace NI.Data.Storage.Tests {
 
 		[Test]
 		public void Delete() {
-			addTestData();
+			DataSetStorageContext.AddTestData(testSchema, objContext.ObjectContainerStorage);
 
 			Assert.AreEqual(3, storageDalc.RecordsCount( new Query("contacts") ) );
 
@@ -114,7 +82,7 @@ namespace NI.Data.Storage.Tests {
 
 		[Test]
 		public void Update() {
-			addTestData();
+			DataSetStorageContext.AddTestData(testSchema, objContext.ObjectContainerStorage);
 
 			var ds = new DataSet();
 			var contactsTbl = testSchema.FindClassByID("contacts").CreateDataTable();
@@ -135,7 +103,7 @@ namespace NI.Data.Storage.Tests {
 
 		[Test]
 		public void Load() {
-			addTestData();
+			DataSetStorageContext.AddTestData(testSchema, objContext.ObjectContainerStorage);
 
 			var primaryContacts = storageDalc.LoadAllRecords( new Query("contacts", (QField)"is_primary"==new QConst(true) ) );
 			Assert.AreEqual(2, primaryContacts.Length);

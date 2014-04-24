@@ -21,6 +21,8 @@ using System.Threading.Tasks;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Web;
+using System.Xml;
+using System.Xml.XPath;
 using System.Net;
 using System.IO;
 
@@ -36,21 +38,38 @@ namespace NI.Data.Storage.Tests {
 		DataSetStorageContext objPersisterContext;
 		WebServiceHost serviceHost;
 		ChannelFactory<IStorageService> storageServiceUnderTestProxyFactory;
+		StorageDalc storageDalc;
+		string baseUrl = "http://localhost:8005/";
 
 		[TestFixtureSetUp]
 		public void StartStorageService() {
-			var objectPersisterTest = new ObjectContainerDalcStorageTest();
-
 			var testSchema = DataSetStorageContext.CreateTestSchema();
-			objPersisterContext = new DataSetStorageContext(() => { return testSchema; });
+			Func<DataSchema> getTestSchema = () => { return testSchema; };
+			objPersisterContext = new DataSetStorageContext(getTestSchema);
+			storageDalc = new StorageDalc(
+				objPersisterContext.StorageDbMgr.Dalc, 
+				objPersisterContext.ObjectContainerStorage, 
+				getTestSchema);
 
-			var storageService = new StorageService(objPersisterContext.ObjectContainerStorage, () => { return testSchema; });
-			serviceHost = new WebServiceHost(storageService, new[] { new Uri("http://localhost:8005") });
+			DataSetStorageContext.AddTestData(testSchema, objPersisterContext.ObjectContainerStorage);
 
+			var storageService = new StorageService(
+					objPersisterContext.ObjectContainerStorage, 
+					storageDalc,
+					getTestSchema);
+			serviceHost = new WebServiceHost(storageService, new[] { new Uri(baseUrl) });
+			
 			serviceHost.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
 			serviceHost.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
 
 			serviceHost.Open();
+
+			var endPoint = (WebHttpEndpoint)serviceHost.Description.Endpoints.First();
+			endPoint.AutomaticFormatSelectionEnabled = true;
+			((WebHttpBehavior)endPoint.EndpointBehaviors.First()).AutomaticFormatSelectionEnabled = true;
+			((WebHttpBehavior)endPoint.EndpointBehaviors.First()).DefaultOutgoingResponseFormat = WebMessageFormat.Json;
+
+
 		}
 
 		[TestFixtureTearDown]
@@ -59,9 +78,10 @@ namespace NI.Data.Storage.Tests {
 		}
 
 		public string GetUrl(string url, string method = "GET", string postData = null) {
-			var webReq = WebRequest.Create(url);
+			var webReq = WebRequest.Create(url) as HttpWebRequest;
 			webReq.Method = method;
-			webReq.ContentType = "application/xml";
+			webReq.ContentType = "text/json";// "application/xml";
+			webReq.Accept = "application/json";
 			if (postData!=null) {
 				using (var reqStream = webReq.GetRequestStream()) {
 					var wr = new StreamWriter(reqStream);
@@ -73,9 +93,14 @@ namespace NI.Data.Storage.Tests {
 			try {
 				webResponse = webReq.GetResponse();
 			} catch (WebException ex) {
-				var stream = ex.Response.GetResponseStream();
-				var res = new StreamReader(stream).ReadToEnd();
-				Console.WriteLine(res);
+				Console.WriteLine("ERROR: {0}", ex);
+				if (ex.Response!=null) {
+					var stream = ex.Response.GetResponseStream();
+					if (stream!=null) {
+						var res = new StreamReader(stream).ReadToEnd();
+						Console.WriteLine("RESPONSE OUTPUT:\n", res);
+					}
+				}
 				throw ex;
 			}
 			try {
@@ -87,15 +112,45 @@ namespace NI.Data.Storage.Tests {
 			}
 		}
 
+		protected XPathDocument LoadXPathDoc(string res) {
+			var doc = new XPathDocument( new StringReader(res) );
+			return doc;
+		}
+
+		protected XmlNamespaceManager GetNsManager(XPathNavigator nav) {
+			var xmlNsMgr = new XmlNamespaceManager(nav.NameTable);
+			xmlNsMgr.AddNamespace("s", "http://schemas.datacontract.org/2004/07/NI.Data.Storage.Service.Schema");
+			return xmlNsMgr;
+		}
+
 		[Test]
-		public void StorageService_Test() {
-			var baseUrl = "http://localhost:8005/";
-
+		public void DataSchema() {
 			var ontologyRes = GetUrl(baseUrl+"dataschema");
-
 			Console.WriteLine(ontologyRes);
 
 		}
+
+		[Test]
+		public void Relex() {
+
+			var contactsRelexRes = GetUrl(baseUrl + "relex?q=contacts[*;id]");
+
+			Console.WriteLine(contactsRelexRes);
+
+			var contactsResXmlDoc = LoadXPathDoc(contactsRelexRes);
+			var contactsResNav = contactsResXmlDoc.CreateNavigator();
+			var contactsResNsMgr = GetNsManager(contactsResNav);
+
+			var contactsResRows = contactsResNav.Select("/s:result/s:data/s:row", contactsResNsMgr);
+			Assert.AreEqual(3, contactsResRows.Count);
+			var contactNames = new[] {"John","Mary","Bob"};
+			var contactIdx = 0;
+			foreach (XPathNavigator contact in contactsResRows) {
+				Assert.AreEqual( contactNames[contactIdx++], contact.SelectSingleNode("name", contactsResNsMgr).Value );
+			}
+
+		}
+
 
 
 	}

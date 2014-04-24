@@ -380,5 +380,38 @@ namespace NI.Data.Storage.Tests {
 		}
 
 
+		public static void AddTestData(DataSchema testSchema, IObjectContainerStorage storage) {
+			var googCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
+			googCompany["title"] = "Google";
+
+			var msCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
+			msCompany["title"] = "Microsoft";
+
+			storage.Insert(googCompany);
+			storage.Insert(msCompany);
+
+			var johnContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
+			johnContact["name"] = "John";
+			johnContact["is_primary"] = true;
+			var maryContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
+			maryContact["name"] = "Mary";
+			maryContact["is_primary"] = false;
+			maryContact["birthday"] = new DateTime(1999, 5, 20);
+			var bobContact = new ObjectContainer(testSchema.FindClassByID("contacts"));
+			bobContact["name"] = "Bob";
+			bobContact["is_primary"] = true;
+
+			storage.Insert(johnContact);
+			storage.Insert(maryContact);
+			storage.Insert(bobContact);
+
+			var rel = testSchema.FindClassByID("contacts").FindRelationship(
+				testSchema.FindClassByID("contactCompany"), testSchema.FindClassByID("companies"));
+			storage.AddRelations(
+				new ObjectRelation(johnContact.ID.Value, rel, googCompany.ID.Value)
+			);
+		}
+
+
 	}
 }
