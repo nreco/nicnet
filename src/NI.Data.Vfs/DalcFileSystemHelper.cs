@@ -52,7 +52,10 @@ namespace NI.Data.Vfs {
         }
        
         public DalcFileContent SetContentProperties(DalcFileContent content, IDictionary data) {
-            return (DalcFileContent)SetProperties(content, data, FileContentMap);
+			var res = (DalcFileContent)SetProperties(content, data, FileContentMap);
+			var dataBuf = (data[FileContentMap["Stream"]] as byte[]) ?? new byte[0];
+			content.GetStream(FileAccess.Write).Write(dataBuf, 0, dataBuf.Length);
+			return res;
         }
 
         public IDictionary SetFileDictionaryValues(IDictionary data,DalcFileObject file) {
@@ -60,7 +63,9 @@ namespace NI.Data.Vfs {
         }
 
         public IDictionary SetContentDictionaryValues(IDictionary data, DalcFileContent content) {
-            return SetValues(data, content, FileContentMap);
+            var res = SetValues(data, content, FileContentMap);
+			res[FileContentMap["Stream"]] = ((MemoryStream)content.GetStream(FileAccess.Read)).ToArray();
+			return res;
         }
 
         /// <summary>
@@ -73,18 +78,11 @@ namespace NI.Data.Vfs {
         private object SetProperties(object o, IDictionary data,IDictionary map) {
             PropertyInfo[] props = o.GetType().GetProperties();
             for (int i = 0; i < props.Length; i++)
-                    if (map.Contains(props[i].Name) && data.Contains(map[props[i].Name]) && 
-                        (props[i].CanWrite || props[i].Name == "InputStream")
-                        && props[i].Name != "OutputStream") {
+                    if (map.Contains(props[i].Name) && data.Contains(map[props[i].Name]) && props[i].CanWrite) {
                      object fldName = props[i].Name;
                      object typedValue = null;
                      if (props[i].PropertyType == typeof(FileType)) {
                          typedValue = Enum.Parse(typeof(FileType),(string)ConvertTo(data[map[fldName]],typeof(string)));
-                     } else if (props[i].Name == "InputStream") {                         
-                         if (data[map[fldName]] != null) {
-                             BinaryWriter writer = new BinaryWriter((Stream)props[i].GetValue(o,null));
-                             writer.Write((byte[])ConvertTo(data[map[fldName]], typeof(byte[])));
-                         }                             
                      } else {
                         typedValue = ConvertTo(data[map[fldName]], props[i].PropertyType);
                      }
@@ -105,13 +103,11 @@ namespace NI.Data.Vfs {
         private IDictionary SetValues(IDictionary data, object o, IDictionary map) {
             PropertyInfo[] props = o.GetType().GetProperties();
             for (int i = 0; i < props.Length; i++)                
-                if (map.Contains(props[i].Name) && props[i].Name != "InputStream" && props[i].CanRead) {                    
+                if (map.Contains(props[i].Name) && props[i].CanRead) {                    
                     object fldName = props[i].Name;
                     object propValue = props[i].GetValue(o, null);
-                    if (props[i].Name == "OutputStream") {                        
-                        propValue = ((MemoryStream)propValue).ToArray();
-                    }
-                    else if (props[i].PropertyType.IsEnum) {
+
+                    if (props[i].PropertyType.IsEnum) {
                         propValue = Enum.GetName(props[i].PropertyType, propValue);
                     }
                     if (data.Contains(map[props[i].Name]))

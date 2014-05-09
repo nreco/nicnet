@@ -21,17 +21,17 @@ namespace NI.Tests.Vfs
 			// create folder
 			IFileObject testFolder = fileSystem.ResolveFile("test");
 			testFolder.CreateFolder();
-			
+		
 			// create 10 files
 			for (int i=0; i<10; i++) {
 				string fName = String.Format("test/test{0}.{1}", i, i%2==0 ? "txt" : "doc" );
 				IFileObject testFile = fileSystem.ResolveFile(fName);
 				testFile.CreateFile();
-				StreamWriter streamWr = new StreamWriter( testFile.GetContent().OutputStream );
+				StreamWriter streamWr = new StreamWriter( testFile.Content.GetStream(FileAccess.Write) );
 				streamWr.Write("This is test content #"+i.ToString());
 				streamWr.Close();
 			}
-			
+		
 			// GetChildren
 			if (testFolder.GetChildren().Length!=10)
 				throw new Exception("GetChildren failed");
@@ -55,11 +55,10 @@ namespace NI.Tests.Vfs
 			IFileObject test1docFile = fileSystem.ResolveFile("test2/test/test1.doc");
 			if (!test1docFile.Exists())
 				throw new Exception("ResolveFile failed");
-			StreamReader rdr = new StreamReader( test1docFile.GetContent().InputStream );
+			StreamReader rdr = new StreamReader( test1docFile.Content.GetStream(FileAccess.Read) );
 			string content = rdr.ReadToEnd();
 			rdr.Close();
-			if (content!="This is test content #1")
-				throw new Exception("GetContent failed");
+			Assert.AreEqual("This is test content #1",content);
 			
 			// deep tree copy test
 			IFileObject test3Folder = fileSystem.ResolveFile("test3");
@@ -109,8 +108,7 @@ namespace NI.Tests.Vfs
             System.Collections.Hashtable fileContentMap = new System.Collections.Hashtable();
             fileContentMap.Add("Name", "name");
             fileContentMap.Add("LastModifiedTime", "modified_date");
-            fileContentMap.Add("InputStream", "content");
-            fileContentMap.Add("OutputStream", "content");
+            fileContentMap.Add("Stream", "content");
             fsHelper.FileContentMap = fileContentMap;
 
             //DataSet Dalc definition
@@ -190,7 +188,7 @@ namespace NI.Tests.Vfs
 			public void Delete() { }
 			public bool Exists() { return true; }
 			public IFileObject[] GetChildren() { return null; }
-			public IFileContent GetContent() {return null; }
+			public IFileContent Content { get { return null; } }
 			public IFileObject[] FindFiles(IFileSelector selector) { return null; }
 			public void MoveTo(IFileObject desfile) { }
 			

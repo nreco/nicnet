@@ -195,7 +195,7 @@ namespace NI.Data {
 			if (name == "full_name") return fName;
 			if (name == "ext") return Path.GetExtension(fName);
 			if (name == "folder_name") return Path.GetDirectoryName(fName);
-			IFileContent fContent = file.GetContent();
+			IFileContent fContent = file.Content;
 			if (name=="size") return fContent.Size;
 			if (name=="last_modified") return fContent.LastModifiedTime;
 			throw new ArgumentException("Unknown field name: "+name);

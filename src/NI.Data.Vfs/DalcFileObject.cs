@@ -84,7 +84,7 @@ namespace NI.Data.Vfs {
         public virtual void CopyFrom(IFileObject srcFile) {
             if (srcFile.Type == FileType.File)
             {
-                using (Stream inputStream = srcFile.GetContent().InputStream)
+                using (Stream inputStream = srcFile.Content.GetStream(FileAccess.Read) )
                 {
                     CopyFrom(inputStream);
                 }
@@ -110,7 +110,7 @@ namespace NI.Data.Vfs {
         public void CopyFrom(Stream inputStream) {
             if (Type != FileType.Imaginary) Delete();
             CreateFile();
-            Stream outputStream = GetContent().OutputStream;
+            Stream outputStream = Content.GetStream(FileAccess.Write);
 
             byte[] buf = new byte[CopyBufferLength];
             try
@@ -165,24 +165,24 @@ namespace NI.Data.Vfs {
             return DalcFs.GetChildren(Name);
         }
 
-        public IFileContent GetContent() {
-            if (FileContent == null) {
-                FileContent = new DalcFileContent(this);
-                if (Type != FileType.Imaginary) {
-                    FileContent = DalcFs.GetContent(FileContent, Name);
-                    
-                }
-                if (Type == FileType.File) 
-                InitialContentLength = FileContent.OutputStream.Length;
-            }
-            
+        public IFileContent Content {
+			get {
+				if (FileContent == null) {
+					FileContent = new DalcFileContent(this);
+					if (Type != FileType.Imaginary) {
+						FileContent = DalcFs.GetContent(FileContent, Name);
 
-            return FileContent;
+					}
+					if (Type == FileType.File)
+						InitialContentLength = FileContent.GetStream(FileAccess.Read).Length;
+				}
+				return FileContent;
+			}
         }
 
         public void SaveContent() {
             if (FileContent != null) {
-                if (InitialContentLength != FileContent.OutputStream.Length)
+				if (InitialContentLength != FileContent.GetStream(FileAccess.Read).Length) // TODO: wrong! not enough criteria
                     DalcFs.SaveContent(FileContent);
             }
         }

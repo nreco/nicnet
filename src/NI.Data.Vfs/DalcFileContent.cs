@@ -47,22 +47,11 @@ namespace NI.Data.Vfs {
             get { return File.Name; }
         }
 
-		public Stream InputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(); // TODO: more structured exception
-				ReopenStream();
-				return fileStream;
-			}
-		}
-
-		public Stream OutputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(); // TODO: more structured exception
-				ReopenStream();
-				return fileStream;
-			}
+		public Stream GetStream(FileAccess access) {
+			if (File.Type!=FileType.File)
+				throw new FileSystemException(); // TODO: more structured exception
+			ReopenStream();
+			return fileStream;
 		}
 
 		public long Size {
@@ -86,7 +75,7 @@ namespace NI.Data.Vfs {
 		}
 
 		public void Close() {
-			if (fileStream!=null) {                
+			if (fileStream!=null) {
                 _File.SaveContent(); //Save content in storage
 				fileStream.CloseMemoryStream(); //Close memory(underlying) stream
 			}

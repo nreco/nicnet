@@ -106,6 +106,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AllFileSelector.cs" />
+    <Compile Include="FileObjectExt.cs" />
     <Compile Include="ExtensionFileSelector.cs" />
     <Compile Include="Exceptions\FileSystemException.cs">
       <SubType>Code</SubType>

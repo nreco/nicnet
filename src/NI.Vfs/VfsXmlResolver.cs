@@ -27,7 +27,13 @@ namespace NI.Vfs {
 		IFileSystem _FileSystem;
 		string _BasePath;
 		
-		public static readonly Uri AbsoluteBaseUri = new Uri("http://vfs/");
+		/// <summary>
+		/// Get or set base URI that identifies resources handled by this resolver
+		/// </summary>
+		/// <remarks>By default base URI is "http://vfs/"</remarks>
+		public Uri AbsoluteBaseUri { get; set; }
+
+		static Uri DefaultVfsBaseUri = new Uri("http://vfs/");
 
 		protected IFileSystem FileSystem {
 			get { return _FileSystem; }
@@ -40,6 +46,7 @@ namespace NI.Vfs {
 		public VfsXmlResolver(IFileSystem fileSystem, string basePath) {
 			_FileSystem = fileSystem;
 			_BasePath = basePath;
+			AbsoluteBaseUri = DefaultVfsBaseUri;
 		}
 
 		public override System.Net.ICredentials Credentials {
@@ -64,7 +71,7 @@ namespace NI.Vfs {
 					sb.Append("<root>"); 
 					var matchedFiles = startFile.FindFiles(new MaskFileSelector(fullPath));
 					foreach (var f in matchedFiles) {
-						using (var input = f.GetContent().InputStream) {
+						using (var input = f.Content.GetStream(FileAccess.Read) ) {
 							var fileText = new StreamReader(input).ReadToEnd();
 							fileText = MatchXmlDeclaration.Replace(fileText, String.Empty);
 							sb.Append(fileText);
@@ -76,7 +83,7 @@ namespace NI.Vfs {
 					// one file
 					IFileObject file = FileSystem.ResolveFile(fullPath);
 					byte[] fileContent;
-					using (var input = file.GetContent().InputStream) {
+					using (var input = file.Content.GetStream(FileAccess.Read) ) {
 						fileContent = new byte[input.Length];
 						input.Read(fileContent, 0, fileContent.Length);
 					}

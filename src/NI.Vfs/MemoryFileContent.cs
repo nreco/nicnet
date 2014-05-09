@@ -35,22 +35,11 @@ namespace NI.Vfs
 			get { return MemoryFile; }
 		}
 
-		public Stream InputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(); // TODO: more structured exception
-				ReopenMemoryStream();
-				return MemFileStream;
-			}
-		}
-
-		public Stream OutputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(); // TODO: more structured exception
-				ReopenMemoryStream();
-				return MemFileStream;
-			}
+		public Stream GetStream(FileAccess access) {
+			if (File.Type!=FileType.File)
+				throw new FileSystemException(); // TODO: more structured exception
+			ReopenMemoryStream();
+			return MemFileStream;
 		}
 
 		public long Size {

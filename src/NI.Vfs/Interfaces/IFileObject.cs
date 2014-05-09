@@ -107,7 +107,7 @@ namespace NI.Vfs
 		/// <summary>
 		/// Returns this file's content.
 		/// </summary>
-		IFileContent GetContent();
+		IFileContent Content { get; }
 		
 		/// <summary>
 		/// Finds the set of matching descendents of this file, in depthwise order.

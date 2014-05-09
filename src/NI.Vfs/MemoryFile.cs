@@ -73,7 +73,7 @@ namespace NI.Vfs
 		
 		public virtual void CopyFrom(IFileObject srcFile) {
 			if (srcFile.Type==FileType.File) {
-				using (Stream inputStream = srcFile.GetContent().InputStream) {
+				using (Stream inputStream = srcFile.Content.GetStream(FileAccess.Read) ) {
 					CopyFrom( inputStream );
 				}
 			}
@@ -96,7 +96,7 @@ namespace NI.Vfs
 		public virtual void CopyFrom(Stream inputStream) {
 			if (Type!=FileType.Imaginary) Delete();
 			CreateFile();
-			Stream outputStream = GetContent().OutputStream;
+			Stream outputStream = Content.GetStream(FileAccess.Write);
 			
 			byte[] buf = new byte[CopyBufferLength];
 			try {
@@ -152,10 +152,10 @@ namespace NI.Vfs
 			return children.ToArray(typeof(IFileObject)) as IFileObject[];
 		}
 		
-		public IFileContent GetContent() {
-			if (FileContent==null)
-				FileContent = new MemoryFileContent(this);
-			return FileContent;
+		public IFileContent Content {
+			get {
+				return FileContent ?? (FileContent = new MemoryFileContent(this));
+			}
 		}		
 		
 		public IFileObject[] FindFiles(IFileSelector selector) {

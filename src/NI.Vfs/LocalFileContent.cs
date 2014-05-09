@@ -24,8 +24,7 @@ namespace NI.Vfs
 	{
 		protected LocalFile LocalFile;
 		protected LocalFileSystem LocalFs;
-		protected FileStream InputFileStream = null;
-		protected FileStream OutputFileStream = null;
+		protected FileStream CurrentFileStream = null;
 		protected FileInfo LocalFileInfo;
 		
 
@@ -50,40 +49,19 @@ namespace NI.Vfs
 		}
 		
 		/// <summary>
-		/// <see cref="IFileContent.InputStream"/>
+		/// <see cref="IFileContent.GetStream"/>
 		/// </summary>
-		public Stream InputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(File.Name + " is not a file!"); // TODO: more structured exception
+		public Stream GetStream(FileAccess access) {
+			if (File.Type!=FileType.File)
+				throw new FileSystemException(File.Name + " is not a file!"); // TODO: more structured exception
 				
-				if (InputFileStream!=null) InputFileStream.Close();
-				// raise open event
-				if (LocalFs.EventsMediator!=null)
-					LocalFs.EventsMediator.OnFileOpening(new FileObjectOpenEventArgs(LocalFs,File,FileAccess.Read));
-				
-				InputFileStream = new FileStream(LocalFile.LocalName, FileMode.OpenOrCreate, FileAccess.Read, LocalFs.InputFileShare);
-				return InputFileStream;
-			}
-		}
+			if (CurrentFileStream!=null) CurrentFileStream.Close();
+			// raise open event
+			if (LocalFs.EventsMediator!=null)
+				LocalFs.EventsMediator.OnFileOpening(new FileObjectOpenEventArgs(LocalFs,File,FileAccess.Read));
 
-		/// <summary>
-		/// <see cref="IFileContent.OutputStream"/>
-		/// </summary>
-		public Stream OutputStream {
-			get {
-				if (File.Type!=FileType.File)
-					throw new FileSystemException(); // TODO: more structured exception
-				
-				if (OutputFileStream!=null) OutputFileStream.Close();
-
-				// raise open event
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileOpening(new FileObjectOpenEventArgs(LocalFs, File, FileAccess.Write));
-				
-				OutputFileStream = new FileStream(LocalFile.LocalName, FileMode.OpenOrCreate, FileAccess.Write, LocalFs.OutputFileShare);
-				return OutputFileStream;
-			}
+			CurrentFileStream = new FileStream(LocalFile.LocalName, FileMode.OpenOrCreate, access, LocalFs.InputFileShare);
+			return CurrentFileStream;
 		}
 
 		/// <summary>
@@ -109,14 +87,9 @@ namespace NI.Vfs
 		/// <see cref="IFileContent.Close"/>
 		/// </summary>
 		public void Close() {
-			if (InputFileStream!=null) {
-				InputFileStream.Close();
-				InputFileStream = null;
-			}
-			
-			if (OutputFileStream!=null) {
-				OutputFileStream.Close();
-				InputFileStream = null;
+			if (CurrentFileStream!=null) {
+				CurrentFileStream.Close();
+				CurrentFileStream = null;
 			}
 		}
 

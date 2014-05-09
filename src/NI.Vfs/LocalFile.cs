@@ -96,7 +96,7 @@ namespace NI.Vfs
 				
 			try {
 				if (srcFile.Type==FileType.File) {
-					using (Stream inputStream = srcFile.GetContent().InputStream) {
+					using (Stream inputStream = srcFile.Content.GetStream(FileAccess.Read) ) {
 						CopyFrom( inputStream );
 					}
 				}
@@ -141,7 +141,7 @@ namespace NI.Vfs
 			try {
 				if (Type!=FileType.Imaginary) Delete();
 				CreateFile();
-				Stream outputStream = GetContent().OutputStream;
+				Stream outputStream = Content.GetStream(FileAccess.Write);
 				
 				byte[] buf = new byte[CopyBufferLength];
 				try {
@@ -326,10 +326,10 @@ namespace NI.Vfs
 		/// <summary>
 		/// <see cref="IFileObject.GetContent"/>
 		/// </summary>		
-		public IFileContent GetContent() {
-			if (FileContent==null)
-				FileContent = new LocalFileContent(this, LocalFs);
-			return FileContent;
+		public IFileContent Content {
+			get {
+				return FileContent ?? (FileContent = new LocalFileContent(this, LocalFs));
+			}
 		}
 		
 		/// <summary>

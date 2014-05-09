@@ -44,13 +44,11 @@ namespace NI.Vfs {
 		
 		bool _SuppressNestedEvents = true;
 		int nestedLevel = 0;
-		
-		public bool SuppressNestedEvents {
-			get { return _SuppressNestedEvents; }
-			set { _SuppressNestedEvents = value; }
-		}
+
+		public bool SuppressNestedEvents { get; set; }
 				
 		public FileObjectEventsMediator() {
+			SuppressNestedEvents = true;
 		}
 		
 		protected bool IncNestedLevel() {

@@ -59,14 +59,14 @@ namespace NI.Vfs
 					
 				if (Field==FileObjectField.LastModifiedTime) {
 					return SortDirection==ListSortDirection.Ascending ?
-						xFile.GetContent().LastModifiedTime.CompareTo(yFile.GetContent().LastModifiedTime) :
-						yFile.GetContent().LastModifiedTime.CompareTo(xFile.GetContent().LastModifiedTime);
+						xFile.Content.LastModifiedTime.CompareTo(yFile.Content.LastModifiedTime) :
+						yFile.Content.LastModifiedTime.CompareTo(xFile.Content.LastModifiedTime);
 				}
 
 				if (Field==FileObjectField.Size) {
 					return SortDirection==ListSortDirection.Ascending ?
-						xFile.GetContent().Size.CompareTo(yFile.GetContent().Size) :
-						yFile.GetContent().Size.CompareTo(xFile.GetContent().Size);
+						xFile.Content.Size.CompareTo(yFile.Content.Size) :
+						yFile.Content.Size.CompareTo(xFile.Content.Size);
 				}
 
 				if (Field==FileObjectField.Extension) {

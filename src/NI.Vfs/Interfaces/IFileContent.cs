@@ -28,14 +28,9 @@ namespace NI.Vfs
 		IFileObject File { get; }
 		
 		/// <summary>
-		/// Returns an input stream for reading the file's content.
+		/// Returns a stream for reading or writing the file's content.
 		/// </summary>
-		Stream InputStream { get; }
-
-		/// <summary>
-		/// Returns an output stream for writing the file's content.
-		/// </summary>
-		Stream OutputStream { get; }
+		Stream GetStream(FileAccess access);
 		
 		/// <summary>
 		/// Determines the size of the file, in bytes.
