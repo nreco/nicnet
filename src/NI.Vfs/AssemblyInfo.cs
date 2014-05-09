@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 // associated with an assembly.
 //
 [assembly: AssemblyTitle("NI.Vfs")]
-[assembly: AssemblyDescription("Virtual file system abstraction")]
+[assembly: AssemblyDescription("Virtual file system (VFS) provides a single API for accessing various different file systems.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
 [assembly: AssemblyProduct("Open NIC.NET")]
-[assembly: AssemblyCopyright("NewtonIdeas 2004-2008")]
+[assembly: AssemblyCopyright("NewtonIdeas 2004-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
 

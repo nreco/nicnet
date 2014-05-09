@@ -111,13 +111,10 @@
     <Compile Include="Exceptions\FileSystemException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FileCache.cs" />
     <Compile Include="FileObjectComparer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FileObjectEventsMediator.cs" />
-    <Compile Include="FileObjectTrigger.cs" />
-    <Compile Include="Interfaces\IFileObjectEventsMediator.cs" />
+    <Compile Include="FileObjectEventArgs.cs" />
     <Compile Include="Interfaces\IFileContent.cs">
       <SubType>Code</SubType>
     </Compile>

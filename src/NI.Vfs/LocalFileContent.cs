@@ -57,8 +57,7 @@ namespace NI.Vfs
 				
 			if (CurrentFileStream!=null) CurrentFileStream.Close();
 			// raise open event
-			if (LocalFs.EventsMediator!=null)
-				LocalFs.EventsMediator.OnFileOpening(new FileObjectOpenEventArgs(LocalFs,File,FileAccess.Read));
+			LocalFs.OnFileOpen(this.File, access);
 
 			CurrentFileStream = new FileStream(LocalFile.LocalName, FileMode.OpenOrCreate, access, LocalFs.InputFileShare);
 			return CurrentFileStream;

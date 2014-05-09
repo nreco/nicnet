@@ -25,21 +25,9 @@ namespace NI.Vfs
 	{
 		string _Name;
 		FileType _Type = FileType.Imaginary;
-		int _CopyBufferLength = 64*1024; //64kb
 
 		protected LocalFileSystem LocalFs;
 		protected LocalFileContent FileContent = null;
-		
-		/// <summary>
-		/// Get or set buffer length used when copying file
-		/// </summary>
-		public int CopyBufferLength {
-			get { return _CopyBufferLength; }
-			set {
-				if (value<=0) throw new ArgumentOutOfRangeException();
-				_CopyBufferLength = value;
-			}
-		}
 		
 		public string LocalName {
 			get { 
@@ -91,8 +79,7 @@ namespace NI.Vfs
 		/// </summary>		
 		public virtual void CopyFrom(IFileObject srcFile) {
 			// raise 'before copy'
-			if (LocalFs.EventsMediator!=null)
-				LocalFs.EventsMediator.OnFileCopying(new FileObjectEventArgs(LocalFs,this));
+			LocalFs.OnFileCopying(this, srcFile);
 				
 			try {
 				if (srcFile.Type==FileType.File) {
@@ -106,14 +93,12 @@ namespace NI.Vfs
 				
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this,ex));
+				LocalFs.OnFileError(this,ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
 
 			// raise 'after copy'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCopied(new FileObjectEventArgs(LocalFs, this));
+			LocalFs.OnFileCopied(this, srcFile);
 		}
 		
 		/// <summary>
@@ -133,21 +118,18 @@ namespace NI.Vfs
 		/// <summary>
 		/// <see cref="IFileObject.CopyFrom"/>
 		/// </summary>
-		public virtual void CopyFrom(Stream inputStream) {
-			// raise 'before copy'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCopying(new FileObjectEventArgs(LocalFs, this));			
+		public virtual void CopyFrom(Stream inputStream) {		
 			
 			try {
 				if (Type!=FileType.Imaginary) Delete();
 				CreateFile();
 				Stream outputStream = Content.GetStream(FileAccess.Write);
 				
-				byte[] buf = new byte[CopyBufferLength];
+				byte[] buf = new byte[LocalFs.CopyBufferLength];
 				try {
 					int bytesRead = 0;
 					do {
-						bytesRead = inputStream.Read(buf, 0, CopyBufferLength);
+						bytesRead = inputStream.Read(buf, 0, LocalFs.CopyBufferLength);
 						if (bytesRead>0)
 							outputStream.Write(buf, 0, bytesRead);
 					} while (bytesRead>0);
@@ -156,15 +138,9 @@ namespace NI.Vfs
 				}
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this, ex));
+				LocalFs.OnFileError(this, ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
-
-			// raise 'after copy'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCopied(new FileObjectEventArgs(LocalFs, this));
-		
 		}
 		
 		/// <summary>
@@ -172,8 +148,7 @@ namespace NI.Vfs
 		/// </summary>
 		public virtual void MoveTo(IFileObject destFile) {
 			// raise 'before move'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileMoving(new FileObjectMoveEventArgs(LocalFs, this, destFile));			
+			LocalFs.OnFileMoving(this, destFile);			
 			
 			try {		
 				if (destFile is LocalFile) {
@@ -194,14 +169,12 @@ namespace NI.Vfs
 				}
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this, ex));
+				LocalFs.OnFileError(this, ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
 
 			// raise 'after move'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileMoved(new FileObjectMoveEventArgs(LocalFs, this,destFile));
+			LocalFs.OnFileMoved(this, destFile);	
 		}
 		
 		/// <summary>
@@ -213,8 +186,7 @@ namespace NI.Vfs
 				throw new InvalidOperationException("This instance of file system is read only");
 			
 			// raise 'before create'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCreating(new FileObjectEventArgs(LocalFs, this));			
+			LocalFs.OnFileCreating(this, FileType.File);			
 			
 			try {
 
@@ -231,14 +203,12 @@ namespace NI.Vfs
 				_Type = FileType.File;
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this, ex));
+				LocalFs.OnFileError(this, ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
 
 			// raise 'after create'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCreated(new FileObjectEventArgs(LocalFs, this));
+			LocalFs.OnFileCreated(this, FileType.File);
 		}
 		
 		/// <summary>
@@ -249,8 +219,7 @@ namespace NI.Vfs
 				throw new InvalidOperationException("This instance of file system is read only");
 			
 			// raise 'before create'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFolderCreating(new FileObjectEventArgs(LocalFs, this));			
+			LocalFs.OnFileCreating(this, FileType.Folder);			
 			
 			try {			
 				if (Type==FileType.File) Delete();
@@ -259,14 +228,12 @@ namespace NI.Vfs
 				_Type = FileType.Folder;
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this, ex));
+				LocalFs.OnFileError(this, ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
 
 			// raise 'after create'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileCreated(new FileObjectEventArgs(LocalFs, this));			
+			LocalFs.OnFileCreated(this, FileType.Folder);			
 		}
 		
 		/// <summary>
@@ -277,8 +244,7 @@ namespace NI.Vfs
 				throw new InvalidOperationException("This instance of file system is read only");
 			
 			// raise 'before delete'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileDeleting(new FileObjectEventArgs(LocalFs, this));			
+			LocalFs.OnFileDeleting(this);			
 			
 			try {			
 				switch (Type) {
@@ -290,14 +256,12 @@ namespace NI.Vfs
 				_Type = FileType.Imaginary;
 			} catch (Exception ex) {
 				// raise 'error'
-				if (LocalFs.EventsMediator != null)
-					LocalFs.EventsMediator.OnFileError(new FileObjectErrorEventArgs(LocalFs, this, ex));
+				LocalFs.OnFileError(this, ex);
 				throw new FileSystemException(ex.Message, this, ex);
 			}
 
 			// raise 'after delete'
-			if (LocalFs.EventsMediator != null)
-				LocalFs.EventsMediator.OnFileDeleted(new FileObjectEventArgs(LocalFs, this));				
+			LocalFs.OnFileDeleted(this);				
 		}
 		
 		/// <summary>

@@ -30,6 +30,9 @@ namespace NI.Vfs
 		/// <summary>
 		/// Returns a stream for reading or writing the file's content.
 		/// </summary>
+		/// <param name="access">file access type (read or write).</param>
+		/// <remarks>Note that access type <see cref="FileAccess.ReadWrite"/> option may not be supported by some implementations.</remarks>
+		/// <returns>An stream to read or write the file's content.</returns>
 		Stream GetStream(FileAccess access);
 		
 		/// <summary>
