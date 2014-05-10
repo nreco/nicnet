@@ -31,7 +31,7 @@
     <RootNamespaceContainer>False</RootNamespaceContainer>
     <PresentationStyle>VS2010</PresentationStyle>
     <Preliminary>False</Preliminary>
-    <NamingMethod>Guid</NamingMethod>
+    <NamingMethod>MemberName</NamingMethod>
     <HelpTitle>NI.Vfs Class Library Documentation</HelpTitle>
     <HeaderText>&amp;lt%3bscript type=&amp;quot%3btext/javascript&amp;quot%3b src=&amp;quot%3bhttp://localhost/nrecosite/js/helpheader.js&amp;quot%3b/&amp;gt%3b</HeaderText>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
@@ -40,6 +40,9 @@
     <DocumentationSources>
       <DocumentationSource sourceFile="..\src\NI.Vfs\NI.Vfs.csproj" xmlns="" />
     </DocumentationSources>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="NI.Vfs" isDocumented="True" xmlns="">Virtual file system (VFS) provides a single API for accessing various different file systems.</NamespaceSummaryItem>
+    </NamespaceSummaries>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
