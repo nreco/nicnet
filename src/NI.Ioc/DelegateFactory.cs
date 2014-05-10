@@ -64,10 +64,14 @@ namespace NI.Ioc
 				var mParams = mInfo.GetParameters();
 				if (mInfo.ReturnType == typeof(void)) {
 					var actionType = SuggestGenericType(actionTypeByParamCnt, mParams.Length);
-					var paramTypes = new Type[mParams.Length];
-					for (int i = 0; i < paramTypes.Length; i++)
-						paramTypes[i] = mParams[i].ParameterType;
-					return actionType.MakeGenericType(paramTypes);
+					if (mParams.Length == 0) {
+						return actionType;
+					} else {
+						var paramTypes = new Type[mParams.Length];
+						for (int i = 0; i < paramTypes.Length; i++)
+							paramTypes[i] = mParams[i].ParameterType;
+						return actionType.MakeGenericType(paramTypes);
+					}
 				} else {
 					var funcType = SuggestGenericType(funcTypeByParamCnt, mParams.Length);
 					var paramTypes = new Type[mParams.Length+1];
