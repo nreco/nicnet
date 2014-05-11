@@ -41,8 +41,8 @@ namespace NI.Data.Web {
 		}
 
 		protected virtual DataSet GetDataSet() {
-			if (DataSource.CreateDataSet != null) {
-				DataSet ds = DataSource.CreateDataSet(Name);
+			if (DataSource.DataSetFactory != null) {
+				DataSet ds = DataSource.DataSetFactory.GetDataSet(Name);
 				if (ds != null)
 					return ds;
 			}

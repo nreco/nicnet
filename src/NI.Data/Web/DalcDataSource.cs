@@ -35,7 +35,6 @@ namespace NI.Data.Web {
 		IDalc _Dalc;
 		QueryNode _Condition = null;
 		bool _DataSetMode = false;
-		bool _InsertMode = false;
 		string[] _AutoIncrementNames = null;
 		string[] _DataKeyNames = null;
 
@@ -138,9 +137,9 @@ namespace NI.Data.Web {
 		}
 
 		/// <summary>
-		/// Get or set DataSet instance provider for specificed table name (optional).
+		/// Get or set DataSet factory for specificed table name (optional).
 		/// </summary>
-		public Func<string, DataSet> CreateDataSet { get; set; }
+		public IDataSetFactory DataSetFactory { get; set; }
 
 		/// <summary>
 		/// Get or set data retrieval condition (optional).
@@ -156,7 +155,7 @@ namespace NI.Data.Web {
 			Query q = new Query(viewName == TableName ? SelectTableName : viewName);
 			q.Condition = Condition;
 			DataSourceSelectArguments selectArgs = new DataSourceSelectArguments();
-			DataSet ds = CreateDataSet(viewName);
+			DataSet ds = DataSetFactory.GetDataSet(viewName);
 			DalcDataSourceSelectEventArgs eArgs = new DalcDataSourceSelectEventArgs(q, selectArgs, ds);
 			// raise event
 			OnSelecting(this, eArgs);
