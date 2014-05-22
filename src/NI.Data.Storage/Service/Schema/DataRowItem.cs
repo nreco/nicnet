@@ -50,6 +50,8 @@ namespace NI.Data.Storage.Service.Schema {
 					info.AddValue(c.ColumnName, (double)val);
 				} else if (val is Single) {
 					info.AddValue(c.ColumnName, (float)val);
+				} else if (val is decimal) {
+					info.AddValue(c.ColumnName, (decimal)val);
 				} else {
 					if (val is IFormattable)
 						info.AddValue(c.ColumnName, ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture));

@@ -20,6 +20,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
 using System.Data;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace NI.Data.Storage.Service.Schema {
@@ -29,6 +30,10 @@ namespace NI.Data.Storage.Service.Schema {
 
 		[DataMember(Name = "data")]
 		public DataRowItemList Data { get; set; }
+
+		[DataMember(Name = "totalcount", EmitDefaultValue=true)]
+		[DefaultValue(null)]
+		public int? TotalCount { get; set; }
 
 		public LoadRelexResult() {
 		}

@@ -46,13 +46,17 @@ namespace NI.Data.Storage.Service {
 			return new GetDataSchema(ProvideOntology()).Execute();
 		}
 
-		public LoadRelexResult LoadRelex(string relex) {
+		public LoadRelexResult LoadRelex(string relex, bool totalcount) {
 			try {
-				return new LoadRelex(ProvideOntology(), StorageDalc ).Execute(relex); 
+				return new LoadRelex(ProvideOntology(), StorageDalc ).Execute(relex, totalcount); 
 			} catch (Exception ex) {
 				Console.WriteLine("RELEX ERROR: {0}", ex);
 				throw;
 			}
+		}
+
+		public void UpdateRow(string tableName, string id, IDictionary<string, object> data) {
+			(new UpdateRow(ProvideOntology(), ObjPersister)).Update( tableName, Convert.ToInt64( id ), data);
 		}
 
 		/*protected void RunInTransaction(Action<object> a) {

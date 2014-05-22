@@ -29,34 +29,29 @@ using NI.Data.Storage.Service.Schema;
 
 namespace NI.Data.Storage.Service.Actions {
 	
-	public class LoadRelex {
-		
-		DataSchema Schema;
-		IDalc StorageDalc;
+	public class UpdateRow {
 
-		public LoadRelex(DataSchema schema, IDalc storageDalc) {
+		static Logger log = new Logger(typeof(UpdateRow));
+
+		DataSchema Schema;
+		IObjectContainerStorage ObjStorage;
+
+		public UpdateRow(DataSchema schema, IObjectContainerStorage objStorage) {
 			Schema = schema;
-			StorageDalc = storageDalc;
+			ObjStorage = objStorage;
 		}
 
-		public LoadRelexResult Execute(string relex, bool totalcount) {
-			var res = new LoadRelexResult();
-			var relexParser = new RelExParser();
-			var q = relexParser.Parse(relex);
-
-			if (totalcount) {
-				res.TotalCount = StorageDalc.RecordsCount( q );
+		public void Update(string tableName, long id, IDictionary<string,object> data) {
+			var objClass = Schema.FindClassByID(tableName);
+			if (objClass==null)
+				throw new Exception(String.Format("Unknown table {0}", tableName) );
+			var objContainer = new ObjectContainer(objClass, id);
+			log.Info("UPDATE {0} (ID={1})", tableName, id);
+			foreach (var entry in data) {
+				objContainer[ entry.Key ] = entry.Value;
+				log.Info( "SET {0} = {1}", entry.Key, entry.Value );
 			}
-
-			var ds = new DataSet();
-			var tbl = StorageDalc.Load(q, ds);
-			
-			var data = new DataRowItemList();
-			foreach (DataRow r in tbl.Rows) {
-				data.Add( new DataRowItem(r) );
-			}
-			res.Data = data;
-			return res;
+			ObjStorage.Update( objContainer );
 		}
 
 	}

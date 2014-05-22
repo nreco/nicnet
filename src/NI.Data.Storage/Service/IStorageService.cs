@@ -40,9 +40,13 @@ namespace NI.Data.Storage.Service {
 		//TODO: rest service that reflects IObjectPersister for rest
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/relex?q={relex}", Method = "GET")] //, ResponseFormat=WebMessageFormat.Json
+		[WebInvoke(UriTemplate = "/relex?q={relex}&totalcount={totalcount}", Method = "GET")]
 		[FaultContract(typeof(ApiFault))]
 		[Description("Query storage data with relex expression")]
-		LoadRelexResult LoadRelex(string relex);
+		LoadRelexResult LoadRelex(string relex, bool totalcount);
+
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/update", Method = "POST", BodyStyle=WebMessageBodyStyle.WrappedRequest)]
+		void UpdateRow(string tableName, string id, IDictionary<string,object> data);
 	}
 }

@@ -69,7 +69,8 @@ namespace NI.Data.Web {
 			q.StartRecord = arguments.StartRowIndex;
 			if (arguments.MaximumRows>0)
 				q.RecordCount = arguments.MaximumRows;
-			DataSource.Dalc.Load(q, ds);
+			if (q.RecordCount>0)
+				DataSource.Dalc.Load(q, ds);
 			// raise event
 			DataSource.OnSelected(DataSource, eArgs);
 			
