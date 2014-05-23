@@ -6,12 +6,16 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace NI.Data {
-	internal class SimpleStringTemplate {
+
+	/// <summary>
+	/// Simple string template that handles conditional formatting
+	/// </summary>
+	public class SimpleStringTemplate {
 		internal readonly static string NotApplicable = "\0";
 
 		protected string Template;
 
-		internal SimpleStringTemplate(string tpl) {
+		public SimpleStringTemplate(string tpl) {
 			Template = tpl;
 		}
 
