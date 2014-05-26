@@ -29,7 +29,7 @@ namespace NI.Data.Storage.Service.Schema {
 	public class LoadRelexResult {
 
 		[DataMember(Name = "data")]
-		public DataRowItemList Data { get; set; }
+		public RowList Data { get; set; }
 
 		[DataMember(Name = "totalcount", EmitDefaultValue=true)]
 		[DefaultValue(null)]
@@ -41,7 +41,7 @@ namespace NI.Data.Storage.Service.Schema {
 	}
 
 	[CollectionDataContract(ItemName = "row")]
-	public class DataRowItemList : List<DataRowItem> { }
+	public class RowList : List<DataRowItem> { }
 
 
 }

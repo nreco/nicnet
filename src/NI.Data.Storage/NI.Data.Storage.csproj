@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NI.Data.Storage</RootNamespace>
     <AssemblyName>NI.Data.Storage</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -60,7 +60,8 @@
     <Compile Include="DataSchemaDalcStorage.cs" />
     <Compile Include="ObjectContainerSqlDalcStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\Actions\UpdateRow.cs" />
+    <Compile Include="Service\Actions\ChangeRow.cs" />
+    <Compile Include="Service\Schema\DictionaryItem.cs" />
     <Compile Include="Service\Schema\GetDataSchemaResult.cs" />
     <Compile Include="Service\Schema\LoadRelexResult.cs" />
     <Compile Include="Service\Schema\DataRowItem.cs" />

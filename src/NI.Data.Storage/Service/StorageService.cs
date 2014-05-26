@@ -55,8 +55,18 @@ namespace NI.Data.Storage.Service {
 			}
 		}
 
-		public void UpdateRow(string tableName, string id, IDictionary<string, object> data) {
-			(new UpdateRow(ProvideOntology(), ObjPersister)).Update( tableName, Convert.ToInt64( id ), data);
+		public long InsertRow(string tableName, DictionaryItem data) {
+			return (new ChangeRow(ProvideOntology(), ObjPersister)).Insert(tableName, data);
+		}
+
+		public void UpdateRow(string tableName, string id, DictionaryItem data) {
+			if (data==null)
+				throw new ArgumentException("data is null");
+			(new ChangeRow(ProvideOntology(), ObjPersister)).Update( tableName, Convert.ToInt64( id ), data);
+		}
+
+		public void DeleteRow(string tableName, string id) {
+			(new ChangeRow(ProvideOntology(), ObjPersister)).Delete(tableName, Convert.ToInt64(id) );
 		}
 
 		/*protected void RunInTransaction(Action<object> a) {

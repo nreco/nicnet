@@ -51,7 +51,7 @@ namespace NI.Data.Storage.Service.Actions {
 			var ds = new DataSet();
 			var tbl = StorageDalc.Load(q, ds);
 			
-			var data = new DataRowItemList();
+			var data = new RowList();
 			foreach (DataRow r in tbl.Rows) {
 				data.Add( new DataRowItem(r) );
 			}

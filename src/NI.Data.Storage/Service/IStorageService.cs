@@ -46,7 +46,15 @@ namespace NI.Data.Storage.Service {
 		LoadRelexResult LoadRelex(string relex, bool totalcount);
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/update", Method = "POST", BodyStyle=WebMessageBodyStyle.WrappedRequest)]
-		void UpdateRow(string tableName, string id, IDictionary<string,object> data);
+		[WebInvoke(UriTemplate = "/data/{tableName}/insert", Method = "POST")]
+		long InsertRow(string tableName, DictionaryItem data);
+
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/update", Method = "POST")]
+		void UpdateRow(string tableName, string id, DictionaryItem data);
+
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/delete", Method = "GET")]
+		void DeleteRow(string tableName, string id);
 	}
 }

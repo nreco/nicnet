@@ -29,29 +29,53 @@ using NI.Data.Storage.Service.Schema;
 
 namespace NI.Data.Storage.Service.Actions {
 	
-	public class UpdateRow {
+	public class ChangeRow {
 
-		static Logger log = new Logger(typeof(UpdateRow));
+		static Logger log = new Logger(typeof(ChangeRow));
 
 		DataSchema Schema;
 		IObjectContainerStorage ObjStorage;
 
-		public UpdateRow(DataSchema schema, IObjectContainerStorage objStorage) {
+		public ChangeRow(DataSchema schema, IObjectContainerStorage objStorage) {
 			Schema = schema;
 			ObjStorage = objStorage;
 		}
 
-		public void Update(string tableName, long id, IDictionary<string,object> data) {
+		public long Insert(string tableName, DictionaryItem data) {
+			var objClass = Schema.FindClassByID(tableName);
+			if (objClass == null)
+				throw new Exception(String.Format("Unknown table {0}", tableName));
+			var objContainer = new ObjectContainer(objClass);
+			foreach (var entry in data.Data) {
+				var prop = objClass.FindPropertyByID(entry.Key);
+				if (prop != null && !prop.PrimaryKey) {
+					objContainer[entry.Key] = entry.Value;
+				}
+			}
+			ObjStorage.Insert(objContainer);
+			return objContainer.ID.Value;
+		}
+
+		public void Update(string tableName, long id, DictionaryItem data) {
 			var objClass = Schema.FindClassByID(tableName);
 			if (objClass==null)
 				throw new Exception(String.Format("Unknown table {0}", tableName) );
 			var objContainer = new ObjectContainer(objClass, id);
-			log.Info("UPDATE {0} (ID={1})", tableName, id);
-			foreach (var entry in data) {
-				objContainer[ entry.Key ] = entry.Value;
-				log.Info( "SET {0} = {1}", entry.Key, entry.Value );
+			foreach (var entry in data.Data) {
+				var prop = objClass.FindPropertyByID(entry.Key);
+				if (prop!=null && !prop.PrimaryKey) {
+					objContainer[ entry.Key ] = entry.Value;
+				}
 			}
 			ObjStorage.Update( objContainer );
+		}
+
+		public void Delete(string tableName, long id) {
+			var objClass = Schema.FindClassByID(tableName);
+			if (objClass == null)
+				throw new Exception(String.Format("Unknown table {0}", tableName));
+			var objContainer = new ObjectContainer(objClass, id);
+			ObjStorage.Delete(objContainer);
 		}
 
 	}
