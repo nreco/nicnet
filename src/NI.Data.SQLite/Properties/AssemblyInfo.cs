@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NI.Data.Dalc.SQLite")]
-[assembly: AssemblyDescription("SQLite Data Provider factory for DALC")]
+[assembly: AssemblyTitle("NI.Data.SQLite")]
+[assembly: AssemblyDescription("SQLite Data Provider factory for NI.Data DALC")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
-[assembly: AssemblyProduct("NI.Data.Dalc.SQLite")]
+[assembly: AssemblyProduct("Open NIC.NET")]
 [assembly: AssemblyCopyright("Copyright © 2013 NewtonIdeas")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

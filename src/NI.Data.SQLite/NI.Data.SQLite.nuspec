@@ -13,5 +13,10 @@
     <description>$description$</description>
     <copyright>Copyright 2004-2014 Newtonideas</copyright>
     <tags>NI.Data SQLite</tags>
+	<dependencies>
+		<dependency id="System.Data.SQLite.Core" version="[1.0.92.0]"  />
+	</dependencies>
   </metadata>
+  <files>
+  </files>
 </package>
