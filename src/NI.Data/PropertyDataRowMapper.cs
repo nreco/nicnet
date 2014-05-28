@@ -58,9 +58,10 @@ namespace NI.Data {
 					continue;
 				if (skipPk && Array.IndexOf(r.Table.PrimaryKey, c) >= 0)
 					continue;
-
 				var pVal = pInfo.GetValue(o, null);
 				if (pVal == null) {
+					if (c.AutoIncrement)
+						continue;
 					pVal = DBNull.Value;
 				} else {
 					pVal = Convert.ChangeType(pVal, c.DataType, CultureInfo.InvariantCulture);

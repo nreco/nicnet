@@ -19,6 +19,17 @@ namespace NI.Data {
 		protected DataRowDalcMapper DbManager { get; set; }
 
 		/// <summary>
+		/// Initializes a new instance of ObjectDalcMapper 
+		/// </summary>
+		/// <param name="dbMgr">DataRowManager</param>
+		/// <param name="tableName">data table name</param>
+		public ObjectDalcMapper(DataRowDalcMapper dbMgr, string tableName) {
+			TableName = tableName;
+			ObjectMapper = new PropertyDataRowMapper(null);
+			DbManager = dbMgr;
+		}
+
+		/// <summary>
 		/// Initializes a new instance of ObjectDalcMapper
 		/// </summary>
 		/// <param name="dbMgr">DataRowManager</param>
