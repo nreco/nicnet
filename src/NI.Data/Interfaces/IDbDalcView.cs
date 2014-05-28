@@ -30,11 +30,6 @@ namespace NI.Data
 		bool IsMatchTable(QTable table);
 		
 		/// <summary>
-		/// List of origin sources names used in data view (optional; can be null)
-		/// </summary>
-		QTable[] OriginTables { get; }
-		
-		/// <summary>
 		/// Compose dataview SQL select text by specified query
 		/// </summary>
 		/// <param name="q">query to this dataview</param>

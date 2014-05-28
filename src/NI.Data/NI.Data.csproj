@@ -123,6 +123,7 @@
     <Compile Include="GenericDbProviderFactory.cs" />
     <Compile Include="DbDalc.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Permissions\IQueryRule.cs" />
     <Compile Include="Triggers\DataRowActionType.cs" />
     <Compile Include="Triggers\DataRowTrigger.cs" />
     <Compile Include="DbDalcView.cs">

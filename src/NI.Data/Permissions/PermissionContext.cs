@@ -17,6 +17,7 @@ using System;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace NI.Data.Permissions
 {
@@ -30,6 +31,8 @@ namespace NI.Data.Permissions
 		public DalcOperation Operation { get; private set; }
 
 		public IPrincipal Principal { get; private set; }
+
+		public IDictionary<string,object> ExtendedProperties { get; set; }
 
 		public PermissionContext(string tableName, DalcOperation operation) {
 			TableName = tableName;

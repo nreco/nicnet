@@ -47,7 +47,12 @@ namespace NI.Data.Triggers {
 		/// <summary>
 		/// Inserted or Updated
 		/// </summary>
-		Saved = 2 + 8
+		Saved = 2 + 8,
+
+		/// <summary>
+		/// Any data row action 
+		/// </summary>
+		Any = 1+2+4+8+16+32
 	}
 
 }

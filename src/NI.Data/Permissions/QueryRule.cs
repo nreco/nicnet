@@ -21,9 +21,9 @@ using NI.Data.RelationalExpressions;
 namespace NI.Data.Permissions {
 	
 	/// <summary>
-	/// Generic query rule
+	/// Generic implementation of IQueryRule interface
 	/// </summary>
-	public class QueryRule {
+	public class QueryRule : IQueryRule {
 
 		public string TableName { get; set; }
 
@@ -89,11 +89,13 @@ namespace NI.Data.Permissions {
 
 
 		protected virtual void SetVariable(QVar var, PermissionContext context) {
-			var p = context.GetType().GetProperty(var.Name);
 			var.Unset();
+			var p = context.GetType().GetProperty(var.Name);
 			if (p!=null) {
 				var.Set( p.GetValue(context, null) );
 			}
+			if (context.ExtendedProperties!=null && context.ExtendedProperties.ContainsKey(var.Name))
+				var.Set(context.ExtendedProperties[var.Name]);
 		}
 
 	}

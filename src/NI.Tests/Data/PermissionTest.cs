@@ -27,11 +27,11 @@ namespace NI.Tests.Data
 				var dalc = sqliteTest.Dalc;
 
 				var oldCmdGen = (DbCommandGenerator)dalc.CommandGenerator;
-				dalc.CommandGenerator = new DbPermissionCommandGenerator(dalc.DbFactory, oldCmdGen.Views, new Func<PermissionContext, QueryNode>[] {
+				dalc.CommandGenerator = new DbPermissionCommandGenerator(dalc.DbFactory, oldCmdGen.Views, new [] {
 					(new QueryRule("users", DalcOperation.Select, "users.role!=\"3\":int32 or \"IdentityName\":var=\"Mike\"" ) {
 						ViewNames = new[] { new QTable("users_view","u") }
-					}).ComposeCondition,
-					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name " ).ComposeCondition
+					}),
+					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name " )
 				});
 
 				Assert.AreEqual(3, dalc.RecordsCount(new Query("users")), "Select rule failed");

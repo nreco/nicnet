@@ -65,7 +65,7 @@ namespace NI.Data
 		/// <param name="eventArgs">event arguments</param>
 		public virtual void Publish(object sender, EventArgs eventArgs) {
 			if (eventArgs==null)
-				throw new ArgumentNullException("eventData");
+				throw new ArgumentNullException("eventArgs");
 			if (Publishing != null)
 				Publishing(sender, eventArgs);
 

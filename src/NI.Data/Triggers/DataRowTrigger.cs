@@ -52,7 +52,7 @@ namespace NI.Data.Triggers {
 		/// <param name="tableName">table name to match</param>
 		/// <param name="handler">handler delegate</param>
 		public DataRowTrigger(DataRowActionType rowAction, string tableName, Action<DataRowTriggerEventArgs> handler) :
-			this(null, rowAction, tableName, handler) {
+			this( rowAction, tableName, handler, null) {
 		}
 
 		/// <summary>
@@ -62,7 +62,7 @@ namespace NI.Data.Triggers {
 		/// <param name="rowAction">row action flags</param>
 		/// <param name="tableName">table name to match</param>
 		/// <param name="handler">handler delegate</param>
-		public DataRowTrigger(DataEventBroker broker, DataRowActionType rowAction, string tableName, Action<DataRowTriggerEventArgs> handler) {
+		public DataRowTrigger(DataRowActionType rowAction, string tableName, Action<DataRowTriggerEventArgs> handler, DataEventBroker broker) {
 			TableName = tableName;
 			Action = rowAction;
 			Handler = handler;

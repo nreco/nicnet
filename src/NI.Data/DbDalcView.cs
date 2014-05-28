@@ -30,8 +30,6 @@ namespace NI.Data
 	{
 		public string TableName { get; set; }
 
-		public QTable[] OriginTables { get; set; }
-
 		public IDictionary<string,string> FieldMapping { get; set; }
 
 		protected string CountFields { get; set; }

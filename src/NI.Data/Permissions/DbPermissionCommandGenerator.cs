@@ -17,6 +17,7 @@ using System;
 using System.Threading;
 using System.Security.Principal;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Data;
@@ -30,28 +31,28 @@ namespace NI.Data.Permissions
 	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
 
-		public Func<PermissionContext,QueryNode>[] Rules { get; set; }
+		public IQueryRule[] Rules { get; set; }
 		
 		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
-			Rules = new Func<PermissionContext, QueryNode>[0];
+			Rules = new IQueryRule[0];
 		}
 
-		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views, Func<PermissionContext, QueryNode>[] rules)
+		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views, IQueryRule[] rules)
 			: base(dbFactory, views) {
 			Rules = rules;
 		}
 
-		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op) {
-			return new PermissionContext(tableName, op);
+		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op, IDictionary<string, object> extraData) {
+			return new PermissionContext(tableName, op) { ExtendedProperties = extraData };
 		}
 
-		protected QueryNode ApplyRuleConditions(QueryNode node, string tableName, DalcOperation operation) {
+		protected QueryNode ApplyRuleConditions(QueryNode node, string tableName, DalcOperation operation, IDictionary<string,object> extraData) {
 			var resNode = new QueryGroupNode(QueryGroupNodeType.And);
 			resNode.Nodes.Add(node);
-			var context = CreatePermissionContext(tableName, operation);
+			var context = CreatePermissionContext(tableName, operation, extraData);
 			for (int i = 0; i < Rules.Length; i++) {
 				var r = Rules[i];
-				var extraCondition = r(context);
+				var extraCondition = r.ComposeCondition(context);
 				if (extraCondition != null)
 					resNode.Nodes.Add(extraCondition);
 			}
@@ -59,7 +60,7 @@ namespace NI.Data.Permissions
 		}
 
 		protected override Query PrepareSelectQuery(Query q) {
-			var withExtraConditions = ApplyRuleConditions(q.Condition, q.Table.Name, DalcOperation.Select);
+			var withExtraConditions = ApplyRuleConditions(q.Condition, q.Table.Name, DalcOperation.Select, q.ExtendedProperties);
 			if (withExtraConditions != q.Condition) {
 				var qClone = new Query(q);
 				qClone.Condition = withExtraConditions;
@@ -70,22 +71,22 @@ namespace NI.Data.Permissions
 
 		protected override QueryNode ComposeDeleteCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
 			var baseDelete = base.ComposeDeleteCondition(table, dbSqlBuilder);
-			return ApplyRuleConditions(baseDelete, table.TableName, DalcOperation.Delete);
+			return ApplyRuleConditions(baseDelete, table.TableName, DalcOperation.Delete, null);
 		}
 
 		protected override QueryNode ComposeDeleteCondition(Query query) {
 			var baseDelete = base.ComposeDeleteCondition(query);
-			return ApplyRuleConditions(baseDelete, query.Table.Name, DalcOperation.Delete);
+			return ApplyRuleConditions(baseDelete, query.Table.Name, DalcOperation.Delete, query.ExtendedProperties);
 		}
 
 		protected override QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
 			var baseUpdate = base.ComposeUpdateCondition(table, dbSqlBuilder);
-			return ApplyRuleConditions(baseUpdate, table.TableName, DalcOperation.Update);
+			return ApplyRuleConditions(baseUpdate, table.TableName, DalcOperation.Update, null);
 		}
 
 		protected override QueryNode ComposeUpdateCondition(Query query) {
 			var baseUpdate = base.ComposeUpdateCondition(query);
-			return ApplyRuleConditions( baseUpdate, query.Table.Name, DalcOperation.Update );
+			return ApplyRuleConditions( baseUpdate, query.Table.Name, DalcOperation.Update, query.ExtendedProperties );
 		}
 
 		
