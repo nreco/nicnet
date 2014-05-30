@@ -2,7 +2,7 @@
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
  * Copyright 2004-2012 NewtonIdeas
- * Copyright 2008-2013 Vitalii Fedorchenko (changes and v.2)
+ * Copyright 2008-2014 Vitalii Fedorchenko (changes and v.2)
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -30,7 +30,7 @@ namespace NI.Data.Permissions
 	/// </summary>
 	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
-
+		
 		public IQueryRule[] Rules { get; set; }
 		
 		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
@@ -42,14 +42,14 @@ namespace NI.Data.Permissions
 			Rules = rules;
 		}
 
-		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op, IDictionary<string, object> extraData) {
-			return new PermissionContext(tableName, op) { ExtendedProperties = extraData };
+		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op) {
+			return new PermissionContext(tableName, op);
 		}
 
-		protected QueryNode ApplyRuleConditions(QueryNode node, string tableName, DalcOperation operation, IDictionary<string,object> extraData) {
+		protected QueryNode ApplyRuleConditions(QueryNode node, string tableName, DalcOperation operation) {
 			var resNode = new QueryGroupNode(QueryGroupNodeType.And);
 			resNode.Nodes.Add(node);
-			var context = CreatePermissionContext(tableName, operation, extraData);
+			var context = CreatePermissionContext(tableName, operation);
 			for (int i = 0; i < Rules.Length; i++) {
 				var r = Rules[i];
 				var extraCondition = r.ComposeCondition(context);
@@ -60,7 +60,7 @@ namespace NI.Data.Permissions
 		}
 
 		protected override Query PrepareSelectQuery(Query q) {
-			var withExtraConditions = ApplyRuleConditions(q.Condition, q.Table.Name, DalcOperation.Select, q.ExtendedProperties);
+			var withExtraConditions = ApplyRuleConditions(q.Condition, q.Table.Name, DalcOperation.Select);
 			if (withExtraConditions != q.Condition) {
 				var qClone = new Query(q);
 				qClone.Condition = withExtraConditions;
@@ -71,22 +71,22 @@ namespace NI.Data.Permissions
 
 		protected override QueryNode ComposeDeleteCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
 			var baseDelete = base.ComposeDeleteCondition(table, dbSqlBuilder);
-			return ApplyRuleConditions(baseDelete, table.TableName, DalcOperation.Delete, null);
+			return ApplyRuleConditions(baseDelete, table.TableName, DalcOperation.Delete);
 		}
 
 		protected override QueryNode ComposeDeleteCondition(Query query) {
 			var baseDelete = base.ComposeDeleteCondition(query);
-			return ApplyRuleConditions(baseDelete, query.Table.Name, DalcOperation.Delete, query.ExtendedProperties);
+			return ApplyRuleConditions(baseDelete, query.Table.Name, DalcOperation.Delete);
 		}
 
 		protected override QueryNode ComposeUpdateCondition(DataTable table, IDbSqlBuilder dbSqlBuilder) {
 			var baseUpdate = base.ComposeUpdateCondition(table, dbSqlBuilder);
-			return ApplyRuleConditions(baseUpdate, table.TableName, DalcOperation.Update, null);
+			return ApplyRuleConditions(baseUpdate, table.TableName, DalcOperation.Update);
 		}
 
 		protected override QueryNode ComposeUpdateCondition(Query query) {
 			var baseUpdate = base.ComposeUpdateCondition(query);
-			return ApplyRuleConditions( baseUpdate, query.Table.Name, DalcOperation.Update, query.ExtendedProperties );
+			return ApplyRuleConditions( baseUpdate, query.Table.Name, DalcOperation.Update);
 		}
 
 		

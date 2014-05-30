@@ -32,8 +32,6 @@ namespace NI.Data.Permissions
 
 		public IPrincipal Principal { get; private set; }
 
-		public IDictionary<string,object> ExtendedProperties { get; set; }
-
 		public PermissionContext(string tableName, DalcOperation operation) {
 			TableName = tableName;
 			Principal = Thread.CurrentPrincipal;

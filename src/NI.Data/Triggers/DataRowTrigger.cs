@@ -46,6 +46,25 @@ namespace NI.Data.Triggers {
 		public Action<DataRowTriggerEventArgs> Handler { get; set; }
 
 		/// <summary>
+		/// Initializes new instance of DataRowTrigger with specified handler
+		/// </summary>
+		/// <param name="handler">handler delegate</param>
+		public DataRowTrigger(Action<DataRowTriggerEventArgs> handler) {
+			Handler = handler;
+			Action = DataRowActionType.Any;
+		}
+
+		/// <summary>
+		/// Initializes new instance of DataRowTrigger with specified handler
+		/// </summary>
+		/// <param name="handler">handler delegate</param>
+		/// <param name="broker">data events broker</param>
+		public DataRowTrigger(Action<DataRowTriggerEventArgs> handler, DataEventBroker broker) {
+			Handler = handler;
+			SubscribeForEvents(broker);
+		}
+
+		/// <summary>
 		/// Initializes new instance of DataRowTrigger with specified row action, table name and handler
 		/// </summary>
 		/// <param name="rowAction">row action flags</param>
@@ -58,14 +77,18 @@ namespace NI.Data.Triggers {
 		/// <summary>
 		/// Initializes new instance of DataRowTrigger with specified row action, table name, handler and subscribes it to appropriate data events.
 		/// </summary>
-		/// <param name="broker">data events broker</param>
 		/// <param name="rowAction">row action flags</param>
 		/// <param name="tableName">table name to match</param>
 		/// <param name="handler">handler delegate</param>
+		/// <param name="broker">data events broker</param>
 		public DataRowTrigger(DataRowActionType rowAction, string tableName, Action<DataRowTriggerEventArgs> handler, DataEventBroker broker) {
 			TableName = tableName;
 			Action = rowAction;
 			Handler = handler;
+			SubscribeForEvents(broker);
+		}
+
+		protected void SubscribeForEvents(DataEventBroker broker) {
 			if (broker!=null) {
 				broker.Subscribe( new Func<EventArgs,bool>(IsMatchRowUpdating), new EventHandler<RowUpdatingEventArgs>(RowUpdatingHandler) );
 				broker.Subscribe( new Func<EventArgs,bool>(IsMatchRowUpdated), new EventHandler<RowUpdatedEventArgs>(RowUpdatedHandler));

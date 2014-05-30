@@ -94,8 +94,6 @@ namespace NI.Data.Permissions {
 			if (p!=null) {
 				var.Set( p.GetValue(context, null) );
 			}
-			if (context.ExtendedProperties!=null && context.ExtendedProperties.ContainsKey(var.Name))
-				var.Set(context.ExtendedProperties[var.Name]);
 		}
 
 	}
