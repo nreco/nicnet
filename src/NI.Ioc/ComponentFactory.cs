@@ -353,6 +353,33 @@ namespace NI.Ioc
 					}
 				}
 				
+				// inject properties marked by dependency attr
+				var publicProps = componentInfo.ComponentType.GetProperties();
+				for (int i=0; i<publicProps.Length; i++) {
+					var p = publicProps[i];
+					if (p.IsDefined(typeof(DependencyAttribute), false)) {
+						// skip if already injected
+						var alreadyInjected = false;
+						for (int j=0; j<componentInfo.Properties.Length; j++)
+							if (componentInfo.Properties[j].Name==p.Name) {
+								alreadyInjected = true;
+								break;
+							}
+						if (!alreadyInjected) {
+							var depAttrs = (DependencyAttribute[])p.GetCustomAttributes(typeof(DependencyAttribute), false);
+							if (depAttrs.Length>0) {
+								var depAttr = depAttrs[0];
+								var depValue = new ValueInitInfo( depAttr.Name!=null ? GetComponent(depAttr.Name) : GetService(p.PropertyType) );
+								try {
+									SetObjectProperty(componentInfo.ComponentType, instance, p.Name, factory, depValue);
+								} catch (Exception e) {
+									throw new Exception(string.Format("Cannot initialize component property (marked as dependency): {1}.{0}", p.Name, componentInfo.Name), e);
+								}
+							}
+						}
+					}
+				}
+
 				// if component is service provider aware, set service provider
 				if (instance is IServiceProviderAware)
 					((IServiceProviderAware)instance).ServiceProvider = this;

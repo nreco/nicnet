@@ -96,6 +96,14 @@ namespace NI.Tests.Ioc
 		}
 
 		[Test]
+		public void InjectionByDependencyAttribute() {
+			var cWithDep = componentFactory.GetComponent<ComponentWithDependency>("componentWithDependencyAttr");
+			Assert.IsNull( cWithDep.NotDependency );
+			Assert.IsNotNull( cWithDep.DependencyByType );
+			Assert.True( cWithDep.DependencyByName is Component1);
+		}
+
+		[Test]
 		public void ConfigState() {
 			// check
 			int i = 0;
@@ -232,6 +240,7 @@ namespace NI.Tests.Ioc
 
 					<component name='componentFactoryContext' type='NI.Ioc.ComponentFactoryContext'/>
 
+					<component name='componentWithDependencyAttr' type='NI.Tests.Ioc.ComponentWithDependency,NI.Tests' singleton='true'/>
 				</components>
 			";
 			
@@ -326,7 +335,20 @@ namespace NI.Tests.Ioc
 		}
 
 	}
-				
+	
+
+	public class ComponentWithDependency {
+		
+		public Component4 NotDependency { get; set; }
+
+		[Dependency]
+		public Component4 DependencyByType { get; set; }
+
+		[Dependency("parent_template")]
+		public BaseComponent DependencyByName { get; set; }
+
+		public ComponentWithDependency() { }
+	}
 	
 	
 	

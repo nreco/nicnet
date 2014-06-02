@@ -17,7 +17,7 @@ namespace NI.Ioc {
 		/// <param name="name"></param>
 		/// <returns>component instance of desired type</returns>
 		public static T GetComponent<T>(this IComponentFactory factory, string name) {
-			return (T)factory.GetComponent(name);
+			return (T)factory.GetComponent(name, typeof(T));
 		}
 
 	}

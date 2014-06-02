@@ -117,6 +117,7 @@
     <Compile Include="ConstDictionary.cs" />
     <Compile Include="ComponentFactoryContext.cs" />
     <Compile Include="DelegateFactory.cs" />
+    <Compile Include="DependencyAttribute.cs" />
     <Compile Include="Exceptions\XmlConfigurationException.cs" />
     <Compile Include="IndexerProxy.cs" />
     <Compile Include="Interfaces\IComponentFactory.cs" />
