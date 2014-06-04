@@ -20,10 +20,28 @@ namespace NI.Data.Storage {
 			base(objectDbMgr, logDalc, getSchema) {
 		}
 
-		protected override IDictionary[] LoadRelationData(Query q) {
+		protected override IList<RelationData> LoadRelationData(Query q) {
 			if (!String.IsNullOrEmpty(ObjectRelationViewName)) {
 				var viewQuery = new Query(ObjectRelationViewName, q.Condition);
-				return DbMgr.Dalc.LoadAllRecords(viewQuery);
+				var rels = new List<RelationData>();
+				DbMgr.Dalc.ExecuteReader( viewQuery, (rdr) => {
+					while (rdr.Read()) {
+						var rd = new RelationData();
+						rd.SubjectId = Convert.ToInt64(rdr["subject_id"]);
+						rd.ObjectId = Convert.ToInt64(rdr["object_id"]);
+						rd.PredicateClassCompactId = Convert.ToInt32(rdr["predicate_class_compact_id"]);
+						
+						var subjectCompactClassId = rdr["subject_compact_class_id"];
+						if (subjectCompactClassId!=null && !DBNull.Value.Equals(subjectCompactClassId))
+							rd.SubjectClassCompactId = Convert.ToInt32(subjectCompactClassId);
+						
+						var objectCompactClassId = rdr["object_compact_class_id"];
+						if (objectCompactClassId != null && !DBNull.Value.Equals(objectCompactClassId))
+							rd.ObjectClassCompactId = Convert.ToInt32(objectCompactClassId);
+						rels.Add(rd);
+					}
+				});
+				return rels;
 			} else {
 				return base.LoadRelationData(q);
 			}

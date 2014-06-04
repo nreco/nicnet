@@ -29,8 +29,12 @@ namespace NI.Data.Storage.Service.Schema {
 		[DataMember(Name = "classes")]
 		public List<DataSchemaClassInfo> Classes { get; private set; }
 
+		[DataMember(Name = "relationships")]
+		public List<DataSchemaRelationshipInfo> Relationships { get; private set; }
+
 		public GetDataSchemaResult() {
 			Classes = new List<DataSchemaClassInfo>();
+			Relationships = new List<DataSchemaRelationshipInfo>();
 		}
 
 	}
@@ -39,24 +43,50 @@ namespace NI.Data.Storage.Service.Schema {
 	public class DataSchemaClassInfo {
 		[DataMember(Name = "id")]
 		public string ID { get; set; }
+		
 		[DataMember(Name = "name")]
 		public string Name { get; set; }
-		[DataMember(Name = "is_predicate")]
-		public bool IsPredicate { get; set; }
 
 		[DataMember(Name = "properties")]
-		public List<DataSchemaClassPropertyInfo> Properties { get; set; }
+		public List<DataSchemaPropertyInfo> Properties { get; set; }
 
 		public DataSchemaClassInfo() {
-			Properties = new List<DataSchemaClassPropertyInfo>();
+			Properties = new List<DataSchemaPropertyInfo>();
 		}
 	}
 
 	[DataContract(Name = "property")]
-	public class DataSchemaClassPropertyInfo {
+	public class DataSchemaPropertyInfo {
 		[DataMember(Name = "id")]
 		public string ID { get; set; }
+
+		[DataMember(Name = "name")]
+		public string Name { get; set; }
+
+		[DataMember(Name = "datatype")]
+		public string DataTypeID { get; set; }
 	}
+
+	[DataContract(Name = "relationship")]
+	public class DataSchemaRelationshipInfo {
+		[DataMember(Name = "id")]
+		public string ID { get; set; }
+
+		[DataMember(Name = "subject_class")]
+		public string SubjectClassID { get; set; }
+
+		[DataMember(Name = "object_class")]
+		public string ObjectClassID { get; set; }
+
+		[DataMember(Name = "reversed")]
+		public bool Reversed { get; set; }
+
+		[DataMember(Name = "multiplicity")]
+		public bool Multiplicity { get; set; }
+
+	}
+
+
 	
 
 }

@@ -619,41 +619,33 @@ namespace NI.Data.Storage {
 
 				var objIdToClass = new Dictionary<long, Class>();
 				foreach (var rel in relData) {
-					var subjId = Convert.ToInt64(rel["subject_id"]);
-					if (rel["subject_compact_class_id"]!=null) {
-						var subjCompactClassId = Convert.ToInt32(rel["subject_compact_class_id"]);
-						var subjClass = dataSchema.FindClassByCompactID( subjCompactClassId );
+					if (rel.SubjectClassCompactId.HasValue) {
+						var subjClass = dataSchema.FindClassByCompactID(rel.SubjectClassCompactId.Value);
 						if (subjClass!=null)
-							objIdToClass[ subjId ] = subjClass;
+							objIdToClass[ rel.SubjectId ] = subjClass;
 					}
-					var objId = Convert.ToInt64(rel["object_id"]);
-					if (rel["object_compact_class_id"]!=null) {
-						var objCompactClassId = Convert.ToInt32(rel["object_compact_class_id"]);
-						var objClass = dataSchema.FindClassByCompactID(objCompactClassId);
+					if (rel.ObjectClassCompactId.HasValue) {
+						var objClass = dataSchema.FindClassByCompactID(rel.ObjectClassCompactId.Value);
 						if (objClass != null)
-							objIdToClass[objId] = objClass;
+							objIdToClass[rel.ObjectId] = objClass;
 					}
 				}
 
 				foreach (var rel in relData) {
-					var subjId = Convert.ToInt64(rel["subject_id"]);
-					var objId = Convert.ToInt64(rel["object_id"]);
-					var predCompactId = Convert.ToInt32(rel["predicate_class_compact_id"]);
-				
 					long relSubjId, relObjId;
-					var isReversed = !objBatchIds.Contains(subjId);
+					var isReversed = !objBatchIds.Contains(rel.SubjectId);
 					if (isReversed) {
-						relSubjId = objId;
-						relObjId = subjId;
+						relSubjId = rel.ObjectId;
+						relObjId = rel.SubjectId;
 					} else {
-						relSubjId = subjId;
-						relObjId = objId;
+						relSubjId = rel.SubjectId;
+						relObjId = rel.ObjectId;
 					}
 
 					var subjClass = objIdToClass[relSubjId];
-					var predClass = subjClass.Schema.FindClassByCompactID(predCompactId);
+					var predClass = subjClass.Schema.FindClassByCompactID(rel.PredicateClassCompactId);
 					if (predClass==null) {
-						log.Info("Predicate with compact ID={0} doesn't exist: relation skipped", predCompactId);
+						log.Info("Predicate with compact ID={0} doesn't exist: relation skipped", rel.PredicateClassCompactId);
 						continue;
 					}
 
@@ -745,16 +737,32 @@ namespace NI.Data.Storage {
 			return rs;
 		}
 
-		protected virtual IDictionary[] LoadRelationData(Query q) {
-			var relData = DbMgr.Dalc.LoadAllRecords(q);
+		public sealed class RelationData {
+			public long SubjectId;
+			public long ObjectId;
+			public int PredicateClassCompactId;
+			public int? SubjectClassCompactId;
+			public int? ObjectClassCompactId;
+		}
+
+		protected virtual IList<RelationData> LoadRelationData(Query q) {
+			var relData = new List<RelationData>();
+			DbMgr.Dalc.ExecuteReader( q, (rdr) => {
+				while (rdr.Read()) {
+					var rd = new RelationData();
+					rd.SubjectId = Convert.ToInt64(rdr["subject_id"]);
+					rd.ObjectId = Convert.ToInt64(rdr["object_id"]);
+					rd.PredicateClassCompactId = Convert.ToInt32(rdr["predicate_class_compact_id"]);
+					relData.Add(rd);
+				}
+			});
+
 			var relObjToLoad = new List<long>();
 			foreach (var rel in relData) {
-				var subjId = Convert.ToInt64(rel["subject_id"]);
-				var relObjId = Convert.ToInt64(rel["object_id"]);
-				if (!relObjToLoad.Contains(subjId))
-					relObjToLoad.Add(subjId);
-				if (!relObjToLoad.Contains(relObjId))
-					relObjToLoad.Add(relObjId);
+				if (!relObjToLoad.Contains(rel.SubjectId))
+					relObjToLoad.Add(rel.SubjectId);
+				if (!relObjToLoad.Contains(rel.ObjectId))
+					relObjToLoad.Add(rel.ObjectId);
 			}
 			if (relObjToLoad.Count>0) {
 				var objIdToClassCompactId = new Dictionary<long, int>();
@@ -768,13 +776,12 @@ namespace NI.Data.Storage {
 						}
 					});
 				}
-				foreach (var rel in relData) {
-					var subjId = Convert.ToInt64(rel["subject_id"]);
-					if (objIdToClassCompactId.ContainsKey(subjId))
-						rel["subject_compact_class_id"] = objIdToClassCompactId[subjId];
-					var objId = Convert.ToInt64(rel["object_id"]);
-					if (objIdToClassCompactId.ContainsKey(objId))
-						rel["object_compact_class_id"] = objIdToClassCompactId[objId];
+				for (int i=0; i<relData.Count; i++) {
+					var rel = relData[i];
+					if (objIdToClassCompactId.ContainsKey(rel.SubjectId))
+						rel.SubjectClassCompactId = objIdToClassCompactId[rel.SubjectId];
+					if (objIdToClassCompactId.ContainsKey(rel.ObjectId))
+						rel.ObjectClassCompactId = objIdToClassCompactId[rel.ObjectId];
 				}
 			}
 

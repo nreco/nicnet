@@ -34,21 +34,32 @@ namespace NI.Data.Storage.Service.Actions {
 		}
 
 		public GetDataSchemaResult Execute() {
-			var r = new GetDataSchemaResult();
+			var res = new GetDataSchemaResult();
 
-			foreach (var c in Schema.Classes) {
+			foreach (var c in Schema.Classes.Where(c=>!c.IsPredicate) ) {
 				var cInfo = new DataSchemaClassInfo() {
 					ID = c.ID,
 					Name = c.Name,
-					IsPredicate = c.IsPredicate
 				};
 				foreach (var cProp in c.Properties) {
-					cInfo.Properties.Add( new DataSchemaClassPropertyInfo() { ID = cProp.ID } );
+					cInfo.Properties.Add( new DataSchemaPropertyInfo() { 
+						ID = cProp.ID,
+						Name = cProp.Name,
+						DataTypeID = cProp.DataType.ID
+					} );
 				}
-				r.Classes.Add(cInfo);
+				res.Classes.Add(cInfo);
+			}
+			foreach (var r in Schema.Relationships.Where(r=>r.ID!=null) ) {
+				res.Relationships.Add( new DataSchemaRelationshipInfo() {
+					ID = r.ID, 
+					Multiplicity = r.Multiplicity,
+					SubjectClassID = r.Subject.ID,
+					ObjectClassID = r.Object.ID
+				});
 			}
 
-			return r;
+			return res;
 		}
 
 	}
