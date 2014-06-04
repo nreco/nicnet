@@ -59,6 +59,10 @@ namespace NI.Data.SqlClient {
 			if (SqlClientFactory.ConstOptimization) {
 				if (value.Type==TypeCode.String && (value.Value is string) && IsAsciiConst( (string)value.Value ))
 					return String.Format(AsciiConstFormatStr, value.Value);
+				if (value.Value!=null && !DBNull.Value.Equals(value.Value) &&
+					(value.Type==TypeCode.Int16 || value.Type==TypeCode.Int32 || value.Type==TypeCode.Int64 ||
+					value.Type==TypeCode.UInt16 || value.Type==TypeCode.UInt32 || value.Type==TypeCode.UInt64))
+					return value.Value.ToString();
 			}
 			return base.BuildValue(value);
 		}
