@@ -55,7 +55,8 @@ namespace NI.Data.Storage.Service.Actions {
 					ID = r.ID, 
 					Multiplicity = r.Multiplicity,
 					SubjectClassID = r.Subject.ID,
-					ObjectClassID = r.Object.ID
+					ObjectClassID = r.Object.ID,
+					PredicateName = r.Predicate.Name
 				});
 			}
 

@@ -78,6 +78,9 @@ namespace NI.Data.Storage.Service.Schema {
 		[DataMember(Name = "object_class")]
 		public string ObjectClassID { get; set; }
 
+		[DataMember(Name = "predicate_name")]
+		public string PredicateName { get; set; }
+
 		[DataMember(Name = "reversed")]
 		public bool Reversed { get; set; }
 
