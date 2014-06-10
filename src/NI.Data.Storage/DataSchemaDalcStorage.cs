@@ -101,8 +101,8 @@ namespace NI.Data.Storage {
 			if (CachedDataSchema!=null)
 				return CachedDataSchema; // tmp for tests
 
-			var classes = ClassPersister.LoadAll(new Query(ClassTableName) );
-			var props = PropertyPersister.LoadAll(new Query(PropertyTableName) );
+			var classes = ClassPersister.LoadAll(new Query(ClassTableName) { Sort = new[] { new QSort("name") } } );
+			var props = PropertyPersister.LoadAll(new Query(PropertyTableName) { Sort = new[] { new QSort("name") } } );
 
 			var relData = RelationshipPersister.LoadAll(new Query(RelationshipTableName));
 			var propToClass = PropertyToClassPersister.LoadAll(new Query(PropertyToClassTableName));
@@ -121,8 +121,9 @@ namespace NI.Data.Storage {
 				var objClass = dataSchema.FindClassByID(r.ObjectClassID);
 				var predClass = dataSchema.FindClassByID(r.PredicateClassID);
 				if (subjClass != null && objClass != null && predClass != null) {
-					dataSchema.AddRelationship(new Relationship(subjClass, predClass, objClass, r.ObjectMultiplicity, false));
-					dataSchema.AddRelationship(new Relationship(objClass, predClass, subjClass, r.SubjectMultiplicity, true));
+					var revRelationship = new Relationship(objClass, predClass, subjClass, r.SubjectMultiplicity, true, null);
+					dataSchema.AddRelationship(new Relationship(subjClass, predClass, objClass, r.ObjectMultiplicity, false, revRelationship));
+					dataSchema.AddRelationship(revRelationship);
 				}
 			}
 

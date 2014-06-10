@@ -320,61 +320,54 @@ namespace NI.Data.Storage.Tests {
 			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("id"));
 			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("id"));
 
-			var contactToCompanyRel = new Relationship(
-					o.FindClassByID("contacts"),
-					o.FindClassByID("contactCompany"),
-					o.FindClassByID("companies"),
-					false,
-					false );
-			o.AddRelationship(contactToCompanyRel);
-
 			var companyToContactRel = new Relationship(
 				o.FindClassByID("companies"),
 				o.FindClassByID("contactCompany"),
 				o.FindClassByID("contacts"),
 				true,
-				true);
+				true, null);
+			var contactToCompanyRel = new Relationship(
+					o.FindClassByID("contacts"),
+					o.FindClassByID("contactCompany"),
+					o.FindClassByID("companies"),
+					false,
+					false, companyToContactRel);
+			o.AddRelationship(contactToCompanyRel);
 
 			o.AddRelationship(companyToContactRel);
-
-			var companyToParentRel = new Relationship(
-				o.FindClassByID("companies"),
-				o.FindClassByID("parentCompany"),
-				o.FindClassByID("companies"),
-				false,
-				false
-			);
-
-			o.AddRelationship(companyToParentRel);
 
 			var companyToChildRel = new Relationship(
 				o.FindClassByID("companies"),
 				o.FindClassByID("parentCompany"),
 				o.FindClassByID("companies"),
 				true,
-				true
+				true, null
 			);
-
-			o.AddRelationship(companyToChildRel);
-
-			var companyToCountryRel = new Relationship(
+			var companyToParentRel = new Relationship(
 				o.FindClassByID("companies"),
-				o.FindClassByID("companyCountry"),
-				o.FindClassByID("countries"),
-				false, false
+				o.FindClassByID("parentCompany"),
+				o.FindClassByID("companies"),
+				false,
+				false, companyToChildRel
 			);
 
-			o.AddRelationship(companyToCountryRel);
+			o.AddRelationship(companyToParentRel);
+			o.AddRelationship(companyToChildRel);
 
 			var countryToCompanyRel = new Relationship(
 				o.FindClassByID("countries"),
 				o.FindClassByID("companyCountry"),
 				o.FindClassByID("companies"),
-				true, true
+				true, true, null
 			);
-
+			var companyToCountryRel = new Relationship(
+				o.FindClassByID("companies"),
+				o.FindClassByID("companyCountry"),
+				o.FindClassByID("countries"),
+				false, false, countryToCompanyRel
+			);
+			o.AddRelationship(companyToCountryRel);
 			o.AddRelationship(countryToCompanyRel);
-
 
 			return o;
 		}

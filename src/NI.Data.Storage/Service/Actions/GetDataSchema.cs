@@ -50,14 +50,16 @@ namespace NI.Data.Storage.Service.Actions {
 				}
 				res.Classes.Add(cInfo);
 			}
-			foreach (var r in Schema.Relationships.Where(r=>r.ID!=null) ) {
-				res.Relationships.Add( new DataSchemaRelationshipInfo() {
+			foreach (var r in Schema.Relationships.Where(r=>r.ID!=null && !r.Reversed) ) {
+				var relInfo = new DataSchemaRelationshipInfo() {
 					ID = r.ID, 
-					Multiplicity = r.Multiplicity,
 					SubjectClassID = r.Subject.ID,
 					ObjectClassID = r.Object.ID,
-					PredicateName = r.Predicate.Name
-				});
+					PredicateName = r.Predicate.Name,
+					ObjectMultiplicity = r.Multiplicity,
+					SubjectMultiplicity = r.ReversedRelationship.Multiplicity
+				};
+				res.Relationships.Add(relInfo);
 			}
 
 			return res;

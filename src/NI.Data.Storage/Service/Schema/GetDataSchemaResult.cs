@@ -81,11 +81,11 @@ namespace NI.Data.Storage.Service.Schema {
 		[DataMember(Name = "predicate_name")]
 		public string PredicateName { get; set; }
 
-		[DataMember(Name = "reversed")]
-		public bool Reversed { get; set; }
+		[DataMember(Name = "subject_multiplicity")]
+		public bool SubjectMultiplicity { get; set; }
 
-		[DataMember(Name = "multiplicity")]
-		public bool Multiplicity { get; set; }
+		[DataMember(Name = "object_multiplicity")]
+		public bool ObjectMultiplicity { get; set; }
 
 	}
 

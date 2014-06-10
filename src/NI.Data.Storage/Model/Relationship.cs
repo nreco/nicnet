@@ -58,6 +58,11 @@ namespace NI.Data.Storage.Model {
 		public bool Reversed { get; private set; }
 
 		/// <summary>
+		/// Reversed relationship
+		/// </summary>
+		public Relationship ReversedRelationship { get; private set; }
+
+		/// <summary>
 		/// True if this relationship is inferred view of relationship sequence
 		/// </summary>
 		public bool Inferred { get; private set; }
@@ -67,17 +72,21 @@ namespace NI.Data.Storage.Model {
 		/// </summary>
 		public IEnumerable<Relationship> InferredByRelationships { get; private set; }
 
-		public Relationship(Class subj, Class predicate, Class obj, bool multiplicity, bool reversed) {
+		public Relationship(Class subj, Class predicate, Class obj, bool multiplicity, bool reversed, Relationship reversedRelationship) {
 			Subject = subj;
 			Predicate = predicate;
 			Object = obj;
 			Multiplicity = multiplicity;
 			Reversed = reversed;
+			if (reversedRelationship!=null) {
+				ReversedRelationship = reversedRelationship;
+				reversedRelationship.ReversedRelationship = this;
+			}
 			Inferred = false;
-			
+
 			// only "real" relations have an ID
-			if (!reversed)
-				ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID );
+			if (!Reversed)
+				ID = String.Format("{0}_{1}_{2}", subj.ID, predicate.ID, obj.ID);
 		}
 
 		public Relationship(Class subj, IEnumerable<Relationship> inferredByRelationships, Class obj) {
