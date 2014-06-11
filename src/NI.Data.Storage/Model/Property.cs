@@ -34,17 +34,9 @@ namespace NI.Data.Storage.Model {
 
 		public PropertyDataType DataType { get; set; }
 
-        public bool Indexable { get; set; }
-
-        public bool Hidden { get; set; }
-
-		public bool Predefined { get; set; }
-
         public bool Multivalue { get; set; }
 
 		public bool PrimaryKey { get; set; }
-
-		public PropertyValueLocationMode ValueLocation { get; set; }
 
         public IEnumerable<Class> Classes {
 			get {
@@ -55,12 +47,15 @@ namespace NI.Data.Storage.Model {
 		public DataSchema Schema { get; internal set; }
 
 		public Property() {
-			ValueLocation = PropertyValueLocationMode.ValueTable;
 			PrimaryKey = false;
 		}
 
         public Property(string id) {
             ID = id;
+		}
+
+		public ClassPropertyLocation GetLocation(Class dataClass) {
+			return Schema.FindClassPropertyLocation(dataClass.ID, ID);
 		}
 
 		public override bool Equals(object obj) {
@@ -88,9 +83,5 @@ namespace NI.Data.Storage.Model {
 
 	}
 
-	public enum PropertyValueLocationMode {
-		ValueTable,
-		ObjectTableColumn
-		//TODO: feature "TableColumn"
-	}
+
 }

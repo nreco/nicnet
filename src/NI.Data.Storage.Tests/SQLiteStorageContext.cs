@@ -176,8 +176,7 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "string"},
-				{"compact_id", 1},
-				{"value_location", "ValueTable"}
+				{"compact_id", 1}
 			});
 
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
@@ -187,8 +186,7 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "date"},
-				{"compact_id", 2},
-				{"value_location", "ValueTable"}
+				{"compact_id", 2}
 			});
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "is_primary"},
@@ -197,8 +195,7 @@ namespace NI.Data.Storage.Tests {
 				{"indexable", false},
 				{"predefined", false},
 				{"datatype", "boolean"},
-				{"compact_id", 3},
-				{"value_location", "ValueTable"}
+				{"compact_id", 3}
 			});
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "id"},
@@ -208,35 +205,46 @@ namespace NI.Data.Storage.Tests {
 				{"predefined", true},
 				{"datatype", "integer"},
 				{"compact_id", 4},
-				{"primary_key", true},
-				{"value_location", "ObjectTableColumn"}
+				{"primary_key", true}
 			});
 
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "name"},
-				{"class_id", "companies"} } );
+				{"class_id", "companies"},
+				{"value_location", "ValueTable"}
+			} );
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "is_primary"},
-				{"class_id", "contacts"} });
+				{"class_id", "contacts"},
+				{"value_location", "ValueTable"} });
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "name"},
-				{"class_id", "contacts"} });
+				{"class_id", "contacts"},
+				{"value_location", "ValueTable"} });
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "birthday"},
-				{"class_id", "contacts"} });
+				{"class_id", "contacts"},
+				{"value_location", "ValueTable"} });
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "name"},
-				{"class_id", "countries"} });
+				{"class_id", "countries"},
+				{"value_location", "ValueTable"} });
 
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "id"},
-				{"class_id", "countries"} });
+				{"class_id", "countries"},
+				{"value_location", "TableColumn"},
+				{"column_name", "id"}  });
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "id"},
-				{"class_id", "contacts"} });
+				{"class_id", "contacts"},
+				{"value_location", "TableColumn"},
+				{"column_name", "id"} });
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "id"},
-				{"class_id", "companies"} });
+				{"class_id", "companies"},
+				{"value_location", "TableColumn"},
+				{"column_name", "id"} });
 		}
 
 		void InitDbSchema() {
@@ -262,7 +270,6 @@ namespace NI.Data.Storage.Tests {
 					[indexable] INTEGER,
 					[predefined] INTEGER,
 					[compact_id] INTEGER,
-					[value_location] TEXT,
 					[primary_key] INTEGER
 				)");
 
@@ -280,6 +287,8 @@ namespace NI.Data.Storage.Tests {
 				CREATE TABLE [metadata_property_to_class]  (
 					[property_id] TEXT,
 					[class_id] TEXT,
+					[value_location] TEXT,
+					[column_name] TEXT,
 					PRIMARY KEY (property_id, class_id)
 				)");
 
@@ -348,6 +357,19 @@ namespace NI.Data.Storage.Tests {
 			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_integer_values_log", "INTEGER"));
 			InternalDalc.ExecuteNonQuery(String.Format(valueLogTableCreateSqlTemplate, "object_string_values_log", "TEXT"));
 
+
+			InternalDalc.ExecuteNonQuery(@"
+				CREATE TABLE [users]  (
+					[id] INTEGER PRIMARY KEY AUTOINCREMENT,
+					[name] TEXT,
+					[age] INTEGER,
+					[group_id] INTEGER
+				)");
+			InternalDalc.ExecuteNonQuery(@"
+				CREATE TABLE [user_groups]  (
+					[id] INTEGER PRIMARY KEY AUTOINCREMENT,
+					[caption] TEXT
+				)");
 		}
 
 		public class StorageDataSetPrv : IDataSetFactory {

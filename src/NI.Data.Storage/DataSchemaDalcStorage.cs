@@ -53,9 +53,6 @@ namespace NI.Data.Storage {
 			ClassFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
-				{"hidden", "Hidden"},
-				{"indexable", "Indexable"},
-				{"predefined", "Predefined"},
 				{"predicate", "IsPredicate"},
 				{"compact_id", "CompactID"},
 				{"object_location", "ObjectLocation"}
@@ -66,12 +63,8 @@ namespace NI.Data.Storage {
 			PropertyFieldMapping = new Dictionary<string, string>() {
 				{"id", "ID"},
 				{"name", "Name"},
-				{"predefined", "Predefined"},
-				{"hidden", "Hidden"},
-				{"indexable", "Indexable"},
 				{"multivalue", "Multivalue"},
 				{"compact_id", "CompactID"},
-				{"value_location","ValueLocation"},
 				{"primary_key","PrimaryKey"}
 			};
 			PropertyPersister = new ObjectDalcMapper<Property>(DbContext, PropertyTableName,
@@ -90,7 +83,9 @@ namespace NI.Data.Storage {
 			PropertyToClassTableName = "metadata_property_to_class";
 			PropertyToClassFieldMapping = new Dictionary<string, string>() {
 				{"class_id", "ClassID"},
-				{"property_id", "PropertyID"}
+				{"property_id", "PropertyID"},
+				{"value_location", "Location"},
+				{"column_name", "ColumnName"}
 			};
 			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassTableName, PropertyToClassFieldMapping);
 		}
@@ -113,7 +108,7 @@ namespace NI.Data.Storage {
 				var c = dataSchema.FindClassByID(p2c.ClassID);
 				var p = dataSchema.FindPropertyByID(p2c.PropertyID);
 				if (c != null && p != null)
-					dataSchema.AddClassProperty(c, p);
+					dataSchema.AddClassProperty(new ClassPropertyLocation(c,p,p2c.Location,p2c.ColumnName) );
 			}
 
 			foreach (var r in relData) {
@@ -134,6 +129,8 @@ namespace NI.Data.Storage {
 		protected class PropertyToClass {
 			public string ClassID { get; set; }
 			public string PropertyID { get; set; }
+			public PropertyValueLocationMode Location { get; set; }
+			public string ColumnName { get; set; }
 		}
 
 		protected class RelationshipData {

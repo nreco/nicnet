@@ -38,6 +38,7 @@ namespace NI.Data.Storage.Model {
 		IDictionary<int, Property> PropertyByCompactId = null;
 		IDictionary<string, List<Class>> ClassesByPropertyId = null;
 		IDictionary<string, List<Property>> PropertiesByClassId = null;
+		IDictionary<string, IDictionary<string, ClassPropertyLocation>> ValueLocationByPropertyClass = null;
 		IDictionary<string, List<Relationship>> RelationshipsByClassId = null;
 		IDictionary<string, Relationship> RelationshipById = null;
 
@@ -52,6 +53,7 @@ namespace NI.Data.Storage.Model {
 			RelationshipsByClassId = new Dictionary<string, List<Relationship>>();
 			RelationshipList = new List<Relationship>();
 			RelationshipById = new Dictionary<string,Relationship>();
+			ValueLocationByPropertyClass = new Dictionary<string, IDictionary<string, ClassPropertyLocation>>();
 		}
 
 		public void AddRelationship(Relationship r) {
@@ -63,14 +65,18 @@ namespace NI.Data.Storage.Model {
 				RelationshipById[r.ID] = r;
 		}
 
-		public void AddClassProperty(Class c, Property p) {
-			if (!PropertiesByClassId.ContainsKey(c.ID))
-				PropertiesByClassId[c.ID] = new List<Property>();
-			PropertiesByClassId[c.ID].Add(p);
+		public void AddClassProperty(ClassPropertyLocation classProp) {
+			if (!PropertiesByClassId.ContainsKey(classProp.Class.ID))
+				PropertiesByClassId[classProp.Class.ID] = new List<Property>();
+			PropertiesByClassId[classProp.Class.ID].Add(classProp.Property);
 
-			if (!ClassesByPropertyId.ContainsKey(p.ID))
-				ClassesByPropertyId[p.ID] = new List<Class>();
-			ClassesByPropertyId[p.ID].Add(c);
+			if (!ClassesByPropertyId.ContainsKey(classProp.Property.ID))
+				ClassesByPropertyId[classProp.Property.ID] = new List<Class>();
+			ClassesByPropertyId[classProp.Property.ID].Add(classProp.Class);
+
+			if (!ValueLocationByPropertyClass.ContainsKey(classProp.Property.ID))
+				ValueLocationByPropertyClass[classProp.Property.ID] = new Dictionary<string,ClassPropertyLocation>();
+			ValueLocationByPropertyClass[ classProp.Property.ID ][ classProp.Class.ID ] = classProp;
 		}
 
 		protected void BuildClassIndex() {
@@ -97,6 +103,16 @@ namespace NI.Data.Storage.Model {
 			return PropertiesByClassId.ContainsKey(classId)?
 					PropertiesByClassId[classId].AsEnumerable()
 					: new Property[0];
+		}
+
+		public ClassPropertyLocation FindClassPropertyLocation(string classId, string propertyId) {
+			if (ValueLocationByPropertyClass.ContainsKey(propertyId)) {
+				var d = ValueLocationByPropertyClass[propertyId];
+				if (d.ContainsKey(classId)) {
+					return d[classId];
+				}
+			}
+			return null;
 		}
 
 		public IEnumerable<Relationship> FindClassRelationships(string classId) {

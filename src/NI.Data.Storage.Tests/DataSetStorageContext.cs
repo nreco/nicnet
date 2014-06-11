@@ -195,7 +195,6 @@ namespace NI.Data.Storage.Tests {
 			t.Columns.Add("indexable", typeof(bool));
 			t.Columns.Add("predefined", typeof(bool));
 			t.Columns.Add("datatype", typeof(string));
-			t.Columns.Add("value_location", typeof(string));
 			t.Columns.Add("primary_key", typeof(bool)).DefaultValue = false;
 
 			t.PrimaryKey = new[] { idCol };
@@ -206,6 +205,8 @@ namespace NI.Data.Storage.Tests {
 			var t = new DataTable("metadata_property_to_class");
 			var propIdCol = t.Columns.Add("property_id", typeof(string));
 			var classIdCol = t.Columns.Add("class_id", typeof(string));
+			t.Columns.Add("value_location", typeof(string));
+			t.Columns.Add("column_name", typeof(string));
 
 			t.PrimaryKey = new[] { propIdCol, classIdCol };
 			return t;
@@ -269,22 +270,19 @@ namespace NI.Data.Storage.Tests {
 					ID = "name",
 					CompactID = 1,
 					Name = "Name",
-					DataType = PropertyDataType.String,
-					ValueLocation = PropertyValueLocationMode.ValueTable
+					DataType = PropertyDataType.String
 				},
 				new Property() {
 					ID = "title",
 					CompactID = 2,
 					Name = "Title",
-					DataType = PropertyDataType.String, 
-					ValueLocation = PropertyValueLocationMode.ValueTable
+					DataType = PropertyDataType.String
 				},
 				new Property() {
 					ID = "birthday",
 					CompactID = 3,
 					Name = "Birthday",
-					DataType = PropertyDataType.DateTime,
-					ValueLocation = PropertyValueLocationMode.ValueTable
+					DataType = PropertyDataType.DateTime
 				},
 				new Property() {
 					ID = "is_primary",
@@ -302,23 +300,21 @@ namespace NI.Data.Storage.Tests {
 					ID = "id",
 					CompactID = 6,
 					Name = "ID",
-					Predefined = true,
 					PrimaryKey = true,
-					DataType = PropertyDataType.Integer,
-					ValueLocation = PropertyValueLocationMode.ObjectTableColumn
+					DataType = PropertyDataType.Integer
 				}
 			};
 			var o = new DataSchema(classes, props);
-			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("title"));
-			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("net_income"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("name"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"));
-			o.AddClassProperty(o.FindClassByID("countries"), o.FindPropertyByID("title"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("title"), PropertyValueLocationMode.ValueTable,null));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("net_income"), PropertyValueLocationMode.ValueTable,null) );
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("name"), PropertyValueLocationMode.ValueTable,null) );
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"), PropertyValueLocationMode.ValueTable,null));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"), PropertyValueLocationMode.ValueTable,null));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("title"), PropertyValueLocationMode.ValueTable, null));
 
-			o.AddClassProperty(o.FindClassByID("countries"), o.FindPropertyByID("id"));
-			o.AddClassProperty(o.FindClassByID("contacts"), o.FindPropertyByID("id"));
-			o.AddClassProperty(o.FindClassByID("companies"), o.FindPropertyByID("id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
 
 			var companyToContactRel = new Relationship(
 				o.FindClassByID("companies"),

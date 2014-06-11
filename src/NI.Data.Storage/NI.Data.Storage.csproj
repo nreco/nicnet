@@ -50,6 +50,7 @@
     <Compile Include="Interfaces\IDataSchemaStorage.cs" />
     <Compile Include="Interfaces\IObjectContainerStorage.cs" />
     <Compile Include="Model\Class.cs" />
+    <Compile Include="Model\ClassPropertyLocation.cs" />
     <Compile Include="Model\ObjectContainer.cs" />
     <Compile Include="Model\ObjectRelation.cs" />
     <Compile Include="Model\PropertyDataType.cs" />

@@ -386,8 +386,6 @@ namespace NI.Data.Storage {
 
 			SaveValues(obj);
 
-			//SaveReferences(obj, obj.References, new ObjectReference[0] );
-
 			if (LoggingEnabled)
 				WriteObjectLog(objRow, "insert");
 		}

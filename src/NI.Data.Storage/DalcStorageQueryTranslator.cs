@@ -23,10 +23,17 @@ namespace NI.Data.Storage {
 			// is class query?
 			var dataClass = Schema.FindClassByID(query.Table.Name);
 			if (dataClass!=null) {
-				var dataClassQuery = new Query( new QTable( ObjStorage.ObjectTableName, query.Table.Alias) );
-				dataClassQuery.Condition = TranslateQueryNode( dataClass, query.Condition );
+				var tableName = ObjStorage.ObjectTableName;
+				if (dataClass.ObjectLocation==ClassObjectLocationMode.SeparateTable) {
+					tableName = dataClass.ID;
+				}
+				var dataClassQuery = new Query(new QTable(tableName, query.Table.Alias));
+				dataClassQuery.Condition = 
+					(QField)"compact_class_id"==new QConst(dataClass.CompactID)
+					&
+					TranslateQueryNode( dataClass, query.Condition );
 				// TBD: add support for any field
-				CheckFieldsConstraint(query, "id");
+				CheckFieldsConstraint(query, dataClass.FindPrimaryKeyProperty().ID );
 				dataClassQuery.Fields = query.Fields;
 				return dataClassQuery;
 			}
@@ -123,17 +130,18 @@ namespace NI.Data.Storage {
 				};
 			}
 
-			return new QueryConditionNode( (QField)"id", Conditions.In, propQuery );
+			return new QueryConditionNode( (QField)dataClass.FindPrimaryKeyProperty().ID, Conditions.In, propQuery );
 		}
 
 		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
-			if (prop.PrimaryKey) {
-				return new QueryConditionNode( (QField)"id", cnd, val );
+			var propLocation = prop.GetLocation( dataClass );
+			if (propLocation.Location == PropertyValueLocationMode.TableColumn) {
+				return new QueryConditionNode((QField)propLocation.ColumnName, cnd, val);
 			}
 
 			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
 			return new QueryConditionNode(
-				new QField(null, "id", null),
+				new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
 				Conditions.In,
 				new Query(pSrcName,
 					(QField)"property_compact_id" == (QConst)prop.CompactID

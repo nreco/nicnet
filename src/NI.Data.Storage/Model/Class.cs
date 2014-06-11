@@ -34,21 +34,6 @@ namespace NI.Data.Storage.Model {
 		public string Name { get; set; }
 
         /// <summary>
-        /// Hidden classes are not served by UI for objects manipulation - usually used for system internal data
-        /// </summary>
-        public bool Hidden { get; set; }
-
-        /// <summary>
-        /// Determines indexable objects and their values for global search service
-        /// </summary>
-        public bool Indexable { get; set; }
-
-        /// <summary>
-        /// Predefined classes usually used for system-critical internal data and cannot be modified/removed
-        /// </summary>
-        public bool Predefined { get; set; }
-
-        /// <summary>
         /// Can act as predicate in the relationship
         /// </summary>
         public bool IsPredicate { get; set; }
@@ -117,6 +102,15 @@ namespace NI.Data.Storage.Model {
 			return p;
 		}
 
+		Property PrimaryKeyProperty = null;
+		public Property FindPrimaryKeyProperty() {
+			if (PrimaryKeyProperty==null) {
+				var props = Schema.FindPropertyByClassID(ID);
+				PrimaryKeyProperty = props.Where(p => p.PrimaryKey).FirstOrDefault();
+			}
+			return PrimaryKeyProperty;
+		}
+
 		public Relationship FindRelationship(Class predicate, Class refClass, bool? reversed = null) {
 			var rels = Relationships.Where(r => r.Predicate == predicate && r.Object==refClass);
 			if (reversed.HasValue) {
@@ -124,8 +118,6 @@ namespace NI.Data.Storage.Model {
 			} else
 				return rels.FirstOrDefault();
 		}
-
-
 
 		public DataTable CreateDataTable() {
 			var t = new DataTable(ID);
@@ -149,8 +141,8 @@ namespace NI.Data.Storage.Model {
 
 
 	public enum ClassObjectLocationMode {
-		ObjectTable, // TBD: feature "SeparateTable"
-		NativeTable
+		ObjectTable, 
+		SeparateTable
 	}
 
 }
