@@ -43,16 +43,40 @@ namespace NI.Data
 			}
 		}
 
+		/// <summary>
+		/// Get format for variable value (null if formatting is not needed)
+		/// </summary>
+		public string Format { get; private set; }
+
 		private object _VarValue;
 		private bool _isDefined = false;
 
 		/// <summary>
 		/// Initializes a new instance of the QVar with specified variable name
 		/// </summary>
-		/// <param name="varName"></param>
+		/// <param name="varName">variable name</param>
 		public QVar(string varName) : base(null) {
-			Name = varName;
+			var formatIdx = varName.IndexOf(':');
+			if (formatIdx >= 0) {
+				Name = varName.Substring(0, formatIdx);
+				Format = varName.Substring(formatIdx+1);
+				if (Format.Length==0)
+					throw new ArgumentException("Format cannot be empty");
+			} else { 
+				Name = varName;
+			}
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the QVar with specified variable name and format
+		/// </summary>
+		/// <param name="varName">variable name</param>
+		/// <param name="format">the string format applied on setting of the variable</param>
+		public QVar(string varName, string format) : base(null) {
+			Name = varName;
+			Format = format;
+		}
+
 
 		/// <summary>
 		/// Assigns a value for this variable
@@ -60,7 +84,11 @@ namespace NI.Data
 		/// <remarks>Assigned QVar can be used as QConst</remarks>
 		/// <param name="varValue">variable value</param>
 		public void Set(object varValue) {
-			_VarValue = varValue;
+			if (Format != null) {
+				_VarValue = String.Format(Format, varValue);
+			} else { 
+				_VarValue = varValue;
+			}
 			_isDefined = true;
 		}
 

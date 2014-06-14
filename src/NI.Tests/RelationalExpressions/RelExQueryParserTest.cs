@@ -147,9 +147,12 @@ namespace NI.Tests.Data.RelationalExpressions
 		[Test]
 		public void test_RelexVar() {
 			var relExParser = new RelExParser();
-			var cnd = relExParser.ParseCondition("\"hey\":var = \"hey\" ");
+			var cnd = relExParser.ParseCondition("\"hey:%{0}\":var = \"hey\" ");
 			Assert.IsTrue(cnd is QueryConditionNode);
 			Assert.IsTrue(((QueryConditionNode)cnd).LValue is QVar);
+			((QVar)((QueryConditionNode)cnd).LValue).Set("yeh");
+
+			Assert.AreEqual("\"%yeh\"=\"hey\"", new RelexBuilder().BuildRelex(cnd) );
 		}
 
 		protected QueryNode FindNodeByName(QueryNode node, string name) {

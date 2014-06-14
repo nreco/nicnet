@@ -15,6 +15,8 @@ namespace NI.Data {
 
 		protected string Template;
 
+		protected char[] ExtraNameChars = new [] {'_','-'};
+
 		public SimpleStringTemplate(string tpl) {
 			Template = tpl;
 		}
@@ -103,7 +105,7 @@ namespace NI.Data {
 			if (start >= s.Length || !Char.IsLetter(s[start]))
 				return null;
 			// rest of the name: letters or digits
-			while (start < s.Length && Char.IsLetterOrDigit(s[start]))
+			while (start < s.Length && (Char.IsLetterOrDigit(s[start]) || Array.IndexOf( ExtraNameChars, s[start])>=0 ) )
 				start++;
 
 			var name = s.Substring(newStart, start - newStart);
