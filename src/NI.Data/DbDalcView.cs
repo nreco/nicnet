@@ -82,7 +82,7 @@ namespace NI.Data
 		/// Performs default SQL template parsing that can handle simple code snippets
 		/// </summary>
 		protected string FormatSelectSql(ViewContext viewContext) {
-			var strTpl = new SimpleStringTemplate(SqlCommandTextTemplate);
+			var strTpl = new SimpleStringTemplate(SqlCommandTextTemplate,2);
 			var props = new Dictionary<string, object>();
 			foreach (var p in viewContext.GetType().GetProperties()) {
 				props[p.Name] = p.GetValue(viewContext, null);

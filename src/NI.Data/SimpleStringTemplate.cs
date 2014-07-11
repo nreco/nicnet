@@ -17,27 +17,46 @@ namespace NI.Data {
 
 		protected char[] ExtraNameChars = new [] {'_','-'};
 
+		public int RecursionLevel { get; private set; }
+
 		public SimpleStringTemplate(string tpl) {
 			Template = tpl;
+			RecursionLevel = 1;
+		}
+
+		public SimpleStringTemplate(string tpl, int recursionLevel) {
+			Template = tpl;
+			RecursionLevel = recursionLevel;
 		}
 
 		/// <summary>
 		/// Performs default SQL template parsing that can handle simple code snippets
 		/// </summary>
 		public string FormatTemplate(IDictionary<string,object> props) {
-
 			var sb = new StringBuilder();
-			var sqlTpl = Template;
+			string tpl = Template;
+			for (int i = 0; i < RecursionLevel; i++) {
+				if (ReplaceTokens(tpl, props, sb) == 0)
+					break;
+				tpl = sb.ToString();
+				sb.Clear();
+			}
+
+			return sb.ToString();
+		}
+
+		protected int ReplaceTokens(string tpl, IDictionary<string, object> props, StringBuilder sb) {
 			int pos = 0;
-			while (pos < sqlTpl.Length) {
-				var c = sqlTpl[pos];
+			int matchedTokensCount = 0;
+			while (pos < tpl.Length) {
+				var c = tpl[pos];
 				if (c == '@') {
 					int endPos;
-					var name = ReadName(sqlTpl, pos + 1, out endPos);
+					var name = ReadName(tpl, pos + 1, out endPos);
 					if (name != null) {
 						string[] formatOptions;
 						try {
-							formatOptions = ReadFormatOptions(sqlTpl, endPos, out endPos);
+							formatOptions = ReadFormatOptions(tpl, endPos, out endPos);
 						} catch (Exception ex) {
 							throw new Exception(String.Format("Parse error (format options of property {0}) at {1}: {2}",
 								name, pos, ex.Message), ex);
@@ -62,6 +81,7 @@ namespace NI.Data {
 							}
 						}
 						pos = endPos;
+						matchedTokensCount++;
 						continue;
 					}
 				}
@@ -69,7 +89,7 @@ namespace NI.Data {
 				pos++;
 			}
 
-			return sb.ToString();
+			return matchedTokensCount;
 		}
 
 		protected string[] ReadFormatOptions(string s, int start, out int newStart) {
