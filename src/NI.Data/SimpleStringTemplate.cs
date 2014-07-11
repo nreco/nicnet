@@ -36,10 +36,10 @@ namespace NI.Data {
 			var sb = new StringBuilder();
 			string tpl = Template;
 			for (int i = 0; i < RecursionLevel; i++) {
+				sb.Clear();
 				if (ReplaceTokens(tpl, props, sb) == 0)
 					break;
 				tpl = sb.ToString();
-				sb.Clear();
 			}
 
 			return sb.ToString();
@@ -88,7 +88,6 @@ namespace NI.Data {
 				sb.Append(c);
 				pos++;
 			}
-
 			return matchedTokensCount;
 		}
 

@@ -37,7 +37,7 @@ left join roles r on (u.role=r.id)
 
 			Dalc.CommandGenerator = new DbCommandGenerator(Dalc.DbFactory) {
 				Views = new[] {
-					new DbDalcView("users_view", usersViewSql, "u.*,r.role as role_name","count(u.id)") {
+					new DbDalcView("users_view", usersViewSql, "u.*,r.role as role_name@customParam[, {0}]","count(u.id)") {
 						FieldMapping = new Dictionary<string,string>() { {"role_name", "r.role"} }
 					}
 				}
@@ -106,8 +106,9 @@ left join roles r on (u.role=r.id)
 
 order by u.id desc".Trim()},
 
-				{new Query("users_view") { Sort = new QSort[] { "role_name desc" } }, @"
-select u.*,r.role as role_name from users u
+				{new Query("users_view") { Sort = new QSort[] { "role_name desc" }, 
+					ExtendedProperties = new Dictionary<string,object>() { {"customParam","u.id as u_id"} } }, @"
+select u.*,r.role as role_name, u.id as u_id from users u
 left join roles r on (u.role=r.id)
 
 order by r.role desc".Trim()},
