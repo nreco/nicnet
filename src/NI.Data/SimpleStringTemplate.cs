@@ -17,16 +17,20 @@ namespace NI.Data {
 
 		protected char[] ExtraNameChars = new [] {'_','-'};
 
-		public int RecursionLevel { get; private set; }
+		public int RecursionLevel { get; set; }
+
+		public bool ReplaceMissedTokens { get;set; }
 
 		public SimpleStringTemplate(string tpl) {
 			Template = tpl;
 			RecursionLevel = 1;
+			ReplaceMissedTokens = true;
 		}
 
 		public SimpleStringTemplate(string tpl, int recursionLevel) {
 			Template = tpl;
 			RecursionLevel = recursionLevel;
+			ReplaceMissedTokens = true;
 		}
 
 		/// <summary>
@@ -54,35 +58,37 @@ namespace NI.Data {
 					int endPos;
 					var name = ReadName(tpl, pos + 1, out endPos);
 					if (name != null) {
-						string[] formatOptions;
-						try {
-							formatOptions = ReadFormatOptions(tpl, endPos, out endPos);
-						} catch (Exception ex) {
-							throw new Exception(String.Format("Parse error (format options of property {0}) at {1}: {2}",
-								name, pos, ex.Message), ex);
-						}
-						object callRes;
-						try {
-							callRes = props.ContainsKey(name) ? props[name] : null;
-						} catch (Exception ex) {
-							throw new Exception(String.Format("Evaluation of property {0} at position {1} failed: {2}",
-								name, pos, ex.Message), ex);
-						}
-						if (callRes != NotApplicable) {
-							var fmtNotEmpty = formatOptions != null && formatOptions.Length > 0 ? formatOptions[0] : "{0}";
-							var fmtEmpty = formatOptions != null && formatOptions.Length > 1 ? formatOptions[1] : "";
+						if (ReplaceMissedTokens || props.ContainsKey(name)) {
+							object callRes;
 							try {
-								sb.Append(callRes != null && Convert.ToString(callRes) != String.Empty ?
-										String.Format(fmtNotEmpty, callRes) : String.Format(fmtEmpty, callRes)
-								);
+								callRes = props.ContainsKey(name) ? props[name] : null;
 							} catch (Exception ex) {
-								throw new Exception(String.Format("Format of property {0} at position {1} failed: {2}",
+								throw new Exception(String.Format("Evaluation of token {0} at position {1} failed: {2}",
 									name, pos, ex.Message), ex);
 							}
+							string[] formatOptions;
+							try {
+								formatOptions = ReadFormatOptions(tpl, endPos, out endPos);
+							} catch (Exception ex) {
+								throw new Exception(String.Format("Parse error (format options of token {0}) at {1}: {2}",
+									name, pos, ex.Message), ex);
+							}
+							if (!NotApplicable.Equals(callRes)) {
+								var fmtNotEmpty = formatOptions != null && formatOptions.Length > 0 ? formatOptions[0] : "{0}";
+								var fmtEmpty = formatOptions != null && formatOptions.Length > 1 ? formatOptions[1] : "";
+								try {
+									sb.Append(callRes != null && Convert.ToString(callRes) != String.Empty ?
+											String.Format(fmtNotEmpty, callRes) : String.Format(fmtEmpty, callRes)
+									);
+								} catch (Exception ex) {
+									throw new Exception(String.Format("Format of token {0} at position {1} failed: {2}",
+										name, pos, ex.Message), ex);
+								}
+							}
+							pos = endPos;
+							matchedTokensCount++;
+							continue;
 						}
-						pos = endPos;
-						matchedTokensCount++;
-						continue;
 					}
 				}
 				sb.Append(c);
