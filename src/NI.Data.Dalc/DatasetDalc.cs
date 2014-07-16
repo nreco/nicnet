@@ -79,8 +79,13 @@ namespace NI.Data.Dalc
 					ds.Tables[query.SourceName].Columns.Add(column);
 				}
 			}
-			for (int i=0; i<result.Length; i++)
-				ds.Tables[query.SourceName].ImportRow(result[i]);
+			var tbl = ds.Tables[query.SourceName];
+			for (int i=0; i<result.Length && tbl.Rows.Count<query.RecordCount; i++) {
+				if (i>=query.StartRecord) {
+					tbl.ImportRow(result[i]);
+				}
+			}
+
 		}
 		
 		/// <summary>
