@@ -124,7 +124,7 @@ namespace NI.Data {
 		/// Load all records by query
 		/// </summary>
 		/// <param name="q">query</param>
-		/// <returns></returns>
+		/// <returns>DataTable filled with data that matched specified query</returns>
 		public DataTable LoadAll(Query q) {
 			QTable source = new QTable(q.Table);
 			DataSet ds = CreateDataSet(source.Name);
@@ -139,8 +139,9 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="tableName">data table name</param>
 		/// <param name="pk">primary key value</param>
-		public void Delete(string tableName, object pk) {
-			Delete(tableName, new object[] { pk });
+		/// <returns>true if record deleted successfully</returns>
+		public bool Delete(string tableName, object pk) {
+			return Delete(tableName, new object[] { pk });
 		}
 
 		/// <summary>
@@ -148,22 +149,27 @@ namespace NI.Data {
 		/// </summary>
 		/// <param name="tableName">data table name</param>
 		/// <param name="pk">primary key values</param>
-		public void Delete(string tableName, params object[] pk) {
+		/// <returns>true if record deleted successfully</returns>
+		public bool Delete(string tableName, params object[] pk) {
 			DataRow r = Load(tableName, pk);
             if (r != null) {
                 Delete(r);
+				return true;
             }
+			return false;
 		}
 
 		/// <summary>
 		/// Delete all records matched by query
 		/// </summary>
 		/// <param name="q">query</param>
-        public void Delete(Query q) {
+		/// <returns>number of deleted records</returns>
+        public int Delete(Query q) {
             DataTable tbl = LoadAll(q);
 			foreach (DataRow r in tbl.Rows)
 				r.Delete();
 			Update(tbl);
+			return tbl.Rows.Count;
         }
 
 		/// <summary>

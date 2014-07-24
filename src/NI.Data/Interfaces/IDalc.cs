@@ -67,7 +67,8 @@ namespace NI.Data
 		/// <summary>
 		/// Delete data from dataset by query
 		/// </summary>
-		/// <param name="query"></param>
+		/// <param name="query">query that specifies data to delete</param>
+		/// <returns>number of deleted records</returns>
 		int Delete(Query query);
 		
 		
