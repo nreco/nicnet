@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 // associated with an assembly.
 //
 [assembly: AssemblyTitle("NI.Data")]
-[assembly: AssemblyDescription("Database intependent layer for accessing relational data. Includes abstract queries (RelEx), dataviews, triggers and permission rules.")]
+[assembly: AssemblyDescription("Fast and flexible DB-independent data layer for .NET. Supports abstract queries (RelEx), SQL-dataviews, triggers and query hooks.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NewtonIdeas")]
 [assembly: AssemblyProduct("Open NIC.NET")]
