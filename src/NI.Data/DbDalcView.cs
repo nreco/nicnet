@@ -38,26 +38,26 @@ namespace NI.Data
 		protected string SqlCommandTextTemplate { get; set; }
 		protected Func<ViewContext, string> GetSqlCommandText { get; set; }
 
-		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText) {
-			TableName = tableName;
-			GetSqlCommandText = getSqlCommandText;
-		}
-
 		public DbDalcView(string tableName, string sqlCommandTextTemplate) {
 			TableName = tableName;
 			SqlCommandTextTemplate = sqlCommandTextTemplate;
 		}
 
-		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText, string sqlFields, string sqlCountFields) {
+		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText) {
 			TableName = tableName;
 			GetSqlCommandText = getSqlCommandText;
-			SelectFields = sqlFields;
-			CountFields = sqlCountFields;
 		}
 
 		public DbDalcView(string tableName, string sqlCommandTextTemplate, string sqlFields, string sqlCountFields) {
 			TableName = tableName;
 			SqlCommandTextTemplate = sqlCommandTextTemplate;
+			SelectFields = sqlFields;
+			CountFields = sqlCountFields;
+		}
+
+		public DbDalcView(string tableName, Func<ViewContext, string> getSqlCommandText, string sqlFields, string sqlCountFields) {
+			TableName = tableName;
+			GetSqlCommandText = getSqlCommandText;
 			SelectFields = sqlFields;
 			CountFields = sqlCountFields;
 		}

@@ -39,7 +39,7 @@ namespace NI.Ioc
 		bool _CountersEnabled = false;
 		bool _ReflectionCacheEnabled = false;
 		CountersData counters = new CountersData();
-		static IComparer constructorInfoComparer = new ConstructorInfoComparer();
+		static IComparer<ConstructorInfo> constructorInfoComparer = new ConstructorInfoComparer();
 		static IDictionary<ReflectionPropertyCacheKey,ReflectionPropertyCacheValue> propertyInfoCache = new Dictionary<ReflectionPropertyCacheKey,ReflectionPropertyCacheValue>();
 		static IDictionary<Type,CreateObjectHandler> constructorInfoCache = new Dictionary<Type,CreateObjectHandler>();
 		
@@ -304,9 +304,17 @@ namespace NI.Ioc
 				} else {
 					// find appropriate constructor and create instance
 					ConstructorInfo[] constructors = componentInfo.ComponentType.GetConstructors();
-					// order is important only if at least one argument is present
-					if (constructors.Length>0 && componentInfo.ConstructorArgs!=null && componentInfo.ConstructorArgs.Length>0)
-						Array.Sort(constructors, constructorInfoComparer);
+					// order is important if at least one argument is present
+					if (constructors.Length > 0 && componentInfo.ConstructorArgs != null && componentInfo.ConstructorArgs.Length > 0) { 
+						var constructorsList = new List<ConstructorInfo>();
+						for (int i=0; i<constructors.Length; i++) {
+							var cArgs = constructors[i].GetParameters();
+							if (cArgs!=null && cArgs.Length == componentInfo.ConstructorArgs.Length)
+								constructorsList.Add(constructors[i]);
+						}
+						constructorsList.Sort( constructorInfoComparer );
+						constructors = constructorsList.ToArray();
+					}
 
 					Exception lastTryException = null;
 					foreach (ConstructorInfo constructor in constructors) {
@@ -420,10 +428,8 @@ namespace NI.Ioc
 			}
 		}
 
-		internal class ConstructorInfoComparer : IComparer {
-			public int Compare(object x, object y) {
-				ConstructorInfo c1 = (ConstructorInfo)x;
-				ConstructorInfo c2 = (ConstructorInfo)y;
+		internal class ConstructorInfoComparer : IComparer<ConstructorInfo> {
+			public int Compare(ConstructorInfo c1, ConstructorInfo c2) {
 				ParameterInfo[] c1Params = c1.GetParameters();
 				ParameterInfo[] c2Params = c2.GetParameters();
 				if (c1Params.Length != c2Params.Length)
@@ -438,6 +444,7 @@ namespace NI.Ioc
 				}
 				return 0;
 			}
+
 		}
 		
 		public class CountersData {
