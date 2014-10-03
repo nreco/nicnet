@@ -103,7 +103,7 @@ namespace NI.Data
 					res = String.Format("{0} LIKE {1}", lvalue, rvalue );
 					break;
 				case Conditions.In:
-					res = String.Format("{0} IN ({1})", lvalue, rvalue );
+					res = String.IsNullOrWhiteSpace(rvalue) ? "0=1" : String.Format("{0} IN ({1})", lvalue, rvalue );
 					break;
 				case Conditions.Null:
 					res = String.Format("{0} IS {1} NULL", lvalue, (node.Condition & Conditions.Not)!=0 ? "NOT" : "" );
