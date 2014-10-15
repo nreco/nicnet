@@ -132,9 +132,9 @@ namespace NI.Data.Storage {
 
 				}
 				translatedQuery.Sort = sortFields.ToArray();
-				translatedQuery.ExtendedProperties = new Dictionary<string,object>();
-				translatedQuery.ExtendedProperties["Joins"] = joinSb.ToString();
 			}
+			translatedQuery.ExtendedProperties = new Dictionary<string,object>();
+			translatedQuery.ExtendedProperties["Joins"] = joinSb.ToString();
 			translatedQuery.StartRecord = originalQuery.StartRecord;
 			translatedQuery.RecordCount = originalQuery.RecordCount;
 
