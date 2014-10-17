@@ -49,30 +49,10 @@ namespace NI.Data.Storage.Service.Schema {
 
 		public void GetObjectData(SerializationInfo info, StreamingContext context) {
 			foreach (var entry in Data) {
-				if (entry.Value==null || DBNull.Value.Equals(entry.Value))
+				if (entry.Value == null || DBNull.Value.Equals(entry.Value))
 					continue;
-				var val = entry.Value;
-				if (val is long) {
-					info.AddValue(entry.Key, (long)val);
-				} else if (val is int) {
-					info.AddValue(entry.Key, (int)val);
-				} else if (val is bool) {
-					info.AddValue(entry.Key, (bool)val);
-				} else if (val is DateTime) {
-					info.AddValue(entry.Key, ((DateTime)val).ToString("s"));
-				} else if (val is Double) {
-					info.AddValue(entry.Key, (double)val);
-				} else if (val is Single) {
-					info.AddValue(entry.Key, (float)val);
-				} else if (val is decimal) {
-					info.AddValue(entry.Key, (decimal)val);
-				} else {
-					if (val is IFormattable)
-						info.AddValue(entry.Key, ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture));
-					else
-						info.AddValue(entry.Key, val.ToString());
-				}
 
+				info.AddValue(entry.Key, entry.Value, entry.Value.GetType());
 			}
 		}
 

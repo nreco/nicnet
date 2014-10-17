@@ -25,23 +25,22 @@ using System.Threading.Tasks;
 
 namespace NI.Data.Storage.Service.Schema {
 
-	[DataContract(Name = "result")]
-	public class LoadRelexResult {
+	[DataContract(Name = "valuesResult")]
+	public class LoadValuesResult {
+
+		[DataMember(Name="columns")]
+		public string[] Columns {  get; set; }
 
 		[DataMember(Name = "data")]
-		public RowList Data { get; set; }
+		public IList<object[]> Data { get; set; }
 
 		[DataMember(Name = "totalcount", EmitDefaultValue=true)]
 		[DefaultValue(null)]
 		public int? TotalCount { get; set; }
 
-		public LoadRelexResult() {
+		public LoadValuesResult() {
 		}
 
 	}
-
-	[CollectionDataContract(ItemName = "row")]
-	public class RowList : List<DataRowItem> { }
-
 
 }

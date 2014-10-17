@@ -81,7 +81,7 @@ namespace NI.Data.Storage.Tests {
 			var webReq = WebRequest.Create(url) as HttpWebRequest;
 			webReq.Method = method;
 			webReq.ContentType = "text/json";// "application/xml";
-			webReq.Accept = "application/json";
+			webReq.Accept = "application/xml"; //"application/json";
 			if (postData!=null) {
 				using (var reqStream = webReq.GetRequestStream()) {
 					var wr = new StreamWriter(reqStream);
@@ -120,6 +120,7 @@ namespace NI.Data.Storage.Tests {
 		protected XmlNamespaceManager GetNsManager(XPathNavigator nav) {
 			var xmlNsMgr = new XmlNamespaceManager(nav.NameTable);
 			xmlNsMgr.AddNamespace("s", "http://schemas.datacontract.org/2004/07/NI.Data.Storage.Service.Schema");
+			xmlNsMgr.AddNamespace("a", "http://schemas.microsoft.com/2003/10/Serialization/Arrays");
 			return xmlNsMgr;
 		}
 
@@ -131,9 +132,9 @@ namespace NI.Data.Storage.Tests {
 		}
 
 		[Test]
-		public void Relex() {
+		public void LoadRows() {
 
-			var contactsRelexRes = GetUrl(baseUrl + "relex?q=contacts[*;id]");
+			var contactsRelexRes = GetUrl(baseUrl + "load/rows?q=contacts[*;id]");
 
 			Console.WriteLine(contactsRelexRes);
 
@@ -141,7 +142,7 @@ namespace NI.Data.Storage.Tests {
 			var contactsResNav = contactsResXmlDoc.CreateNavigator();
 			var contactsResNsMgr = GetNsManager(contactsResNav);
 
-			var contactsResRows = contactsResNav.Select("/s:result/s:data/s:row", contactsResNsMgr);
+			var contactsResRows = contactsResNav.Select("/s:rowsResult/s:data/s:row", contactsResNsMgr);
 			Assert.AreEqual(3, contactsResRows.Count);
 			var contactNames = new[] {"John","Mary","Bob"};
 			var contactIdx = 0;
@@ -151,6 +152,19 @@ namespace NI.Data.Storage.Tests {
 
 		}
 
+		[Test]
+		public void LoadValues() {
+			var contactsRelexRes = GetUrl(baseUrl + "load/values?q=contacts[*;id]");
+
+			Console.WriteLine(contactsRelexRes);
+
+			var contactsResXmlDoc = LoadXPathDoc(contactsRelexRes);
+			var contactsResNav = contactsResXmlDoc.CreateNavigator();
+			var contactsResNsMgr = GetNsManager(contactsResNav);
+
+			var contactsResValueArrays = contactsResNav.Select("/s:valuesResult/s:data/a:ArrayOfanyType/a:anyType", contactsResNsMgr);
+			Assert.AreEqual(3, contactsResValueArrays.Count);
+		}
 
 
 	}

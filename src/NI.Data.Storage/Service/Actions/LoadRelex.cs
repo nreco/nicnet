@@ -39,8 +39,8 @@ namespace NI.Data.Storage.Service.Actions {
 			StorageDalc = storageDalc;
 		}
 
-		public LoadRelexResult Execute(string relex, bool totalcount) {
-			var res = new LoadRelexResult();
+		public LoadRowsResult LoadRows(string relex, bool totalcount) {
+			var res = new LoadRowsResult();
 			var relexParser = new RelExParser();
 			var q = relexParser.Parse(relex);
 
@@ -58,6 +58,38 @@ namespace NI.Data.Storage.Service.Actions {
 			res.Data = data;
 			return res;
 		}
+
+		public LoadValuesResult LoadValues(string relex, bool totalcount) {
+			var res = new LoadValuesResult();
+			var relexParser = new RelExParser();
+			var q = relexParser.Parse(relex);
+
+			if (totalcount) {
+				res.TotalCount = StorageDalc.RecordsCount( q );
+			}
+
+			var ds = new DataSet();
+			var tbl = StorageDalc.Load(q, ds);
+			
+			var cols = new List<string>();
+			foreach (DataColumn c in tbl.Columns) {
+				cols.Add(c.ColumnName);
+			}
+			res.Columns = cols.ToArray();
+
+			var data = new List<object[]>();
+			foreach (DataRow r in tbl.Rows) {
+				var valuesArr = new object[r.ItemArray.Length];
+				for (int i = 0; i < valuesArr.Length; i++) {
+					var v = r.ItemArray[i];
+					valuesArr[i] = DBNull.Value.Equals(v) ? null : v;
+				}
+				data.Add(valuesArr);
+			}
+			res.Data = data;
+			return res;
+		}
+
 
 	}
 

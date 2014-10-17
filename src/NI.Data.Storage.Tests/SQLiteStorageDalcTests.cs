@@ -298,7 +298,7 @@ namespace NI.Data.Storage.Tests {
 			// sort by related field
 			var contactsByCompanyName = StorageContext.StorageDalc.LoadAllRecords( new Query("contacts") {
 				Sort = new[] { (QSort)"contacts_employee_companies.name asc" },
-				Fields = new [] { (QField)"name", (QField)"contacts_employee_companies.companies_country_countries.name" }
+				Fields = new [] { (QField)"id", (QField)"name", (QField)"contacts_employee_companies.companies_country_countries.name" }
 			});
 			Assert.AreEqual(3, contactsByCompanyName.Length);
 			Assert.AreEqual("Mary", contactsByCompanyName[0]["name"]);
@@ -343,6 +343,17 @@ namespace NI.Data.Storage.Tests {
 					Fields = new[] {(QField)"name"}
 				}
 			));
+
+			Console.WriteLine("**************");
+
+			// filter by id
+			Assert.AreEqual("Mary", StorageContext.StorageDalc.LoadValue(
+				new Query("contacts", (QField)"id"==new QConst(contactsByCompanyName[0]["id"]) ) {
+					Fields = new[] {(QField)"name"}
+				}
+			));
+
+
 		}
 
 	}

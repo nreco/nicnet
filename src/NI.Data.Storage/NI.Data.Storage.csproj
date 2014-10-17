@@ -64,7 +64,8 @@
     <Compile Include="Service\Actions\ChangeRow.cs" />
     <Compile Include="Service\Schema\DictionaryItem.cs" />
     <Compile Include="Service\Schema\GetDataSchemaResult.cs" />
-    <Compile Include="Service\Schema\LoadRelexResult.cs" />
+    <Compile Include="Service\Schema\LoadValuesResult.cs" />
+    <Compile Include="Service\Schema\LoadRowsResult.cs" />
     <Compile Include="Service\Schema\DataRowItem.cs" />
     <Compile Include="Service\Actions\LoadRelex.cs" />
     <Compile Include="Service\Actions\GetDataSchema.cs" />

@@ -37,13 +37,17 @@ namespace NI.Data.Storage.Service {
 		[Description("Get data schema (classes, properties)")]
 		GetDataSchemaResult GetDataSchema();
 
-		//TODO: rest service that reflects IObjectPersister for rest
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/load/rows?q={relex}&totalcount={totalcount}", Method = "GET")]
+		[FaultContract(typeof(ApiFault))]
+		[Description("Load storage data as rows collection by query (relex expression)")]
+		LoadRowsResult LoadRows(string relex, bool totalcount);
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/relex?q={relex}&totalcount={totalcount}", Method = "GET")]
+		[WebInvoke(UriTemplate = "/load/values?q={relex}&totalcount={totalcount}", Method = "GET")]
 		[FaultContract(typeof(ApiFault))]
-		[Description("Query storage data with relex expression")]
-		LoadRelexResult LoadRelex(string relex, bool totalcount);
+		[Description("Load storage data as values collection by query (relex expression)")]
+		LoadValuesResult LoadValues(string relex, bool totalcount);
 
 		[OperationContract]
 		[WebInvoke(UriTemplate = "/data/{tableName}/insert", Method = "POST")]

@@ -17,33 +17,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Runtime.Serialization;
 using System.Xml.Serialization;
+using System.Runtime.Serialization;
 using System.Data;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Globalization;
 
 namespace NI.Data.Storage.Service.Schema {
 
-	[Serializable]
-	public class DataRowItem : ISerializable {
-		DataRow DataRow;
+	[DataContract(Name = "rowsResult")]
+	public class LoadRowsResult {
 
-		public DataRowItem(DataRow r) {
-			DataRow = r;
-		}
+		[DataMember(Name = "data")]
+		public RowList Data { get; set; }
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context) {
-			foreach (DataColumn c in DataRow.Table.Columns) {
-				if (DataRow.IsNull(c)) { 
-					info.AddValue(c.ColumnName, null, c.DataType);
-				} else { 
-					var val = DataRow[c];
-					info.AddValue(c.ColumnName, val, c.DataType);
-				}
-			}
+		[DataMember(Name = "totalcount", EmitDefaultValue=true)]
+		[DefaultValue(null)]
+		public int? TotalCount { get; set; }
+
+		public LoadRowsResult() {
 		}
 
 	}
+
+	[CollectionDataContract(ItemName = "row")]
+	public class RowList : List<DataRowItem> { }
+
 
 }

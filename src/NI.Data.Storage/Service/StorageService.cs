@@ -46,9 +46,18 @@ namespace NI.Data.Storage.Service {
 			return new GetDataSchema(ProvideOntology()).Execute();
 		}
 
-		public LoadRelexResult LoadRelex(string relex, bool totalcount) {
+		public LoadRowsResult LoadRows(string relex, bool totalcount) {
 			try {
-				return new LoadRelex(ProvideOntology(), StorageDalc ).Execute(relex, totalcount); 
+				return new LoadRelex(ProvideOntology(), StorageDalc ).LoadRows(relex, totalcount); 
+			} catch (Exception ex) {
+				Console.WriteLine("RELEX ERROR: {0}", ex);
+				throw;
+			}
+		}
+
+		public LoadValuesResult LoadValues(string relex, bool totalcount) {
+			try {
+				return new LoadRelex(ProvideOntology(), StorageDalc ).LoadValues(relex, totalcount); 
 			} catch (Exception ex) {
 				Console.WriteLine("RELEX ERROR: {0}", ex);
 				throw;
