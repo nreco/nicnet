@@ -103,17 +103,17 @@ namespace NI.Data.Storage.Tests {
 
 			StorageContext.StorageDalc.Update(contactsTbl);
 			// should be 5 contacts
-			Assert.AreEqual(5, StorageContext.ObjectContainerStorage.ObjectsCount( new Query("contacts") ) );
+			Assert.AreEqual(5, StorageContext.ObjectContainerStorage.GetObjectsCount( new Query("contacts") ) );
 
 			// quick insert
 			StorageContext.StorageDalc.Insert("companies", new {
 				name = "TestCompany 1"
 			});
-			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("companies")));
+			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.GetObjectsCount(new Query("companies")));
 			StorageContext.StorageDalc.Insert("companies", new {
 				name = "TestCompany 2"
 			});
-			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("companies")));
+			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.GetObjectsCount(new Query("companies")));
 
 			// test insert relation using datarow
 			var rel = testSchema.FindRelationshipByID("contacts_employee_companies");
@@ -185,11 +185,11 @@ namespace NI.Data.Storage.Tests {
 
 			contactsTbl.Rows[0].Delete();
 			StorageContext.StorageDalc.Update(contactsTbl);
-			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.ObjectsCount( new Query("contacts") ) );
+			Assert.AreEqual(2, StorageContext.ObjectContainerStorage.GetObjectsCount( new Query("contacts") ) );
 
 			// delete by query
 			StorageContext.StorageDalc.Delete(new Query("contacts", (QField)"name" == new QConst(contactsTbl.Rows[0]["name"])));
-			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.ObjectsCount(new Query("contacts")));
+			Assert.AreEqual(1, StorageContext.ObjectContainerStorage.GetObjectsCount(new Query("contacts")));
 
 			// delete relation row
 			var rel = testSchema.FindRelationshipByID("contacts_employee_companies");
@@ -343,8 +343,6 @@ namespace NI.Data.Storage.Tests {
 					Fields = new[] {(QField)"name"}
 				}
 			));
-
-			Console.WriteLine("**************");
 
 			// filter by id
 			Assert.AreEqual("Mary", StorageContext.StorageDalc.LoadValue(

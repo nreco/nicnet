@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
@@ -68,24 +69,24 @@ namespace NI.Data.Storage.Service.Actions {
 				res.TotalCount = StorageDalc.RecordsCount( q );
 			}
 
-			var ds = new DataSet();
-			var tbl = StorageDalc.Load(q, ds);
-			
 			var cols = new List<string>();
-			foreach (DataColumn c in tbl.Columns) {
-				cols.Add(c.ColumnName);
-			}
-			res.Columns = cols.ToArray();
-
 			var data = new List<object[]>();
-			foreach (DataRow r in tbl.Rows) {
-				var valuesArr = new object[r.ItemArray.Length];
-				for (int i = 0; i < valuesArr.Length; i++) {
-					var v = r.ItemArray[i];
-					valuesArr[i] = DBNull.Value.Equals(v) ? null : v;
+			StorageDalc.ExecuteReader(q, (reader) => {
+				for (int i = 0; i < q.StartRecord; i++)
+					reader.Read(); // skip first N records				
+				for (int i = 0; i < reader.FieldCount; i++) {
+					 cols.Add( reader.GetName(i) );
 				}
-				data.Add(valuesArr);
-			}
+
+				while (reader.Read() && data.Count < q.RecordCount) {
+					var values = new object[reader.FieldCount];
+					// fetch all fields & values in hashtable
+					for (int i = 0; i < reader.FieldCount; i++)
+						values[i] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+					data.Add(values);
+				}
+			});
+			res.Columns = cols.ToArray();
 			res.Data = data;
 			return res;
 		}

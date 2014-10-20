@@ -11,7 +11,7 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
-	public class ObjectContainerSqlDalcStorage : ObjectContainerDalcStorage {
+	public class ObjectContainerSqlDalcStorage : ObjectContainerDalcStorage, ISqlObjectContainerStorage {
 
 		public string ObjectViewName { get; set; }
 		public string ObjectRelationViewName { get; set; }
@@ -47,102 +47,172 @@ namespace NI.Data.Storage {
 			}
 		}
 
-		protected override long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery, QSort[] sort) {
-			if (String.IsNullOrEmpty(ObjectViewName))
-				return base.LoadTranslatedQueryInternal(dataClass, translatedQuery, originalQuery, sort);
-			
+		public virtual void LoadObjectReader(Query q, Action<IDataReader> handler) {
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(q.Table.Name);
+			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+
+			var translatedQuery = new Query( new QTable( ObjectTableName, q.Table.Alias ) );
+			translatedQuery.StartRecord = q.StartRecord;
+			translatedQuery.RecordCount = q.RecordCount;
+			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
+
+			translatedQuery.Fields = q.Fields;
+			LoadObjectReaderInternal(dataClass, translatedQuery, q, handler);
+		}
+
+		protected virtual void LoadObjectReaderInternal(Class dataClass, Query translatedQuery, Query originalQuery, Action<IDataReader> handler) {
+			var sort = originalQuery.Sort;
+			var fields = translatedQuery.Fields;
+
 			translatedQuery.Table = (QTable)ObjectViewName;
 			var joinSb = new StringBuilder();
-			var sortFields = new List<QSort>();
-			if (sort!=null && sort.Length>0) {
-				var objTableAlias = originalQuery.Table.Alias ?? ObjectTableName;
-				foreach (var origSort in sort) {
-					if (origSort.Field.Prefix!=null && origSort.Field.Prefix!=originalQuery.Table.Alias) {
-						// related field?
-						var relationship = dataClass.Schema.FindRelationshipByID(origSort.Field.Prefix);
-						if (relationship==null)
-							relationship = dataClass.Schema.InferRelationshipByID(origSort.Field.Prefix, dataClass);
+			
+			var joinFieldMap = new Dictionary<string, string>();
+			var knownFieldTypes = new Dictionary<string,Type>();
+			var objTableAlias = originalQuery.Table.Alias ?? ObjectTableName;
 
-						if (relationship!=null) {
-							if (!relationship.Inferred && relationship.Object==dataClass) {
-								var revRelationship = dataClass.FindRelationship(relationship.Predicate, relationship.Subject, true);
-								if (revRelationship == null)
-									throw new ArgumentException(
-										String.Format("Relationship {0} cannot be used in reverse direction", relationship.ID));
-								relationship = revRelationship;
-							}
+			Action<QField> ensureFieldJoin = (fld) => {
+				if (joinFieldMap.ContainsKey(fld.ToString()))
+					return;
+				if (fld.Prefix!=null && fld.Prefix!=originalQuery.Table.Alias) {
+					// related field?
+					var relationship = dataClass.Schema.FindRelationshipByID(fld.Prefix);
+					if (relationship==null)
+						relationship = dataClass.Schema.InferRelationshipByID(fld.Prefix, dataClass);
 
-							if (relationship.Subject!=dataClass)
+					//TBD: prevent duplicate join
+
+					if (relationship!=null) {
+						if (!relationship.Inferred && relationship.Object==dataClass) {
+							var revRelationship = dataClass.FindRelationship(relationship.Predicate, relationship.Subject, true);
+							if (revRelationship == null)
 								throw new ArgumentException(
-									String.Format("Relationship {0} cannot be used with {1}", relationship.ID, dataClass.ID));								
+									String.Format("Relationship {0} cannot be used in reverse direction", relationship.ID));
+							relationship = revRelationship;
+						}
 
+						if (relationship.Subject!=dataClass)
+							throw new ArgumentException(
+								String.Format("Relationship {0} cannot be used with {1}", relationship.ID, dataClass.ID));								
 								
-							var p = relationship.Object.FindPropertyByID(origSort.Field.Name);
-							if (p==null)
-								throw new ArgumentException(
-									String.Format("Sort field {0} referenced by relationship {1} doesn't exist",
-										origSort.Field.Name, origSort.Field.Prefix));
-							if (p.Multivalue)
-								throw new ArgumentException(
-									String.Format("Cannot sort by multivalue property {0}", p.ID));
+						var p = relationship.Object.FindPropertyByID(fld.Name);
+						if (p==null)
+							throw new ArgumentException(
+								String.Format("Sort field {0} referenced by relationship {1} doesn't exist",
+									fld.Name, fld.Prefix));
+						if (p.Multivalue)
+							throw new ArgumentException(
+								String.Format("Cannot join multivalue property {0}", p.ID));
 
-							// matched related object property
-							if (relationship.Multiplicity)
-								throw new ArgumentException(
-									String.Format("Sorting by relationship {0} is not possible because of multiplicity", origSort.Field.Prefix));									
+						// matched related object property
+						if (relationship.Multiplicity)
+							throw new ArgumentException(
+								String.Format("Join by relationship {0} is not possible because of multiplicity", fld.Prefix));									
 									
-							var propTblName = DataTypeTableNames[p.DataType.ID];
-							var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
+						var propTblName = DataTypeTableNames[p.DataType.ID];
+						var propTblAlias = propTblName+"_"+joinFieldMap.Count.ToString();
 
-							var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propTblAlias, String.Format("{0}.id", objTableAlias),
-									relationship.Inferred ? relationship.InferredByRelationships : new[]{ relationship } );
+						var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propTblAlias, String.Format("{0}.id", objTableAlias),
+								relationship.Inferred ? relationship.InferredByRelationships : new[]{ relationship } );
 
-							if (p.PrimaryKey) {
-								sortFields.Add(new QSort(lastRelObjIdFld, origSort.SortDirection));
-							} else {
-								sortFields.Add(new QSort(propTblAlias + ".value", origSort.SortDirection));
-								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
-									propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
-							}
-
-							continue;
+						if (p.PrimaryKey) {
+							joinFieldMap[ fld.ToString() ] = lastRelObjIdFld;
+						} else {
+							joinFieldMap[ fld.ToString() ] = propTblAlias + ".value";
+							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
+								propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
 						}
+						knownFieldTypes[ fld.ToString().Replace('.','_') ] = p.DataType.ValueType;
+
+						return;
 					}
+				}
+				if (fld.Prefix==null || fld.Prefix==originalQuery.Table.Alias) {
+					var objProp = dataClass.FindPropertyByID(fld);
+					if (objProp!=null) {
+						if (objProp.Multivalue)
+							throw new ArgumentException("Cannot join mulivalue property");
 
-					if (origSort.Field.Prefix==null || origSort.Field.Prefix==originalQuery.Table.Alias) {
-						var p = dataClass.FindPropertyByID(origSort.Field);
-						if (p!=null) {
-							if (p.Multivalue)
-								throw new ArgumentException("Cannot sort by mulivalue property");
-
-							if (p.PrimaryKey) {
-								sortFields.Add(new QSort( String.Format("{0}.id", objTableAlias), origSort.SortDirection));
-							} else {
-								var propTblName = DataTypeTableNames[p.DataType.ID];
-								var propTblAlias = propTblName+"_"+sortFields.Count.ToString();
-								sortFields.Add( new QSort( propTblAlias+".value", origSort.SortDirection ) );
-								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
-									propTblName, propTblAlias, objTableAlias, p.CompactID);
-							}
-							continue;
+						if (objProp.PrimaryKey) {
+							joinFieldMap[ fld.ToString() ] = String.Format("{0}.id", objTableAlias);
+						} else {
+							var propTblName = DataTypeTableNames[objProp.DataType.ID];
+							var propTblAlias = propTblName+"_"+joinFieldMap.Count.ToString();
+							joinFieldMap[ fld.ToString() ] = propTblAlias+".value";
+							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
+								propTblName, propTblAlias, objTableAlias, objProp.CompactID);
 						}
+						knownFieldTypes[ fld.ToString().Replace('.','_') ] = objProp.DataType.ValueType;
+						return;
 					}
+				}
+			};
 
-					sortFields.Add(origSort);
 
+			var selectFields = new List<QField>();
+			var sortFields = new List<QSort>();
+
+			if (sort!=null && sort.Length>0) {
+				foreach (var origSort in sort) {
+					ensureFieldJoin(origSort.Field);
+					if (joinFieldMap.ContainsKey(origSort.Field.ToString())) { 
+						sortFields.Add(new QSort(joinFieldMap[origSort.Field.ToString()], origSort.SortDirection));
+					} else {
+						sortFields.Add(origSort);
+					}
 				}
 				translatedQuery.Sort = sortFields.ToArray();
 			}
+			if (fields==null || fields.Length==0) {
+				fields = dataClass.Properties.Select(p => new QField(p.ID) ).ToArray();
+			}
+
+			foreach (var f in fields) {
+				ensureFieldJoin(f);
+				var fldName = f.ToString();
+				if (joinFieldMap.ContainsKey(fldName)) { 
+					selectFields.Add(new QField(fldName.Replace('.','_'), joinFieldMap[fldName]));
+				} else {
+					selectFields.Add(f);
+				}
+			}
+
+			translatedQuery.Fields = selectFields.ToArray();
 			translatedQuery.ExtendedProperties = new Dictionary<string,object>();
 			translatedQuery.ExtendedProperties["Joins"] = joinSb.ToString();
 			translatedQuery.StartRecord = originalQuery.StartRecord;
 			translatedQuery.RecordCount = originalQuery.RecordCount;
 
-			var idValues = DbMgr.Dalc.LoadAllValues( translatedQuery );
-			var ids = new long[idValues.Length];
-			for (int i=0; i<ids.Length; i++)
-				ids[i] =  Convert.ToInt64(idValues[i]);
-			return ids;
+			DbMgr.Dalc.ExecuteReader(translatedQuery, (reader) => {
+				var valueTypes = new Type[reader.FieldCount];
+				for (int i = 0; i < reader.FieldCount; i++) {
+					var fldName = reader.GetName(i);
+					if (knownFieldTypes.ContainsKey(fldName))
+						valueTypes[i] = knownFieldTypes[fldName];
+					else
+						valueTypes[i] = null;
+				}
+					
+				handler( new DbReaderWrapper(reader,valueTypes) );	
+			});
+		}
+
+		protected override long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery) {
+			if (String.IsNullOrEmpty(ObjectViewName))
+				return base.LoadTranslatedQueryInternal(dataClass, translatedQuery, originalQuery);
+
+			var ids = new List<long>();
+			LoadObjectReaderInternal(dataClass, translatedQuery, originalQuery, (reader) => {
+				int index = 0;
+				while (reader.Read() && ids.Count < translatedQuery.RecordCount ) {
+					if (index>=translatedQuery.StartRecord) {
+						ids.Add( Convert.ToInt64( reader.FieldCount>1 ? reader[translatedQuery.Fields[0].Name] : reader[0] ) );
+					}
+					index++;
+				}
+			});
+			return ids.ToArray();
 		}
 
 		protected string GenerateRelationshipJoins(StringBuilder sqlBuilder, string joinTblPrefix, string subjIdFld, IEnumerable<Relationship> rels) {
@@ -161,6 +231,164 @@ namespace NI.Data.Storage {
 			}
 			return lastRelObjIdFld;
 		}
+
+		internal class DbReaderWrapper : IDataReader {
+			IDataReader DbReader;
+			Type[] KnownTypes;
+
+			internal DbReaderWrapper(IDataReader reader, Type[] knownTypes) {
+				DbReader = reader;
+				KnownTypes = knownTypes;
+			}
+
+			public void Close() {
+				DbReader.Close();
+			}
+
+			public int Depth {
+				get { return DbReader.Depth; }
+			}
+
+			public DataTable GetSchemaTable() {
+				return DbReader.GetSchemaTable();
+			}
+
+			public bool IsClosed {
+				get { return DbReader.IsClosed; }
+			}
+
+			public bool NextResult() {
+				return DbReader.NextResult();
+			}
+
+			public bool Read() {
+				return DbReader.Read();
+			}
+
+			public int RecordsAffected {
+				get { return DbReader.RecordsAffected; }
+			}
+
+			public void Dispose() {
+				DbReader.Dispose();
+			}
+
+			public int FieldCount {
+				get { return DbReader.FieldCount; }
+			}
+
+			public bool GetBoolean(int i) {
+				return DbReader.GetBoolean(i);
+			}
+
+			public byte GetByte(int i) {
+				return DbReader.GetByte(i);
+			}
+
+			public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) {
+				return DbReader.GetBytes(i,fieldOffset,buffer,bufferoffset,length);
+			}
+
+			public char GetChar(int i) {
+				return DbReader.GetChar(i);
+			}
+
+			public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) {
+				return DbReader.GetChars(i,fieldoffset, buffer, bufferoffset,length);
+			}
+
+			public IDataReader GetData(int i) {
+				return DbReader.GetData(i);
+			}
+
+			public string GetDataTypeName(int i) {
+				return DbReader.GetDataTypeName(i);
+			}
+
+			public DateTime GetDateTime(int i) {
+				return DbReader.GetDateTime(i);
+			}
+
+			public decimal GetDecimal(int i) {
+				return DbReader.GetDecimal(i);
+			}
+
+			public double GetDouble(int i) {
+				return DbReader.GetDouble(i);
+			}
+
+			public Type GetFieldType(int i) {
+				return DbReader.GetFieldType(i);
+			}
+
+			public float GetFloat(int i) {
+				return DbReader.GetFloat(i);
+			}
+
+			public Guid GetGuid(int i) {
+				return DbReader.GetGuid(i);
+			}
+
+			public short GetInt16(int i) {
+				return DbReader.GetInt16(i);
+			}
+
+			public int GetInt32(int i) {
+				return DbReader.GetInt32(i);
+			}
+
+			public long GetInt64(int i) {
+				return DbReader.GetInt64(i);
+			}
+
+			public string GetName(int i) {
+				return DbReader.GetName(i);
+			}
+
+			public int GetOrdinal(string name) {
+				return DbReader.GetOrdinal(name);
+			}
+
+			public string GetString(int i) {
+				return DbReader.GetString(i);
+			}
+
+			object PrepareValue(object v, int i) {
+				if (v != null && !DBNull.Value.Equals(v) && KnownTypes[i] != null && !KnownTypes[i].IsInstanceOfType(v) ) {
+					return Convert.ChangeType(v, KnownTypes[i]);
+				} else {
+					return v;
+				}
+			}
+
+			public object GetValue(int i) {
+				var v = DbReader.GetValue(i);
+				return PrepareValue(v,i);
+			}
+
+			public int GetValues(object[] values) {
+				var res = DbReader.GetValues(values);
+				for (int i=0; i<res; i++)
+					values[i] = PrepareValue(values[i], i);
+				return res;
+			}
+
+			public bool IsDBNull(int i) {
+				return DbReader.IsDBNull(i);
+			}
+
+			public object this[string name] {
+				get { 
+					var fldIdx = DbReader.GetOrdinal(name);
+					return GetValue(fldIdx); 
+				}
+			}
+
+			public object this[int i] {
+				get { return GetValue(i); }
+			}
+		}
+		
 
 	}
 }

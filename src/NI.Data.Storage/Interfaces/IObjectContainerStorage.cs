@@ -43,8 +43,8 @@ namespace NI.Data.Storage {
 
 		IEnumerable<ObjectRelation> LoadRelations(Query q);
 		
-		long[] ObjectIds(Query q);
-		int ObjectsCount(Query q);
+		long[] GetObjectIds(Query q);
+		int GetObjectsCount(Query q);
 
 	}
 }

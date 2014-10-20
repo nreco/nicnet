@@ -824,7 +824,7 @@ namespace NI.Data.Storage {
 		}
 
 
-		public long[] ObjectIds(Query q) {
+		public long[] GetObjectIds(Query q) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
 			var qTranslator = new DalcStorageQueryTranslator(schema, this );
@@ -835,10 +835,11 @@ namespace NI.Data.Storage {
 			translatedQuery.Condition = TranslateQueryCondition(dataClass, schema, q.Condition);
 
 			translatedQuery.Fields = new[] { new QField(q.Table.Alias, "id", null) };
-			return LoadTranslatedQueryInternal(dataClass, translatedQuery, q, q.Sort );
+			return LoadTranslatedQueryInternal(dataClass, translatedQuery, q);
 		}
 
-		protected virtual long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery, QSort[] sort) {
+		protected virtual long[] LoadTranslatedQueryInternal(Class dataClass, Query translatedQuery, Query originalQuery) {
+			var sort = originalQuery.Sort;
 			var applySort = sort!=null && sort.Length>0;
 			var ids = new List<long>();
 			if (applySort) {
@@ -879,7 +880,7 @@ namespace NI.Data.Storage {
 			return idsArr;
 		}
 
-		public int ObjectsCount(Query q) {
+		public int GetObjectsCount(Query q) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
 			var translatedQuery = new Query(new QTable(ObjectTableName, q.Table.Alias));

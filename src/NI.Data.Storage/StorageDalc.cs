@@ -100,7 +100,7 @@ namespace NI.Data.Storage
 				var t = ds.Tables.Add(query.Table.Name);
 				t.Columns.Add("count", typeof(int));
 				var cntRow = t.NewRow();
-				cntRow["count"] = ObjectContainerStorage.ObjectsCount(query);
+				cntRow["count"] = ObjectContainerStorage.GetObjectsCount(query);
 				t.Rows.Add(cntRow);
 				return t;
 			}
@@ -181,7 +181,7 @@ namespace NI.Data.Storage
 					}
 				}
 
-			var ids = ObjectContainerStorage.ObjectIds(query);
+			var ids = ObjectContainerStorage.GetObjectIds(query);
 			var objects = ObjectContainerStorage.Load(ids, propsToLoad.ToArray());
 			
 			IDictionary<long,ObjectContainer> relatedObjects = null;
@@ -246,22 +246,30 @@ namespace NI.Data.Storage
 			return newArr;
 		}
 
-
 		public void ExecuteReader(Query q, Action<IDataReader> handler) {
-			var ds = new DataSet();
 			var internalQuery = new Query(q);
 			internalQuery.StartRecord = 0;
 			if (q.RecordCount<Int32.MaxValue)
 				internalQuery.RecordCount = q.StartRecord + q.RecordCount;
-			Load(internalQuery, ds);  // todo - avoid intermediate table?
-			handler( new DataTableReader(ds.Tables[q.Table.Name]) );
+
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(q.Table.Name);
+
+			if (ObjectContainerStorage is ISqlObjectContainerStorage && dataClass!=null) {
+				var sqlStorage = (ISqlObjectContainerStorage)ObjectContainerStorage;
+				sqlStorage.LoadObjectReader(internalQuery, handler);
+			} else {
+				var ds = new DataSet();
+				Load(internalQuery, ds);  // todo - avoid intermediate table?
+				handler( new DataTableReader(ds.Tables[q.Table.Name]) );
+			}
 		}
 
 		public int Delete(Query query) {
 			var srcName = new QTable(query.Table.Name);
 			var dataClass = GetSchema().FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-				var ids = ObjectContainerStorage.ObjectIds(query);
+				var ids = ObjectContainerStorage.GetObjectIds(query);
 				return ObjectContainerStorage.Delete(ids);
 			}
 			return UnderlyingDalc.Delete(query);
@@ -317,7 +325,7 @@ namespace NI.Data.Storage
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(query.Table.Name);
 			if (dataClass!=null) {
-				var affectedObjIds = ObjectContainerStorage.ObjectIds( query );
+				var affectedObjIds = ObjectContainerStorage.GetObjectIds( query );
 				foreach (var objId in affectedObjIds) {
 					var obj = new ObjectContainer(dataClass, objId);
 					foreach (var entry in data) {

@@ -162,7 +162,7 @@ namespace NI.Data.Storage.Tests {
 			var contactsResNav = contactsResXmlDoc.CreateNavigator();
 			var contactsResNsMgr = GetNsManager(contactsResNav);
 
-			var contactsResValueArrays = contactsResNav.Select("/s:valuesResult/s:data/a:ArrayOfanyType/a:anyType", contactsResNsMgr);
+			var contactsResValueArrays = contactsResNav.Select("/s:valuesResult/s:data/a:ArrayOfanyType", contactsResNsMgr);
 			Assert.AreEqual(3, contactsResValueArrays.Count);
 		}
 

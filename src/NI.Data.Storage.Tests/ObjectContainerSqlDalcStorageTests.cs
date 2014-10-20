@@ -55,13 +55,13 @@ namespace NI.Data.Storage.Tests {
 				t.Complete();
 			}
 
-			Assert.AreEqual(100, StorageContext.ObjectContainerStorage.ObjectsCount( new Query("contacts") ) );
+			Assert.AreEqual(100, StorageContext.ObjectContainerStorage.GetObjectsCount( new Query("contacts") ) );
 
 			var selectWithSortQuery = new Query("contacts", (QField)"is_primary" == new QConst(true) ) {
 				Sort = new[] { new QSort("birthday", System.ComponentModel.ListSortDirection.Descending) }
 			}; 
 
-			var contactIds = StorageContext.ObjectContainerStorage.ObjectIds( selectWithSortQuery );
+			var contactIds = StorageContext.ObjectContainerStorage.GetObjectIds( selectWithSortQuery );
 			Assert.AreEqual( 10, contactIds.Length );
 			Assert.AreEqual( 91, contactIds[0] );
 			Assert.AreEqual( 1, contactIds[9] );

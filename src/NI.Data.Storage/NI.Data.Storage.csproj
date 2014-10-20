@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IDataSchemaStorage.cs" />
+    <Compile Include="Interfaces\ISqlObjectContainerStorage.cs" />
     <Compile Include="Interfaces\IObjectContainerStorage.cs" />
     <Compile Include="Model\Class.cs" />
     <Compile Include="Model\ClassPropertyLocation.cs" />
