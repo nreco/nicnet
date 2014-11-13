@@ -8,3 +8,8 @@
 /examples/NI.Examples.suo
 /src/NI.Data.Dalc.SQLite/bin
 /src/NI.Data.Dalc.SQLite/obj
+/src/*/bin/*/*.*
+/src/*/*/bin/*/*.*
+/src/*/obj/*/*.*
+/src/*/*/obj/*/*.*
+/src/*.suo
