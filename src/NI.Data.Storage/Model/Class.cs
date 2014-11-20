@@ -29,7 +29,7 @@ namespace NI.Data.Storage.Model {
 
 		public string ID { get; set; }
 
-		public int CompactID { get; set; }
+		public long CompactID { get; set; }
 
 		public string Name { get; set; }
 

@@ -22,9 +22,12 @@ using System.Threading.Tasks;
 namespace NI.Data.Storage.Model {
     
     public class DataSchema {
-        
-        public IEnumerable<Class> Classes { get; private set; }
-        public IEnumerable<Property> Properties { get; private set; }
+
+		List<Class> ClassesList { get; set; }
+        public IEnumerable<Class> Classes { get { return ClassesList.AsReadOnly(); } }
+
+		List<Property> PropertiesList { get; set; }
+		public IEnumerable<Property> Properties { get { return PropertiesList.AsReadOnly(); } }
         
 		public IEnumerable<Relationship> Relationships {
 			get { return RelationshipList; }
@@ -34,19 +37,33 @@ namespace NI.Data.Storage.Model {
 
 		IDictionary<string, Class> ClassById = null;
 		IDictionary<string, Property> PropertyById = null;
-		IDictionary<int, Class> ClassByCompactId = null;
-		IDictionary<int, Property> PropertyByCompactId = null;
+		IDictionary<long, Class> ClassByCompactId = null;
+		IDictionary<long, Property> PropertyByCompactId = null;
 		IDictionary<string, List<Class>> ClassesByPropertyId = null;
 		IDictionary<string, List<Property>> PropertiesByClassId = null;
 		IDictionary<string, IDictionary<string, ClassPropertyLocation>> ValueLocationByPropertyClass = null;
 		IDictionary<string, List<Relationship>> RelationshipsByClassId = null;
 		IDictionary<string, Relationship> RelationshipById = null;
 
+		public DataSchema() : this(null,null) {
+		}
+
         public DataSchema(IEnumerable<Class> classes, IEnumerable<Property> props) {
-            Classes = classes;
-            Properties = props;
-			BuildClassIndex();
-			BuildPropertyIndex();
+            ClassesList = new List<Class>();
+			ClassById = new Dictionary<string, Class>();
+			ClassByCompactId = new Dictionary<long, Class>();
+			if (classes!=null)
+				foreach (var c in classes) {
+					AddClass(c);
+				}
+
+            PropertiesList = new List<Property>();
+			PropertyById = new Dictionary<string, Property>();
+			PropertyByCompactId = new Dictionary<long, Property>();
+			if (props!=null)
+				foreach (var p in props) {
+					AddProperty(p);
+				}
 
 			ClassesByPropertyId = new Dictionary<string, List<Class>>();
 			PropertiesByClassId = new Dictionary<string, List<Property>>();
@@ -79,24 +96,31 @@ namespace NI.Data.Storage.Model {
 			ValueLocationByPropertyClass[ classProp.Property.ID ][ classProp.Class.ID ] = classProp;
 		}
 
-		protected void BuildClassIndex() {
-			ClassById = new Dictionary<string, Class>();
-			ClassByCompactId = new Dictionary<int, Class>();
-			foreach (var c in Classes) {
-				c.Schema = this;
-				ClassById[c.ID] = c;
-				ClassByCompactId[c.CompactID] = c;
-			}
+		public void AddClass(Class c) {
+			if (ClassById.ContainsKey(c.ID))
+				throw new InvalidOperationException(String.Format("Class with ID={0} already exists",c.ID));
+			if (ClassByCompactId.ContainsKey(c.CompactID)) 
+				throw new InvalidOperationException(String.Format("Class with CompactID={0} already exists",c.ID));
+			
+			ClassById[c.ID] = c;
+			ClassByCompactId[c.CompactID] = c;
+
+			ClassesList.Add(c);
+			c.Schema = this;
 		}
 
-		protected void BuildPropertyIndex() {
-			PropertyById = new Dictionary<string, Property>();
-			PropertyByCompactId = new Dictionary<int, Property>();
-			foreach (var p in Properties) {
-				p.Schema = this;
-				PropertyById[p.ID] = p;
-				PropertyByCompactId[p.CompactID] = p;
-			}
+
+		public void AddProperty(Property p) {
+			if (PropertyById.ContainsKey(p.ID))
+				throw new InvalidOperationException(String.Format("Property with ID={0} already exists",p.ID));
+			if (PropertyByCompactId.ContainsKey(p.CompactID)) 
+				throw new InvalidOperationException(String.Format("Property with CompactID={0} already exists",p.ID));
+
+			PropertyById[p.ID] = p;
+			PropertyByCompactId[p.CompactID] = p;
+
+			PropertiesList.Add(p);
+			p.Schema = this;
 		}
 
 		public IEnumerable<Property> FindPropertyByClassID(string classId) {
@@ -132,7 +156,7 @@ namespace NI.Data.Storage.Model {
 			return ClassById.ContainsKey(id) ? ClassById[id] : null;
 		}
 
-		internal Class FindClassByCompactID(int compactId) {
+		internal Class FindClassByCompactID(long compactId) {
 			return ClassByCompactId.ContainsKey(compactId) ? ClassByCompactId[compactId] : null;
 		}
 
@@ -140,7 +164,7 @@ namespace NI.Data.Storage.Model {
 			return PropertyById.ContainsKey(id) ? PropertyById[id] : null;
 		}
 
-		internal Property FindPropertyByCompactID(int id) {
+		internal Property FindPropertyByCompactID(long id) {
 			return PropertyByCompactId.ContainsKey(id) ? PropertyByCompactId[id] : null;
 		}
 

@@ -172,13 +172,13 @@ namespace NI.Data.Storage {
 
 		protected void SaveValues(ObjectContainer obj) {
 			// determine values to load
-			var propSrcNameProps = new Dictionary<string, IList<int>>();
+			var propSrcNameProps = new Dictionary<string, IList<long>>();
 			foreach (var v in obj) {
 				EnsureKnownDataType(v.Key.DataType.ID);
 				var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
 
 				if (!propSrcNameProps.ContainsKey(valueSrcName))
-					propSrcNameProps[valueSrcName] = new List<int>();
+					propSrcNameProps[valueSrcName] = new List<long>();
 
 				if (!propSrcNameProps[valueSrcName].Contains(v.Key.CompactID))
 					propSrcNameProps[valueSrcName].Add(v.Key.CompactID);
@@ -308,7 +308,7 @@ namespace NI.Data.Storage {
 			var loadWithoutProps = props!=null && props.Length==0;
 
 			var dataSchema = GetSchema();
-			var valueSourceNames = new Dictionary<string,List<int>>();
+			var valueSourceNames = new Dictionary<string,List<long>>();
 
 			// construct object containers + populate source names for values to load
 			foreach (var batchIds in SliceBatchIds(ids, QueryBatchSize)) {
@@ -331,7 +331,7 @@ namespace NI.Data.Storage {
 								EnsureKnownDataType(p.DataType.ID);
 								var pSrcName = DataTypeTableNames[p.DataType.ID];
 								if (!valueSourceNames.ContainsKey(pSrcName))
-									valueSourceNames[pSrcName] = new List<int>();
+									valueSourceNames[pSrcName] = new List<long>();
 
 								if (!valueSourceNames[pSrcName].Contains(p.CompactID))
 									valueSourceNames[pSrcName].Add(p.CompactID);
@@ -892,7 +892,7 @@ namespace NI.Data.Storage {
 		protected QueryNode TranslateQueryCondition(Class dataClass, DataSchema schema, QueryNode condition) {
 			var conditionGrp = QueryGroupNode.And();
 			conditionGrp.Nodes.Add(
-				(QField)"compact_class_id" == (QConst)dataClass.CompactID
+				(QField)"compact_class_id" == new QConst(dataClass.CompactID)
 			);
 			var qTranslator = new DalcStorageQueryTranslator(schema, this);
 			if (condition != null)

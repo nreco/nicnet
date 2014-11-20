@@ -19,7 +19,9 @@ namespace NI.Data.Storage.Tests {
 
 		[SetUp]
 		public void SetUp() {
-			StorageContext = new SQLiteStorageContext();
+			StorageContext = new SQLiteStorageContext( (StorageDbMgr, ObjectContainerStorage) => {
+				return new MetadataTableSchemaStorage(StorageDbMgr);	
+			});
 			StorageContext.CreateTestDataSchema();
 
 			Logger.SetInfo((t, msg) => {

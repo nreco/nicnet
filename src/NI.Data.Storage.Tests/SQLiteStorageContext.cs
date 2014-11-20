@@ -37,11 +37,11 @@ namespace NI.Data.Storage.Tests {
 		string dbFileName;
 		public DataRowDalcMapper StorageDbMgr;
 		public IObjectContainerStorage ObjectContainerStorage;
-		public DataSchemaDalcStorage DataSchemaStorage;
+		public IDataSchemaStorage DataSchemaStorage;
 		public IDalc StorageDalc;
 
-		public SQLiteStorageContext() {
-			dbFileName = Path.GetTempFileName() + ".db";
+		public SQLiteStorageContext(Func<DataRowDalcMapper, IObjectContainerStorage, IDataSchemaStorage> getSchemaStorage) {
+			dbFileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".db" );
 			var connStr = String.Format("Data Source={0};FailIfMissing=false;Pooling=False;", dbFileName);
 			var sqliteDalcFactory = new SQLiteDalcFactory();
 			Connection = sqliteDalcFactory.CreateConnection();
@@ -77,8 +77,10 @@ namespace NI.Data.Storage.Tests {
 			InitDbSchema();
 
 			StorageDbMgr = new DataRowDalcMapper(InternalDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
-			DataSchemaStorage = new DataSchemaDalcStorage(StorageDbMgr);
-			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, DataSchemaStorage.GetSchema);
+
+			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, () => { return DataSchemaStorage.GetSchema(); } );
+			DataSchemaStorage = getSchemaStorage(StorageDbMgr, objStorage);
+
 			objStorage.ObjectViewName = "objects_view";
 			objStorage.ObjectRelationViewName = "object_relations_view";
 			ObjectContainerStorage = objStorage;

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Model\DataSchemaTests.cs" />
     <Compile Include="Model\RelationshipTests.cs" />
+    <Compile Include="OwlEmbeddedSchemaStorageTests.cs" />
     <Compile Include="SQLiteStorageDalcTests.cs" />
     <Compile Include="ObjectContainerSqlDalcStorageTests.cs" />
     <Compile Include="SQLiteStorageContext.cs" />
@@ -76,6 +77,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">

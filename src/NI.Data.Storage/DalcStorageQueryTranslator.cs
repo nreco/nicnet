@@ -10,7 +10,7 @@ namespace NI.Data.Storage {
 	
 	public class DalcStorageQueryTranslator {
 		
-		protected DataSchema Schema;
+		private DataSchema Schema;
 
 		protected ObjectContainerDalcStorage ObjStorage;
 
@@ -109,7 +109,7 @@ namespace NI.Data.Storage {
 			var pSrcName = ObjStorage.DataTypeTableNames[p.DataType.ID];
 
 			var propQuery = new Query(pSrcName,
-							(QField)"property_compact_id" == (QConst)p.CompactID
+							(QField)"property_compact_id" == new QConst(p.CompactID)
 							&
 							new QueryConditionNode((QField)"value", cnd, val)							
 						) {
@@ -144,7 +144,7 @@ namespace NI.Data.Storage {
 				new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
 				Conditions.In,
 				new Query(pSrcName,
-					(QField)"property_compact_id" == (QConst)prop.CompactID
+					(QField)"property_compact_id" == new QConst(prop.CompactID)
 					&
 					new QueryConditionNode((QField)"value", cnd, val)
 				) {

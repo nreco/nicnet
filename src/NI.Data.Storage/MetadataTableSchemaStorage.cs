@@ -25,7 +25,7 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 
-	public class DataSchemaDalcStorage : IDataSchemaStorage {
+	public class MetadataTableSchemaStorage : IDataSchemaStorage {
 
 		protected DataRowDalcMapper DbContext { get; set; }
 
@@ -46,7 +46,7 @@ namespace NI.Data.Storage {
 		public string PropertyToClassTableName { get; set; }
 		public IDictionary<string, string> PropertyToClassFieldMapping { get; private set; }
 
-		public DataSchemaDalcStorage(DataRowDalcMapper dbMgr) {
+		public MetadataTableSchemaStorage(DataRowDalcMapper dbMgr) {
 			DbContext = dbMgr;
 
 			ClassTableName = "metadata_classes";
