@@ -71,10 +71,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  
+  <Target Name="BeforeBuild">
+    <CreateItem Include="$(ProjectDir)..\packages\System.Data.SQLite.Core.1.0.92.0\content\net40\**\*.*">
+      <Output TaskParameter="Include" ItemName="SQLiteDllFiles" />
+    </CreateItem>
+    <Copy SourceFiles="@(SQLiteDllFiles)" DestinationFiles="@(SQLiteDllFiles->'$(ProjectDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />  
+  </Target>
+  
+  
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
   </Target>
   -->
