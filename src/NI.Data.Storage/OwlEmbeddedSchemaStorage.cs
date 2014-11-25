@@ -170,13 +170,14 @@ namespace NI.Data.Storage {
 
 			// resolve datatype properties
 			var datatypePropClass = schema.FindClassByID(OwlConfig.DatatypePropertyClassID);
+			var datatypeClass = schema.FindClassByID(OwlConfig.DatatypeClassID);
 			var domainClass = schema.FindClassByID(OwlConfig.DomainClassID);
 			var rangeClass = schema.FindClassByID(OwlConfig.RangeClassID);
 			var objClass = schema.FindClassByID(OwlConfig.ObjectClassID);
 
 			var dataTypePropertyRanges = ObjectStorage.LoadRelations(allDatatypePropObjects, 
 					new [] { datatypePropClass.FindRelationship( 
-								rangeClass, objClass ) } );
+								rangeClass, datatypeClass ) } );
 			var dataTypeMap = BuildDataTypeMap(datatypeIds, idToObj);
 			foreach (var rangeRel in dataTypePropertyRanges) {
 				var p = schema.FindPropertyByCompactID( rangeRel.SubjectID );
