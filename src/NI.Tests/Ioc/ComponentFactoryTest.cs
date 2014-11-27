@@ -90,6 +90,11 @@ namespace NI.Tests.Ioc
 		}
 
 		[Test]
+		public void FuncTypeDefinition() {
+			Assert.True( typeof(Func<string>) == componentFactory.GetComponent("funcType") );
+		}
+
+		[Test]
 		public void ComponentFactoryContext() {
 			var componentFactoryContext = componentFactory.GetComponent<IComponentFactory>("componentFactoryContext");
 			Assert.AreEqual(componentFactoryContext, componentFactory);
@@ -241,6 +246,10 @@ namespace NI.Tests.Ioc
 					<component name='componentFactoryContext' type='NI.Ioc.ComponentFactoryContext'/>
 
 					<component name='componentWithDependencyAttr' type='NI.Tests.Ioc.ComponentWithDependency,NI.Tests' singleton='true'/>
+
+					<component name='funcType' type='NI.Ioc.ReplacingFactory,NI.Ioc'>
+						<property name='TargetObject'><type>System.Func`1[[System.String,mscorlib]]</type></property>
+					</component>
 				</components>
 			";
 			

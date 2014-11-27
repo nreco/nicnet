@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -27,14 +26,6 @@ namespace NI.Ioc
 
 		public IndexerProxy(object indexed_obj) {
 			IndexedObj = indexed_obj;
-		}
-
-		public static implicit operator IndexerProxy(DataRow o) {
-			return new IndexerProxy(o);
-		}
-
-		public static implicit operator IndexerProxy(Hashtable o) {
-			return new IndexerProxy(o);
 		}
 
 		public object this[params object[] i] {

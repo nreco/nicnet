@@ -46,25 +46,26 @@ namespace NI.Ioc {
 			return -1;
 		}
 
-		public Type ResolveType(string type_description) {
+		public Type ResolveType(string typeDescription) {
 			const char Separator = ',';
 
-			int aposPos = type_description.IndexOf('`');
+			var typeName = typeDescription;
+			int aposPos = typeName.IndexOf('`');
 			bool isGenericType = aposPos >= 0;
 			string genericTypePart = String.Empty;
 
 			if (isGenericType) {
-				int genericStartArgPos = type_description.IndexOf('[', aposPos);
+				int genericStartArgPos = typeName.IndexOf('[', aposPos);
 				if (genericStartArgPos >= 0) { /* real generic type, not definition */
-					genericTypePart = type_description.Substring(genericStartArgPos, type_description.Length - genericStartArgPos);
+					genericTypePart = typeName.Substring(genericStartArgPos, typeName.Length - genericStartArgPos);
 					int genericPartEnd = FindBracketClose(genericTypePart, 1);
 					genericTypePart = genericTypePart.Substring(0, genericPartEnd + 1);
 					// get generic type definition str
-					type_description = type_description.Replace(genericTypePart, String.Empty);
+					typeName = typeName.Replace(genericTypePart, String.Empty);
 				}
 			}
 
-			string[] parts = type_description.Split(new char[] { Separator }, 2);
+			string[] parts = typeName.Split(new char[] { Separator }, 2);
 
 			if (parts.Length > 1) {
 				// assembly name provided
@@ -98,28 +99,28 @@ namespace NI.Ioc {
 					}
 					return t;
 				} catch (Exception ex) {
-					throw new TypeLoadException("Cannot resolve type " + type_description, ex);
+					throw new TypeLoadException("Cannot resolve type " + typeName, ex);
 				}
 			} else {
-				int lastDotIndex = type_description.LastIndexOf('.');
+				int lastDotIndex = typeName.LastIndexOf('.');
 				if (lastDotIndex >= 0) {
 					// try suggest assembly name by namespace
 					try {
-						return ResolveType(String.Format("{0}{1}", type_description, genericTypePart) + "," + type_description.Substring(0, lastDotIndex));
+						return ResolveType(typeDescription + "," + typeName.Substring(0, lastDotIndex));
 					} catch {
-						//bag suggestion. 
+						//bad suggestion. 
 					}
 				}
 				// finally, lets just try all loaded assemblies
 				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
-					Type type = assembly.GetType(type_description, false);
+					Type type = assembly.GetType(typeDescription, false);
 					if (type != null)
 						return type;
 				}
 
 			}
 
-			throw new TypeLoadException("Cannot resolve type " + type_description);
+			throw new TypeLoadException("Cannot resolve type " + typeName);
 		}
 
 	}
