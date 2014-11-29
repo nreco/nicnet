@@ -43,7 +43,10 @@ namespace NI.Data.Storage.Tests {
 				OwlSchemaStorage.OwlConfig.DatatypeClassID,
 				OwlSchemaStorage.OwlConfig.DomainClassID,
 				OwlSchemaStorage.OwlConfig.RangeClassID,
-				OwlSchemaStorage.OwlConfig.LabelClassID
+				OwlSchemaStorage.OwlConfig.LabelClassID,
+				OwlSchemaStorage.OwlConfig.RdfTypeClassID,
+				OwlSchemaStorage.OwlConfig.FunctionalPropertyClassID,
+				OwlSchemaStorage.OwlConfig.InverseFunctionalPropertyClassID
 			};
 			var owlClassIdToCompactId = new Dictionary<string,long>();
 			foreach (var owlClassInstanceId in owlClassInstances) {
@@ -77,11 +80,34 @@ namespace NI.Data.Storage.Tests {
 
 			var owlClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID);
 			var datatypePropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DatatypePropertyClassID);
+			var objPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectPropertyClassID);
 			var rangeClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.RangeClassID);
 			var domainClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DomainClassID);
+			var rdfTypeClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.RdfTypeClassID);
+			var funcPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.FunctionalPropertyClassID);
+			var invFuncPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.InverseFunctionalPropertyClassID);
 			
 			var datatypePropRangeRel = datatypePropClass.FindRelationship(rangeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DatatypeClassID) );
 			var datatypePropDomainRel = datatypePropClass.FindRelationship(domainClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
+			var datatypePropRdfTypeRel = datatypePropClass.FindRelationship(rdfTypeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.SuperClassID) );
+
+			var objPropRangeRel = objPropClass.FindRelationship(rangeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
+			var objPropDomainRel = objPropClass.FindRelationship(domainClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
+			var objPropPropRdfTypeRel = objPropClass.FindRelationship(rdfTypeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.SuperClassID) );
+
+			var cityObj = new ObjectContainer(owlClass);
+			cityObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "cities";
+			cityObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "City";
+			objStorage.Insert(cityObj);
+
+			var cityTitleObj = new ObjectContainer(datatypePropClass);
+			cityTitleObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "title";
+			cityTitleObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Title";
+			objStorage.Insert(cityTitleObj);
+
+			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropRangeRel, dataTypeMap[PropertyDataType.String.ID] ) );
+			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
+			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropDomainRel, cityObj.ID.Value ) );
 
 			var personObj = new ObjectContainer(owlClass);
 			personObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "persons";
@@ -92,6 +118,8 @@ namespace NI.Data.Storage.Tests {
 			nameObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "name";
 			nameObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Name";
 			objStorage.Insert(nameObj);
+
+			objStorage.AddRelations( new ObjectRelation( nameObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
 
 			var birthdayObj = new ObjectContainer(datatypePropClass);
 			birthdayObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "birthday";
@@ -104,7 +132,15 @@ namespace NI.Data.Storage.Tests {
 			objStorage.AddRelations( new ObjectRelation( nameObj.ID.Value, datatypePropDomainRel, personObj.ID.Value ) );
 			objStorage.AddRelations( new ObjectRelation( birthdayObj.ID.Value, datatypePropDomainRel, personObj.ID.Value ) );
 
-			//TODO: add object properties
+			//object property
+			var cityOfObj = new ObjectContainer(objPropClass);
+			cityOfObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "cityOf";
+			cityOfObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "City";
+			objStorage.Insert(cityOfObj);
+			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropDomainRel, cityObj.ID.Value ) );
+			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropRangeRel, personObj.ID.Value ) );
+			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropPropRdfTypeRel, invFuncPropClass.CompactID ) );
+
 		}
 
 		[Test]
@@ -113,17 +149,35 @@ namespace NI.Data.Storage.Tests {
 			addOwlSchema(datatypeMap);
 
 			var schema = OwlSchemaStorage.GetSchema();
-			Assert.AreEqual(8, schema.Classes.Count() );
+			Assert.AreEqual(11, schema.Classes.Count() );
+		}
+
+		[Test]
+		public void DataOntologyCheck() {
+			var datatypeMap = new Dictionary<string,long>();
+			addOwlSchema(datatypeMap);
+			var schema = OwlSchemaStorage.GetSchema();
 
 			addTestDataSchema(schema, datatypeMap);
 			OwlSchemaStorage.Refresh();
 
 			schema = OwlSchemaStorage.GetSchema();
 			Assert.NotNull( schema.FindClassByID("persons") );
+			Assert.IsTrue( schema.FindClassByID("cityOf").IsPredicate );
+
 			Assert.AreEqual("Person", schema.FindClassByID("persons").Name );
 			Assert.AreEqual(2, schema.FindClassByID("persons").Properties.Count() );
+			Assert.AreEqual(1, schema.FindClassByID("persons").Relationships.Count() );
 
-			//TODO: test for relationships
+			Assert.IsFalse( schema.FindPropertyByID("name").Multivalue );
+
+			Assert.AreEqual(1, schema.FindClassByID("persons").Relationships.Count() );
+			var personToCityRel = schema.FindClassByID("persons").FindRelationship(
+					schema.FindClassByID("cityOf"), schema.FindClassByID("cities") );
+			
+			Assert.IsTrue( personToCityRel.Reversed);
+			Assert.IsFalse( personToCityRel.Multiplicity);
+			Assert.IsTrue( personToCityRel.ReversedRelationship.Multiplicity);
 		}
 
 

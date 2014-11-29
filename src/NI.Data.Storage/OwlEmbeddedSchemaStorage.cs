@@ -90,6 +90,7 @@ namespace NI.Data.Storage {
 				schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.SuperIdPropertyID), PropertyValueLocationMode.ValueTable, null) );
 			}
 
+			var superClass = schema.FindClassByID(OwlConfig.SuperClassID);
 			var domainClass = FindAndAssertMetaClass(schema, OwlConfig.DomainClassID);
 			var rangeClass = FindAndAssertMetaClass(schema, OwlConfig.RangeClassID);
 			var objClass = FindAndAssertMetaClass(schema, OwlConfig.ObjectClassID);
@@ -97,12 +98,29 @@ namespace NI.Data.Storage {
 			var datatypePropClass = FindAndAssertMetaClass(schema, OwlConfig.DatatypePropertyClassID);
 			var datatypeClass = FindAndAssertMetaClass(schema, OwlConfig.DatatypeClassID);
 			var labelClass = FindAndAssertMetaClass(schema, OwlConfig.LabelClassID);
+			var rdfTypeClass = FindAndAssertMetaClass(schema, OwlConfig.RdfTypeClassID);
+			var funcPropClass = FindAndAssertMetaClass(schema, OwlConfig.FunctionalPropertyClassID);
+			var invFuncPropClass = FindAndAssertMetaClass(schema, OwlConfig.InverseFunctionalPropertyClassID);
 
-			schema.AddRelationship(new Relationship(objPropClass,domainClass, objClass, true, false, null) );
-			schema.AddRelationship(new Relationship(objPropClass, rangeClass, objClass, true, false, null) );
+			// object property relations
+			var objPropDomainRelRev = new Relationship(objClass,domainClass,objPropClass,true,true,null);
+			schema.AddRelationship(new Relationship(objPropClass,domainClass, objClass, true, false, objPropDomainRelRev) );
+			
+			var objPropRangeRelRev = new Relationship(objClass,rangeClass,objPropClass,true,true,null);
+			schema.AddRelationship(new Relationship(objPropClass, rangeClass, objClass, true, false, objPropRangeRelRev) );
 
-			schema.AddRelationship(new Relationship(datatypePropClass, domainClass, objClass, true, false, null) );
-			schema.AddRelationship(new Relationship(datatypePropClass, rangeClass, datatypeClass, false, false, null) );
+			var objPropTypeRelRev = new Relationship(superClass,rdfTypeClass,objPropClass,true,true,null);
+			schema.AddRelationship(new Relationship(objPropClass, rdfTypeClass, superClass, true, false, objPropTypeRelRev) );
+
+			// datatype properties relations
+			var dtPropDomainRelRev = new Relationship(objClass,domainClass,datatypePropClass,true,true,null);
+			schema.AddRelationship(new Relationship(datatypePropClass, domainClass, objClass, true, false, dtPropDomainRelRev) );
+			
+			var dtPropRangeRelRev = new Relationship(objClass,rangeClass,datatypePropClass,true,true,null);
+			schema.AddRelationship(new Relationship(datatypePropClass, rangeClass, datatypeClass, false, false, dtPropRangeRelRev) );
+
+			var dtPropTypeRelRev = new Relationship(superClass,rdfTypeClass,datatypePropClass,true,true,null);
+			schema.AddRelationship(new Relationship(datatypePropClass, rdfTypeClass, superClass, true, false, dtPropTypeRelRev) );
 
 			var labelProp = new Property(labelClass.ID) {
 				CompactID = labelClass.CompactID,
@@ -149,6 +167,8 @@ namespace NI.Data.Storage {
 					schema.AddProperty( new Property(id) {
 						CompactID = metaPropObj.ID.Value,
 						Name = name,
+						Multivalue = true, // by default all props are multivalue in OWL
+						PrimaryKey = id==OwlConfig.PkPropertyID,
 						DataType = PropertyDataType.String // default type used for properties without explicit range definition
 					});
 				}
@@ -168,29 +188,38 @@ namespace NI.Data.Storage {
 				}
 			}
 
-			// resolve datatype properties
+
+			var superClass = schema.FindClassByID(OwlConfig.SuperClassID);
 			var datatypePropClass = schema.FindClassByID(OwlConfig.DatatypePropertyClassID);
 			var datatypeClass = schema.FindClassByID(OwlConfig.DatatypeClassID);
 			var domainClass = schema.FindClassByID(OwlConfig.DomainClassID);
 			var rangeClass = schema.FindClassByID(OwlConfig.RangeClassID);
 			var objClass = schema.FindClassByID(OwlConfig.ObjectClassID);
+			var rdfTypeClass = schema.FindClassByID(OwlConfig.RdfTypeClassID);
+			var funcPropClass = schema.FindClassByID(OwlConfig.FunctionalPropertyClassID);
+			var invFuncPropClass = schema.FindClassByID(OwlConfig.InverseFunctionalPropertyClassID);
 
-			var dataTypePropertyRanges = ObjectStorage.LoadRelations(allDatatypePropObjects, 
-					new [] { datatypePropClass.FindRelationship( 
-								rangeClass, datatypeClass ) } );
+			// resolve datatype properties
+			var dataTypePropRels = ObjectStorage.LoadRelations(allDatatypePropObjects, 
+					new [] { 
+						datatypePropClass.FindRelationship(rangeClass, datatypeClass ),
+						datatypePropClass.FindRelationship(domainClass, objClass),
+						datatypePropClass.FindRelationship(rdfTypeClass, superClass )
+					} );
 			var dataTypeMap = BuildDataTypeMap(datatypeIds, idToObj);
-			foreach (var rangeRel in dataTypePropertyRanges) {
+			foreach (var rangeRel in dataTypePropRels.Where( r=>r.Relation.Predicate==rangeClass) ) {
 				var p = schema.FindPropertyByCompactID( rangeRel.SubjectID );
 				if (dataTypeMap.ContainsKey(rangeRel.ObjectID)) { 
  					p.DataType = dataTypeMap[rangeRel.ObjectID];
 				}
 			}
 
-			// resolve property domains
-			var dataTypePropertyDomains = ObjectStorage.LoadRelations(allDatatypePropObjects, 
-					new [] { datatypePropClass.FindRelationship( 
-								domainClass, objClass ) } );
-			foreach (var domainRel in dataTypePropertyDomains) {
+			foreach (var funcPropRel in dataTypePropRels.Where( r=>r.Relation.Predicate==rdfTypeClass && r.ObjectID == funcPropClass.CompactID) ) {
+				var p = schema.FindPropertyByCompactID( funcPropRel.SubjectID );
+				p.Multivalue = false;
+			}
+
+			foreach (var domainRel in dataTypePropRels.Where( r=>r.Relation.Predicate==domainClass ) ) {
 				var p = schema.FindPropertyByCompactID( domainRel.SubjectID );
 				var c = schema.FindClassByCompactID( domainRel.ObjectID );
 				if (c!=null && p!=null)
@@ -203,7 +232,11 @@ namespace NI.Data.Storage {
 			var objPropDomainRel = objPropClass.FindRelationship(domainClass, objClass );
 
 			var objPropRels = ObjectStorage.LoadRelations(allObjPropObjects, 
-					new [] { objPropClass.FindRelationship(domainClass, objClass ), objPropClass.FindRelationship(rangeClass, objClass ) } );
+					new [] { 
+						objPropClass.FindRelationship(domainClass, objClass ), 
+						objPropClass.FindRelationship(rangeClass, objClass ),
+						objPropClass.FindRelationship(rdfTypeClass, superClass ) 
+					} );
 
 			foreach (var predicateClass in schema.Classes.Where(c => c.IsPredicate)) {
 				var predRels = objPropRels.Where( r => r.SubjectID == predicateClass.CompactID).ToArray();
@@ -212,9 +245,8 @@ namespace NI.Data.Storage {
 						var rSubjClass = schema.FindClassByCompactID( domainRel.ObjectID );
 						var rObjClass = schema.FindClassByCompactID( rangeRel.ObjectID );
 
-						//TODO: handle cardinality
-						var subjectMultiplicity = true;
-						var objectMultiplicity = true;
+						var subjectMultiplicity = !predRels.Any( r => r.Relation.Predicate==rdfTypeClass && r.ObjectID == invFuncPropClass.CompactID );
+						var objectMultiplicity = !predRels.Any( r => r.Relation.Predicate==rdfTypeClass && r.ObjectID == funcPropClass.CompactID );
 						var revRelationship = new Relationship(rObjClass, predicateClass, rSubjClass, subjectMultiplicity, true, null);
 						schema.AddRelationship(new Relationship(rSubjClass, predicateClass, rObjClass, objectMultiplicity, false, revRelationship));
 						schema.AddRelationship(revRelationship);
@@ -270,6 +302,8 @@ namespace NI.Data.Storage {
 			public string SuperClassID { get; set;}
 			public string SuperIdPropertyID { get; set; }
 
+			public string PkPropertyID { get; set; }
+
 			public string ObjectClassID { get; set;}
 			public string DatatypePropertyClassID { get; set; }
 			public string ObjectPropertyClassID { get; set;}
@@ -277,6 +311,9 @@ namespace NI.Data.Storage {
 			public string DomainClassID { get; set; }
 			public string RangeClassID { get; set; }
 			public string LabelClassID { get; set; }
+			public string RdfTypeClassID { get; set; }
+			public string FunctionalPropertyClassID { get; set; }
+			public string InverseFunctionalPropertyClassID { get; set; }
 
 			public OwlConfiguration() {
 			}
@@ -285,15 +322,20 @@ namespace NI.Data.Storage {
 				SuperClassCompactID = 0,
 				SuperIdPropertyCompactID = 0,
 				SuperClassID = "rdfs_Class",
-				SuperIdPropertyID = "rdf_about",
+				SuperIdPropertyID = "rdf_ID",
 				
+				PkPropertyID = "id",
+
 				ObjectClassID = "owl_Class",
 				DatatypePropertyClassID = "owl_DatatypeProperty",
 				ObjectPropertyClassID = "owl_ObjectProperty",
 				DatatypeClassID = "rdfs_Datatype",
 				DomainClassID = "rdfs_domain",
 				RangeClassID = "rdfs_range",
-				LabelClassID = "rdfs_label"
+				LabelClassID = "rdfs_label",
+				RdfTypeClassID = "rdf_type",
+				FunctionalPropertyClassID = "owl_FunctionalProperty",
+				InverseFunctionalPropertyClassID = "owl_InverseFunctionalProperty"
 			};
 		}
 

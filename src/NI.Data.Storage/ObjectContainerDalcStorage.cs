@@ -83,7 +83,7 @@ namespace NI.Data.Storage {
 				{"object_datetime_values", "object_datetime_values_log"}
 			};
 
-			LoggingEnabled = true;
+			LoggingEnabled = logDalc!=null;
 			QueryBatchSize = 1000;
 		}
 
