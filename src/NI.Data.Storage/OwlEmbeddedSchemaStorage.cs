@@ -34,10 +34,12 @@ namespace NI.Data.Storage {
 
 		public OwlConfiguration OwlConfig { get; set; }
 
+		public string ObjectPkColumn { get; set; }
 
 		public OwlEmbeddedSchemaStorage(IObjectContainerStorage objStorage) {
 			ObjectStorage = objStorage;
 			OwlConfig = OwlConfiguration.Default;
+			ObjectPkColumn = "id";
 		}
 
 		private DataSchema CachedDataSchema = null;
@@ -101,6 +103,7 @@ namespace NI.Data.Storage {
 			var rdfTypeClass = FindAndAssertMetaClass(schema, OwlConfig.RdfTypeClassID);
 			var funcPropClass = FindAndAssertMetaClass(schema, OwlConfig.FunctionalPropertyClassID);
 			var invFuncPropClass = FindAndAssertMetaClass(schema, OwlConfig.InverseFunctionalPropertyClassID);
+			var pkPropClass = FindAndAssertMetaClass(schema, OwlConfig.PkPropertyID);
 
 			// object property relations
 			var objPropDomainRelRev = new Relationship(objClass,domainClass,objPropClass,true,true,null);
@@ -131,6 +134,15 @@ namespace NI.Data.Storage {
 			schema.AddClassProperty(new ClassPropertyLocation(objClass, labelProp, PropertyValueLocationMode.ValueTable, null));
 			schema.AddClassProperty(new ClassPropertyLocation(datatypePropClass, labelProp, PropertyValueLocationMode.ValueTable, null));
 			schema.AddClassProperty(new ClassPropertyLocation(objPropClass, labelProp, PropertyValueLocationMode.ValueTable, null));
+
+			var pkProp = new Property(pkPropClass.ID) {
+				CompactID = pkPropClass.CompactID,
+				Name = pkPropClass.ID,
+				DataType = PropertyDataType.Integer,
+				PrimaryKey = true
+			};
+			schema.AddProperty(pkProp);
+			schema.AddClassProperty(new ClassPropertyLocation(datatypeClass, pkProp, PropertyValueLocationMode.TableColumn, ObjectPkColumn));
 		}
 
 		protected void InitDataSchema(DataSchema schema) {
@@ -156,6 +168,7 @@ namespace NI.Data.Storage {
 						Name = name
 					};
 					schema.AddClass(c);
+					schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.PkPropertyID), PropertyValueLocationMode.TableColumn, ObjectPkColumn));
 				}
 			}
 
@@ -187,7 +200,6 @@ namespace NI.Data.Storage {
 					schema.AddClass(c);
 				}
 			}
-
 
 			var superClass = schema.FindClassByID(OwlConfig.SuperClassID);
 			var datatypePropClass = schema.FindClassByID(OwlConfig.DatatypePropertyClassID);
@@ -280,6 +292,111 @@ namespace NI.Data.Storage {
 
 			return CachedDataSchema;
 		}
+
+		public void CreateClass(string id, string label) {
+			var schema = GetSchema();
+			var owlClass = schema.FindClassByID(OwlConfig.ObjectClassID);
+
+			var newObj = new ObjectContainer(owlClass);
+			newObj[OwlConfig.SuperIdPropertyID] = id;
+			newObj[OwlConfig.LabelClassID] = label;
+			ObjectStorage.Insert(newObj);
+			Refresh();
+		}
+
+		public void CreateObjectProperty(string id, string label, bool isFunctional = false, bool isInverseFunctional = false) {
+			var schema = GetSchema();
+			var objPropClass = schema.FindClassByID(OwlConfig.ObjectPropertyClassID);
+
+			var rdfTypeClass = schema.FindClassByID(OwlConfig.RdfTypeClassID);
+			var funcPropClass = schema.FindClassByID(OwlConfig.FunctionalPropertyClassID);
+			var invFuncPropClass = schema.FindClassByID(OwlConfig.InverseFunctionalPropertyClassID);
+			var objPropPropRdfTypeRel = objPropClass.FindRelationship(rdfTypeClass, schema.FindClassByID(OwlConfig.SuperClassID) );
+
+			var newObj = new ObjectContainer(objPropClass);
+			newObj[OwlConfig.SuperIdPropertyID] = id;
+			newObj[OwlConfig.LabelClassID] = label;
+			ObjectStorage.Insert(newObj);
+
+			if (isFunctional)
+				ObjectStorage.AddRelations( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, funcPropClass.CompactID ) );
+			if (isInverseFunctional)
+				ObjectStorage.AddRelations( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, invFuncPropClass.CompactID ) );
+
+			Refresh();
+		}
+
+		public void SetObjectPropertyDomain(string id, params Class[] classes) {
+			var schema = GetSchema();
+			var objPropClass = schema.FindClassByID(OwlConfig.ObjectPropertyClassID);
+			var domainClass = schema.FindClassByID(OwlConfig.DomainClassID);
+
+			var objPropDomainRel = objPropClass.FindRelationship(domainClass, schema.FindClassByID(OwlConfig.ObjectClassID) );
+			var objProp = schema.FindClassByID(id);
+			if (objProp==null || !objProp.IsPredicate)
+				throw new ArgumentException("Cannot locate object property with ID="+id);
+
+			foreach (var c in classes)
+				ObjectStorage.AddRelations( new ObjectRelation( objProp.CompactID, objPropDomainRel, c.CompactID ) );
+
+			Refresh();
+		}
+
+		public void SetObjectPropertyRange(string id, params Class[] classes) {
+			var schema = GetSchema();
+			var objPropClass = schema.FindClassByID(OwlConfig.ObjectPropertyClassID);
+			var rangeClass = schema.FindClassByID(OwlConfig.RangeClassID);
+
+			var objPropRangeRel = objPropClass.FindRelationship(rangeClass, schema.FindClassByID(OwlConfig.ObjectClassID) );
+			var objProp = schema.FindClassByID(id);
+			if (objProp==null || !objProp.IsPredicate)
+				throw new ArgumentException("Cannot locate object property with ID="+id);
+
+			foreach (var c in classes)
+				ObjectStorage.AddRelations( new ObjectRelation( objProp.CompactID, objPropRangeRel, c.CompactID ) );
+
+			Refresh();
+		}
+
+		public void CreateDatatypeProperty(string id, string label, PropertyDataType dataType, bool isFunctional = true) {
+			var schema = GetSchema();
+			var datatypePropClass = schema.FindClassByID(OwlConfig.DatatypePropertyClassID);
+			var rangeClass = schema.FindClassByID(OwlConfig.RangeClassID);
+			var rdfTypeClass = schema.FindClassByID(OwlConfig.RdfTypeClassID);
+			var funcPropClass = schema.FindClassByID(OwlConfig.FunctionalPropertyClassID);
+
+			var datatypePropRangeRel = datatypePropClass.FindRelationship(rangeClass, schema.FindClassByID(OwlConfig.DatatypeClassID) );
+			var datatypePropRdfTypeRel = datatypePropClass.FindRelationship(rdfTypeClass, schema.FindClassByID(OwlConfig.SuperClassID) );
+
+			var dataTypeIds = ObjectStorage.GetObjectIds( new Query(OwlConfig.DatatypeClassID, (QField)OwlConfig.SuperIdPropertyID==new QConst(dataType.ID) ) );
+			if (dataTypeIds.Length!=1)
+				throw new ArgumentException("Cannot locate object for datatype ID="+dataType.ID);
+
+			var dtPropObj = new ObjectContainer(datatypePropClass);
+			dtPropObj[OwlConfig.SuperIdPropertyID] = id;
+			dtPropObj[OwlConfig.LabelClassID] = label;
+			ObjectStorage.Insert(dtPropObj);
+
+			if (isFunctional)
+				ObjectStorage.AddRelations( new ObjectRelation( dtPropObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
+			ObjectStorage.AddRelations( new ObjectRelation( dtPropObj.ID.Value, datatypePropRangeRel, dataTypeIds[0] ) );
+
+			Refresh();
+		}
+
+		public void SetDatatypePropertyDomain(string id, params Class[] classes) {
+			var schema = GetSchema();
+			var datatypePropClass = schema.FindClassByID(OwlConfig.DatatypePropertyClassID);
+			var domainClass = schema.FindClassByID(OwlConfig.DomainClassID);
+
+			var datatypePropDomainRel = datatypePropClass.FindRelationship(domainClass, schema.FindClassByID(OwlConfig.ObjectClassID) );
+			var dtProp = schema.FindPropertyByID(id);
+			foreach (var c in classes)
+				ObjectStorage.AddRelations( new ObjectRelation( dtProp.CompactID, datatypePropDomainRel, c.CompactID ) );
+
+			Refresh();
+		}
+
 
 		private IDictionary<long, PropertyDataType> BuildDataTypeMap(long[] dataTypeIds, IDictionary<long, ObjectContainer> idToObj) {
 			var r = new Dictionary<long,PropertyDataType>();

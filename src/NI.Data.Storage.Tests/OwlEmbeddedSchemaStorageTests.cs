@@ -46,7 +46,8 @@ namespace NI.Data.Storage.Tests {
 				OwlSchemaStorage.OwlConfig.LabelClassID,
 				OwlSchemaStorage.OwlConfig.RdfTypeClassID,
 				OwlSchemaStorage.OwlConfig.FunctionalPropertyClassID,
-				OwlSchemaStorage.OwlConfig.InverseFunctionalPropertyClassID
+				OwlSchemaStorage.OwlConfig.InverseFunctionalPropertyClassID,
+				OwlSchemaStorage.OwlConfig.PkPropertyID
 			};
 			var owlClassIdToCompactId = new Dictionary<string,long>();
 			foreach (var owlClassInstanceId in owlClassInstances) {
@@ -75,72 +76,20 @@ namespace NI.Data.Storage.Tests {
 
 		}
 
-		void addTestDataSchema(DataSchema owlSchema, IDictionary<string,long> dataTypeMap) {
-			var objStorage = StorageContext.ObjectContainerStorage;
+		void addTestDataSchema() {
+			OwlSchemaStorage.CreateClass("cities", "City");
+			OwlSchemaStorage.CreateDatatypeProperty("title", "Title", PropertyDataType.String, true);
+			OwlSchemaStorage.SetDatatypePropertyDomain("title", OwlSchemaStorage.GetSchema().FindClassByID("cities") );
 
-			var owlClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID);
-			var datatypePropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DatatypePropertyClassID);
-			var objPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectPropertyClassID);
-			var rangeClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.RangeClassID);
-			var domainClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DomainClassID);
-			var rdfTypeClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.RdfTypeClassID);
-			var funcPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.FunctionalPropertyClassID);
-			var invFuncPropClass = owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.InverseFunctionalPropertyClassID);
+			OwlSchemaStorage.CreateClass("persons", "Person");
+			OwlSchemaStorage.CreateDatatypeProperty("name", "Name", PropertyDataType.String, true);
+			OwlSchemaStorage.CreateDatatypeProperty("birthday", "Birthday", PropertyDataType.Date, true);
+			OwlSchemaStorage.SetDatatypePropertyDomain("name", OwlSchemaStorage.GetSchema().FindClassByID("persons") );
+			OwlSchemaStorage.SetDatatypePropertyDomain("birthday", OwlSchemaStorage.GetSchema().FindClassByID("persons") );
 			
-			var datatypePropRangeRel = datatypePropClass.FindRelationship(rangeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.DatatypeClassID) );
-			var datatypePropDomainRel = datatypePropClass.FindRelationship(domainClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
-			var datatypePropRdfTypeRel = datatypePropClass.FindRelationship(rdfTypeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.SuperClassID) );
-
-			var objPropRangeRel = objPropClass.FindRelationship(rangeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
-			var objPropDomainRel = objPropClass.FindRelationship(domainClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.ObjectClassID) );
-			var objPropPropRdfTypeRel = objPropClass.FindRelationship(rdfTypeClass, owlSchema.FindClassByID(OwlSchemaStorage.OwlConfig.SuperClassID) );
-
-			var cityObj = new ObjectContainer(owlClass);
-			cityObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "cities";
-			cityObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "City";
-			objStorage.Insert(cityObj);
-
-			var cityTitleObj = new ObjectContainer(datatypePropClass);
-			cityTitleObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "title";
-			cityTitleObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Title";
-			objStorage.Insert(cityTitleObj);
-
-			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropRangeRel, dataTypeMap[PropertyDataType.String.ID] ) );
-			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
-			objStorage.AddRelations( new ObjectRelation( cityTitleObj.ID.Value, datatypePropDomainRel, cityObj.ID.Value ) );
-
-			var personObj = new ObjectContainer(owlClass);
-			personObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "persons";
-			personObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Person";
-			objStorage.Insert(personObj);
-
-			var nameObj = new ObjectContainer(datatypePropClass);
-			nameObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "name";
-			nameObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Name";
-			objStorage.Insert(nameObj);
-
-			objStorage.AddRelations( new ObjectRelation( nameObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
-
-			var birthdayObj = new ObjectContainer(datatypePropClass);
-			birthdayObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "birthday";
-			birthdayObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "Birthday";
-			objStorage.Insert(birthdayObj);
-
-			objStorage.AddRelations( new ObjectRelation( nameObj.ID.Value, datatypePropRangeRel, dataTypeMap[PropertyDataType.String.ID] ) );
-			objStorage.AddRelations( new ObjectRelation( birthdayObj.ID.Value, datatypePropRangeRel, dataTypeMap[PropertyDataType.Date.ID] ) );
-
-			objStorage.AddRelations( new ObjectRelation( nameObj.ID.Value, datatypePropDomainRel, personObj.ID.Value ) );
-			objStorage.AddRelations( new ObjectRelation( birthdayObj.ID.Value, datatypePropDomainRel, personObj.ID.Value ) );
-
-			//object property
-			var cityOfObj = new ObjectContainer(objPropClass);
-			cityOfObj[OwlSchemaStorage.OwlConfig.SuperIdPropertyID] = "cityOf";
-			cityOfObj[OwlSchemaStorage.OwlConfig.LabelClassID] = "City";
-			objStorage.Insert(cityOfObj);
-			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropDomainRel, cityObj.ID.Value ) );
-			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropRangeRel, personObj.ID.Value ) );
-			objStorage.AddRelations( new ObjectRelation( cityOfObj.ID.Value, objPropPropRdfTypeRel, invFuncPropClass.CompactID ) );
-
+			OwlSchemaStorage.CreateObjectProperty("cityOf", "City", false, true);
+			OwlSchemaStorage.SetObjectPropertyRange("cityOf", OwlSchemaStorage.GetSchema().FindClassByID("persons") );
+			OwlSchemaStorage.SetObjectPropertyDomain("cityOf", OwlSchemaStorage.GetSchema().FindClassByID("cities") );
 		}
 
 		[Test]
@@ -149,7 +98,7 @@ namespace NI.Data.Storage.Tests {
 			addOwlSchema(datatypeMap);
 
 			var schema = OwlSchemaStorage.GetSchema();
-			Assert.AreEqual(11, schema.Classes.Count() );
+			Assert.AreEqual(12, schema.Classes.Count() );
 		}
 
 		[Test]
@@ -158,7 +107,7 @@ namespace NI.Data.Storage.Tests {
 			addOwlSchema(datatypeMap);
 			var schema = OwlSchemaStorage.GetSchema();
 
-			addTestDataSchema(schema, datatypeMap);
+			addTestDataSchema();
 			OwlSchemaStorage.Refresh();
 
 			schema = OwlSchemaStorage.GetSchema();
@@ -166,7 +115,7 @@ namespace NI.Data.Storage.Tests {
 			Assert.IsTrue( schema.FindClassByID("cityOf").IsPredicate );
 
 			Assert.AreEqual("Person", schema.FindClassByID("persons").Name );
-			Assert.AreEqual(2, schema.FindClassByID("persons").Properties.Count() );
+			Assert.AreEqual(3, schema.FindClassByID("persons").Properties.Count() );
 			Assert.AreEqual(1, schema.FindClassByID("persons").Relationships.Count() );
 
 			Assert.IsFalse( schema.FindPropertyByID("name").Multivalue );
