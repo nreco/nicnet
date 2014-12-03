@@ -396,7 +396,7 @@ namespace NI.Data.Storage.Tests {
 
 			var rel = testSchema.FindClassByID("contacts").FindRelationship(
 				testSchema.FindClassByID("contactCompany"), testSchema.FindClassByID("companies"));
-			storage.AddRelations(
+			storage.AddRelation(
 				new ObjectRelation(johnContact.ID.Value, rel, googCompany.ID.Value)
 			);
 		}

@@ -124,7 +124,7 @@ namespace NI.Data.Storage.Tests
 			var companyToCountryRel = googCompany.GetClass().FindRelationship(
 				o.FindClassByID("companyCountry"), usaCountry.GetClass(), false
 			);
-			objPersisterContext.ObjectContainerStorage.AddRelations(
+			objPersisterContext.ObjectContainerStorage.AddRelation(
 				new ObjectRelation(maryContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(johnContact.ID.Value, contactToCompanyRel, googCompany.ID.Value ),
 				new ObjectRelation(bobContact.ID.Value, contactToCompanyRel, yahooCompany.ID.Value),
@@ -145,7 +145,7 @@ namespace NI.Data.Storage.Tests
 
 			// remove rel
 			var maryRel = googCompanyRels.Where( r=>r.ObjectID == maryContact.ID.Value ).First();
-			objPersisterContext.ObjectContainerStorage.RemoveRelations( 
+			objPersisterContext.ObjectContainerStorage.RemoveRelation( 
 				new ObjectRelation(
 					googCompany.ID.Value, 
 					googCompany.GetClass().FindRelationship(o.FindClassByID("contactCompany"), maryContact.GetClass()), 
@@ -187,7 +187,7 @@ namespace NI.Data.Storage.Tests
 
 			// set relation
 			var rel = o.FindClassByID("contacts").FindRelationship(o.FindClassByID("contactCompany"), o.FindClassByID("companies") );
-			objPersisterContext.ObjectContainerStorage.AddRelations( 
+			objPersisterContext.ObjectContainerStorage.AddRelation( 
 				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value ) );
 
 			// test relation
@@ -211,7 +211,7 @@ namespace NI.Data.Storage.Tests
 			objPersisterContext.ObjectContainerStorage.Insert(msCompany);
 			// try to add one more company for John
 			Assert.Throws<ConstraintException>( () => {
-				objPersisterContext.ObjectContainerStorage.AddRelations(
+				objPersisterContext.ObjectContainerStorage.AddRelation(
 					new ObjectRelation(johnContact.ID.Value, rel, msCompany.ID.Value));
 			});
 

@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -22,6 +22,9 @@ using System.Globalization;
 
 namespace NI.Data.Storage.Model {
 	
+	/// <summary>
+	/// Describes property datatypes supported by storage
+	/// </summary>
 	public class PropertyDataType {
 		public string ID { get; set; }
 		public Type ValueType { get; set; }
@@ -76,6 +79,9 @@ namespace NI.Data.Storage.Model {
 		public static readonly PropertyDataType Date = new PropertyDataType() { ID = "date", ValueType = typeof(DateTime) };
 		public static readonly PropertyDataType Boolean = new PropertyDataType() { ID = "boolean", ValueType = typeof(bool) };
 
+		/// <summary>
+		/// List of all datatypes supported by storage
+		/// </summary>
 		public static readonly IEnumerable<PropertyDataType> KnownDataTypes = new[] {String, Integer, Decimal, DateTime, Date, Boolean};
 	}
 

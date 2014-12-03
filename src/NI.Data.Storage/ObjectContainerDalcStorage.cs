@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -409,7 +409,7 @@ namespace NI.Data.Storage {
 			return loadRelQ;
 		}
 
-		public void AddRelations(params ObjectRelation[] relations) {
+		public void AddRelation(params ObjectRelation[] relations) {
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
 			var relTbl = DbMgr.LoadAll(loadRelQ);
 			foreach (var r in relations) {
@@ -457,7 +457,7 @@ namespace NI.Data.Storage {
 			return q;
 		}
 
-		public void RemoveRelations(params ObjectRelation[] relations) {
+		public void RemoveRelation(params ObjectRelation[] relations) {
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
 			var relTbl = DbMgr.LoadAll(loadRelQ);
 

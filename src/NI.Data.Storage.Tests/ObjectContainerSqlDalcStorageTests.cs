@@ -99,7 +99,7 @@ namespace NI.Data.Storage.Tests {
 							objContact["name"] = String.Format("Company_{0} Contact_{1}", i, j);
 							StorageContext.ObjectContainerStorage.Insert(objContact);
 
-							StorageContext.ObjectContainerStorage.AddRelations( 
+							StorageContext.ObjectContainerStorage.AddRelation( 
 								new ObjectRelation(objContact.ID.Value, contactCompanyEmployeeRel, objCompany.ID.Value ) );
 						}
 					}

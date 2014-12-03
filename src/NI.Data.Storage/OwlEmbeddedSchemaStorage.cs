@@ -1,8 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
- * Copyright 2014 NewtonIdeas
+ * Copyright 2014 Vitalii Fedorchenko
  * Distributed under the LGPL licence
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -319,9 +318,9 @@ namespace NI.Data.Storage {
 			ObjectStorage.Insert(newObj);
 
 			if (isFunctional)
-				ObjectStorage.AddRelations( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, funcPropClass.CompactID ) );
+				ObjectStorage.AddRelation( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, funcPropClass.CompactID ) );
 			if (isInverseFunctional)
-				ObjectStorage.AddRelations( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, invFuncPropClass.CompactID ) );
+				ObjectStorage.AddRelation( new ObjectRelation( newObj.ID.Value, objPropPropRdfTypeRel, invFuncPropClass.CompactID ) );
 
 			Refresh();
 		}
@@ -337,7 +336,7 @@ namespace NI.Data.Storage {
 				throw new ArgumentException("Cannot locate object property with ID="+id);
 
 			foreach (var c in classes)
-				ObjectStorage.AddRelations( new ObjectRelation( objProp.CompactID, objPropDomainRel, c.CompactID ) );
+				ObjectStorage.AddRelation( new ObjectRelation( objProp.CompactID, objPropDomainRel, c.CompactID ) );
 
 			Refresh();
 		}
@@ -353,7 +352,7 @@ namespace NI.Data.Storage {
 				throw new ArgumentException("Cannot locate object property with ID="+id);
 
 			foreach (var c in classes)
-				ObjectStorage.AddRelations( new ObjectRelation( objProp.CompactID, objPropRangeRel, c.CompactID ) );
+				ObjectStorage.AddRelation( new ObjectRelation( objProp.CompactID, objPropRangeRel, c.CompactID ) );
 
 			Refresh();
 		}
@@ -378,8 +377,8 @@ namespace NI.Data.Storage {
 			ObjectStorage.Insert(dtPropObj);
 
 			if (isFunctional)
-				ObjectStorage.AddRelations( new ObjectRelation( dtPropObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
-			ObjectStorage.AddRelations( new ObjectRelation( dtPropObj.ID.Value, datatypePropRangeRel, dataTypeIds[0] ) );
+				ObjectStorage.AddRelation( new ObjectRelation( dtPropObj.ID.Value, datatypePropRdfTypeRel, funcPropClass.CompactID ) );
+			ObjectStorage.AddRelation( new ObjectRelation( dtPropObj.ID.Value, datatypePropRangeRel, dataTypeIds[0] ) );
 
 			Refresh();
 		}
@@ -392,7 +391,7 @@ namespace NI.Data.Storage {
 			var datatypePropDomainRel = datatypePropClass.FindRelationship(domainClass, schema.FindClassByID(OwlConfig.ObjectClassID) );
 			var dtProp = schema.FindPropertyByID(id);
 			foreach (var c in classes)
-				ObjectStorage.AddRelations( new ObjectRelation( dtProp.CompactID, datatypePropDomainRel, c.CompactID ) );
+				ObjectStorage.AddRelation( new ObjectRelation( dtProp.CompactID, datatypePropDomainRel, c.CompactID ) );
 
 			Refresh();
 		}

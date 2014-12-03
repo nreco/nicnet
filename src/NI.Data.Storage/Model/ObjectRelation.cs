@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -21,6 +21,9 @@ using System.Threading.Tasks;
 
 namespace NI.Data.Storage.Model {
 	
+	/// <summary>
+	/// Represents relation between two objects
+	/// </summary>
 	public class ObjectRelation {
 
 		public long SubjectID { get; private set; }

@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 namespace NI.Data.Storage.Model {
 	
     /// <summary>
-    /// Represents relationship determined by subject, predictate and object classes
+    /// Describes relationship between two object classes (subject, predictate, object)
     /// </summary>
 	public sealed class Relationship {
 

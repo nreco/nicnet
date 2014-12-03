@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -313,7 +313,7 @@ namespace NI.Data.Storage
 					throw new ArgumentException("subject_id is required");
 				if (!objId.HasValue)
 					throw new ArgumentException("object_id is required");
-				ObjectContainerStorage.AddRelations(
+				ObjectContainerStorage.AddRelation(
 					new ObjectRelation(subjId.Value, relation, objId.Value) );
 				return;
 			}
@@ -379,14 +379,14 @@ namespace NI.Data.Storage
 				foreach (DataRow r in t.Rows) {
 					switch (r.RowState) {
 						case DataRowState.Added:
-							ObjectContainerStorage.AddRelations(
+							ObjectContainerStorage.AddRelation(
 								new ObjectRelation( 
 									Convert.ToInt64(r["subject_id"]),
 									relation,
 									Convert.ToInt64(r["object_id"])));
 							break;
 						case DataRowState.Deleted:
-							ObjectContainerStorage.RemoveRelations(
+							ObjectContainerStorage.RemoveRelation(
 								new ObjectRelation(
 									Convert.ToInt64(r["subject_id",DataRowVersion.Original]),
 									relation,

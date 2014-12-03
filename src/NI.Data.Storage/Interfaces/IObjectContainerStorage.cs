@@ -1,7 +1,7 @@
 ﻿#region License
 /*
  * Open NIC.NET library (http://nicnet.googlecode.com/)
- * Copyright 2013 Vitalii Fedorchenko
+ * Copyright 2013-2014 Vitalii Fedorchenko
  * Copyright 2014 NewtonIdeas
  * Distributed under the LGPL licence
  *
@@ -35,8 +35,8 @@ namespace NI.Data.Storage {
 
 		int Delete(params long[] objIds);
 
-		void AddRelations(params ObjectRelation[] relations);
-		void RemoveRelations(params ObjectRelation[] relations);
+		void AddRelation(params ObjectRelation[] relations);
+		void RemoveRelation(params ObjectRelation[] relations);
 		
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer obj, IEnumerable<Relationship> rels);
 		IEnumerable<ObjectRelation> LoadRelations(ObjectContainer[] obj, IEnumerable<Relationship> rels);

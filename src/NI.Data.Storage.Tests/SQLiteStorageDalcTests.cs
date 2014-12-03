@@ -72,17 +72,17 @@ namespace NI.Data.Storage.Tests {
 				testSchema.FindClassByID("employee"), testSchema.FindClassByID("companies"));
 			var countryRel = testSchema.FindRelationshipByID("companies_country_countries");
 			
-			StorageContext.ObjectContainerStorage.AddRelations( 
+			StorageContext.ObjectContainerStorage.AddRelation( 
 				new ObjectRelation( johnContact.ID.Value, rel, googCompany.ID.Value )
 			);
-			StorageContext.ObjectContainerStorage.AddRelations(
+			StorageContext.ObjectContainerStorage.AddRelation(
 				new ObjectRelation(bobContact.ID.Value, rel, msCompany.ID.Value)
 			);
 
-			StorageContext.ObjectContainerStorage.AddRelations(
+			StorageContext.ObjectContainerStorage.AddRelation(
 				new ObjectRelation(msCompany.ID.Value, countryRel, usaCountry.ID.Value)
 			);
-			StorageContext.ObjectContainerStorage.AddRelations(
+			StorageContext.ObjectContainerStorage.AddRelation(
 				new ObjectRelation(googCompany.ID.Value, countryRel, canadaCountry.ID.Value)
 			);
 
