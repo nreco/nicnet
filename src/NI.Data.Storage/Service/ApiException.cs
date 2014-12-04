@@ -31,13 +31,15 @@ namespace NI.Data.Storage.Service {
 
 		public string ErrorId { get; private set; }
 
-		public ApiException(string msg, HttpStatusCode code) : this( msg, code, "") { }
+		public ApiException(string msg, HttpStatusCode code) : this( msg, code, null) { }
 
-		public ApiException(string msg, HttpStatusCode code, string errorCode) : base( msg ) {
+		public ApiException(string msg, HttpStatusCode code, string errorCode) : this( msg, code, errorCode, null ) {
+		}
+
+		public ApiException(string msg, HttpStatusCode code, string errorCode, Exception inner) : base( msg, inner ) {
 			StatusCode = code;
 			ErrorId = errorCode;
 		}
-
 	}
 
 	[DataContract(Name = "error")]

@@ -36,12 +36,11 @@ namespace NI.Data.Storage.Service {
 		}
 
 		public bool HandleError(Exception error) {
-			log.Error("Storage API error: {0}", error);
+			log.Error("StorageService API error: {0}", error);
 			return true;
 		}
 
 		public void ProvideFault(Exception error, System.ServiceModel.Channels.MessageVersion version, ref System.ServiceModel.Channels.Message fault) {
-			Console.WriteLine("API ERROR: {0}", error);
 
 			var faultEx = new FaultException<ApiFault>( new ApiFault(error.Message), new FaultReason(error.Message) );
 			fault = Message.CreateMessage(version, faultEx.CreateMessageFault(), "error" );

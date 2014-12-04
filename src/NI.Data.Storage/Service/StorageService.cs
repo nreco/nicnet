@@ -26,11 +26,15 @@ using NI.Data.Storage.Model;
 using NI.Data.Storage.Service.Actions;
 using NI.Data.Storage.Service.Schema;
 
+using NI.Data;
+
 namespace NI.Data.Storage.Service {
 
 	[AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
 	[ErrorBehavior(typeof(ErrorHandler))]
 	public class StorageService : IStorageService {
+
+		static Logger log = new Logger(typeof(StorageService));
 
 		protected IObjectContainerStorage ObjPersister;
 		protected Func<DataSchema> ProvideOntology;
@@ -50,7 +54,7 @@ namespace NI.Data.Storage.Service {
 			try {
 				return new LoadRelex(ProvideOntology(), StorageDalc ).LoadRows(relex, totalcount); 
 			} catch (Exception ex) {
-				Console.WriteLine("RELEX ERROR: {0}", ex);
+				log.Error("LoadRows: {0}", ex);
 				throw;
 			}
 		}
@@ -59,7 +63,7 @@ namespace NI.Data.Storage.Service {
 			try {
 				return new LoadRelex(ProvideOntology(), StorageDalc ).LoadValues(relex, totalcount); 
 			} catch (Exception ex) {
-				Console.WriteLine("RELEX ERROR: {0}", ex);
+				log.Error("LoadValues: {0}", ex);
 				throw;
 			}
 		}
