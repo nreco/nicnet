@@ -45,7 +45,38 @@ namespace NI.Data.Storage
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
-				return LoadObjectTable(query, ds, dataClass);
+				if (ObjectContainerStorage is ISqlObjectContainerStorage) {
+					// SQL-optimized data load
+					DataTable tbl = !ds.Tables.Contains(dataClass.ID) ? ds.Tables.Add(dataClass.ID) : ds.Tables[dataClass.ID];
+					tbl.BeginLoadData();
+					ExecuteReader(query, (reader)=> {
+						for (int i = 0; i < query.StartRecord; i++)
+							reader.Read(); // skip first N records
+						var fieldIdxMapping = new int[reader.FieldCount];
+						for (int i = 0; i < reader.FieldCount; i++) {
+							var cName = reader.GetName(i);
+							var cType = reader.GetFieldType(i);
+							if (!tbl.Columns.Contains(cName))
+								tbl.Columns.Add(cName, cType);
+							fieldIdxMapping[i] = tbl.Columns.IndexOf(cName);
+						}
+
+						var values = new object[reader.FieldCount];
+						while (reader.Read() && tbl.Rows.Count < query.RecordCount) {
+							reader.GetValues(values);
+							var rowValues = new object[tbl.Columns.Count];
+							for (int i = 0; i < reader.FieldCount; i++)
+								rowValues[fieldIdxMapping[i]] = values[i];
+							var r = tbl.LoadDataRow(rowValues, LoadOption.Upsert);
+							r.AcceptChanges();
+						}
+
+					});
+					tbl.EndLoadData();
+					return tbl;
+				} else {
+					return LoadObjectTable(query, ds, dataClass);	
+				}
 			}
 			// check for relation table
 			var relation = schema.FindRelationshipByID(query.Table.Name);

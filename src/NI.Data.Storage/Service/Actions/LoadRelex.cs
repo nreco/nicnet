@@ -49,13 +49,26 @@ namespace NI.Data.Storage.Service.Actions {
 				res.TotalCount = StorageDalc.RecordsCount( q );
 			}
 
-			var ds = new DataSet();
-			var tbl = StorageDalc.Load(q, ds);
-			
 			var data = new RowList();
-			foreach (DataRow r in tbl.Rows) {
-				data.Add( new DataRowItem(r) );
-			}
+			StorageDalc.ExecuteReader(q, (reader) => {
+				for (int i = 0; i < q.StartRecord; i++)
+					reader.Read(); // skip first N records
+
+				var cols = new List<string>();
+				for (int i = 0; i < reader.FieldCount; i++) {
+					cols.Add(reader.GetName(i));
+				}
+
+				while (reader.Read() && data.Count < q.RecordCount) {
+					var values = new object[reader.FieldCount];
+					reader.GetValues(values);
+					var row = new Dictionary<string, object>(values.Length);
+					for (int i = 0; i < reader.FieldCount; i++)
+						row[ cols[i] ] = DBNull.Value.Equals(values[i]) ? null : values[i];
+					data.Add(new DictionaryItem(row) );
+				}
+			});
+
 			res.Data = data;
 			return res;
 		}
@@ -73,16 +86,17 @@ namespace NI.Data.Storage.Service.Actions {
 			var data = new List<object[]>();
 			StorageDalc.ExecuteReader(q, (reader) => {
 				for (int i = 0; i < q.StartRecord; i++)
-					reader.Read(); // skip first N records				
+					reader.Read(); // skip first N records
 				for (int i = 0; i < reader.FieldCount; i++) {
 					 cols.Add( reader.GetName(i) );
 				}
 
 				while (reader.Read() && data.Count < q.RecordCount) {
 					var values = new object[reader.FieldCount];
-					// fetch all fields & values in hashtable
+					reader.GetValues(values);
 					for (int i = 0; i < reader.FieldCount; i++)
-						values[i] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+						if (DBNull.Value.Equals(values[i]))
+							values[i] = null;
 					data.Add(values);
 				}
 			});

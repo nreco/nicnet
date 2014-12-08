@@ -41,7 +41,7 @@ namespace NI.Data.Storage.Service.Schema {
 	}
 
 	[CollectionDataContract(ItemName = "row")]
-	public class RowList : List<DataRowItem> { }
+	public class RowList : List<DictionaryItem> { }
 
 
 }
