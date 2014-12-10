@@ -99,7 +99,7 @@ namespace NI.Data
 						var val = p.GetValue(viewContext, null);
 						res = new SimpleStringTemplate.TokenResult(val);
 					}
-				} else if (viewContext.Query.ExtendedProperties.ContainsKey(token)) {
+				} else if (viewContext.Query.ExtendedProperties!=null && viewContext.Query.ExtendedProperties.ContainsKey(token)) {
 					res = new SimpleStringTemplate.TokenResult(viewContext.Query.ExtendedProperties[token]);
 				}
 				cachedProps[token] = res;
