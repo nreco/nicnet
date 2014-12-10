@@ -53,6 +53,7 @@
     <Compile Include="Data\DataEventBrokerTest.cs" />
     <Compile Include="Data\LinqTests.cs" />
     <Compile Include="Data\PermissionTest.cs" />
+    <Compile Include="Data\SimpleStringTemplateTest.cs" />
     <Compile Include="Data\SQLiteDalcTest.cs" />
     <Compile Include="Data\DataSetDalcTest.cs" />
     <Compile Include="Data\DbCommandGeneratorTest.cs" />

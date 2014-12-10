@@ -84,16 +84,27 @@ namespace NI.Data
 		protected string FormatSelectSql(ViewContext viewContext) {
 			var strTpl = new SimpleStringTemplate(SqlCommandTextTemplate,2);
 			strTpl.ReplaceMissedTokens = false;
-			var props = new Dictionary<string, object>();
-			foreach (var p in viewContext.GetType().GetProperties()) {
-				props[p.Name] = p.GetValue(viewContext, null);
-			}
-			if (viewContext.Query.ExtendedProperties != null) {
-				foreach (var extProp in viewContext.Query.ExtendedProperties) {
-					props[extProp.Key] = extProp.Value;
+			
+			var cachedProps = new Dictionary<string, SimpleStringTemplate.TokenResult>();
+			return strTpl.FormatTemplate((token) => {
+				if (cachedProps.ContainsKey(token))
+					return cachedProps[token];
+				SimpleStringTemplate.TokenResult res = SimpleStringTemplate.TokenResult.NotDefined;
+
+				var p = viewContext.GetType().GetProperty(token);
+				if (p!=null) {
+					if (token == "SqlOrderBy" && viewContext.IsCountQuery) { // order by is not applicable for count queries
+						res = SimpleStringTemplate.TokenResult.NotApplicable;
+					} else {
+						var val = p.GetValue(viewContext, null);
+						res = new SimpleStringTemplate.TokenResult(val);
+					}
+				} else if (viewContext.Query.ExtendedProperties.ContainsKey(token)) {
+					res = new SimpleStringTemplate.TokenResult(viewContext.Query.ExtendedProperties[token]);
 				}
-			}
-			return strTpl.FormatTemplate(props);
+				cachedProps[token] = res;
+				return res;
+			});
 		}
 
 		public class ViewContext {
@@ -194,8 +205,6 @@ namespace NI.Data
 			}
 
 			protected string BuildSort() {
-				if (IsCountQuery) // order by is not applicable for count queries
-					return SimpleStringTemplate.NotApplicable;
 				if (Query.Sort==null || Query.Sort.Length==0)
 					return null;
 
