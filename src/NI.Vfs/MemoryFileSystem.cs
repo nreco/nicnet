@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NI.Vfs
 {
@@ -23,15 +24,15 @@ namespace NI.Vfs
 	/// </summary>
 	public class MemoryFileSystem : IFileSystem
 	{
-		protected IDictionary MemoryFilesMap;
+		protected IDictionary<string,MemoryFile> MemoryFilesMap;
 		
-		public IEnumerable MemoryFiles {
+		public IEnumerable<MemoryFile> MemoryFiles {
 			get { return MemoryFilesMap.Values; }
 		}
 	
 		public MemoryFileSystem()
 		{
-			MemoryFilesMap = new Hashtable();
+			MemoryFilesMap = new Dictionary<string,MemoryFile>();
 		}
 		
 	
@@ -53,13 +54,15 @@ namespace NI.Vfs
 				name = Path.Combine( Path.GetDirectoryName(name), Path.GetFileName(name) );
 			}
 			
-			MemoryFile file = MemoryFilesMap[name] as MemoryFile;
-			if (file==null) {
-				file = new MemoryFile( name, name.Length>0 ? FileType.Imaginary : FileType.Folder, this);
-				MemoryFilesMap[name] = file;
+			if (!MemoryFilesMap.ContainsKey(name)) {
+				var newFile = new MemoryFile( name, name.Length>0 ? FileType.Imaginary : FileType.Folder, this);
 			}
-			return file;
-		}	
+			return MemoryFilesMap[name];
+		}
+
+		internal void AddFile(MemoryFile f) {
+			MemoryFilesMap[f.Name] = f;
+		}
 		
 		public void Clear() {
 			MemoryFilesMap.Clear();

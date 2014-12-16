@@ -76,6 +76,11 @@ namespace NI.Tests.Vfs
 			
 			prepeare(memFs);
 
+			var f = memFs.ResolveFile("g1.wmv");
+			f.CreateFile();
+			f.WriteAllBytes( System.Text.Encoding.ASCII.GetBytes("test") );
+			Assert.AreEqual(4, f.Content.Size);
+
 			// remove everything
 			memFs.Root.Delete();
 		}

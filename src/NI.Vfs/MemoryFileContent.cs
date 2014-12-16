@@ -23,9 +23,11 @@ namespace NI.Vfs
 	public class MemoryFileContent : IFileContent
 	{
 		protected MemoryFile MemoryFile;
-		protected MemoryStream MemFileStream = null;
+		protected MemoryStream LastStream = null;
 		protected DateTime _LastModifiedTime = DateTime.Now;
 		
+		protected byte[] ContentBytes = null;
+
 		public MemoryFileContent(MemoryFile file)
 		{
 			MemoryFile = file;
@@ -37,13 +39,23 @@ namespace NI.Vfs
 
 		public Stream GetStream(FileAccess access) {
 			if (File.Type!=FileType.File)
-				throw new FileSystemException(); // TODO: more structured exception
-			ReopenMemoryStream();
-			return MemFileStream;
+				throw new FileSystemException("Not a file"); // TODO: more structured exception
+
+			if (ContentBytes!=null && access==FileAccess.Read)
+				return new MemoryStream(ContentBytes, false);
+
+			LastStream = new MemoryFileStream(this);
+			if (ContentBytes != null) {
+				LastStream.Write(ContentBytes,0,ContentBytes.Length);
+				LastStream.Seek(0, SeekOrigin.Begin);
+			}
+			return LastStream;
 		}
 
 		public long Size {
-			get { return MemFileStream.Length; }
+			get { 
+				return ContentBytes!=null ? ContentBytes.Length : 0; 
+			}
 		}
 
 		public DateTime LastModifiedTime {
@@ -51,21 +63,24 @@ namespace NI.Vfs
 			set { _LastModifiedTime = value; }
 		}
 
-		protected void ReopenMemoryStream() {
-			MemoryStream newMemFileStream = new MemoryStream();
-			if (MemFileStream!=null) {
-				MemFileStream.Close();
-				byte[] data = MemFileStream.ToArray();
-				newMemFileStream.Write(data,0,data.Length);
-				newMemFileStream.Seek(0, SeekOrigin.Begin);
+		public void Close() {
+			if (LastStream!=null) {
+				LastStream.Close();
 			}
-			MemFileStream = newMemFileStream;			
 		}
 
-		public void Close() {
-			if (MemFileStream!=null) {
-				MemFileStream.Close();
+		internal class MemoryFileStream : MemoryStream {
+			MemoryFileContent FileContent;
+
+			public MemoryFileStream(MemoryFileContent fileContent) {
+				FileContent = fileContent;
 			}
+
+			public override void Close() {
+				base.Close();
+				FileContent.ContentBytes = ToArray();
+			}
+
 		}
 
 	}

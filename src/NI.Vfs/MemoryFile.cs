@@ -61,6 +61,7 @@ namespace NI.Vfs
 			_Name = name;
 			MemoryFs = memFilesystem;
 			_Type = type;
+			memFilesystem.AddFile(this);
 		}
 
 		public virtual void Close() {
@@ -121,6 +122,7 @@ namespace NI.Vfs
 				}
 			}		
 			_Type = FileType.File;
+			Content.LastModifiedTime = DateTime.Now;
 			Close();
 		}
 		
