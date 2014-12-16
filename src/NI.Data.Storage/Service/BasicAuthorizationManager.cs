@@ -60,7 +60,7 @@ namespace NI.Data.Storage.Service {
 		}
 
 
-		public bool Evaluate(EvaluationContext evaluationContext, ref object state) {
+		public virtual bool Evaluate(EvaluationContext evaluationContext, ref object state) {
 			var authHeader = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
 			if (!String.IsNullOrEmpty(authHeader)) {
 				var svcCredentials = System.Text.ASCIIEncoding.ASCII
