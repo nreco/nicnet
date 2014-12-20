@@ -63,6 +63,7 @@
     <Compile Include="MetadataTableSchemaStorage.cs" />
     <Compile Include="ObjectContainerSqlDalcStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchemaDataSetFactory.cs" />
     <Compile Include="Service\Actions\ChangeRow.cs" />
     <Compile Include="Service\Schema\DictionaryItem.cs" />
     <Compile Include="Service\Schema\GetDataSchemaResult.cs" />

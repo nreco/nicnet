@@ -356,5 +356,22 @@ namespace NI.Data.Storage.Tests {
 
 		}
 
+		[Test]
+		public void SchemaDataSetFactory() {
+			var schemaDsFactory = new SchemaDataSetFactory( StorageContext.DataSchemaStorage.GetSchema );
+			var ds1 = schemaDsFactory.GetDataSet("contacts");
+			Assert.True(ds1.Tables.Contains("contacts"));
+			Assert.AreEqual(4, ds1.Tables["contacts"].Columns.Count );
+
+			var dataRowMapper = new DataRowDalcMapper(StorageContext.StorageDalc, schemaDsFactory.GetDataSet);
+			var testContactRow = dataRowMapper.Create("contacts");
+			testContactRow["name"] = "Test1";
+			dataRowMapper.Update(testContactRow);
+
+			var loadedTestContactRow = dataRowMapper.Load("contacts", testContactRow["id"]);
+			Assert.NotNull(loadedTestContactRow);
+			Assert.AreEqual("Test1", loadedTestContactRow["name"]);
+		}
+
 	}
 }
