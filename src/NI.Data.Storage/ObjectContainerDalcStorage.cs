@@ -652,7 +652,7 @@ namespace NI.Data.Storage {
 						if (rels==null || rels.Contains(relationship) )
 							rs.Add(new ObjectRelation(relSubjId, relationship, relObjId));
 					} else {
-						log.Info( "Relation between ObjectID={0} and ObjectID={1} with predicate ClassID={0} doesn't exist: relation skipped",
+						log.Info( "Relation between ObjectID={0} and ObjectID={1} with predicate ClassID={2} doesn't exist: relation skipped",
 							relSubjId, relObjId, predClass.ID);
 					}
 				}

@@ -111,6 +111,12 @@ namespace NI.Data.Storage {
 			var objPropRangeRelRev = new Relationship(objClass,rangeClass,objPropClass,true,true,null);
 			schema.AddRelationship(new Relationship(objPropClass, rangeClass, objClass, true, false, objPropRangeRelRev) );
 
+			// for superclass (TBD: subclass-of should resolve these duplicate relationships) 
+			var objPropDomainForSuperRelRev = new Relationship(superClass,domainClass,objPropClass,true,true,null);
+			schema.AddRelationship(new Relationship(objPropClass,domainClass, superClass, true, false, objPropDomainForSuperRelRev) );
+			var objPropRangeForSuperRelRev = new Relationship(superClass,rangeClass,objPropClass,true,true,null);
+			schema.AddRelationship(new Relationship(objPropClass, rangeClass, superClass, true, false, objPropRangeForSuperRelRev) );
+
 			var objPropTypeRelRev = new Relationship(superClass,rdfTypeClass,objPropClass,true,true,null);
 			schema.AddRelationship(new Relationship(objPropClass, rdfTypeClass, superClass, true, false, objPropTypeRelRev) );
 
@@ -246,7 +252,10 @@ namespace NI.Data.Storage {
 					new [] { 
 						objPropClass.FindRelationship(domainClass, objClass ), 
 						objPropClass.FindRelationship(rangeClass, objClass ),
-						objPropClass.FindRelationship(rdfTypeClass, superClass ) 
+						objPropClass.FindRelationship(rdfTypeClass, superClass ),
+						// TBD: subclass-of to avoid these duplicate relationships
+						objPropClass.FindRelationship(domainClass, superClass ), 
+						objPropClass.FindRelationship(rangeClass, superClass )
 					} );
 
 			foreach (var predicateClass in schema.Classes.Where(c => c.IsPredicate)) {
