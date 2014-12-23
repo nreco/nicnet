@@ -298,11 +298,21 @@ namespace NI.Data.Storage
 
 		public int Delete(Query query) {
 			var srcName = new QTable(query.Table.Name);
-			var dataClass = GetSchema().FindClassByID(query.Table.Name);
+			var schema = GetSchema();
+			var dataClass = schema.FindClassByID(query.Table.Name);
 			if (dataClass != null) {
 				var ids = ObjectContainerStorage.GetObjectIds(query);
 				return ObjectContainerStorage.Delete(ids);
 			}
+
+			// check for relation table
+			var relation = schema.FindRelationshipByID(query.Table.Name);
+			if (relation != null) {
+				var rels = ObjectContainerStorage.LoadRelations(query).ToArray();
+				ObjectContainerStorage.RemoveRelation( rels );
+				return rels.Length;
+			}
+
 			return UnderlyingDalc.Delete(query);
 		}
 

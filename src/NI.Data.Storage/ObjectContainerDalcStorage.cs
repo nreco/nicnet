@@ -406,6 +406,9 @@ namespace NI.Data.Storage {
 					& (QField)"predicate_class_compact_id" == new QConst(r.Relation.Predicate.CompactID);
 				orCondition.Nodes.Add(relCondition);
 			}
+			if (orCondition.Nodes.Count == 0) {
+				orCondition.Nodes.Add( new QueryConditionNode( new QConst(1), Conditions.Equal, new QConst(2) ) );
+			}
 			return loadRelQ;
 		}
 
@@ -458,6 +461,8 @@ namespace NI.Data.Storage {
 		}
 
 		public void RemoveRelation(params ObjectRelation[] relations) {
+			if (relations.Length==0)
+				return; // nothing to do
 			var loadRelQ = ComposeLoadRelationsQuery(relations);
 			var relTbl = DbMgr.LoadAll(loadRelQ);
 
