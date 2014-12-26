@@ -175,9 +175,6 @@ namespace NI.Data.Storage.Tests {
 			var idCol = t.Columns.Add("id", typeof(string));
 			t.Columns.Add("compact_id", typeof(int));
 			t.Columns.Add("name", typeof(string));
-			t.Columns.Add("hidden", typeof(bool));
-			t.Columns.Add("indexable", typeof(bool));
-			t.Columns.Add("predefined", typeof(bool));
 			t.Columns.Add("predicate", typeof(bool));
 			t.Columns.Add("object_location", typeof(string));
 
@@ -191,9 +188,6 @@ namespace NI.Data.Storage.Tests {
 			var idCol = t.Columns.Add("id", typeof(string));
 			t.Columns.Add("compact_id", typeof(int));
 			t.Columns.Add("name", typeof(string));
-			t.Columns.Add("hidden", typeof(bool));
-			t.Columns.Add("indexable", typeof(bool));
-			t.Columns.Add("predefined", typeof(bool));
 			t.Columns.Add("datatype", typeof(string));
 			t.Columns.Add("primary_key", typeof(bool)).DefaultValue = false;
 
@@ -233,13 +227,13 @@ namespace NI.Data.Storage.Tests {
 					ID = "contacts",
 					CompactID = 1,
 					Name = "Contacts",
-					ObjectLocation = ClassObjectLocationMode.ObjectTable
+					ObjectLocation = ObjectLocationType.ObjectTable
 				},
 				new Class() {
 					ID = "companies",
 					CompactID = 2,
 					Name = "Companies",
-					ObjectLocation = ClassObjectLocationMode.ObjectTable
+					ObjectLocation = ObjectLocationType.ObjectTable
 				},
 				new Class() {
 					ID = "contactCompany",
@@ -305,16 +299,16 @@ namespace NI.Data.Storage.Tests {
 				}
 			};
 			var o = new DataSchema(classes, props);
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("title"), PropertyValueLocationMode.ValueTable,null));
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("net_income"), PropertyValueLocationMode.ValueTable,null) );
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("name"), PropertyValueLocationMode.ValueTable,null) );
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("birthday"), PropertyValueLocationMode.ValueTable,null));
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary"), PropertyValueLocationMode.ValueTable,null));
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("title"), PropertyValueLocationMode.ValueTable, null));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("title")));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("net_income")) );
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("name")) );
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("birthday")));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("is_primary")));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("title")));
 
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
-			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("id"), PropertyValueLocationMode.TableColumn, "id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("countries"), o.FindPropertyByID("id"), "id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("contacts"), o.FindPropertyByID("id"),"id"));
+			o.AddClassProperty(new ClassPropertyLocation(o.FindClassByID("companies"), o.FindPropertyByID("id"), "id"));
 
 			var companyToContactRel = new Relationship(
 				o.FindClassByID("companies"),

@@ -79,6 +79,9 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr = new DataRowDalcMapper(InternalDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
 
 			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, () => { return DataSchemaStorage.GetSchema(); } );
+			objStorage.DeriveTypeFieldExpr = new Dictionary<string,string>() {
+				{"getDateYear", "CAST(strftime('%Y', {0}) as integer)"}
+			};
 			DataSchemaStorage = getSchemaStorage(StorageDbMgr, objStorage);
 
 			objStorage.ObjectViewName = "objects_view";
@@ -102,9 +105,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert( "metadata_classes", new Dictionary<string,object>() {
 				{"id", "companies"},
 				{"name", "Company"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"predicate", false},
 				{"compact_id", 1},
 				{"object_location", "ObjectTable"}
@@ -112,9 +112,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
 				{"id", "contacts"},
 				{"name", "Contact"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"predicate", false},
 				{"compact_id", 2},
 				{"object_location", "ObjectTable"}
@@ -123,9 +120,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
 				{"id", "employee"},
 				{"name", "Employee"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"predicate", true},
 				{"compact_id", 3},
 				{"object_location", "ObjectTable"}
@@ -134,9 +128,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
 				{"id", "countries"},
 				{"name", "Country Lookup"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"predicate", false},
 				{"compact_id", 4},
 				{"object_location", "ObjectTable"}
@@ -145,9 +136,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_classes", new Dictionary<string, object>() {
 				{"id", "country"},
 				{"name", "Country"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"predicate", true},
 				{"compact_id", 5},
 				{"object_location", "ObjectTable"}
@@ -174,9 +162,6 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "name"},
 				{"name", "Name"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"datatype", "string"},
 				{"compact_id", 1}
 			});
@@ -184,27 +169,18 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "birthday"},
 				{"name", "Birthday"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"datatype", "date"},
 				{"compact_id", 2}
 			});
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "is_primary"},
 				{"name", "Is Primary?"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", false},
 				{"datatype", "boolean"},
 				{"compact_id", 3}
 			});
 			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
 				{"id", "id"},
 				{"name", "ID"},
-				{"hidden", false},
-				{"indexable", false},
-				{"predefined", true},
 				{"datatype", "integer"},
 				{"compact_id", 4},
 				{"primary_key", true}
@@ -255,9 +231,6 @@ namespace NI.Data.Storage.Tests {
 				CREATE TABLE [metadata_classes]  (
 					[id] TEXT PRIMARY KEY,
 					[name] TEXT,
-					[hidden] INTEGER,
-					[indexable] INTEGER,
-					[predefined] INTEGER,
 					[predicate] INTEGER,
 					[compact_id] INTEGER,
 					[object_location] TEXT
@@ -268,9 +241,6 @@ namespace NI.Data.Storage.Tests {
 					[id] TEXT PRIMARY KEY,
 					[name] TEXT,
 					[datatype] TEXT,
-					[hidden] INTEGER,
-					[indexable] INTEGER,
-					[predefined] INTEGER,
 					[compact_id] INTEGER,
 					[primary_key] INTEGER
 				)");

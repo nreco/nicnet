@@ -22,25 +22,65 @@ using System.Threading.Tasks;
 namespace NI.Data.Storage.Model {
 
 	/// <summary>
-	/// Describes class property 
+	/// Describes class property value location
 	/// </summary>
 	public class ClassPropertyLocation {
 		public Class Class { get; private set; }
 		public Property Property { get; private set; }
-		public PropertyValueLocationMode Location { get; private set; }
-		public string ColumnName { get; private set; }
+		public PropertyValueLocationType Location { get; private set; }
+		public string TableColumnName { get; private set; }
 
-		public ClassPropertyLocation(Class dataClass, Property p, PropertyValueLocationMode locationMode, string columnName) {
+		protected ClassPropertyLocation(Class dataClass, Property p, PropertyValueLocationType location) {
 			Class = dataClass;
 			Property = p;
-			Location = locationMode;
-			ColumnName = columnName;
+			Location = location;
+		}
+
+		/// <summary>
+		/// Initializes new class property located in value table
+		/// </summary>
+		public ClassPropertyLocation(Class dataClass, Property p) : this(dataClass,p,PropertyValueLocationType.ValueTable) {
+		}
+
+		/// <summary>
+		/// Initializes new class property located in object's table column
+		/// </summary>
+		public ClassPropertyLocation(Class dataClass, Property p, string columnName) : this (dataClass,p,PropertyValueLocationType.TableColumn) {
+			if (String.IsNullOrEmpty(columnName))
+				throw new ArgumentNullException("columnName");
+			TableColumnName = columnName;
+		}
+
+		public override string ToString() {
+			return String.Format("Class property {0}.{1} location={2}", Class.ID, Property.ID, Location);
 		}
 	}
 
-	public enum PropertyValueLocationMode {
+	public enum PropertyValueLocationType {
 		ValueTable,
-		TableColumn
+		TableColumn,
+		Derived
 	}
+
+	public class DerivedClassPropertyLocation : ClassPropertyLocation {
+
+		public ClassPropertyLocation DerivedFrom { get; private set; }
+
+		public string DeriveType { get; private set; }
+
+		public DerivedClassPropertyLocation(Class dataClass, Property p, string deriveType, ClassPropertyLocation derivedFrom)
+			: base(dataClass, p, PropertyValueLocationType.Derived) {
+			if (derivedFrom.Class!=dataClass)
+				throw new NotSupportedException("Property can be derived from property of the same class");
+			DerivedFrom = derivedFrom;
+			DeriveType = deriveType;
+		}
+
+		public override string ToString() {
+			return String.Format("{0} deriveType={1}", base.ToString(), DeriveType);
+		}
+
+	}
+
 
 }

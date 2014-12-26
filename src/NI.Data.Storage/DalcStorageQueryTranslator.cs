@@ -10,13 +10,16 @@ namespace NI.Data.Storage {
 	
 	public class DalcStorageQueryTranslator {
 		
-		private DataSchema Schema;
+		protected DataSchema Schema { get; private set; }
 
-		protected ObjectContainerDalcStorage ObjStorage;
+		protected ObjectContainerDalcStorage ObjStorage { get; private set; }
+
+		protected Func<DerivedClassPropertyLocation,string,QField> GetDerivedField { get ;private set; }
 
 		public DalcStorageQueryTranslator(DataSchema schema, ObjectContainerDalcStorage objStorage) {
 			Schema = schema;
 			ObjStorage = objStorage;
+			GetDerivedField = objStorage.ResolveDerivedProperty;
 		}
 
 		public Query TranslateSubQuery(Query query) {
@@ -24,7 +27,7 @@ namespace NI.Data.Storage {
 			var dataClass = Schema.FindClassByID(query.Table.Name);
 			if (dataClass!=null) {
 				var tableName = ObjStorage.ObjectTableName;
-				if (dataClass.ObjectLocation==ClassObjectLocationMode.SeparateTable) {
+				if (dataClass.ObjectLocation==ObjectLocationType.SeparateTable) {
 					tableName = dataClass.ID;
 				}
 				var dataClassQuery = new Query(new QTable(tableName, query.Table.Alias));
@@ -106,15 +109,43 @@ namespace NI.Data.Storage {
 					String.Format("Related field {0} referenced by relationship {1} doesn't exist",
 						fld.Name, fld.Prefix));
 
-			var pSrcName = ObjStorage.DataTypeTableNames[p.DataType.ID];
+			var pLoc = p.GetLocation(relationship.Object);
+			QField pFld = null;
+			Query propQuery = null;
 
-			var propQuery = new Query(pSrcName,
-							(QField)"property_compact_id" == new QConst(p.CompactID)
-							&
-							new QueryConditionNode((QField)"value", cnd, val)							
-						) {
-							Fields = new[] { (QField)"object_id" }
-						};
+			// filter by derived property handling
+			if (pLoc.Location == PropertyValueLocationType.Derived) {
+				if (GetDerivedField==null)
+					throw new NotSupportedException(String.Format("Derived property {0} is not supported",pLoc.ToString() ));
+				var derivedPropLoc = (DerivedClassPropertyLocation)pLoc;
+
+				if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
+					fld = GetDerivedField(derivedPropLoc, derivedPropLoc.TableColumnName);
+				} else if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
+					fld = GetDerivedField(derivedPropLoc,"value");
+				} else {
+					throw new NotSupportedException("DerivedFrom cannot be derived property");
+				}
+				pLoc = derivedPropLoc.DerivedFrom;
+			}
+
+			if (pLoc.Location == PropertyValueLocationType.ValueTable) { 
+				var pSrcName = ObjStorage.DataTypeTableNames[pLoc.Property.DataType.ID];
+				propQuery = new Query(pSrcName,
+								(QField)"property_compact_id" == new QConst(pLoc.Property.CompactID)
+								&
+								new QueryConditionNode( pFld??(QField)"value", cnd, val)							
+							) {
+								Fields = new[] { (QField)"object_id" }
+							};
+			} else if (pLoc.Location==PropertyValueLocationType.TableColumn) {
+				//TBD: handle separate table location
+				propQuery = new Query(ObjStorage.ObjectTableName, 
+					new QueryConditionNode( pFld??(QField)pLoc.TableColumnName, cnd, val) ) {
+					Fields = new[] { (QField)"id" }
+				};
+			}
+
 			var reverseRelSequence = relationship.Inferred ? relationship.InferredByRelationships.Reverse() : new[] { relationship };
 
 			foreach (var r in reverseRelSequence) {
@@ -135,22 +166,48 @@ namespace NI.Data.Storage {
 
 		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
 			var propLocation = prop.GetLocation( dataClass );
-			if (propLocation.Location == PropertyValueLocationMode.TableColumn) {
-				return new QueryConditionNode((QField)propLocation.ColumnName, cnd, val);
+
+			QField fld = null;
+			if (propLocation.Location == PropertyValueLocationType.Derived) {
+				if (GetDerivedField==null)
+					throw new NotSupportedException(String.Format("Derived property {0}.{1} is not supported",propLocation.Class.ID,propLocation.Property.ID));
+				var derivedPropLoc = (DerivedClassPropertyLocation)propLocation;
+
+				if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
+					fld = GetDerivedField(derivedPropLoc, derivedPropLoc.TableColumnName);
+				} else if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
+					fld = GetDerivedField(derivedPropLoc,"value");
+				} else {
+					throw new NotSupportedException("DerivedFrom cannot be derived property");
+				}
+				propLocation = derivedPropLoc.DerivedFrom;
 			}
 
+			if (propLocation.Location == PropertyValueLocationType.TableColumn) {
+				return new QueryConditionNode(  fld ?? (QField)propLocation.TableColumnName, cnd, val);
+			} else if (propLocation.Location == PropertyValueLocationType.ValueTable) {
+				return ComposeValueTableCondition(propLocation.Class,propLocation.Property, fld ?? (QField)"value",cnd,val);
+			} else {
+				throw new NotSupportedException(String.Format("Unsupported location of class property {0}.{1}: {2}",
+					propLocation.Class.ID, propLocation.Property.ID,
+					propLocation.Location));
+			}
+
+		}
+
+		private QueryNode ComposeValueTableCondition(Class dataClass, Property prop, QField fld, Conditions cnd, IQueryValue val) {
 			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
 			return new QueryConditionNode(
-				new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
-				Conditions.In,
-				new Query(pSrcName,
-					(QField)"property_compact_id" == new QConst(prop.CompactID)
-					&
-					new QueryConditionNode((QField)"value", cnd, val)
-				) {
-					Fields = new[] { (QField)"object_id" }
-				}
-			);
+					new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
+					Conditions.In,
+					new Query(pSrcName,
+						(QField)"property_compact_id" == new QConst(prop.CompactID)
+						&
+						new QueryConditionNode(fld, cnd, val)
+					) {
+						Fields = new[] { (QField)"object_id" }
+					}
+				);
 		}
 
 

@@ -60,6 +60,8 @@ namespace NI.Data.Storage {
 
 		public int QueryBatchSize { get; set; }
 
+		public IDictionary<string, string> DeriveTypeFieldExpr { get; set; }
+
 		public ObjectContainerDalcStorage(DataRowDalcMapper objectDbMgr, IDalc logDalc, Func<DataSchema> getSchema) {
 			DbMgr = objectDbMgr;
 			LogDalc = logDalc;
@@ -170,18 +172,20 @@ namespace NI.Data.Storage {
 			}
 		}
 
-		protected void SaveValues(ObjectContainer obj) {
+		protected void SaveValues(ObjectContainer obj, DataRow objRow) {
 			// determine values to load
 			var propSrcNameProps = new Dictionary<string, IList<long>>();
 			foreach (var v in obj) {
 				EnsureKnownDataType(v.Key.DataType.ID);
-				var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
+				var propLocation = v.Key.GetLocation(obj.GetClass());
 
-				if (!propSrcNameProps.ContainsKey(valueSrcName))
-					propSrcNameProps[valueSrcName] = new List<long>();
-
-				if (!propSrcNameProps[valueSrcName].Contains(v.Key.CompactID))
-					propSrcNameProps[valueSrcName].Add(v.Key.CompactID);
+				if (propLocation.Location == PropertyValueLocationType.ValueTable) {
+					var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
+					if (!propSrcNameProps.ContainsKey(valueSrcName))
+						propSrcNameProps[valueSrcName] = new List<long>();
+					if (!propSrcNameProps[valueSrcName].Contains(v.Key.CompactID))
+						propSrcNameProps[valueSrcName].Add(v.Key.CompactID);
+				}
 			}
 			// load value tables
 			var propSrcNameToTbl = new Dictionary<string, DataTable>();
@@ -205,65 +209,77 @@ namespace NI.Data.Storage {
 				WriteValueLog(valRow);
 				tbl.Rows.Add(valRow);
 			};
-
+			int objTablePropsCount = 0;
 			// process values
 			foreach (var v in obj) {
-				var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
-				var tbl = propSrcNameToTbl[valueSrcName];
+				var propLocation = v.Key.GetLocation(obj.GetClass());
 
-				var isEmpty = IsEmpty(v.Key, v.Value);
-				if (isEmpty) {
-					// just remove all rows of the property
-					foreach (var r in findPropertyRows(v.Key, tbl)) {
-						deleteValueRow(r);
-					}
+				if (propLocation.Location == PropertyValueLocationType.TableColumn && !v.Key.PrimaryKey) {
+					objRow[propLocation.TableColumnName] = SerializeValueData(v.Key, v.Value);
+					objTablePropsCount++;
+				} else if (propLocation.Location == PropertyValueLocationType.ValueTable) {
 
-				} else {
-					var propRows = findPropertyRows(v.Key, tbl).ToArray();
+					var valueSrcName = DataTypeTableNames[v.Key.DataType.ID];
+					var tbl = propSrcNameToTbl[valueSrcName];
 
-					if (v.Key.Multivalue) {
-						var vs = v.Value is IList ? (IList)v.Value : new[] { v.Value };
-						var unchangedRows = new List<DataRow>();
-						foreach (var vEntry in vs) {
-							var isNewValue = true;
-							var dbValue = SerializeValueData(v.Key, vEntry);
-							for (int i = 0; i < propRows.Length; i++) {
-								var pRow = propRows[i];
-								if (unchangedRows.Contains(pRow))
-									continue;
-								if (DbValueEquals(pRow["value"], dbValue)) {
-									isNewValue = false;
-									unchangedRows.Add(pRow);
+					var isEmpty = IsEmpty(v.Key, v.Value);
+					if (isEmpty) {
+						// just remove all rows of the property
+						foreach (var r in findPropertyRows(v.Key, tbl)) {
+							deleteValueRow(r);
+						}
+					} else {
+						var propRows = findPropertyRows(v.Key, tbl).ToArray();
+
+						if (v.Key.Multivalue) {
+							var vs = v.Value is IList ? (IList)v.Value : new[] { v.Value };
+							var unchangedRows = new List<DataRow>();
+							foreach (var vEntry in vs) {
+								var isNewValue = true;
+								var dbValue = SerializeValueData(v.Key, vEntry);
+								for (int i = 0; i < propRows.Length; i++) {
+									var pRow = propRows[i];
+									if (unchangedRows.Contains(pRow))
+										continue;
+									if (DbValueEquals(pRow["value"], dbValue)) {
+										isNewValue = false;
+										unchangedRows.Add(pRow);
+									}
+								}
+								if (isNewValue) {
+									addValueRow(tbl, v.Key, vEntry);
 								}
 							}
-							if (isNewValue) {
-								addValueRow(tbl, v.Key, vEntry);
-							}
-						}
-						// remove not matched rows
-						foreach (var r in propRows)
-							if (!unchangedRows.Contains(r))
-								deleteValueRow(r);
+							// remove not matched rows
+							foreach (var r in propRows)
+								if (!unchangedRows.Contains(r))
+									deleteValueRow(r);
 
-					} else {
-						// hm... cleanup
-						if (propRows.Length > 1)
-							for (int i = 1; i < propRows.Length; i++)
-								deleteValueRow(propRows[i]);
-						if (propRows.Length == 0) {
-							addValueRow(tbl, v.Key, v.Value);
 						} else {
-							// just update
-							var newValue = SerializeValueData(v.Key, v.Value);
-							if (!DbValueEquals(propRows[0]["value"], newValue)) {
-								propRows[0]["value"] = newValue;
-								WriteValueLog(propRows[0]);
+							// hm... cleanup
+							if (propRows.Length > 1)
+								for (int i = 1; i < propRows.Length; i++)
+									deleteValueRow(propRows[i]);
+							if (propRows.Length == 0) {
+								addValueRow(tbl, v.Key, v.Value);
+							} else {
+								// just update
+								var newValue = SerializeValueData(v.Key, v.Value);
+								if (!DbValueEquals(propRows[0]["value"], newValue)) {
+									propRows[0]["value"] = newValue;
+									WriteValueLog(propRows[0]);
+								}
 							}
 						}
+
 					}
 
 				}
 
+			}
+
+			if (objTablePropsCount>0) {
+				DbMgr.Update(objRow);
 			}
 
 			// push changes to DB
@@ -379,12 +395,16 @@ namespace NI.Data.Storage {
 		}
 
 		public void Insert(ObjectContainer obj) {
+			var c = obj.GetClass();
+			if (c.ObjectLocation!=ObjectLocationType.ObjectTable)
+				throw new NotSupportedException();
+
 			var objRow = DbMgr.Insert(ObjectTableName, new Dictionary<string, object>() {
-				{"compact_class_id", obj.GetClass().CompactID}
+				{"compact_class_id", c.CompactID}
 			});
 			obj.ID = Convert.ToInt64( objRow["id"] );
 
-			SaveValues(obj);
+			SaveValues(obj, objRow);
 
 			if (LoggingEnabled)
 				WriteObjectLog(objRow, "insert");
@@ -530,12 +550,16 @@ namespace NI.Data.Storage {
 		public void Update(ObjectContainer obj) {
 			if (!obj.ID.HasValue)
 				throw new ArgumentException("Object ID is required for update");
+			
+			var c = obj.GetClass();
+			if (c.ObjectLocation!=ObjectLocationType.ObjectTable)
+				throw new NotSupportedException();
 
 			var objRow = DbMgr.Load(ObjectTableName, obj.ID);
 			if (objRow == null)
 				throw new DBConcurrencyException(String.Format("Object with ID={0} doesn't exist", obj.ID));
 
-			SaveValues(obj);
+			SaveValues(obj, objRow);
 
 			if (LoggingEnabled)
 				WriteObjectLog(objRow, "update");
@@ -801,6 +825,13 @@ namespace NI.Data.Storage {
 			}
 		}
 
+		internal QField ResolveDerivedProperty(DerivedClassPropertyLocation classProp, string derivedFromFldName) {
+			if (DeriveTypeFieldExpr != null) {
+				if (DeriveTypeFieldExpr.ContainsKey(classProp.DeriveType))
+					return new QField(classProp.Property.ID, String.Format(DeriveTypeFieldExpr[classProp.DeriveType], derivedFromFldName) );
+			}
+			throw new NotSupportedException(classProp.ToString());
+		}
 
 		public IEnumerable<ObjectRelation> LoadRelations(Query query) {
 			if (query.Fields!=null)

@@ -373,5 +373,30 @@ namespace NI.Data.Storage.Tests {
 			Assert.AreEqual("Test1", loadedTestContactRow["name"]);
 		}
 
+
+		[Test]
+		public void DerivedProperty() {
+			addTestData();
+			var storageDalc = StorageContext.StorageDalc;
+			var testSchema = StorageContext.DataSchemaStorage.GetSchema();
+
+			var birthdayYear = new Property("birthday_year");
+			birthdayYear.CompactID = -1;
+			birthdayYear.DataType = PropertyDataType.Integer;
+			testSchema.AddProperty( birthdayYear );
+			var birthdayClassProp = testSchema.FindClassPropertyLocation("contacts","birthday");
+			testSchema.AddClassProperty( 
+				new DerivedClassPropertyLocation( 
+					testSchema.FindClassByID("contacts"),
+					birthdayYear, "getDateYear", birthdayClassProp ) );
+
+			Assert.AreEqual("Mary", storageDalc.LoadValue( 
+				new Query("contacts", (QField)"birthday_year"==(QConst)1999 ) {
+					Fields = new[] {(QField)"name"}
+				}) );
+
+
+		}
+
 	}
 }

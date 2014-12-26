@@ -40,7 +40,7 @@ namespace NI.Data.Storage.Model {
 
 		//TODO: logging enabled flag
 
-		public ClassObjectLocationMode ObjectLocation { get; set; }
+		public ObjectLocationType ObjectLocation { get; set; }
 
 		public IEnumerable<Property> Properties {
 			get {
@@ -57,7 +57,7 @@ namespace NI.Data.Storage.Model {
 		public DataSchema Schema { get; internal set; }
 
 		public Class() {
-			ObjectLocation = ClassObjectLocationMode.ObjectTable;
+			ObjectLocation = ObjectLocationType.ObjectTable;
 		}
 
         public Class(string id) {
@@ -140,7 +140,7 @@ namespace NI.Data.Storage.Model {
 	}
 
 
-	public enum ClassObjectLocationMode {
+	public enum ObjectLocationType {
 		ObjectTable, 
 		SeparateTable
 	}

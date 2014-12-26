@@ -107,8 +107,13 @@ namespace NI.Data.Storage {
 			foreach (var p2c in propToClass) {
 				var c = dataSchema.FindClassByID(p2c.ClassID);
 				var p = dataSchema.FindPropertyByID(p2c.PropertyID);
-				if (c != null && p != null)
-					dataSchema.AddClassProperty(new ClassPropertyLocation(c,p,p2c.Location,p2c.ColumnName) );
+				if (c != null && p != null) {
+					dataSchema.AddClassProperty( 
+						p2c.Location == PropertyValueLocationType.TableColumn ?
+						new ClassPropertyLocation(c,p,p2c.ColumnName) :
+						new ClassPropertyLocation(c,p)
+					);
+				}
 			}
 
 			foreach (var r in relData) {
@@ -129,7 +134,7 @@ namespace NI.Data.Storage {
 		protected class PropertyToClass {
 			public string ClassID { get; set; }
 			public string PropertyID { get; set; }
-			public PropertyValueLocationMode Location { get; set; }
+			public PropertyValueLocationType Location { get; set; }
 			public string ColumnName { get; set; }
 		}
 

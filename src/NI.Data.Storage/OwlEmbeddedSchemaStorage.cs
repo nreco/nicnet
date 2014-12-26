@@ -51,7 +51,7 @@ namespace NI.Data.Storage {
 			var superClass = new Class(OwlConfig.SuperClassID) {
 				CompactID = OwlConfig.SuperClassCompactID,
 				Name = OwlConfig.SuperClassID,
-				ObjectLocation = ClassObjectLocationMode.ObjectTable
+				ObjectLocation = ObjectLocationType.ObjectTable
 			};
 
 			schema.AddClass(superClass);
@@ -63,7 +63,7 @@ namespace NI.Data.Storage {
 			};
 			schema.AddProperty(superIdProp);
 
-			schema.AddClassProperty(new ClassPropertyLocation(superClass, superIdProp, PropertyValueLocationMode.ValueTable, null) );
+			schema.AddClassProperty(new ClassPropertyLocation(superClass, superIdProp) );
 		}
 
 		Class FindAndAssertMetaClass(DataSchema schema, string classId) {
@@ -88,7 +88,7 @@ namespace NI.Data.Storage {
 			}
 
 			foreach (var c in metaClasses) {
-				schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.SuperIdPropertyID), PropertyValueLocationMode.ValueTable, null) );
+				schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.SuperIdPropertyID)) );
 			}
 
 			var superClass = schema.FindClassByID(OwlConfig.SuperClassID);
@@ -136,9 +136,9 @@ namespace NI.Data.Storage {
 				DataType = PropertyDataType.String
 			};
 			schema.AddProperty(labelProp);
-			schema.AddClassProperty(new ClassPropertyLocation(objClass, labelProp, PropertyValueLocationMode.ValueTable, null));
-			schema.AddClassProperty(new ClassPropertyLocation(datatypePropClass, labelProp, PropertyValueLocationMode.ValueTable, null));
-			schema.AddClassProperty(new ClassPropertyLocation(objPropClass, labelProp, PropertyValueLocationMode.ValueTable, null));
+			schema.AddClassProperty(new ClassPropertyLocation(objClass, labelProp));
+			schema.AddClassProperty(new ClassPropertyLocation(datatypePropClass, labelProp));
+			schema.AddClassProperty(new ClassPropertyLocation(objPropClass, labelProp));
 
 			var pkProp = new Property(pkPropClass.ID) {
 				CompactID = pkPropClass.CompactID,
@@ -147,7 +147,7 @@ namespace NI.Data.Storage {
 				PrimaryKey = true
 			};
 			schema.AddProperty(pkProp);
-			schema.AddClassProperty(new ClassPropertyLocation(datatypeClass, pkProp, PropertyValueLocationMode.TableColumn, ObjectPkColumn));
+			schema.AddClassProperty(new ClassPropertyLocation(datatypeClass, pkProp, ObjectPkColumn));
 		}
 
 		protected void InitDataSchema(DataSchema schema) {
@@ -173,7 +173,7 @@ namespace NI.Data.Storage {
 						Name = name
 					};
 					schema.AddClass(c);
-					schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.PkPropertyID), PropertyValueLocationMode.TableColumn, ObjectPkColumn));
+					schema.AddClassProperty(new ClassPropertyLocation(c, schema.FindPropertyByID(OwlConfig.PkPropertyID), ObjectPkColumn));
 				}
 			}
 
@@ -240,7 +240,7 @@ namespace NI.Data.Storage {
 				var p = schema.FindPropertyByCompactID( domainRel.SubjectID );
 				var c = schema.FindClassByCompactID( domainRel.ObjectID );
 				if (c!=null && p!=null)
-					schema.AddClassProperty(new ClassPropertyLocation(c,p,PropertyValueLocationMode.ValueTable, null));
+					schema.AddClassProperty(new ClassPropertyLocation(c,p));
 			}
 
 			// resolve object properties into relationships
