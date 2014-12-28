@@ -186,11 +186,37 @@ namespace NI.Data.Storage.Tests {
 				{"primary_key", true}
 			});
 
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "created"},
+				{"name", "Created"},
+				{"datatype", "datetime"},
+				{"compact_id", 5}
+			});
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "created_year"},
+				{"name", "Created (Year)"},
+				{"datatype", "integer"},
+				{"compact_id", 6}
+			});
+
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "name"},
 				{"class_id", "companies"},
 				{"value_location", "ValueTable"}
 			} );
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "created"},
+				{"class_id", "companies"},
+				{"value_location", "ValueTable"} });
+
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "created_year"},
+				{"class_id", "companies"},
+				{"value_location", "Derived"},
+				{"derive_type","getDateYear"},
+				{"derived_from_property_id","created"}
+			});
+
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "is_primary"},
 				{"class_id", "contacts"},
@@ -261,6 +287,8 @@ namespace NI.Data.Storage.Tests {
 					[class_id] TEXT,
 					[value_location] TEXT,
 					[column_name] TEXT,
+					[derive_type] TEXT,
+					[derived_from_property_id] TEXT,
 					PRIMARY KEY (property_id, class_id)
 				)");
 

@@ -30,6 +30,9 @@ namespace NI.Data.Storage.Model {
 		public PropertyValueLocationType Location { get; private set; }
 		public string TableColumnName { get; private set; }
 
+		public ClassPropertyLocation DerivedFrom { get; private set; }
+		public string DeriveType { get; private set; }
+
 		protected ClassPropertyLocation(Class dataClass, Property p, PropertyValueLocationType location) {
 			Class = dataClass;
 			Property = p;
@@ -37,18 +40,29 @@ namespace NI.Data.Storage.Model {
 		}
 
 		/// <summary>
-		/// Initializes new class property located in value table
+		/// Initializes new instance of ClassPropertyLocation for property located in value table
 		/// </summary>
 		public ClassPropertyLocation(Class dataClass, Property p) : this(dataClass,p,PropertyValueLocationType.ValueTable) {
 		}
 
 		/// <summary>
-		/// Initializes new class property located in object's table column
+		/// Initializes new instance of ClassPropertyLocation for property located in object's table column
 		/// </summary>
 		public ClassPropertyLocation(Class dataClass, Property p, string columnName) : this (dataClass,p,PropertyValueLocationType.TableColumn) {
 			if (String.IsNullOrEmpty(columnName))
 				throw new ArgumentNullException("columnName");
 			TableColumnName = columnName;
+		}
+
+		/// <summary>
+		/// Initializes new instance of ClassPropertyLocation for derived property
+		/// </summary>
+		public ClassPropertyLocation(Class dataClass, Property p, ClassPropertyLocation derivedFrom, string deriveType)
+			: this(dataClass, p, PropertyValueLocationType.Derived) {
+			if (derivedFrom.Class!=dataClass)
+				throw new NotSupportedException("Property can be derived from property of the same class");
+			DerivedFrom = derivedFrom;
+			DeriveType = deriveType;
 		}
 
 		public override string ToString() {
@@ -62,25 +76,6 @@ namespace NI.Data.Storage.Model {
 		Derived
 	}
 
-	public class DerivedClassPropertyLocation : ClassPropertyLocation {
-
-		public ClassPropertyLocation DerivedFrom { get; private set; }
-
-		public string DeriveType { get; private set; }
-
-		public DerivedClassPropertyLocation(Class dataClass, Property p, string deriveType, ClassPropertyLocation derivedFrom)
-			: base(dataClass, p, PropertyValueLocationType.Derived) {
-			if (derivedFrom.Class!=dataClass)
-				throw new NotSupportedException("Property can be derived from property of the same class");
-			DerivedFrom = derivedFrom;
-			DeriveType = deriveType;
-		}
-
-		public override string ToString() {
-			return String.Format("{0} deriveType={1}", base.ToString(), DeriveType);
-		}
-
-	}
 
 
 }

@@ -39,9 +39,11 @@ namespace NI.Data.Storage.Tests {
 
 			var googCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
 			googCompany["name"] = "Google";
+			googCompany["created"] = new DateTime(1998, 9, 4, 9, 30, 0);
 			
 			var msCompany = new ObjectContainer(testSchema.FindClassByID("companies"));
 			msCompany["name"] = "Microsoft";
+			msCompany["created"] = new DateTime(1975, 4, 4, 10, 0, 0);
 			
 			StorageContext.ObjectContainerStorage.Insert(googCompany);
 			StorageContext.ObjectContainerStorage.Insert(msCompany);
@@ -385,15 +387,52 @@ namespace NI.Data.Storage.Tests {
 			birthdayYear.DataType = PropertyDataType.Integer;
 			testSchema.AddProperty( birthdayYear );
 			var birthdayClassProp = testSchema.FindClassPropertyLocation("contacts","birthday");
-			testSchema.AddClassProperty( 
-				new DerivedClassPropertyLocation( 
-					testSchema.FindClassByID("contacts"),
-					birthdayYear, "getDateYear", birthdayClassProp ) );
+			testSchema.AddClassProperty(
+				new ClassPropertyLocation(testSchema.FindClassByID("contacts"), birthdayYear, birthdayClassProp, "getDateYear"));
 
+			/*var createdYear = new Property("created_year");
+			createdYear.CompactID = -2;
+			createdYear.DataType = PropertyDataType.Integer;
+			testSchema.AddProperty( createdYear );
+			var createdClassProp = testSchema.FindClassPropertyLocation("companies","created");
+			testSchema.AddClassProperty(
+				new ClassPropertyLocation(testSchema.FindClassByID("companies"), createdYear, createdClassProp, "getDateYear"));*/
+
+			// filter by derived prop
 			Assert.AreEqual("Mary", storageDalc.LoadValue( 
 				new Query("contacts", (QField)"birthday_year"==(QConst)1999 ) {
 					Fields = new[] {(QField)"name"}
 				}) );
+
+			// select derived prop
+			Assert.AreEqual(1999, storageDalc.LoadValue( 
+				new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
+					Fields = new[] {(QField)"birthday_year"}
+				}) );
+
+			// filter by related derived prop
+			Assert.AreEqual("Bob", StorageContext.StorageDalc.LoadValue(
+				new Query("contacts", (QField)"contacts_employee_companies.created_year"==(QConst)1975 ) {
+					Fields = new[] {(QField)"name"}
+				}
+			));
+
+			// select related derived prop
+			Assert.AreEqual(1998, StorageContext.StorageDalc.LoadValue(
+				new Query("contacts", (QField)"name"==(QConst)"John" ) {
+					Fields = new[] {(QField)"contacts_employee_companies.created_year"}
+				}
+			));
+
+			// order by related derived prop
+			var allNames = StorageContext.StorageDalc.LoadAllValues(
+				new Query("contacts") {
+					Fields = new[] {(QField)"name"},
+					Sort = new[] { (QSort)"contacts_employee_companies.created_year" }
+				}
+			);
+			Assert.AreEqual("Mary",allNames[0]);
+			Assert.AreEqual("Bob",allNames[1]);
 
 
 		}

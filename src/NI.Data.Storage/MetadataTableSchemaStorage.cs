@@ -85,9 +85,11 @@ namespace NI.Data.Storage {
 				{"class_id", "ClassID"},
 				{"property_id", "PropertyID"},
 				{"value_location", "Location"},
-				{"column_name", "ColumnName"}
+				{"column_name", "ColumnName"},
+				{"derive_type", "DeriveType"},
+				{"derived_from_property_id","DerivedFromPropertyID"}
 			};
-			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassTableName, PropertyToClassFieldMapping);
+			PropertyToClassPersister = new ObjectDalcMapper<PropertyToClass>(DbContext, PropertyToClassTableName,PropertyToClassFieldMapping);
 		}
 
 		protected DataSchema CachedDataSchema = null;
@@ -108,11 +110,16 @@ namespace NI.Data.Storage {
 				var c = dataSchema.FindClassByID(p2c.ClassID);
 				var p = dataSchema.FindPropertyByID(p2c.PropertyID);
 				if (c != null && p != null) {
-					dataSchema.AddClassProperty( 
-						p2c.Location == PropertyValueLocationType.TableColumn ?
-						new ClassPropertyLocation(c,p,p2c.ColumnName) :
-						new ClassPropertyLocation(c,p)
-					);
+					if (p2c.Location == PropertyValueLocationType.TableColumn) {
+						dataSchema.AddClassProperty( new ClassPropertyLocation(c,p,p2c.ColumnName) );
+					} else if (p2c.Location == PropertyValueLocationType.ValueTable) {
+						dataSchema.AddClassProperty( new ClassPropertyLocation(c,p) );
+					} else if (p2c.Location==PropertyValueLocationType.Derived) {
+						var derivedFromProp = c.FindPropertyByID( p2c.DerivedFromPropertyID );
+						if (derivedFromProp==null)
+							throw new Exception("Cannot find derived from property ID="+p2c.DerivedFromPropertyID);
+						dataSchema.AddClassProperty(new ClassPropertyLocation(c, p, derivedFromProp.GetLocation(c), p2c.DeriveType));
+					}
 				}
 			}
 
@@ -136,6 +143,8 @@ namespace NI.Data.Storage {
 			public string PropertyID { get; set; }
 			public PropertyValueLocationType Location { get; set; }
 			public string ColumnName { get; set; }
+			public string DeriveType { get; set; }
+			public string DerivedFromPropertyID { get; set; }
 		}
 
 		protected class RelationshipData {

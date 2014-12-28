@@ -124,19 +124,32 @@ namespace NI.Data.Storage {
 						if (relationship.Multiplicity)
 							throw new ArgumentException(
 								String.Format("Join by relationship {0} is not possible because of multiplicity", fld.Prefix));									
-									
-						var propTblName = DataTypeTableNames[p.DataType.ID];
-						var propTblAlias = propTblName+"_"+joinFieldMap.Count.ToString();
 
-						var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propTblAlias, String.Format("{0}.id", objTableAlias),
+						var propJoinsPrefix = "rel_"+p.ID+"_"+joinFieldMap.Count.ToString();
+
+						var lastRelObjIdFld = GenerateRelationshipJoins(joinSb, propJoinsPrefix, String.Format("{0}.id", objTableAlias),
 								relationship.Inferred ? relationship.InferredByRelationships : new[]{ relationship } );
+
+						var propLoc = p.GetLocation(relationship.Object);
 
 						if (p.PrimaryKey) {
 							joinFieldMap[ fld.ToString() ] = lastRelObjIdFld;
 						} else {
-							joinFieldMap[ fld.ToString() ] = propTblAlias + ".value";
-							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
-								propTblName, propTblAlias, lastRelObjIdFld, p.CompactID);
+							string fldExpr = propJoinsPrefix + ".value";
+							if (propLoc.Location == PropertyValueLocationType.Derived) {
+								fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
+								propLoc = propLoc.DerivedFrom;
+							}
+
+							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
+								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
+								joinFieldMap[ fld.ToString() ] = fldExpr;
+								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
+									propTblName, propJoinsPrefix, lastRelObjIdFld, propLoc.Property.CompactID);
+							} else {
+								//TBD: column property
+								throw new NotImplementedException();
+							}
 						}
 						knownFieldTypes[ fld.ToString().Replace('.','_') ] = p.DataType.ValueType;
 
@@ -149,14 +162,30 @@ namespace NI.Data.Storage {
 						if (objProp.Multivalue)
 							throw new ArgumentException("Cannot join mulivalue property");
 
+						var propLoc = objProp.GetLocation(dataClass);
+
 						if (objProp.PrimaryKey) {
 							joinFieldMap[ fld.ToString() ] = String.Format("{0}.id", objTableAlias);
 						} else {
-							var propTblName = DataTypeTableNames[objProp.DataType.ID];
-							var propTblAlias = propTblName+"_"+joinFieldMap.Count.ToString();
-							joinFieldMap[ fld.ToString() ] = propTblAlias+".value";
-							joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
-								propTblName, propTblAlias, objTableAlias, objProp.CompactID);
+
+							var propTblAlias = "prop_"+objProp.ID+"_"+joinFieldMap.Count.ToString();
+
+							string fldExpr = propTblAlias + ".value";
+
+							if (propLoc.Location == PropertyValueLocationType.Derived) {
+								fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
+								propLoc = propLoc.DerivedFrom;
+							}
+
+							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
+								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
+								joinFieldMap[ fld.ToString() ] = fldExpr;
+								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
+									propTblName, propTblAlias, objTableAlias, propLoc.Property.CompactID);
+							} else {
+								//TBD: column property
+								throw new NotImplementedException();
+							}
 						}
 						knownFieldTypes[ fld.ToString().Replace('.','_') ] = objProp.DataType.ValueType;
 						return;

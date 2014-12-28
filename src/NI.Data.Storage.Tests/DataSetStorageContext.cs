@@ -201,6 +201,8 @@ namespace NI.Data.Storage.Tests {
 			var classIdCol = t.Columns.Add("class_id", typeof(string));
 			t.Columns.Add("value_location", typeof(string));
 			t.Columns.Add("column_name", typeof(string));
+			t.Columns.Add("derive_type", typeof(string));
+			t.Columns.Add("derived_from_property_id", typeof(string));
 
 			t.PrimaryKey = new[] { propIdCol, classIdCol };
 			return t;

@@ -325,6 +325,7 @@ namespace NI.Data.Storage {
 
 			var dataSchema = GetSchema();
 			var valueSourceNames = new Dictionary<string,List<long>>();
+			var propertyIdDerivedLocations = new Dictionary<long,List<ClassPropertyLocation>>();
 
 			// construct object containers + populate source names for values to load
 			foreach (var batchIds in SliceBatchIds(ids, QueryBatchSize)) {
@@ -344,13 +345,31 @@ namespace NI.Data.Storage {
 							foreach (var p in objClass.Properties) {
 								if (p.PrimaryKey || (props != null && !props.Contains(p)))
 									continue;
-								EnsureKnownDataType(p.DataType.ID);
-								var pSrcName = DataTypeTableNames[p.DataType.ID];
-								if (!valueSourceNames.ContainsKey(pSrcName))
-									valueSourceNames[pSrcName] = new List<long>();
 
-								if (!valueSourceNames[pSrcName].Contains(p.CompactID))
-									valueSourceNames[pSrcName].Add(p.CompactID);
+								var pLoc = p.GetLocation(objClass);
+								if (pLoc.Location == PropertyValueLocationType.TableColumn) {
+									obj[p] = DeserializeValueData(p, rdr[pLoc.TableColumnName]);
+								} else if (pLoc.Location == PropertyValueLocationType.Derived) {
+
+									var derivedFromCompactID = pLoc.DerivedFrom.Property.CompactID;
+									if (!propertyIdDerivedLocations.ContainsKey(derivedFromCompactID))
+										propertyIdDerivedLocations[derivedFromCompactID] = new List<ClassPropertyLocation>();
+									if (!propertyIdDerivedLocations[derivedFromCompactID].Contains(pLoc))
+										propertyIdDerivedLocations[derivedFromCompactID].Add(pLoc);
+
+									// mark derived prop to load
+									pLoc = pLoc.DerivedFrom;
+								}
+ 		
+								if (pLoc.Location == PropertyValueLocationType.ValueTable) { 
+									EnsureKnownDataType(pLoc.Property.DataType.ID);
+									var pSrcName = DataTypeTableNames[pLoc.Property.DataType.ID];
+									if (!valueSourceNames.ContainsKey(pSrcName))
+										valueSourceNames[pSrcName] = new List<long>();
+
+									if (!valueSourceNames[pSrcName].Contains(pLoc.Property.CompactID))
+										valueSourceNames[pSrcName].Add(pLoc.Property.CompactID);
+								}
 							}
 						}
 						objById[obj.ID.Value] = obj;					
@@ -358,11 +377,8 @@ namespace NI.Data.Storage {
 				});
 			}
 
-			// special case: no objects at all
-			if (objById.Count==0)
-				return objById;
-			// special case: no properties to load
-			if (loadWithoutProps)
+			// special cases: no objects at all or no properties to load
+			if (objById.Count==0 || loadWithoutProps)
 				return objById;
 
 			// load values by sourcenames
@@ -376,15 +392,51 @@ namespace NI.Data.Storage {
 							new QueryConditionNode((QField)"property_compact_id",
 								Conditions.In, new QConst(valSrcName.Value))
 						);
+					var fldList = new List<QField>();
+					fldList.Add( (QField)"object_id" );
+					fldList.Add( (QField)"property_compact_id" );
+					fldList.Add( (QField)"value" );
+
+					// derived props handling
+					Func<ClassPropertyLocation,string> getDerivedFldName = (d) => {
+						return String.Format("derived_{0}_{1}", d.Class.CompactID, d.Property.CompactID);
+					};
+					foreach (var propCompactId in valSrcName.Value) {
+						if (propertyIdDerivedLocations.ContainsKey(propCompactId)) {
+							foreach (var derivedPropLoc in propertyIdDerivedLocations[propCompactId]) {
+								var derivedFld = ResolveDerivedProperty(derivedPropLoc, "value");
+								fldList.Add( new QField( getDerivedFldName(derivedPropLoc), derivedFld.Expression) );
+							}
+						}
+					}
+					valQuery.Fields = fldList.ToArray();
+
 					DbMgr.Dalc.ExecuteReader( valQuery, (rdr) => {
 						while (rdr.Read()) {
 							var propertyCompactId = Convert.ToInt32(rdr["property_compact_id"]);
 							var objId = Convert.ToInt64(rdr["object_id"]);
 							var prop = dataSchema.FindPropertyByCompactID(propertyCompactId);
 							if (prop != null) {
-								// UNDONE: handle multi-values props
-								if (objById.ContainsKey(objId))
-									objById[objId][prop] = DeserializeValueData(prop, rdr["value"]);
+								if (objById.ContainsKey(objId)) { 
+									var obj = objById[objId];
+									var objClass = obj.GetClass();
+									var propLoc = prop.GetLocation(objClass);
+									if (propLoc!=null) {
+										if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
+											// TBD: handle multi-values props
+											obj[prop] = DeserializeValueData(prop, rdr["value"]);
+										}
+										// check derived
+										if (propertyIdDerivedLocations.ContainsKey(propertyCompactId)) {
+											foreach (var derivedPropLoc in propertyIdDerivedLocations[propertyCompactId])
+												if (objClass == derivedPropLoc.Class) {
+													obj[derivedPropLoc.Property] = DeserializeValueData(prop, rdr[getDerivedFldName(derivedPropLoc)]);
+												}
+										}
+									} else {
+										// property for this class no longer exist... TBD: handle that somehow
+									}
+								}
 							}							
 						}
 					});
@@ -825,7 +877,7 @@ namespace NI.Data.Storage {
 			}
 		}
 
-		internal QField ResolveDerivedProperty(DerivedClassPropertyLocation classProp, string derivedFromFldName) {
+		internal QField ResolveDerivedProperty(ClassPropertyLocation classProp, string derivedFromFldName) {
 			if (DeriveTypeFieldExpr != null) {
 				if (DeriveTypeFieldExpr.ContainsKey(classProp.DeriveType))
 					return new QField(classProp.Property.ID, String.Format(DeriveTypeFieldExpr[classProp.DeriveType], derivedFromFldName) );

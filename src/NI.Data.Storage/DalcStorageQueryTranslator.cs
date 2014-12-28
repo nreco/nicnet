@@ -14,7 +14,7 @@ namespace NI.Data.Storage {
 
 		protected ObjectContainerDalcStorage ObjStorage { get; private set; }
 
-		protected Func<DerivedClassPropertyLocation,string,QField> GetDerivedField { get ;private set; }
+		protected Func<ClassPropertyLocation,string,QField> GetDerivedField { get ;private set; }
 
 		public DalcStorageQueryTranslator(DataSchema schema, ObjectContainerDalcStorage objStorage) {
 			Schema = schema;
@@ -117,16 +117,15 @@ namespace NI.Data.Storage {
 			if (pLoc.Location == PropertyValueLocationType.Derived) {
 				if (GetDerivedField==null)
 					throw new NotSupportedException(String.Format("Derived property {0} is not supported",pLoc.ToString() ));
-				var derivedPropLoc = (DerivedClassPropertyLocation)pLoc;
 
-				if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
-					fld = GetDerivedField(derivedPropLoc, derivedPropLoc.TableColumnName);
-				} else if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
-					fld = GetDerivedField(derivedPropLoc,"value");
+				if (pLoc.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
+					pFld = GetDerivedField(pLoc, pLoc.DerivedFrom.TableColumnName);
+				} else if (pLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
+					pFld = GetDerivedField(pLoc,"value");
 				} else {
 					throw new NotSupportedException("DerivedFrom cannot be derived property");
 				}
-				pLoc = derivedPropLoc.DerivedFrom;
+				pLoc = pLoc.DerivedFrom;
 			}
 
 			if (pLoc.Location == PropertyValueLocationType.ValueTable) { 
@@ -171,16 +170,15 @@ namespace NI.Data.Storage {
 			if (propLocation.Location == PropertyValueLocationType.Derived) {
 				if (GetDerivedField==null)
 					throw new NotSupportedException(String.Format("Derived property {0}.{1} is not supported",propLocation.Class.ID,propLocation.Property.ID));
-				var derivedPropLoc = (DerivedClassPropertyLocation)propLocation;
 
-				if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
-					fld = GetDerivedField(derivedPropLoc, derivedPropLoc.TableColumnName);
-				} else if (derivedPropLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
-					fld = GetDerivedField(derivedPropLoc,"value");
+				if (propLocation.DerivedFrom.Location == PropertyValueLocationType.TableColumn) {
+					fld = GetDerivedField(propLocation, propLocation.DerivedFrom.TableColumnName);
+				} else if (propLocation.DerivedFrom.Location == PropertyValueLocationType.ValueTable) {
+					fld = GetDerivedField(propLocation,"value");
 				} else {
 					throw new NotSupportedException("DerivedFrom cannot be derived property");
 				}
-				propLocation = derivedPropLoc.DerivedFrom;
+				propLocation = propLocation.DerivedFrom;
 			}
 
 			if (propLocation.Location == PropertyValueLocationType.TableColumn) {
