@@ -42,10 +42,12 @@ namespace NI.Data.Storage.Service.Actions {
 					Name = c.Name,
 				};
 				foreach (var cProp in c.Properties) {
+					var propLoc = cProp.GetLocation(c);
 					cInfo.Properties.Add( new DataSchemaPropertyInfo() { 
 						ID = cProp.ID,
 						Name = cProp.Name,
-						DataTypeID = cProp.DataType.ID
+						DataTypeID = cProp.DataType.ID,
+						DerivedFromPropertyID = propLoc.Location==PropertyValueLocationType.Derived ? propLoc.DerivedFrom.Property.ID : null
 					} );
 				}
 				res.Classes.Add(cInfo);

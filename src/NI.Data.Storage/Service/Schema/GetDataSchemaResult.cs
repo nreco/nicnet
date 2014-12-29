@@ -65,6 +65,9 @@ namespace NI.Data.Storage.Service.Schema {
 
 		[DataMember(Name = "datatype")]
 		public string DataTypeID { get; set; }
+
+		[DataMember(Name="derived_from")]
+		public string DerivedFromPropertyID { get; set; }
 	}
 
 	[DataContract(Name = "relationship")]

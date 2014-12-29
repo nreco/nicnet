@@ -94,7 +94,7 @@ namespace NI.Data.Storage {
 
 		protected DataSchema CachedDataSchema = null;
 
-		public DataSchema GetSchema() {
+		public virtual DataSchema GetSchema() {
 			if (CachedDataSchema!=null)
 				return CachedDataSchema; // tmp for tests
 
@@ -103,24 +103,11 @@ namespace NI.Data.Storage {
 
 			var relData = RelationshipPersister.LoadAll(new Query(RelationshipTableName));
 			var propToClass = PropertyToClassPersister.LoadAll(new Query(PropertyToClassTableName));
-			
-			var dataSchema = new DataSchema(classes, props);
+
+			var dataSchema = CreateDataSchema(classes, props);
 
 			foreach (var p2c in propToClass) {
-				var c = dataSchema.FindClassByID(p2c.ClassID);
-				var p = dataSchema.FindPropertyByID(p2c.PropertyID);
-				if (c != null && p != null) {
-					if (p2c.Location == PropertyValueLocationType.TableColumn) {
-						dataSchema.AddClassProperty( new ClassPropertyLocation(c,p,p2c.ColumnName) );
-					} else if (p2c.Location == PropertyValueLocationType.ValueTable) {
-						dataSchema.AddClassProperty( new ClassPropertyLocation(c,p) );
-					} else if (p2c.Location==PropertyValueLocationType.Derived) {
-						var derivedFromProp = c.FindPropertyByID( p2c.DerivedFromPropertyID );
-						if (derivedFromProp==null)
-							throw new Exception("Cannot find derived from property ID="+p2c.DerivedFromPropertyID);
-						dataSchema.AddClassProperty(new ClassPropertyLocation(c, p, derivedFromProp.GetLocation(c), p2c.DeriveType));
-					}
-				}
+				AddClassProperty(dataSchema, p2c);
 			}
 
 			foreach (var r in relData) {
@@ -137,6 +124,32 @@ namespace NI.Data.Storage {
 			CachedDataSchema = dataSchema;
 			return dataSchema;
 		}
+
+		protected virtual DataSchema CreateDataSchema(IEnumerable<Class> classes, IEnumerable<Property> props) {
+			return new DataSchema(classes, props);
+		}
+
+		protected virtual ClassPropertyLocation AddClassProperty(DataSchema dataSchema, PropertyToClass p2c) {
+			var c = dataSchema.FindClassByID(p2c.ClassID);
+			var p = dataSchema.FindPropertyByID(p2c.PropertyID);
+			ClassPropertyLocation propLoc = null;
+			if (c != null && p != null) {
+				if (p2c.Location == PropertyValueLocationType.TableColumn) {
+					propLoc = new ClassPropertyLocation(c, p, p2c.ColumnName);
+				} else if (p2c.Location == PropertyValueLocationType.ValueTable) {
+					propLoc = new ClassPropertyLocation(c, p);
+				} else if (p2c.Location == PropertyValueLocationType.Derived) {
+					var derivedFromProp = c.FindPropertyByID(p2c.DerivedFromPropertyID);
+					if (derivedFromProp == null)
+						throw new Exception("Cannot find derived from property ID=" + p2c.DerivedFromPropertyID);
+					propLoc = new ClassPropertyLocation(c, p, derivedFromProp.GetLocation(c), p2c.DeriveType);
+				}
+			}
+			if (propLoc != null)
+				dataSchema.AddClassProperty(propLoc);
+			return propLoc;
+		}
+
 
 		protected class PropertyToClass {
 			public string ClassID { get; set; }
