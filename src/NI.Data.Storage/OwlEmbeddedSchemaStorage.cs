@@ -240,7 +240,7 @@ namespace NI.Data.Storage {
 				var p = schema.FindPropertyByCompactID( domainRel.SubjectID );
 				var c = schema.FindClassByCompactID( domainRel.ObjectID );
 				if (c!=null && p!=null)
-					schema.AddClassProperty(new ClassPropertyLocation(c,p));
+					AddClassProperty( schema, new ClassPropertyLocation(c,p));
 			}
 
 			// resolve object properties into relationships
@@ -275,6 +275,10 @@ namespace NI.Data.Storage {
 			}
 
 
+		}
+
+		protected virtual void AddClassProperty(DataSchema schema, ClassPropertyLocation pLoc) {
+			schema.AddClassProperty(pLoc);
 		}
 
 		public DataSchema GetSchema() {
