@@ -26,6 +26,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
+	/// <summary>
+	/// SQL-optimized implementation of <see cref="IObjectContainerStorage"/> 
+	/// </summary>
 	public class ObjectContainerSqlDalcStorage : ObjectContainerDalcStorage, ISqlObjectContainerStorage {
 
 		public string ObjectViewName { get; set; }

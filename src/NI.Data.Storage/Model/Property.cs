@@ -22,28 +22,52 @@ using System.Threading.Tasks;
 namespace NI.Data.Storage.Model {
 	
     /// <summary>
-    /// Describes object property
+    /// Describes storage object property
     /// </summary>
 	public class Property {
 
+		/// <summary>
+		/// Property unique string identifier
+		/// </summary>
 		public string ID { get; set; }
 
+		/// <summary>
+		/// Internal property identifier represented by integer value
+		/// </summary>
 		public long CompactID { get; set; }
 
+		/// <summary>
+		/// Property human-readable name (label)
+		/// </summary>
 		public string Name { get; set; }
 
+		/// <summary>
+		/// Property data type descriptor
+		/// </summary>
 		public PropertyDataType DataType { get; set; }
 
+		/// <summary>
+		/// Determines if property is multivalue
+		/// </summary>
         public bool Multivalue { get; set; }
 
+		/// <summary>
+		/// Determines if property represents object primary key
+		/// </summary>
 		public bool PrimaryKey { get; set; }
 
+		/// <summary>
+		/// List of classes with this property
+		/// </summary>
         public IEnumerable<Class> Classes {
 			get {
 				return Schema.FindPropertyClasses(ID);
 			}
 		}
 
+		/// <summary>
+		/// Property schema instance
+		/// </summary>
 		public DataSchema Schema { get; internal set; }
 
 		public Property() {

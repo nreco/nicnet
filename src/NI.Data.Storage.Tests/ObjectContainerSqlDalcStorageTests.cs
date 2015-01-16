@@ -127,15 +127,15 @@ namespace NI.Data.Storage.Tests {
 
 			// relation load test
 			var company0rels = StorageContext.ObjectContainerStorage.LoadRelations( 
-					new Query("contacts_employee_companies",
-						new QueryConditionNode( 
-							(QField)"object_id",
-							Conditions.In,
-							new Query("companies.c", (QField)"name"==(QConst)"Company_0" ) {
-								Fields = new[] { (QField)"c.id" }
-							}
-						)
-					) );
+					"contacts_employee_companies",
+					new QueryConditionNode( 
+						(QField)"object_id",
+						Conditions.In,
+						new Query("companies.c", (QField)"name"==(QConst)"Company_0" ) {
+							Fields = new[] { (QField)"c.id" }
+						}
+					)
+			);
 			Assert.AreEqual(10, company0rels.Count() );
 		}
 

@@ -24,7 +24,7 @@ using NI.Data.Storage.Model;
 namespace NI.Data.Storage {
 	
 	/// <summary>
-	/// <see cref="IDataSetFactory"/> implementation based on DataSchema. 
+	/// <see cref="IDataSetFactory"/> implementation based on <see cref="DataSchema"/>. 
 	/// </summary>
 	public class SchemaDataSetFactory : IDataSetFactory {
 

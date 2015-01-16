@@ -205,7 +205,7 @@ namespace NI.Data.Storage.Tests {
 			relTbl.Rows[0].Delete();
 			StorageContext.StorageDalc.Update(relTbl);
 
-			Assert.AreEqual(0, StorageContext.ObjectContainerStorage.LoadRelations( new Query("contacts_employee_companies") ).Count() );
+			Assert.AreEqual(0, StorageContext.ObjectContainerStorage.LoadRelations( "contacts_employee_companies", null ).Count() );
 		}
 
 

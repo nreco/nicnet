@@ -27,6 +27,9 @@ using NI.Data;
 
 namespace NI.Data.Storage
 {
+	/// <summary>
+	/// <see cref="IDalc"/> implementation for accessing storage objects and relations like usual data tables
+	/// </summary>
     public class StorageDalc : IDalc {
 
 		protected IObjectContainerStorage ObjectContainerStorage { get; set; }
@@ -34,6 +37,12 @@ namespace NI.Data.Storage
 
 		protected Func<DataSchema> GetSchema { get; set; }
 
+		/// <summary>
+		/// Initializes a new instance of StorageDalc with specified <see cref="IDalc"/>, <see cref="IObjectContainerStorage"/> implementations and schema provider delegate
+		/// </summary>
+		/// <param name="dalc">DALC instance for accessing underlying storage tables</param>
+		/// <param name="objContainerStorage">object container storage instance</param>
+		/// <param name="getSchema">storage schema provider delegate</param>
 		public StorageDalc(IDalc dalc, IObjectContainerStorage objContainerStorage, Func<DataSchema> getSchema) {
 			UnderlyingDalc = dalc;
 			GetSchema = getSchema;
@@ -89,10 +98,7 @@ namespace NI.Data.Storage
 		}
 
 		protected DataTable LoadRelationTable(Query query, DataSet ds) {
-			var relQuery = new Query(query);
-			relQuery.Fields = null; // no explicit fields
-
-			var relations = ObjectContainerStorage.LoadRelations(relQuery);
+			var relations = ObjectContainerStorage.LoadRelations(query.Table.Name, query.Condition);
 			if (!ds.Tables.Contains(query.Table.Name))
 				ds.Tables.Add(query.Table.Name);
 				
@@ -308,7 +314,7 @@ namespace NI.Data.Storage
 			// check for relation table
 			var relation = schema.FindRelationshipByID(query.Table.Name);
 			if (relation != null) {
-				var rels = ObjectContainerStorage.LoadRelations(query).ToArray();
+				var rels = ObjectContainerStorage.LoadRelations(query.Table.Name, query.Condition).ToArray();
 				ObjectContainerStorage.RemoveRelation( rels );
 				return rels.Length;
 			}

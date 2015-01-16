@@ -25,7 +25,7 @@ using NI.Data.Storage.Model;
 namespace NI.Data.Storage {
 
 	/// <summary>
-	/// OWL-compatible data schema persisted in IObjectContainerStorage  
+	/// <see cref="IDataSchemaStorage"/> implementation for RDFS/OWL-compatible storage metadata persisted as storage objects in <see cref="IObjectContainerStorage"/>   
 	/// </summary>
 	public class OwlEmbeddedSchemaStorage : IDataSchemaStorage {
 

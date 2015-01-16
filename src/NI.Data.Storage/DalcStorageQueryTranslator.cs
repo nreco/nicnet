@@ -8,6 +8,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
+	/// <summary>
+	/// Incapsulates query translation rules
+	/// </summary>
 	public class DalcStorageQueryTranslator {
 		
 		protected DataSchema Schema { get; private set; }

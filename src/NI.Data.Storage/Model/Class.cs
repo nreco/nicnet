@@ -23,14 +23,23 @@ using System.Data;
 namespace NI.Data.Storage.Model {
 	
 	/// <summary>
-	/// Describes object class
+	/// Describes storage object class
 	/// </summary>
     public class Class {
 
+		/// <summary>
+		/// Class unique string identifier
+		/// </summary>
 		public string ID { get; set; }
 
+		/// <summary>
+		/// Internal class identifier represented by integer value
+		/// </summary>
 		public long CompactID { get; set; }
 
+		/// <summary>
+		/// Class human-readable name (label)
+		/// </summary>
 		public string Name { get; set; }
 
         /// <summary>
@@ -38,22 +47,32 @@ namespace NI.Data.Storage.Model {
         /// </summary>
         public bool IsPredicate { get; set; }
 
-		//TODO: logging enabled flag
-
+		/// <summary>
+		/// Determines where object is physically located in the database
+		/// </summary>
 		public ObjectLocationType ObjectLocation { get; set; }
 
+		/// <summary>
+		/// List of class properties
+		/// </summary>
 		public IEnumerable<Property> Properties {
 			get {
 				return Schema.FindPropertyByClassID(ID);
 			}
 		}
 
+		/// <summary>
+		/// List of relationships linked with this class
+		/// </summary>
 		public IEnumerable<Relationship> Relationships {
 			get {
 				return Schema.FindClassRelationships(ID);
 			}
 		}
 
+		/// <summary>
+		/// Class schema instance
+		/// </summary>
 		public DataSchema Schema { get; internal set; }
 
 		public Class() {

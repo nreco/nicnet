@@ -25,7 +25,16 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
+	/// <summary>
+	/// Represents abstract SQL-specific storage for <see cref="ObjectContainer"/>
+	/// </summary>
 	public interface ISqlObjectContainerStorage : IObjectContainerStorage {
+
+		/// <summary>
+		/// Execute object query and pass result as <see cref="IDataReader"/> for specified handler
+		/// </summary>
+		/// <param name="q">object query to execute</param>
+		/// <param name="handler">delegate that accepts <see cref="IDataReader"/> with query result</param>
 		void LoadObjectReader(Query q, Action<IDataReader> handler);
 	}
 }

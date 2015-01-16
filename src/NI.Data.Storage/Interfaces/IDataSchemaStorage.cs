@@ -23,8 +23,14 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
+	/// <summary>
+	/// Represents data schema persistence storage
+	/// </summary>
 	public interface IDataSchemaStorage {
 		
+		/// <summary>
+		/// Returns actual <see cref="DataSchema"/> from metadata storage
+		/// </summary>
 		DataSchema GetSchema();
 
 	}

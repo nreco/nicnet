@@ -25,6 +25,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 
+	/// <summary>
+	/// <see cref="IDataSchemaStorage"/> implementation that persists storage metadata in special data tables.
+	/// </summary>
 	public class MetadataTableSchemaStorage : IDataSchemaStorage {
 
 		protected DataRowDalcMapper DbContext { get; set; }

@@ -27,6 +27,9 @@ using NI.Data.Storage.Model;
 
 namespace NI.Data.Storage {
 	
+	/// <summary>
+	/// Generic IDalc-based implementation of <see cref="IObjectContainerStorage"/>
+	/// </summary>
 	public class ObjectContainerDalcStorage : IObjectContainerStorage {
 
 		static Logger log = new Logger(typeof(ObjectContainerDalcStorage));
@@ -54,14 +57,34 @@ namespace NI.Data.Storage {
 
 		public Func<object,object> GetContextAccountId { get; set; }
 
+		/// <summary>
+		/// Enables data logging
+		/// </summary>
+		/// <remarks>If data logging is enabled all data changes are logged into special log tables</remarks>
 		public bool LoggingEnabled { get; set; }
 
+		/// <summary>
+		/// Get or set custom implementation for comparing property values.
+		/// </summary>
+		/// <remarks>If not set default <see cref="DbValueComparer"/> implementation is used</remarks>
 		public IComparer ValueComparer { get; set; }
 
+		/// <summary>
+		/// Get or set query batch size (number of objects explicitly specified in one query). Default value is 1000.
+		/// </summary>
 		public int QueryBatchSize { get; set; }
 
+		/// <summary>
+		/// Get or set map for resolving SQL expression by derived property type identifier
+		/// </summary>
 		public IDictionary<string, string> DeriveTypeFieldExpr { get; set; }
 
+		/// <summary>
+		/// Initializes a new instance of the ObjectContainerDalcStorage.
+		/// </summary>
+		/// <param name="objectDbMgr">instance of <see cref="NI.Data.DataRowDalcMapper"/> for accessing EAV data tables</param>
+		/// <param name="logDalc">instance of <see cref="NI.Data.IDalc"/> for writing data changes log</param>
+		/// <param name="getSchema">data schema provider delegate</param>
 		public ObjectContainerDalcStorage(DataRowDalcMapper objectDbMgr, IDalc logDalc, Func<DataSchema> getSchema) {
 			DbMgr = objectDbMgr;
 			LogDalc = logDalc;
@@ -885,17 +908,15 @@ namespace NI.Data.Storage {
 			throw new NotSupportedException(classProp.ToString());
 		}
 
-		public IEnumerable<ObjectRelation> LoadRelations(Query query) {
-			if (query.Fields!=null)
-				throw new NotSupportedException("Relation query does not support explicit list of fields");
-
+		public IEnumerable<ObjectRelation> LoadRelations(string relationshipId, QueryNode conditions) {
 			var schema = GetSchema();
 			// check for relation table
-			var relationship = schema.FindRelationshipByID(query.Table.Name);
+			var relationship = schema.FindRelationshipByID(relationshipId);
 			if (relationship == null)
-				throw new Exception(String.Format("Relationship with ID={0} does not exist", query.Table.Name));
+				throw new Exception(String.Format("Relationship with ID={0} does not exist", relationshipId));
 
 			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+			var query = new Query(relationshipId, conditions);
 			var relQuery = qTranslator.TranslateSubQuery( query );
 			relQuery.Sort = query.Sort; // leave as is
 			
