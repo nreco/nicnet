@@ -18,11 +18,12 @@ using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace NI.Data.Permissions
 {
 	/// <summary>
-	/// Dalc permission context
+	/// Represents query permission context
 	/// </summary>
 	public class PermissionContext
 	{
@@ -42,6 +43,28 @@ namespace NI.Data.Permissions
 			get {
 				return Principal != null && Principal.Identity != null ? Principal.Identity.Name : null;
 			}
+		}
+
+		public bool IsInRole(string role) {
+			return Principal!=null ? Principal.IsInRole(role) : false;
+		}
+
+		public virtual object GetValue(string varName) {
+			var memberName = varName.Trim();
+			var t = this.GetType();
+			var p = t.GetProperty(memberName);
+			if (p!=null) {
+				return p.GetValue(this, null);
+			}
+			if (memberName.IndexOf('(')>0 && memberName[memberName.Length-1] == ')') {
+				var methodParts = varName.Split(new[]{'(',')'}, StringSplitOptions.RemoveEmptyEntries );
+				var m = t.GetMethod(methodParts[0]);
+				if (m!=null && m.GetParameters().Length==1) {
+					var param = m.GetParameters()[0];
+					return m.Invoke(this, new[] { Convert.ChangeType(methodParts[1], param.ParameterType, CultureInfo.InvariantCulture) });
+				}
+			}
+			return null;
 		}
 	}
 

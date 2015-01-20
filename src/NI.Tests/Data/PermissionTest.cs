@@ -28,10 +28,10 @@ namespace NI.Tests.Data
 
 				var oldCmdGen = (DbCommandGenerator)dalc.CommandGenerator;
 				dalc.CommandGenerator = new DbPermissionCommandGenerator(dalc.DbFactory, oldCmdGen.Views, new [] {
-					(new QueryRule("users", DalcOperation.Select, "users.role!=\"3\":int32 or \"IdentityName\":var=\"Mike\"" ) {
+					(new QueryRule("users", DalcOperation.Select, "users.role!=\"3\":int32 or \"IdentityName\":var=\"Mike\" or \"IsInRole(testRole)\":var=\"True\"" ) {
 						ViewNames = new[] { new QTable("users_view","u") }
 					}),
-					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name " )
+					new QueryRule("users", DalcOperation.Change, " \"IdentityName\":var=name" )
 				});
 
 				Assert.AreEqual(3, dalc.RecordsCount(new Query("users")), "Select rule failed");
@@ -54,7 +54,7 @@ namespace NI.Tests.Data
 				var oldPrincipal = Thread.CurrentPrincipal;
 				try {
 
-					Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("Mike"), new string[0] { });
+					Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("Mike"), new string[] { "testRole" });
 
 					Assert.AreEqual(4, dalc.RecordsCount(new Query("users")), "Select rule failed");
 
@@ -75,7 +75,7 @@ namespace NI.Tests.Data
 				using (var cmd1 = dalc.CommandGenerator.ComposeSelect(new Query("users_view", (QField)"id" == new QConst(1)))) {
 					var cmd1Sql = @"select u.*,r.role as role_name from users u
 left join roles r on (u.role=r.id)
-where ((id=?) And ((u.role<>?) Or (?=?)))
+where ((id=?) And ((u.role<>?) Or (?=?) Or (?=?)))
 order by u.id desc";
 					Assert.AreEqual(cmd1Sql, cmd1.CommandText, "Permissions for dataview failed");
 				}

@@ -31,8 +31,16 @@ namespace NI.Data.Permissions
 	public class DbPermissionCommandGenerator : NI.Data.DbCommandGenerator
 	{
 		
+		/// <summary>
+		/// Get or set list of permission rules
+		/// </summary>
 		public IQueryRule[] Rules { get; set; }
-		
+
+		/// <summary>
+		/// Get or set external permission context delegate
+		/// </summary>
+		public Func<string, DalcOperation, PermissionContext> GetPermissionContext { get; set; }
+
 		public DbPermissionCommandGenerator(IDbProviderFactory dbFactory, IDbDalcView[] views) : base(dbFactory,views) {
 			Rules = new IQueryRule[0];
 		}
@@ -43,6 +51,8 @@ namespace NI.Data.Permissions
 		}
 
 		protected virtual PermissionContext CreatePermissionContext(string tableName, DalcOperation op) {
+			if (GetPermissionContext!=null)
+				return GetPermissionContext(tableName, op);
 			return new PermissionContext(tableName, op);
 		}
 

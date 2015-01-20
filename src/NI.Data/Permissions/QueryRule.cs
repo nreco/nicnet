@@ -90,9 +90,11 @@ namespace NI.Data.Permissions {
 
 		protected virtual void SetVariable(QVar var, PermissionContext context) {
 			var.Unset();
-			var p = context.GetType().GetProperty(var.Name);
-			if (p!=null) {
-				var.Set( p.GetValue(context, null) );
+			var v = context.GetValue(var.Name);
+			if (v!=null) {
+				var.Set( v );
+			} else {
+				throw new Exception("Unknown variable in permission rule: "+var.Name);
 			}
 		}
 
