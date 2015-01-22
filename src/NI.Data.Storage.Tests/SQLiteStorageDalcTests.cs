@@ -236,7 +236,11 @@ namespace NI.Data.Storage.Tests {
 			foreach (DataRow r in contactsTbl.Rows) {
 				Assert.AreEqual( expectedCompanyNames[r["name"].ToString()], r["contacts_employee_companies_name"] );
 			}
-
+			// test expression-driven "as" syntax for loading related fields
+			var relatedCompanyNameFld = storageDalc.LoadValue( new Query("contacts", (QField)"name" == new QConst("Bob") ) { 
+					Fields = new[] { new QField("company_name", "contacts_employee_companies.name") } 
+				});
+			Assert.AreEqual("Microsoft", relatedCompanyNameFld );
 
 			Assert.AreEqual( new DateTime(1999, 5, 20), 
 				storageDalc.LoadValue( new Query("contacts", (QField)"name"==(QConst)"Mary" ) {

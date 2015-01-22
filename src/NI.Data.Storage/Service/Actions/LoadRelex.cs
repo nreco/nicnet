@@ -44,6 +44,9 @@ namespace NI.Data.Storage.Service.Actions {
 			var res = new LoadRowsResult();
 			var relexParser = new RelExParser();
 			var q = relexParser.Parse(relex);
+			
+			var fldMapping = new FieldMapping(q.Fields);
+			q.Fields = fldMapping.CompactFields;
 
 			if (totalcount) {
 				res.TotalCount = StorageDalc.RecordsCount( q );
@@ -56,7 +59,8 @@ namespace NI.Data.Storage.Service.Actions {
 
 				var cols = new List<string>();
 				for (int i = 0; i < reader.FieldCount; i++) {
-					cols.Add(reader.GetName(i));
+					var fName = reader.GetName(i);
+					cols.Add( fldMapping.RevMapping.ContainsKey(fName) ? fldMapping.RevMapping[fName] : fName );
 				}
 
 				while (reader.Read() && data.Count < q.RecordCount) {
@@ -78,6 +82,9 @@ namespace NI.Data.Storage.Service.Actions {
 			var relexParser = new RelExParser();
 			var q = relexParser.Parse(relex);
 
+			var fldMapping = new FieldMapping(q.Fields);
+			q.Fields = fldMapping.CompactFields;
+
 			if (totalcount) {
 				res.TotalCount = StorageDalc.RecordsCount( q );
 			}
@@ -88,7 +95,8 @@ namespace NI.Data.Storage.Service.Actions {
 				for (int i = 0; i < q.StartRecord; i++)
 					reader.Read(); // skip first N records
 				for (int i = 0; i < reader.FieldCount; i++) {
-					 cols.Add( reader.GetName(i) );
+					var fName = reader.GetName(i);
+					cols.Add( fldMapping.RevMapping.ContainsKey(fName) ? fldMapping.RevMapping[fName] : fName );
 				}
 
 				while (reader.Read() && data.Count < q.RecordCount) {
@@ -105,6 +113,34 @@ namespace NI.Data.Storage.Service.Actions {
 			return res;
 		}
 
+		internal class FieldMapping {
+			QField[] Fields;
+			internal QField[] CompactFields;
+			internal IDictionary<string,string> RevMapping;
+			internal FieldMapping(QField[] fields) {
+				Fields = fields;
+				RevMapping = new Dictionary<string,string>();
+				if (fields != null && fields.Length > 0) { 
+					CompactFields = new QField[Fields.Length];
+					for (int i = 0; i < CompactFields.Length; i++) {
+						var f = Fields[i];
+						if (f.Prefix != null && f.Expression==null) {
+							var originalFieldName = f.ToString().Replace('.', '_');
+							var compactName = "f_"+i.ToString()+"_"+f.Name;
+							RevMapping[compactName] = originalFieldName;
+							CompactFields[i] = new QField( compactName, f.ToString() );
+						} else {
+							CompactFields[i] = f;
+						}
+					}
+				} else {
+					CompactFields = Fields;
+				}
+				
+
+			}
+
+		}
 
 	}
 

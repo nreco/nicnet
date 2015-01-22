@@ -93,12 +93,17 @@ namespace NI.Data.Storage {
 			Action<QField> ensureFieldJoin = (fld) => {
 				if (joinFieldMap.ContainsKey(fld.ToString()))
 					return;
-				if (fld.Prefix!=null && fld.Prefix!=originalQuery.Table.Alias) {
-					// related field?
-					var relationship = dataClass.Schema.FindRelationshipByID(fld.Prefix);
-					if (relationship==null)
-						relationship = dataClass.Schema.InferRelationshipByID(fld.Prefix, dataClass);
-
+				if ((fld.Prefix!=null && fld.Prefix!=originalQuery.Table.Alias) || fld.Expression!=null) {
+					// alternative related field specifier
+					var relatedFld = fld.Expression!=null ? new QField(fld.Expression) : fld;
+					var relatedFldName = (fld.Expression!=null ? fld.Name : fld.ToString()).Replace('.','_');
+					// match relation
+					Relationship relationship = null;
+					if (relatedFld.Prefix!=null) {
+						relationship = dataClass.Schema.FindRelationshipByID(relatedFld.Prefix);
+						if (relationship==null)
+							relationship = dataClass.Schema.InferRelationshipByID(relatedFld.Prefix, dataClass);
+					}
 					//TBD: prevent duplicate join
 
 					if (relationship!=null) {
@@ -114,11 +119,11 @@ namespace NI.Data.Storage {
 							throw new ArgumentException(
 								String.Format("Relationship {0} cannot be used with {1}", relationship.ID, dataClass.ID));								
 								
-						var p = relationship.Object.FindPropertyByID(fld.Name);
+						var p = relationship.Object.FindPropertyByID(relatedFld.Name);
 						if (p==null)
 							throw new ArgumentException(
 								String.Format("Sort field {0} referenced by relationship {1} doesn't exist",
-									fld.Name, fld.Prefix));
+									relatedFld.Name, relatedFld.Prefix));
 						if (p.Multivalue)
 							throw new ArgumentException(
 								String.Format("Cannot join multivalue property {0}", p.ID));
@@ -126,7 +131,7 @@ namespace NI.Data.Storage {
 						// matched related object property
 						if (relationship.Multiplicity)
 							throw new ArgumentException(
-								String.Format("Join by relationship {0} is not possible because of multiplicity", fld.Prefix));									
+								String.Format("Join by relationship {0} is not possible because of multiplicity", relatedFld.Prefix));									
 
 						var propJoinsPrefix = "rel_"+p.ID+"_"+joinFieldMap.Count.ToString();
 
@@ -136,7 +141,7 @@ namespace NI.Data.Storage {
 						var propLoc = p.GetLocation(relationship.Object);
 
 						if (p.PrimaryKey) {
-							joinFieldMap[ fld.ToString() ] = lastRelObjIdFld;
+							joinFieldMap[ relatedFldName ] = lastRelObjIdFld;
 						} else {
 							string fldExpr = propJoinsPrefix + ".value";
 							if (propLoc.Location == PropertyValueLocationType.Derived) {
@@ -146,7 +151,7 @@ namespace NI.Data.Storage {
 
 							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
 								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
-								joinFieldMap[ fld.ToString() ] = fldExpr;
+								joinFieldMap[ relatedFldName ] = fldExpr;
 								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
 									propTblName, propJoinsPrefix, lastRelObjIdFld, propLoc.Property.CompactID);
 							} else {
@@ -154,7 +159,7 @@ namespace NI.Data.Storage {
 								throw new NotImplementedException();
 							}
 						}
-						knownFieldTypes[ fld.ToString().Replace('.','_') ] = p.DataType.ValueType;
+						knownFieldTypes[ relatedFldName ] = p.DataType.ValueType;
 
 						return;
 					}
@@ -166,15 +171,14 @@ namespace NI.Data.Storage {
 							throw new ArgumentException("Cannot join mulivalue property");
 
 						var propLoc = objProp.GetLocation(dataClass);
+						var fldName = fld.ToString().Replace('.','_');
 
 						if (objProp.PrimaryKey) {
-							joinFieldMap[ fld.ToString() ] = String.Format("{0}.id", objTableAlias);
+							joinFieldMap[fldName] = String.Format("{0}.id", objTableAlias);
 						} else {
 
 							var propTblAlias = "prop_"+objProp.ID+"_"+joinFieldMap.Count.ToString();
-
 							string fldExpr = propTblAlias + ".value";
-
 							if (propLoc.Location == PropertyValueLocationType.Derived) {
 								fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
 								propLoc = propLoc.DerivedFrom;
@@ -182,7 +186,7 @@ namespace NI.Data.Storage {
 
 							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
 								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
-								joinFieldMap[ fld.ToString() ] = fldExpr;
+								joinFieldMap[fldName] = fldExpr;
 								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
 									propTblName, propTblAlias, objTableAlias, propLoc.Property.CompactID);
 							} else {
@@ -190,7 +194,7 @@ namespace NI.Data.Storage {
 								throw new NotImplementedException();
 							}
 						}
-						knownFieldTypes[ fld.ToString().Replace('.','_') ] = objProp.DataType.ValueType;
+						knownFieldTypes[ fldName ] = objProp.DataType.ValueType;
 						return;
 					}
 				}
@@ -203,8 +207,9 @@ namespace NI.Data.Storage {
 			if (sort!=null && sort.Length>0) {
 				foreach (var origSort in sort) {
 					ensureFieldJoin(origSort.Field);
-					if (joinFieldMap.ContainsKey(origSort.Field.ToString())) { 
-						sortFields.Add(new QSort(joinFieldMap[origSort.Field.ToString()], origSort.SortDirection));
+					var fldName = (origSort.Field.Expression!=null ? origSort.Field.Name : origSort.Field.ToString()).Replace('.','_');
+					if (joinFieldMap.ContainsKey(fldName)) { 
+						sortFields.Add(new QSort(joinFieldMap[fldName], origSort.SortDirection));
 					} else {
 						sortFields.Add(origSort);
 					}
@@ -217,9 +222,9 @@ namespace NI.Data.Storage {
 
 			foreach (var f in fields) {
 				ensureFieldJoin(f);
-				var fldName = f.ToString();
+				var fldName = (f.Expression!=null ? f.Name : f.ToString()).Replace('.','_');
 				if (joinFieldMap.ContainsKey(fldName)) { 
-					selectFields.Add(new QField(fldName.Replace('.','_'), joinFieldMap[fldName]));
+					selectFields.Add(new QField(fldName, joinFieldMap[fldName]));
 				} else {
 					selectFields.Add(f);
 				}
