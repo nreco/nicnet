@@ -195,7 +195,7 @@ namespace NI.Data.Storage {
 			}
 		}
 
-		protected void SaveValues(ObjectContainer obj, DataRow objRow) {
+		protected void SaveValues(ObjectContainer obj, DataRow objRow, bool newValues = false) {
 			// determine values to load
 			var propSrcNameProps = new Dictionary<string, IList<long>>();
 			foreach (var v in obj) {
@@ -213,11 +213,16 @@ namespace NI.Data.Storage {
 			// load value tables
 			var propSrcNameToTbl = new Dictionary<string, DataTable>();
 			foreach (var srcNameEntry in propSrcNameProps) {
-				propSrcNameToTbl[srcNameEntry.Key] = DbMgr.LoadAll(
-					new Query(srcNameEntry.Key, 
-						(QField)"object_id" == new QConst(obj.ID.Value)
-						&
-						new QueryConditionNode((QField)"property_compact_id", Conditions.In, new QConst(srcNameEntry.Value))));
+				if (newValues) {
+					var ds = DbMgr.CreateDataSet(srcNameEntry.Key);
+					propSrcNameToTbl[srcNameEntry.Key] = ds.Tables[srcNameEntry.Key];
+				} else { 
+					propSrcNameToTbl[srcNameEntry.Key] = DbMgr.LoadAll(
+						new Query(srcNameEntry.Key, 
+							(QField)"object_id" == new QConst(obj.ID.Value)
+							&
+							new QueryConditionNode((QField)"property_compact_id", Conditions.In, new QConst(srcNameEntry.Value))));
+				}
 			}
 			Action<DataRow> deleteValueRow = r => {
 				r["value"] = DBNull.Value;
@@ -252,7 +257,7 @@ namespace NI.Data.Storage {
 							deleteValueRow(r);
 						}
 					} else {
-						var propRows = findPropertyRows(v.Key, tbl).ToArray();
+						var propRows = newValues ? new DataRow[0] : findPropertyRows(v.Key, tbl).ToArray();
 
 						if (v.Key.Multivalue) {
 							var vs = v.Value is IList ? (IList)v.Value : new[] { v.Value };
@@ -308,6 +313,26 @@ namespace NI.Data.Storage {
 			// push changes to DB
 			foreach (var entry in propSrcNameToTbl)
 				DbMgr.Update(entry.Value);
+				/*foreach (DataRow r in entry.Value.Rows)
+					if (r.RowState == DataRowState.Modified) {
+						DbMgr.Dalc.Update(
+							new Query(r.Table.TableName, (QField)"id"==new QConst(r["id"]) ),
+							new Dictionary<string, IQueryValue>() {
+								{"value", new QConst(r["value"])}
+							}
+						);
+					} else if (r.RowState==DataRowState.Added) {
+						DbMgr.Dalc.Insert(
+							r.Table.TableName,
+							new Dictionary<string, IQueryValue>() {
+								{"object_id", new QConst(r["object_id"])},
+								{"property_compact_id", new QConst(r["property_compact_id"])},
+								{"value", new QConst(r["value"])}
+							}
+						);
+					} else if (r.RowState == DataRowState.Deleted) {
+						DbMgr.Dalc.Delete(new Query(r.Table.TableName, (QField)"id"==new QConst(r["id",DataRowVersion.Original]) ));
+					}*/
 		}
 
 		protected bool DbValueEquals(object oldValue, object newValue) {
@@ -479,7 +504,7 @@ namespace NI.Data.Storage {
 			});
 			obj.ID = Convert.ToInt64( objRow["id"] );
 
-			SaveValues(obj, objRow);
+			SaveValues(obj, objRow, true);
 
 			if (LoggingEnabled)
 				WriteObjectLog(objRow, "insert");
