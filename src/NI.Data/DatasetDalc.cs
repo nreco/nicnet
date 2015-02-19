@@ -97,6 +97,15 @@ namespace NI.Data
 					tbl.ImportRow(result[i]);
 				}
 			}
+			// remove excessive columns
+			if (query.Fields != null && query.Fields.Length != 0) {
+				var tblColNames = tbl.Columns.Cast<DataColumn>().Select(c=>c.ColumnName).ToArray();
+				var fldNames = query.Fields.Select(f=>f.Name).ToArray();
+				foreach (var tblColName in tblColNames) {
+					if (!fldNames.Contains(tblColName))
+						tbl.Columns.Remove(tblColName);
+				}
+			}
 
 			return tbl;
 		}
