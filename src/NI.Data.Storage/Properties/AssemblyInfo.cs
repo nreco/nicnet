@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NI.Data.Storage")]
-[assembly: AssemblyDescription("Virtual business data storage based on underlying DALC (SQL database).")]
+[assembly: AssemblyDescription("NI.Data.Storage provides ADO.NET-like access to data represented with entity-attribute-value model. Entities may be queried, created, updated and deleted like usual database tables.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("NewtonIdeas")]
+[assembly: AssemblyCompany("Vitalii Fedorchenko")]
 [assembly: AssemblyProduct("NI.Data.Storage")]
-[assembly: AssemblyCopyright("Copyright © NewtonIdeas 2013-2014")]
+[assembly: AssemblyCopyright("Copyright © Vitalii Fedorchenko 2013-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -4,17 +4,17 @@
     <id>$id$</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>NewtonIdeas</authors>
-    <owners>NewtonIdeas</owners>
+    <authors>Vitalii Fedorchenko</authors>
+    <owners>$author$</owners>
     <!--licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl-->
-    <projectUrl>http://nicnet.googlecode.com/</projectUrl>
+    <projectUrl>http://www.nrecosite.com/semantic_storage_net.aspx</projectUrl>
     <!--iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2013-2014 NewtonIdeas</copyright>
-    <tags>Data Storage</tags>
+    <copyright>Copyright 2013-2015 Vitalii Fedorchenko</copyright>
+    <tags>NI.Data ADO.NET DAL EAV Engine Entity-Attribute-Value Triplestore</tags>
 	  <dependencies>
-		<dependency id="NI.Data" version="2.0" />
+		<dependency id="NI.Data" version="2.0.6" />
 	  </dependencies>
   </metadata>
 </package>
