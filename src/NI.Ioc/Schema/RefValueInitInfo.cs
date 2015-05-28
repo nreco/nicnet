@@ -37,8 +37,12 @@ namespace NI.Ioc
 		{
 			if (ComponentMethod!=null) {
 				var targetInstance = factory.GetInstance(ComponentRef, typeof(object) );
+				var delegFactory = new DelegateFactory(targetInstance, ComponentMethod);
+				if (typeof(Delegate).IsAssignableFrom(conversionType)) {
+					delegFactory.DelegateType = conversionType;
+				}
 				return factory.GetInstance( 
-					new DelegateFactory(targetInstance, ComponentMethod).GetObject(),
+					delegFactory.GetObject(),
 					conversionType
 				);
 			} else {

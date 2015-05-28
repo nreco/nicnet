@@ -129,7 +129,7 @@ namespace NI.Tests.Ioc
 					case "parent":
 						if (cInfo.ConstructorArgs.Length != 0 ||
 							cInfo.ComponentType != typeof(Component1) ||
-							cInfo.Properties.Length != 2)
+							cInfo.Properties.Length != 4)
 							throw new Exception("Invalid component info");
 						break;
 				}
@@ -178,6 +178,9 @@ namespace NI.Tests.Ioc
 						<property name='PropInt'>
 							<value>6</value>
 						</property>
+
+						<property name='ActionDep'><ref name='simple' method='ActionMethod'/></property>
+						<property name='FuncDep'><ref name='simple' method='FuncMethod'/></property>
 					</component>
 					
 					<component
@@ -266,6 +269,25 @@ namespace NI.Tests.Ioc
 
 	public class BaseComponent {
 
+		public void ActionMethod() {
+
+		}
+
+		public void ActionMethod(int i) {
+
+		}
+
+		public int FuncMethod() {
+			return 0;
+		}
+
+		public int FuncMethod(string s) {
+			return s.Length;
+		}
+
+		public string FuncMethod(int i) {
+			return i.ToString();
+		}
 	}
 
 	public class Component2 : BaseComponent {
@@ -301,9 +323,16 @@ namespace NI.Tests.Ioc
 		}
 
 		public Component1() { }
-			
+
+		public Action ActionDep { get; set; }
+		public Func<string,int> FuncDep { get; set; }
+
 		public void init() {
 			_initCalled = true;
+
+			Assert.IsNotNull(ActionDep);
+			Assert.IsNotNull(FuncDep);
+			Assert.AreEqual(4, FuncDep("test"));
 		}
 
 		public Component1(BaseComponent dependency1) {
