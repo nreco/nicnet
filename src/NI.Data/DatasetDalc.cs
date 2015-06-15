@@ -56,13 +56,16 @@ namespace NI.Data
 
 			string whereExpression = SqlBuilder.BuildExpression(query.Condition);
 			string sortExpression = BuildSort( query );
-			DataRow[] result = PersistedDS.Tables[query.Table.Name].Select( whereExpression, sortExpression );
+			var masterTbl = PersistedDS.Tables[query.Table.Name];
+			DataRow[] result = masterTbl.Select( whereExpression, sortExpression );
 
-			if (!ds.Tables.Contains(query.Table.Name))
-				ds.Tables.Add(PersistedDS.Tables[query.Table.Name].Clone());
-			else
+			if (!ds.Tables.Contains(query.Table.Name)) {
+				var newTbl = query.Fields==null ? masterTbl.Clone() : new DataTable(query.Table.Name);
+				ds.Tables.Add(newTbl);
+			} else { 
 				ds.Tables[query.Table.Name].Rows.Clear();
-			
+			}
+
 			if (query.Fields != null && query.Fields.Length != 0) {
 				if (query.Fields.Length == 1 && query.Fields[0].Expression!=null && query.Fields[0].Expression.ToLower() == "count(*)") {
 					ds.Tables.Remove(query.Table.Name);
@@ -75,19 +78,14 @@ namespace NI.Data
 				}
 
 				for (int i=0; i<query.Fields.Length; i++) {
-					string fld = query.Fields[i].Name;
-					if (ds.Tables[query.Table].Columns.Contains(fld))
+					var fld = query.Fields[i];
+					if (ds.Tables[query.Table].Columns.Contains(fld.Name))
 						continue;
-					DataColumn column = new DataColumn();
-					int idx = fld.LastIndexOf(')');
-					if (idx == -1) {
-						column.ColumnName = fld;
-					} else {
-						column.ColumnName = fld.Substring(idx + 1).Trim();
-						column.Expression = fld.Substring(0, idx + 1).Trim();
+					DataColumn column = new DataColumn(fld.Name,
+						masterTbl.Columns.Contains(fld.Name) ? masterTbl.Columns[fld.Name].DataType : typeof(object) );
+					if (fld.Expression!=null) {
+						column.Expression = fld.Expression;
 					}
-					if (ds.Tables[query.Table].Columns.Contains(column.ColumnName))
-						ds.Tables[query.Table].Columns.Remove(column.ColumnName);
 					ds.Tables[query.Table].Columns.Add(column);
 				}
 			}
@@ -95,15 +93,6 @@ namespace NI.Data
 			for (int i=0; i<result.Length && tbl.Rows.Count<query.RecordCount; i++) {
 				if (i>=query.StartRecord) {
 					tbl.ImportRow(result[i]);
-				}
-			}
-			// remove excessive columns
-			if (query.Fields != null && query.Fields.Length != 0) {
-				var tblColNames = tbl.Columns.Cast<DataColumn>().Select(c=>c.ColumnName).ToArray();
-				var fldNames = query.Fields.Select(f=>f.Name).ToArray();
-				foreach (var tblColName in tblColNames) {
-					if (!fldNames.Contains(tblColName))
-						tbl.Columns.Remove(tblColName);
 				}
 			}
 
