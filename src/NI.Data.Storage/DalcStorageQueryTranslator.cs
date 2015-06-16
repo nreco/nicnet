@@ -22,8 +22,13 @@ namespace NI.Data.Storage {
 		public DalcStorageQueryTranslator(DataSchema schema, ObjectContainerDalcStorage objStorage) {
 			Schema = schema;
 			ObjStorage = objStorage;
-			GetDerivedField = objStorage.ResolveDerivedProperty;
 		}
+
+		public DalcStorageQueryTranslator(DataSchema schema, ObjectContainerDalcStorage objStorage, Func<ClassPropertyLocation,string,QField> getDerivedField)
+			: this(schema, objStorage) {
+			GetDerivedField = getDerivedField;
+		}
+
 
 		public Query TranslateSubQuery(Query query) {
 			// is class query?

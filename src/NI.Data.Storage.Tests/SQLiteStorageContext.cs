@@ -79,7 +79,7 @@ namespace NI.Data.Storage.Tests {
 			StorageDbMgr = new DataRowDalcMapper(InternalDalc, new StorageDataSetPrv(CreateStorageSchemaDS()).GetDataSet);
 
 			var objStorage = new ObjectContainerSqlDalcStorage(StorageDbMgr, InternalDalc, () => { return DataSchemaStorage.GetSchema(); } );
-			objStorage.DeriveTypeFieldExpr = new Dictionary<string,string>() {
+			objStorage.DeriveTypeMapping = new Dictionary<string,string>() {
 				{"getDateYear", "CAST(strftime('%Y', {0}) as integer)"}
 			};
 			DataSchemaStorage = getSchemaStorage(StorageDbMgr, objStorage);
@@ -198,6 +198,12 @@ namespace NI.Data.Storage.Tests {
 				{"datatype", "integer"},
 				{"compact_id", 6}
 			});
+			StorageDbMgr.Insert("metadata_properties", new Dictionary<string, object>() {
+				{"id", "id_derived"},
+				{"name", "IDx2"},
+				{"datatype", "integer"},
+				{"compact_id", 7}
+			});
 
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
 				{"property_id", "name"},
@@ -215,6 +221,13 @@ namespace NI.Data.Storage.Tests {
 				{"value_location", "Derived"},
 				{"derive_type","getDateYear"},
 				{"derived_from_property_id","created"}
+			});
+			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {
+				{"property_id", "id_derived"},
+				{"class_id", "companies"},
+				{"value_location", "Derived"},
+				{"derive_type","{0}*2"},
+				{"derived_from_property_id","id"}
 			});
 
 			StorageDbMgr.Insert("metadata_property_to_class", new Dictionary<string, object>() {

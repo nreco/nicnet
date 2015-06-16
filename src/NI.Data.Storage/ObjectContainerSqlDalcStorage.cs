@@ -68,7 +68,7 @@ namespace NI.Data.Storage {
 		public virtual void LoadObjectReader(Query q, Action<IDataReader> handler) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
-			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+			var qTranslator = GetQueryTranslator(schema);
 
 			var translatedQuery = new Query( new QTable( ObjectTableName, q.Table.Alias ) );
 			translatedQuery.StartRecord = q.StartRecord;
@@ -145,18 +145,28 @@ namespace NI.Data.Storage {
 						} else {
 							string fldExpr = propJoinsPrefix + ".value";
 							if (propLoc.Location == PropertyValueLocationType.Derived) {
-								fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
-								propLoc = propLoc.DerivedFrom;
+								if (propLoc.DerivedFrom.Property.PrimaryKey) { //TBD handle derived from non-pk value table property
+									joinFieldMap[ relatedFldName ] = ResolveDerivedProperty(propLoc, lastRelObjIdFld).Expression;
+									propLoc = null;
+								} else if (propLoc.DerivedFrom.Location==PropertyValueLocationType.ValueTable) { 
+									fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
+									propLoc = propLoc.DerivedFrom;
+								} else {
+									throw new NotImplementedException();
+								}
 							}
 
-							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
-								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
-								joinFieldMap[ relatedFldName ] = fldExpr;
-								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
-									propTblName, propJoinsPrefix, lastRelObjIdFld, propLoc.Property.CompactID);
-							} else {
-								//TBD: column property
-								throw new NotImplementedException();
+							if (propLoc != null) {
+								switch (propLoc.Location) {
+									case PropertyValueLocationType.ValueTable:
+										var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
+										joinFieldMap[ relatedFldName ] = fldExpr;
+										joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2} and {1}.property_compact_id={3}) ",
+											propTblName, propJoinsPrefix, lastRelObjIdFld, propLoc.Property.CompactID);
+										break;
+									default:
+										throw new NotImplementedException();
+								}
 							}
 						}
 						knownFieldTypes[ relatedFldName ] = p.DataType.ValueType;
@@ -180,18 +190,29 @@ namespace NI.Data.Storage {
 							var propTblAlias = "prop_"+objProp.ID+"_"+joinFieldMap.Count.ToString();
 							string fldExpr = propTblAlias + ".value";
 							if (propLoc.Location == PropertyValueLocationType.Derived) {
-								fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
-								propLoc = propLoc.DerivedFrom;
+								if (propLoc.DerivedFrom.Property.PrimaryKey) {
+									joinFieldMap[ fldName ] = ResolveDerivedProperty(propLoc, String.Format("{0}.id", objTableAlias) ).Expression;
+									propLoc = null;
+								} else if (propLoc.DerivedFrom.Location==PropertyValueLocationType.ValueTable) { 
+									fldExpr = ResolveDerivedProperty(propLoc, fldExpr).Expression;
+									propLoc = propLoc.DerivedFrom;
+								} else {
+									throw new NotImplementedException();
+								}
 							}
 
-							if (propLoc.Location == PropertyValueLocationType.ValueTable) { 
-								var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
-								joinFieldMap[fldName] = fldExpr;
-								joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
-									propTblName, propTblAlias, objTableAlias, propLoc.Property.CompactID);
-							} else {
-								//TBD: column property
-								throw new NotImplementedException();
+							if (propLoc != null) {
+								switch (propLoc.Location) {
+									case PropertyValueLocationType.ValueTable:
+										var propTblName = DataTypeTableNames[propLoc.Property.DataType.ID];
+										joinFieldMap[fldName] = fldExpr;
+										joinSb.AppendFormat("LEFT JOIN {0} {1} ON ({1}.object_id={2}.id and {1}.property_compact_id={3}) ",
+											propTblName, propTblAlias, objTableAlias, propLoc.Property.CompactID);
+										break;
+									default:
+										//TBD: column property
+										throw new NotImplementedException();
+								}
 							}
 						}
 						knownFieldTypes[ fldName ] = objProp.DataType.ValueType;

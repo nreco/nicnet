@@ -109,7 +109,7 @@ namespace NI.Data.Storage {
 
 			var dataSchema = CreateDataSchema(classes, props);
 
-			foreach (var p2c in propToClass) {
+			foreach (var p2c in propToClass.OrderBy( r => r.DerivedFromPropertyID ) ) {
 				AddClassProperty(dataSchema, p2c);
 			}
 

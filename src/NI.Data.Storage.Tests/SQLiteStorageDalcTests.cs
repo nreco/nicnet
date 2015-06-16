@@ -394,6 +394,14 @@ namespace NI.Data.Storage.Tests {
 			testSchema.AddClassProperty(
 				new ClassPropertyLocation(testSchema.FindClassByID("contacts"), birthdayYear, birthdayClassProp, "getDateYear"));
 
+			var idDerived = new Property("id_derived2");
+			idDerived.CompactID = -2;
+			idDerived.DataType = PropertyDataType.Integer;
+			testSchema.AddProperty( idDerived );
+			var nameClassProp = testSchema.FindClassPropertyLocation("contacts","id");
+			testSchema.AddClassProperty(
+				new ClassPropertyLocation(testSchema.FindClassByID("contacts"), idDerived, nameClassProp, "{0}*10"));
+
 			/*var createdYear = new Property("created_year");
 			createdYear.CompactID = -2;
 			createdYear.DataType = PropertyDataType.Integer;
@@ -413,6 +421,12 @@ namespace NI.Data.Storage.Tests {
 				new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
 					Fields = new[] {(QField)"birthday_year"}
 				}) );
+
+			var maryInfo = storageDalc.LoadRecord( 
+				new Query("contacts", (QField)"name"==(QConst)"Mary" ) {
+					Fields = new[] {(QField)"id_derived2", (QField)"id"}
+				});
+			Assert.AreEqual( Convert.ToInt64( maryInfo["id"] )*10, maryInfo["id_derived2"] );
 
 			// filter by related derived prop
 			Assert.AreEqual("Bob", StorageContext.StorageDalc.LoadValue(

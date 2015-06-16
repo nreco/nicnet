@@ -28,6 +28,35 @@ namespace NI.Data.Storage.Tests {
 		}
 
 		[Test]
+		public void DerivedProperty() {
+			StorageContext.CreateTestDataSchema();
+
+			var schema = StorageContext.DataSchemaStorage.GetSchema();
+			var companiesClass = schema.FindClassByID("companies");
+
+			using (var t = new TransactionScope()) {
+				DataHelper.EnsureConnectionOpen(StorageContext.Connection, () => {
+					var objCompanyA = new ObjectContainer(companiesClass);
+					objCompanyA["name"] = String.Format("Company_A");			
+					StorageContext.ObjectContainerStorage.Insert(objCompanyA);
+
+					var objCompanyB = new ObjectContainer(companiesClass);
+					objCompanyB["name"] = String.Format("Company_B");			
+					StorageContext.ObjectContainerStorage.Insert(objCompanyB);
+
+				});
+				t.Complete();
+			}
+
+			var companyIds = StorageContext.ObjectContainerStorage.GetObjectIds(new Query("companies"));
+			var companiesByIds = StorageContext.ObjectContainerStorage.Load(companyIds);
+			Assert.AreEqual(2, companiesByIds.Count);
+			foreach (var companyEntry in companiesByIds) {
+				Assert.AreEqual( companyEntry.Value.ID*2, companyEntry.Value["id_derived"] );
+			}
+		}
+
+		[Test]
 		public void InsertAndLoadWithSort() {
 			Logger.SetInfo( (t,msg)=> {
 				Console.WriteLine("[{0}] {1}", t,msg);

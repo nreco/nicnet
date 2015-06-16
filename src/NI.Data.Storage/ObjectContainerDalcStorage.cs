@@ -75,9 +75,9 @@ namespace NI.Data.Storage {
 		public int QueryBatchSize { get; set; }
 
 		/// <summary>
-		/// Get or set map for resolving SQL expression by derived property type identifier
+		/// Get or set mapping for resolving derive type expression 
 		/// </summary>
-		public IDictionary<string, string> DeriveTypeFieldExpr { get; set; }
+		public IDictionary<string, string> DeriveTypeMapping { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the ObjectContainerDalcStorage.
@@ -375,18 +375,22 @@ namespace NI.Data.Storage {
 			var valueSourceNames = new Dictionary<string,List<long>>();
 			var propertyIdDerivedLocations = new Dictionary<long,List<ClassPropertyLocation>>();
 
+			var derivedFromValueTable = new List<ClassPropertyLocation>();
+
 			// construct object containers + populate source names for values to load
 			foreach (var batchIds in SliceBatchIds(ids, QueryBatchSize)) {
 				var objectQuery = new Query(ObjectTableName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(batchIds)));
+
 				DbMgr.Dalc.ExecuteReader(objectQuery, (rdr) => {
 					while (rdr.Read()) {
 						var compactClassId = Convert.ToInt32(rdr["compact_class_id"]);
+						var objId = Convert.ToInt64(rdr["id"]);
 						var objClass = dataSchema.FindClassByCompactID(compactClassId);
 						if (objClass == null) {
-							log.Info("Class compact_id={0} of object id={1} not found; load object skipped", compactClassId, rdr["id"]);
+							log.Info("Class compact_id={0} of object id={1} not found; load object skipped", compactClassId, objId);
 							continue;
 						}
-						var obj = new ObjectContainer(objClass, Convert.ToInt64(rdr["id"]));
+						var obj = new ObjectContainer(objClass, objId);
 
 						// populate value source names by class properties
 						if (!loadWithoutProps) {
@@ -395,18 +399,24 @@ namespace NI.Data.Storage {
 									continue;
 
 								var pLoc = p.GetLocation(objClass);
-								if (pLoc.Location == PropertyValueLocationType.TableColumn) {
-									obj[p] = DeserializeValueData(p, rdr[pLoc.TableColumnName]);
-								} else if (pLoc.Location == PropertyValueLocationType.Derived) {
+								switch (pLoc.Location) {
+									case PropertyValueLocationType.TableColumn:
+										obj[p] = DeserializeValueData(p, rdr[pLoc.TableColumnName]);
+										break;
+									case PropertyValueLocationType.Derived:
+										if (pLoc.DerivedFrom.Location == PropertyValueLocationType.ValueTable) { 
+											var derivedFromCompactID = pLoc.DerivedFrom.Property.CompactID;
+											if (!propertyIdDerivedLocations.ContainsKey(derivedFromCompactID))
+												propertyIdDerivedLocations[derivedFromCompactID] = new List<ClassPropertyLocation>();
+											if (!propertyIdDerivedLocations[derivedFromCompactID].Contains(pLoc))
+												propertyIdDerivedLocations[derivedFromCompactID].Add(pLoc);
 
-									var derivedFromCompactID = pLoc.DerivedFrom.Property.CompactID;
-									if (!propertyIdDerivedLocations.ContainsKey(derivedFromCompactID))
-										propertyIdDerivedLocations[derivedFromCompactID] = new List<ClassPropertyLocation>();
-									if (!propertyIdDerivedLocations[derivedFromCompactID].Contains(pLoc))
-										propertyIdDerivedLocations[derivedFromCompactID].Add(pLoc);
-
-									// mark derived prop to load
-									pLoc = pLoc.DerivedFrom;
+											// mark derived prop to load
+											pLoc = pLoc.DerivedFrom;
+										} else if (pLoc.DerivedFrom.Location==PropertyValueLocationType.TableColumn) {
+											derivedFromValueTable.Add(pLoc);
+										}
+										break;
 								}
  		
 								if (pLoc.Location == PropertyValueLocationType.ValueTable) { 
@@ -452,7 +462,7 @@ namespace NI.Data.Storage {
 					foreach (var propCompactId in valSrcName.Value) {
 						if (propertyIdDerivedLocations.ContainsKey(propCompactId)) {
 							foreach (var derivedPropLoc in propertyIdDerivedLocations[propCompactId]) {
-								var derivedFld = ResolveDerivedProperty(derivedPropLoc, "value");
+								var derivedFld = ResolveDerivedProperty(derivedPropLoc, String.Format("{0}.value", valSrcName.Key) );
 								fldList.Add( new QField( getDerivedFldName(derivedPropLoc), derivedFld.Expression) );
 							}
 						}
@@ -486,6 +496,34 @@ namespace NI.Data.Storage {
 									}
 								}
 							}							
+						}
+					});
+				}
+			}
+
+			// load derived from objects table properties
+			if (derivedFromValueTable.Count > 0) { 
+				foreach (var batchIds in SliceBatchIds(ids, QueryBatchSize)) {
+					var objectQuery = new Query(ObjectTableName, new QueryConditionNode((QField)"id", Conditions.In, new QConst(batchIds)));
+					var flds = new List<QField>();
+					flds.Add(new QField("id"));
+					foreach (var derived in derivedFromValueTable) {
+						var derivedFld = ResolveDerivedProperty(derived, String.Format("{0}.{1}", ObjectTableName, derived.DerivedFrom.Property.ID ) );
+						flds.Add(derivedFld);
+					}
+					objectQuery.Fields = flds.ToArray();
+					DbMgr.Dalc.ExecuteReader(objectQuery, (rdr) => {
+						while (rdr.Read()) {
+							var objId = Convert.ToInt64(rdr["id"]);
+							ObjectContainer obj;
+							if (objById.TryGetValue(objId, out obj)) {
+								var objClass = obj.GetClass();
+								foreach (var derived in derivedFromValueTable) {
+									if (derived.Class == objClass) {
+										obj[derived.Property] = rdr[derived.Property.ID];
+									}
+								}
+							}
 						}
 					});
 				}
@@ -925,12 +963,17 @@ namespace NI.Data.Storage {
 			}
 		}
 
-		internal QField ResolveDerivedProperty(ClassPropertyLocation classProp, string derivedFromFldName) {
-			if (DeriveTypeFieldExpr != null) {
-				if (DeriveTypeFieldExpr.ContainsKey(classProp.DeriveType))
-					return new QField(classProp.Property.ID, String.Format(DeriveTypeFieldExpr[classProp.DeriveType], derivedFromFldName) );
+		protected virtual QField ResolveDerivedProperty(ClassPropertyLocation classProp, string derivedFromFldName) {
+			var deriveType = classProp.DeriveType;
+			if (DeriveTypeMapping != null) {
+				if (DeriveTypeMapping.ContainsKey(deriveType))
+					deriveType = DeriveTypeMapping[deriveType];
 			}
-			throw new NotSupportedException(classProp.ToString());
+			return new QField(classProp.Property.ID, String.Format(deriveType, derivedFromFldName) );
+		}
+
+		protected virtual DalcStorageQueryTranslator GetQueryTranslator(DataSchema schema) {
+			return new DalcStorageQueryTranslator(schema, this, ResolveDerivedProperty );
 		}
 
 		public IEnumerable<ObjectRelation> LoadRelations(string relationshipId, QueryNode conditions) {
@@ -940,7 +983,7 @@ namespace NI.Data.Storage {
 			if (relationship == null)
 				throw new Exception(String.Format("Relationship with ID={0} does not exist", relationshipId));
 
-			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+			var qTranslator = GetQueryTranslator(schema);
 			var query = new Query(relationshipId, conditions);
 			var relQuery = qTranslator.TranslateSubQuery( query );
 			relQuery.Sort = query.Sort; // leave as is
@@ -961,7 +1004,7 @@ namespace NI.Data.Storage {
 		public long[] GetObjectIds(Query q) {
 			var schema = GetSchema();
 			var dataClass = schema.FindClassByID(q.Table.Name);
-			var qTranslator = new DalcStorageQueryTranslator(schema, this );
+			var qTranslator = GetQueryTranslator(schema);
 
 			var translatedQuery = new Query( new QTable( ObjectTableName, q.Table.Alias ) );
 			translatedQuery.StartRecord = q.StartRecord;
@@ -1028,7 +1071,7 @@ namespace NI.Data.Storage {
 			conditionGrp.Nodes.Add(
 				(QField)"compact_class_id" == new QConst(dataClass.CompactID)
 			);
-			var qTranslator = new DalcStorageQueryTranslator(schema, this);
+			var qTranslator = GetQueryTranslator(schema);
 			if (condition != null)
 				conditionGrp.Nodes.Add(qTranslator.TranslateQueryNode(dataClass, condition));
 			
