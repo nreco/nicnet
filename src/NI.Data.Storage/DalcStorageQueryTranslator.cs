@@ -203,6 +203,33 @@ namespace NI.Data.Storage {
 
 		private QueryNode ComposeValueTableCondition(Class dataClass, Property prop, QField fld, Conditions cnd, IQueryValue val) {
 			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
+			if (cnd==Conditions.Null) {
+				// special handling for null test
+				return 
+					new QueryConditionNode(
+						new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
+						Conditions.Not|Conditions.In,
+						new Query(pSrcName,
+							(QField)"property_compact_id" == new QConst(prop.CompactID)
+							&
+							new QueryConditionNode(fld, Conditions.Not|Conditions.Null, null)
+						) {
+							Fields = new[] { (QField)"object_id" }
+						}
+					) 
+					| 
+					new QueryConditionNode(
+						new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
+						Conditions.In,
+						new Query(pSrcName,
+							(QField)"property_compact_id" == new QConst(prop.CompactID)
+							&
+							new QueryConditionNode(fld, Conditions.Null, null)
+						) {
+							Fields = new[] { (QField)"object_id" }
+						}
+					);
+			} 
 			return new QueryConditionNode(
 					new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
 					Conditions.In,

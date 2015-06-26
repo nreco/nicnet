@@ -359,7 +359,11 @@ namespace NI.Data.Storage.Tests {
 				}
 			));
 
-
+			// filter by null value
+			Assert.AreEqual(2, StorageContext.StorageDalc.RecordsCount(
+					new Query("contacts", 
+						new QueryConditionNode( (QField)"birthday", Conditions.Null, null ) )
+				) );
 		}
 
 		[Test]
