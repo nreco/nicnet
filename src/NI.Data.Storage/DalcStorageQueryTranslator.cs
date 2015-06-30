@@ -120,6 +120,11 @@ namespace NI.Data.Storage {
 			var pLoc = p.GetLocation(relationship.Object);
 			QField pFld = null;
 			Query propQuery = null;
+			var subQueryCondition = Conditions.In;
+			if (cnd == Conditions.Null) {
+				subQueryCondition = subQueryCondition | Conditions.Not;
+				cnd = Conditions.Null|Conditions.Not;
+			}
 
 			// filter by derived property handling
 			if (pLoc.Location == PropertyValueLocationType.Derived) {
@@ -139,12 +144,12 @@ namespace NI.Data.Storage {
 			if (pLoc.Location == PropertyValueLocationType.ValueTable) { 
 				var pSrcName = ObjStorage.DataTypeTableNames[pLoc.Property.DataType.ID];
 				propQuery = new Query(pSrcName,
-								(QField)"property_compact_id" == new QConst(pLoc.Property.CompactID)
-								&
-								new QueryConditionNode( pFld??(QField)"value", cnd, val)							
-							) {
-								Fields = new[] { (QField)"object_id" }
-							};
+						(QField)"property_compact_id" == new QConst(pLoc.Property.CompactID)
+						&
+						new QueryConditionNode( pFld??(QField)"value", cnd, val)					
+					) {
+						Fields = new[] { (QField)"object_id" }
+					};
 			} else if (pLoc.Location==PropertyValueLocationType.TableColumn) {
 				//TBD: handle separate table location
 				propQuery = new Query(ObjStorage.ObjectTableName, 
@@ -168,7 +173,7 @@ namespace NI.Data.Storage {
 				};
 			}
 
-			return new QueryConditionNode( (QField)dataClass.FindPrimaryKeyProperty().ID, Conditions.In, propQuery );
+			return new QueryConditionNode( (QField)dataClass.FindPrimaryKeyProperty().ID, subQueryCondition, propQuery );
 		}
 
 		protected QueryNode ComposePropertyCondition(Class dataClass, Property prop, Conditions cnd, IQueryValue val) {
@@ -192,7 +197,9 @@ namespace NI.Data.Storage {
 			if (propLocation.Location == PropertyValueLocationType.TableColumn) {
 				return new QueryConditionNode(  fld ?? (QField)propLocation.TableColumnName, cnd, val);
 			} else if (propLocation.Location == PropertyValueLocationType.ValueTable) {
-				return ComposeValueTableCondition(propLocation.Class,propLocation.Property, fld ?? (QField)"value",cnd,val);
+				return ComposeValueTableCondition(
+					propLocation.Class.FindPrimaryKeyProperty().ID, 
+					propLocation.Property, fld ?? (QField)"value",cnd,val);
 			} else {
 				throw new NotSupportedException(String.Format("Unsupported location of class property {0}.{1}: {2}",
 					propLocation.Class.ID, propLocation.Property.ID,
@@ -201,38 +208,17 @@ namespace NI.Data.Storage {
 
 		}
 
-		private QueryNode ComposeValueTableCondition(Class dataClass, Property prop, QField fld, Conditions cnd, IQueryValue val) {
+		private QueryNode ComposeValueTableCondition(string objIdFieldName, Property prop, QField fld, Conditions cnd, IQueryValue val) {
 			var pSrcName = ObjStorage.DataTypeTableNames[prop.DataType.ID];
+			var subQueryCnd = Conditions.In;
 			if (cnd==Conditions.Null) {
 				// special handling for null test
-				return 
-					new QueryConditionNode(
-						new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
-						Conditions.Not|Conditions.In,
-						new Query(pSrcName,
-							(QField)"property_compact_id" == new QConst(prop.CompactID)
-							&
-							new QueryConditionNode(fld, Conditions.Not|Conditions.Null, null)
-						) {
-							Fields = new[] { (QField)"object_id" }
-						}
-					) 
-					| 
-					new QueryConditionNode(
-						new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
-						Conditions.In,
-						new Query(pSrcName,
-							(QField)"property_compact_id" == new QConst(prop.CompactID)
-							&
-							new QueryConditionNode(fld, Conditions.Null, null)
-						) {
-							Fields = new[] { (QField)"object_id" }
-						}
-					);
+				subQueryCnd = subQueryCnd|Conditions.Not;
+				cnd = Conditions.Not|Conditions.Null;
 			} 
 			return new QueryConditionNode(
-					new QField(null, dataClass.FindPrimaryKeyProperty().ID, null),
-					Conditions.In,
+					new QField(null, objIdFieldName, null),
+					subQueryCnd,
 					new Query(pSrcName,
 						(QField)"property_compact_id" == new QConst(prop.CompactID)
 						&
@@ -242,7 +228,6 @@ namespace NI.Data.Storage {
 					}
 				);
 		}
-
 
 		protected QueryNode TranslateConditionNode(Class dataClass, QueryConditionNode node) {
 			if (node.LValue is QField && node.RValue is QField)
