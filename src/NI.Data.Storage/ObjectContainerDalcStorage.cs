@@ -747,7 +747,7 @@ namespace NI.Data.Storage {
 				var subjCond = new QueryConditionNode((QField)"subject_id", Conditions.In, new QConst(objBatchIds));
 				var objCond = new QueryConditionNode((QField)"object_id", Conditions.In, new QConst(objBatchIds));
 
-				if (rels!=null) {
+				if (rels!=null && rels.Count() > 0) {
 					var relCompactIds = new List<long>();
 					var revRelCompactIds = new List<long>();
 					foreach (var r in rels) {
