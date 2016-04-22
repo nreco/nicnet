@@ -50,15 +50,23 @@ namespace NI.Data.Storage.Service {
 		LoadValuesResult LoadValues(string relex, bool totalcount);
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/data/{tableName}/insert", Method = "POST")]
-		long InsertRow(string tableName, DictionaryItem data);
+		[WebInvoke(UriTemplate = "/data/{tableName}", Method = "POST")]
+		long? InsertRow(string tableName, DictionaryItem data);
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/update", Method = "POST")]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}", Method = "PUT")]
 		void UpdateRow(string tableName, string id, DictionaryItem data);
 
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/data/{tableName}/{id}/delete", Method = "GET")]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}", Method = "DELETE")]
 		void DeleteRow(string tableName, string id);
+
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/data/{tableName}/{id}", Method = "GET")]
+		DictionaryItem LoadRow(string tableName, string id);
+
+		[OperationContract]
+		[WebInvoke(UriTemplate = "/delete?q={relex}", Method = "GET")]
+		int DeleteRows(string relex);
 	}
 }

@@ -35,16 +35,23 @@ namespace NI.Data.Storage.Service.Actions {
 
 		DataSchema Schema;
 		IObjectContainerStorage ObjStorage;
+		IDalc StorageDalc;
 
-		public ChangeRow(DataSchema schema, IObjectContainerStorage objStorage) {
+		public ChangeRow(DataSchema schema, IObjectContainerStorage objStorage, IDalc storageDalc) {
 			Schema = schema;
 			ObjStorage = objStorage;
+			StorageDalc = storageDalc;
 		}
 
-		public long Insert(string tableName, DictionaryItem data) {
+		public long? Insert(string tableName, DictionaryItem data) {
 			var objClass = Schema.FindClassByID(tableName);
-			if (objClass == null)
+			if (objClass == null) {
+				if (Schema.FindRelationshipByID(tableName)!=null) {
+					StorageDalc.Insert(tableName, (IDictionary) data.Data);
+					return null;
+				}
 				throw new Exception(String.Format("Unknown table {0}", tableName));
+			}
 			var objContainer = new ObjectContainer(objClass);
 			foreach (var entry in data.Data) {
 				var prop = objClass.FindPropertyByID(entry.Key);
@@ -53,7 +60,7 @@ namespace NI.Data.Storage.Service.Actions {
 				}
 			}
 			ObjStorage.Insert(objContainer);
-			return objContainer.ID.Value;
+			return objContainer.ID;
 		}
 
 		public void Update(string tableName, long id, DictionaryItem data) {
@@ -72,8 +79,9 @@ namespace NI.Data.Storage.Service.Actions {
 
 		public void Delete(string tableName, long id) {
 			var objClass = Schema.FindClassByID(tableName);
-			if (objClass == null)
+			if (objClass == null) {
 				throw new Exception(String.Format("Unknown table {0}", tableName));
+			}
 			var objContainer = new ObjectContainer(objClass, id);
 			ObjStorage.Delete(objContainer);
 		}

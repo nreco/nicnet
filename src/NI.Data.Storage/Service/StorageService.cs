@@ -27,6 +27,7 @@ using NI.Data.Storage.Service.Actions;
 using NI.Data.Storage.Service.Schema;
 
 using NI.Data;
+using NI.Data.RelationalExpressions;
 
 namespace NI.Data.Storage.Service {
 
@@ -68,18 +69,43 @@ namespace NI.Data.Storage.Service {
 			}
 		}
 
-		public long InsertRow(string tableName, DictionaryItem data) {
-			return (new ChangeRow(ProvideOntology(), ObjPersister)).Insert(tableName, data);
+		public long? InsertRow(string tableName, DictionaryItem data) {
+			return (new ChangeRow(ProvideOntology(), ObjPersister, StorageDalc)).Insert(tableName, data);
 		}
 
 		public void UpdateRow(string tableName, string id, DictionaryItem data) {
 			if (data==null)
 				throw new ArgumentException("data is null");
-			(new ChangeRow(ProvideOntology(), ObjPersister)).Update( tableName, Convert.ToInt64( id ), data);
+			(new ChangeRow(ProvideOntology(), ObjPersister, StorageDalc)).Update( tableName, Convert.ToInt64( id ), data);
 		}
 
 		public void DeleteRow(string tableName, string id) {
-			(new ChangeRow(ProvideOntology(), ObjPersister)).Delete(tableName, Convert.ToInt64(id) );
+			(new ChangeRow(ProvideOntology(), ObjPersister, StorageDalc)).Delete(tableName, Convert.ToInt64(id) );
+		}
+
+		public int DeleteRows(string relex) {
+			var relexParser = new RelExParser();
+			var q = relexParser.Parse(relex);
+			return StorageDalc.Delete(q);
+		}
+
+		public DictionaryItem LoadRow(string tableName, string id) {
+			var objId = Convert.ToInt64(id);
+			var schema = ProvideOntology();
+			var objClass = schema.FindClassByID(tableName);
+			if (objClass==null)
+				throw new Exception(String.Format("Unknown table {0}", tableName) );
+
+			var idToContainer = ObjPersister.Load(new[] {objId});
+			if (!idToContainer.ContainsKey(objId) || idToContainer[objId].GetClass()!=objClass ) {
+				throw new Exception(String.Format("Record ID={0} does not exist in table {1}", id, tableName));
+			}
+
+			var record = new Dictionary<string,object>();
+			foreach (var entry in idToContainer[objId]) {
+				record[entry.Key.ID] = entry.Value;
+			}
+			return new DictionaryItem(record);
 		}
 
 		/*protected void RunInTransaction(Action<object> a) {
