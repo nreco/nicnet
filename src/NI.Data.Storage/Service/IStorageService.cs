@@ -32,7 +32,7 @@ namespace NI.Data.Storage.Service {
 	public interface IStorageService {
 		
 		[OperationContract]
-		[WebInvoke(UriTemplate = "/dataschema", Method = "GET")]
+		[WebInvoke(UriTemplate = "/schema", Method = "GET")]
 		[FaultContract(typeof(ApiFault))]
 		[Description("Get data schema (classes, properties)")]
 		GetDataSchemaResult GetDataSchema();

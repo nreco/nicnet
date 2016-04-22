@@ -47,7 +47,7 @@ namespace NI.Data.Storage.Service.Actions {
 			var objClass = Schema.FindClassByID(tableName);
 			if (objClass == null) {
 				if (Schema.FindRelationshipByID(tableName)!=null) {
-					StorageDalc.Insert(tableName, (IDictionary) data.Data);
+					StorageDalc.Insert(tableName, (System.Collections.IDictionary) data.Data);
 					return null;
 				}
 				throw new Exception(String.Format("Unknown table {0}", tableName));
