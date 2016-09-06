@@ -166,10 +166,11 @@ namespace NI.Data {
 		/// <returns>number of deleted records</returns>
         public int Delete(Query q) {
             DataTable tbl = LoadAll(q);
+			var initialRowsCount = tbl.Rows.Count;
 			foreach (DataRow r in tbl.Rows)
 				r.Delete();
 			Update(tbl);
-			return tbl.Rows.Count;
+			return initialRowsCount - tbl.Rows.Count;
         }
 
 		/// <summary>
