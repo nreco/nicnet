@@ -63,6 +63,10 @@ namespace NI.Data {
 			return new QConst(value);
 		}
 
+		public static explicit operator QConst(long value) {
+			return new QConst(value);
+		}
+
 		public static explicit operator QConst(float value) {
 			return new QConst(value);
 		}
