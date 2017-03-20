@@ -14,3 +14,4 @@
 /src/*/obj/*/*.*
 /src/*/*/obj/*/*.*
 /src/*.suo
+/src/*/*.xml
