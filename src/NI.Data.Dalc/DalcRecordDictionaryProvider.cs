@@ -25,7 +25,7 @@ namespace NI.Data.Dalc
 	/// DALC record dictionary provider
 	/// </summary>
 	public class DalcRecordDictionaryProvider :
-		IDictionaryProvider, IObjectProvider
+		IDictionaryProvider, IObjectProvider, ITokenProvider
 	{
 		IQueryProvider _QueryProvider;
 		IDalc _Dalc;

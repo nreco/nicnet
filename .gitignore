@@ -1,4 +1,5 @@
-
+.vs
+*.user
 /examples/NI.Examples.Dalc/bin
 /examples/NI.Examples.Dalc/obj
 /examples/NI.Examples.Vfs/bin
