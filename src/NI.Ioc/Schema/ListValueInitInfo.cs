@@ -26,6 +26,7 @@ namespace NI.Ioc
 		public IValueInitInfo[] Values;
 		bool isOnlyConstValues = false;
 		IDictionary<Type,Array> cachedTypedArrays = null;
+		private object cachedTypedArraysSyncObject = new object();
 		
 		public ListValueInitInfo(IValueInitInfo[] values)
 		{
@@ -37,31 +38,34 @@ namespace NI.Ioc
 		}
 		
 		public object GetValue(IValueFactory factory, Type conversionType) {
-			// try to find in consts cache
-			if (isOnlyConstValues && cachedTypedArrays != null &&
-				conversionType.IsArray && cachedTypedArrays.ContainsKey(conversionType.GetElementType())) {
-				return cachedTypedArrays[conversionType.GetElementType()].Clone();
-			}
+			lock (cachedTypedArraysSyncObject)
+			{
+				// try to find in consts cache
+				if (isOnlyConstValues && cachedTypedArrays != null &&
+					conversionType.IsArray && cachedTypedArrays.ContainsKey(conversionType.GetElementType())) {
+					return cachedTypedArrays[conversionType.GetElementType()].Clone();
+				}
 			
-			// try to create instance of desired type
-			Type elemType = typeof(object);
-			if (conversionType.IsArray)
-				elemType = conversionType.GetElementType();
-			Array listArray = Array.CreateInstance(elemType,Values.Length);
+				// try to create instance of desired type
+				Type elemType = typeof(object);
+				if (conversionType.IsArray)
+					elemType = conversionType.GetElementType();
+				Array listArray = Array.CreateInstance(elemType,Values.Length);
 			
-			for (int i=0; i<Values.Length; i++) {
-				IValueInitInfo value = Values[i];
-				listArray.SetValue( value.GetValue( factory, elemType), i );
-			}
+				for (int i=0; i<Values.Length; i++) {
+					IValueInitInfo value = Values[i];
+					listArray.SetValue( value.GetValue( factory, elemType), i );
+				}
 			
-			// store in consts cache
-			if (isOnlyConstValues && conversionType.IsArray) {
-				if (cachedTypedArrays==null) cachedTypedArrays = new Dictionary<Type,Array>();
-				cachedTypedArrays[elemType] = (Array)listArray.Clone();
+				// store in consts cache
+				if (isOnlyConstValues && conversionType.IsArray) {
+					if (cachedTypedArrays==null) cachedTypedArrays = new Dictionary<Type,Array>();
+					cachedTypedArrays[elemType] = (Array)listArray.Clone();
+				}
+				if (conversionType.IsArray)
+					return listArray; // nothing to convert
+				return factory.GetInstance(listArray, conversionType);
 			}
-			if (conversionType.IsArray)
-				return listArray; // nothing to convert
-			return factory.GetInstance(listArray, conversionType);
 		}
 		
 	}
