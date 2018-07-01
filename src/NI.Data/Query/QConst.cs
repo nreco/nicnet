@@ -14,12 +14,14 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 
 namespace NI.Data {
 	
 	/// <summary>
 	/// Represents query constant value
 	/// </summary>
+	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	public class QConst : IQueryValue {
 		object _Value;

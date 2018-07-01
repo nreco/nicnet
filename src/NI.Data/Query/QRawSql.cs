@@ -14,12 +14,14 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 
 namespace NI.Data
 {
 	/// <summary>
 	/// Represents raw SQL query value
 	/// </summary>
+	[DebuggerDisplay("{SqlText}")]
 	[Serializable]
 	public class QRawSql : IQueryValue {
 

@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace NI.Data {
@@ -22,6 +23,7 @@ namespace NI.Data {
 	/// <summary>
 	/// Represents logical negation operator
 	/// </summary>
+	[DebuggerDisplay("{Nodes}")]
 	[Serializable]
 	public class QueryNegationNode : QueryNode {
 		

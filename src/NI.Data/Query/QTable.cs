@@ -15,6 +15,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace NI.Data
@@ -22,6 +23,7 @@ namespace NI.Data
 	/// <summary>
 	/// Represents query table information
 	/// </summary>
+	[DebuggerDisplay("{Name}")]
 	[Serializable]
 	public class QTable
 	{

@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace NI.Data
@@ -23,6 +24,7 @@ namespace NI.Data
 	/// <summary>
 	/// Represents group of nodes combined with logical OR/AND operator
 	/// </summary>
+	[DebuggerDisplay("{GroupType} {Nodes}")]
 	[Serializable]
 	public class QueryGroupNode : QueryNode {
 		

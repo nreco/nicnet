@@ -14,6 +14,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 
 namespace NI.Data
 {
@@ -22,6 +23,7 @@ namespace NI.Data
 	/// </summary>
 	/// <remarks>All query variables should be set before processing the query. 
 	/// Accessing undefined variable will cause InvalidOperationException.</remarks>
+	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	public class QVar : QConst, IQueryValue {
 
