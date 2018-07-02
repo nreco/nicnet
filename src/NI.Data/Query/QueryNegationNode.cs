@@ -29,7 +29,6 @@ namespace NI.Data {
 		
 		private QueryNode[] SingleNodeList;
 	
-		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		public override IList<QueryNode> Nodes {
 			get { return SingleNodeList; } 
 		}

@@ -33,7 +33,6 @@ namespace NI.Data
 		/// <summary>
 		/// List of group child nodes
 		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		public override IList<QueryNode> Nodes {
 			get {
 				return _Nodes;
