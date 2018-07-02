@@ -15,10 +15,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace NI.Data {
 	
+	[DebuggerDisplay("{SqlText}")]
 	[Serializable]
 	public class QueryRawSqlNode : QueryNode {
 
