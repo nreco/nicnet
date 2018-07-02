@@ -23,7 +23,7 @@ namespace NI.Data
 	/// </summary>
 	/// <remarks>All query variables should be set before processing the query. 
 	/// Accessing undefined variable will cause InvalidOperationException.</remarks>
-	[DebuggerDisplay("{Value}")]
+	[DebuggerDisplay("{Value}:({Name})")]
 	[Serializable]
 	public class QVar : QConst, IQueryValue {
 
