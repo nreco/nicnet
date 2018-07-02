@@ -14,12 +14,14 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 
 namespace NI.Data
 {
 	/// <summary>
 	/// Represents query field value
 	/// </summary>
+	[DebuggerDisplay("{Name}")]
 	[Serializable]
 	public class QField : IQueryValue
 	{

@@ -16,12 +16,14 @@
 using System;
 using System.Linq;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace NI.Data
 {
 	/// <summary>
 	/// Represents query sort option 
 	/// </summary>
+	[DebuggerDisplay("{Field} {SortDirection}")]
 	public class QSort
 	{
 		public const string Asc = "asc";

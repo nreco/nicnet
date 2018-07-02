@@ -15,10 +15,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 
 namespace NI.Data {
 
+	[DebuggerDisplay("{LValue} {Condition} {RValue}")]
 	[Serializable]
 	public class QueryConditionNode : QueryNode {
 		
